@@ -574,3 +574,181 @@ Stage Summary:
 1. **globals.css** — Replace `--gold-hover`, `--gold-dim`, `--text-primary`, `--text-muted`, `--text-faint`, `--status-red`, `--status-amber` with approved palette hexes or remove unused vars.
 2. **chart.tsx** — Replace `#ccc` with a design-system color or CSS variable reference; replace `#fff` with `#FFFFFF` or a CSS variable.
 3. **interview-avatar.tsx** — Replace `#E8C15F` in inline gradient with a design-system gold variant or CSS var reference.
+
+## Task B5 — Dashboard: Replace Mock Data with Real DB Queries
+
+**Date**: 2025-07-15
+**Agent**: Dashboard Rewrite (B5)
+**Task**: Rewrite `/src/app/[locale]/app/page.tsx` to read real data from the database
+
+### What was done
+
+1. **Converted page to async Server Component** — Removed `'use client'`, made `DashboardPage` an `async` function that receives `params: Promise<{ locale: string }>`.
+
+2. **Added auth guard** — Calls `requireAuth()` from `@/lib/session`; if no session, redirects to `/${locale}/auth/signin`. Also fetches the full `User` record from the database via `db.user.findUnique`.
+
+3. **Real interview data** — Replaced the 5 hardcoded mock interviews with:
+   ```ts
+   db.interview.findMany({
+     where: { userId: user.id },
+     orderBy: { createdAt: 'desc' },
+     take: 5,
+     include: { messages: { take: 1, orderBy: { createdAt: 'asc' } } },
+   })
+   ```
+
+4. **Computed stats from DB** — `completedCount` and `avgScore` are now derived from actual interview records (status `COMPLETED`, averaging `overallScore`). `sessionsLeft` comes from `user.sessionsLeft` in the database.
+
+5. **i18n via `getTranslations`** — Uses `next-intl/server`'s `getTranslations('app.dashboard')` instead of client-side `useTranslations`. All labels (welcome, stats, table headers, statuses, form) come from the translation files.
+
+6. **Industry/Type label mappers** — Added `INDUSTRY_LABELS` and `TYPE_LABELS` lookup tables with AR/EN values, used to render human-readable industry and interview-type names from the database enum-style strings (e.g. `IT` → `تقنية المعلومات`).
+
+7. **StatusBadge helper** — Inline server component that renders localized status badges for `COMPLETED`, `IN_PROGRESS`, `PENDING`, and `EVALUATION_FAILED` with appropriate colors (emerald, amber, muted, red).
+
+8. **Extracted `NewInterviewForm` client component** — Created `/src/app/[locale]/app/new-interview-form.tsx` as a `'use client'` component that handles the interactive form state (field, experience, type, interviewer gender). It receives `sessionsLeft` as a prop and shows the correct warning text. The form is non-functional (Phase C) — shows a toast placeholder.
+
+9. **Zero-sessions CTA** — When `user.sessionsLeft === 0`, renders a `GlowCard` with an `AlertTriangle` icon, prompt text, and a gold link to `/app/packages`.
+
+10. **Empty state** — When user has no interviews, shows `EmptyState` brand component with `MessageSquare` icon.
+
+11. **Date formatting** — Interview dates use `toLocaleDateString` with `ar-SA` or `en-US` based on locale.
+
+### Design preserved
+- Dark glass-morphism theme (void bg, panel cards, gold accents, emerald for success)
+- Same 4-stat grid with `GlowCard` + `CountUpStat` + Lucide icons
+- Same table layout with rounded-2xl border and hover rows
+- Same interview-gender selection cards with `InterviewAvatar`
+- Same `glass-input` selects and `btn-gold` CTA
+
+### Files changed
+| File | Action |
+|------|--------|
+| `src/app/[locale]/app/page.tsx` | Rewritten: server component with real DB data |
+| `src/app/[locale]/app/new-interview-form.tsx` | New: extracted client form component |
+| `worklog.md` | Appended this entry |
+
+### Lint status
+✅ `bun run lint` — no errors
+✅ Dev server — clean, no compilation errors
+
+---
+
+## Phase C — Task B6: Interviews List Page (C2) — Real DB Data
+
+**Date**: 2025-07-31
+**Agent**: Interviews Page Builder
+**Task ID**: B6
+**Task**: Rewrite `/src/app/[locale]/app/interviews/page.tsx` to use real database data instead of mock data
+
+### What was done
+
+Converted the interviews list page from a fully client-side mock-data page into a proper server-rendered page that reads real interview records from the SQLite database via Prisma.
+
+#### Architecture
+- **Server component** (`page.tsx`): Handles auth via `requireAuth()`, redirects to `/auth/signin` if no session, fetches up to 20 interviews from DB ordered by `createdAt desc`, maps industry/type codes to localized labels, passes serialized rows to client component.
+- **Client component** (`interviews-client.tsx`): Receives pre-processed interview data, manages filter tab state (ALL/COMPLETED/IN_PROGRESS/PENDING), renders cards with status badges, ScoreBar for completed interviews, action buttons (view report / resume).
+
+#### Features
+1. **Auth guard**: Server-side redirect to `/${locale}/auth/signin` if no session
+2. **Real DB query**: `db.interview.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 20 })`
+3. **i18n**: `getTranslations('app.interviews')` on server, `useTranslations('app.interviews')` on client
+4. **Status badges** with correct colors:
+   - `PENDING` → amber with Clock icon
+   - `IN_PROGRESS` → cyan with pulsing dot (using `animate-pulse-cyan`)
+   - `COMPLETED` → emerald with CheckCircle2 icon
+   - `EVALUATION_FAILED` → red with AlertTriangle icon
+5. **Filter tabs**: 4 pill buttons (ALL, COMPLETED, IN_PROGRESS, PENDING) with gold active state, client-side filtering
+6. **ScoreBar**: Brand `ScoreBar` component shown for completed interviews (desktop only)
+7. **Score display**: Bold number, emerald if >= 80, amber otherwise
+8. **Action buttons**: "View Report" link for completed, "Resume" link for in-progress
+9. **EmptyState**: Brand `EmptyState` with CTA button linking to `/app` when no interviews match
+10. **Localized industry/type labels**: Same mapper as dashboard page (IT, FINANCE, MEDICINE, ENGINEERING, EDUCATION, MARKETING, SALES, HR / BEHAVIORAL, TECHNICAL)
+11. **Dark glass design**: void bg, `glass-card` class, gold accents, consistent with app sidebar layout
+12. **RTL support**: Uses logical CSS properties, locale-aware date formatting
+13. **Max height with scroll**: Interview list has `max-h-[calc(100vh-280px)] overflow-y-auto` for long lists
+
+### Files created
+- `src/app/[locale]/app/interviews/interviews-client.tsx` — Client component with filter tabs, interview cards, status badges
+
+### Files modified
+- `src/app/[locale]/app/interviews/page.tsx` — Rewritten from 'use client' with mock data to server component with real DB data
+- `src/messages/ar.json` — Added 4 keys to `app.interviews`: `evaluationFailed`, `overallScore`, `startNew`, `startNewHref`
+- `src/messages/en.json` — Same 4 keys added in English
+- `tailwind.config.ts` — Added `pulse-cyan` keyframe and animation for IN_PROGRESS badge pulsing dot
+
+### Design decisions
+- **Split server/client**: Page is a server component for data fetching/auth; `InterviewsClient` handles interactive filter state. This avoids sending DB client to the browser.
+- **Industry/type label mapper duplicated from dashboard**: Same `INDUSTRY_LABELS` / `TYPE_LABELS` maps used. Could be extracted to a shared util in the future.
+- **Date serialization**: Server converts `DateTime` to ISO string via `toISOString()` to avoid serialization issues across server/client boundary.
+- **Filter tabs as buttons instead of Select dropdowns**: Better UX for the 4-option status filter. Gold active state matches the brand design system.
+- **ScoreBar hidden on mobile**: The `hidden sm:block` class keeps the score bar visible only on desktop to avoid crowding the card layout.
+- **No InterviewAvatar**: Unlike the old mock page, the real data doesn't have an interviewer avatar field, so we use a generic MessageSquare icon in a glass container instead.
+
+### Lint status
+- `bun run lint` passes with 0 errors
+- Dev server compiles cleanly with no warnings
+
+## Task B7 — Profile Page (Real Data)
+
+**Date**: 2025-07-25
+**Agent**: Task B7 Profile Builder
+
+### What was done
+
+Rewrote the user profile page (`/app/profile`) to read and update real data from the database.
+
+1. **`src/app/[locale]/app/profile/page.tsx`** — Converted from a `'use client'` stub to a **server component** that:
+   - Calls `requireAuth()` to check session; redirects to `/{locale}/auth/signin` if not authenticated
+   - Fetches real user data via `db.user.findUnique({ where: { id: session.user.id } })` selecting only profile-safe fields
+   - Passes the fetched data and locale to the new `ProfileForm` client component
+
+2. **`src/app/[locale]/app/profile/profile-form.tsx`** — New `'use client'` component containing:
+   - **Profile fields**: name (editable), email (read-only display with Mail icon), country, industry, experience, interviewerGender (MALE/FEMALE), language (AR/EN)
+   - **Country list**: 16 Arab countries (Saudi Arabia, UAE, Egypt, Jordan, Kuwait, Bahrain, Oman, Qatar, Lebanon, Iraq, Morocco, Algeria, Tunisia, Yemen, Sudan, Libya) with bilingual labels
+   - **Industry options**: IT, FINANCE, MEDICINE, ENGINEERING, EDUCATION, MARKETING, SALES, HR (mapped to `app.dashboard.field*` translations)
+   - **Experience options**: JUNIOR, MID, SENIOR, EXECUTIVE (mapped to `app.dashboard.exp*` translations)
+   - **Save button**: PUTs to `/api/users/me` with updated fields; shows success/error toast
+   - **Change Password section**: currentPassword, newPassword, confirmPassword fields; validates match and min-length client-side; PUTs to `/api/users/me/password`; clears fields on success
+   - **Delete Account section**: Red danger zone with double-confirmation AlertDialog (two steps); calls DELETE `/api/users/me/delete` then `signOut()`
+   - All buttons show `Loader2` spinner during async operations
+   - Uses shadcn `Input`, `Select`, `Button`, `Label`, `AlertDialog` components
+   - Dark glass design with `glass-input`, `bg-gold/10`, `text-gold` accents
+
+3. **i18n updates** (`src/messages/en.json` + `src/messages/ar.json`):
+   - Added `email`, `passwordMismatch`, `passwordMinLength`, `passwordChanged` keys to `app.profile`
+
+### Files changed
+- `src/app/[locale]/app/profile/page.tsx` — rewritten as server component
+- `src/app/[locale]/app/profile/profile-form.tsx` — new file
+- `src/messages/en.json` — added 4 profile i18n keys
+- `src/messages/ar.json` — added 4 profile i18n keys
+
+### Lint status
+- `bun run lint` passes with 0 errors
+
+---
+Task ID: B1-B8
+Agent: main
+Task: Phase B — Auth + User Core
+
+Work Log:
+- Wrote complete Prisma schema (11 models) with SQLite adaptations (JSON strings for arrays, Int cents for money, String for enums, // ADAPTATION comments)
+- Pushed schema to SQLite, generated Prisma client
+- Created seed script: 12 users, 2 companies, 8 interviewer profiles (6 approved + 2 pending), 80 questions (8 industries × 5 behavioral + 5 technical), 2 sample completed interviews with messages, 6 demo B2B candidates
+- Implemented NextAuth v4 credentials provider with JWT strategy in src/lib/auth.ts
+- Created auth API routes: POST /api/auth/register (INDIVIDUAL+B2B), POST /api/auth/forgot-password
+- Created user API routes: GET/PUT /api/users/me, PUT /api/users/me/password, DELETE /api/users/me/delete
+- Wired C1 dashboard to real DB data (user name, sessions, interviews list, scores)
+- Wired C2 interviews page to real DB data (status filters, scores, localized labels)
+- Wired C8 profile page to real DB data (read+update form, password change, delete account)
+- Wired auth/signin page to NextAuth signIn() client
+- Fixed bcryptjs import (randomBytes → crypto.randomBytes)
+- Fixed Prisma model name casing (b2bJob → b2BJob)
+- All palette clean (0 off-system hexes)
+- ESLint: 0 errors
+
+Stage Summary:
+- DB: 14 users, 3 companies, 8 interviews, 80 questions, 16 messages, 120 availabilities, 8 profiles, 2 B2B jobs
+- API verified: register(individual+B2B) ✓, forgot-password ✓, duplicate register 409 ✓, validation 400 ✓
+- Browser verified: login → dashboard shows real name + scores, interviews page shows real data with filters, profile page shows real data with edit form
+- Credentials: admin@muqabaleh.com/admin123, user@seed.com/user123, demo@muqabaleh.com/demo123

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { signIn } from "next-auth/react";
 
 import { AuthShell } from "@/components/brand";
 import { Input } from "@/components/ui/input";
@@ -13,11 +15,12 @@ import { Separator } from "@/components/ui/separator";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
   const locale = useLocale();
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
 
   const emailError =
@@ -29,11 +32,30 @@ export default function SignInPage() {
 
   const passwordError = touched.password && !password ? t("errorPasswordRequired") : "";
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ email: true, password: true });
     if (emailError || passwordError || !email || !password) return;
-    toast.info(t("comingSoon"));
+
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(t("loginFailed") || "البريد أو كلمة المرور غير صحيحة");
+      } else {
+        router.push(`/${locale}/app`);
+        router.refresh();
+      }
+    } catch {
+      toast.error(t("loginFailed") || "حدث خطأ");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -116,8 +138,10 @@ export default function SignInPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="btn-gold w-full cursor-pointer text-sm"
+          disabled={loading}
+          className="btn-gold flex w-full cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
         >
+          {loading ? <Loader2 className="animate-spin" size={16} /> : null}
           {t("login")}
         </button>
 
@@ -130,7 +154,7 @@ export default function SignInPage() {
 
         {/* Register link */}
         <p className="text-center text-sm text-[var(--text-muted)]">
-          {t("noAccount")}{" "}
+            {t("noAccount")}{" "}
           <Link
             href={`/${locale}/auth/register`}
             className="font-semibold text-[var(--gold)] hover:text-[var(--gold-hover)] transition-colors"

@@ -1,8 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ─── Muqabaleh (مقابلة) — Full Data Model ───
+// SQLite Adaptation Rules:
+//   - No native array type → String with JSON.parse/JSON.stringify  // ADAPTATION
+//   - No native enum type → String with validation at application layer  // ADAPTATION
+//   - No Decimal type → Int (cents) with divide-by-100 at read  // ADAPTATION
+//   - No jsonb → String with JSON.parse/JSON.stringify  // ADAPTATION
+//   - @@index used for query performance  // ADAPTATION
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +15,260 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── User ───
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String
+  name                 String?
+  image                String?
+  country              String?
+  industry             String?
+  experience           String?
+  interviewerGender    String    @default("MALE")   // ADAPTATION: enum → String, values: MALE|FEMALE
+  language             String    @default("AR")     // ADAPTATION: enum → String, values: AR|EN
+  accountType          String    @default("INDIVIDUAL") // ADAPTATION: enum → String, values: INDIVIDUAL|B2B
+  role                 String    @default("USER")   // ADAPTATION: enum → String, values: USER|ADMIN|COMPANY_ADMIN|COMPANY_MEMBER|INTERVIEWER
+  companyId            String?
+  company              Company?  @relation(fields: [companyId], references: [id])
+  sessionsLeft         Int       @default(1)
+  isActive             Boolean   @default(true)
+  passwordResetToken   String?
+  passwordResetExpiry  DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  payments             Payment[]
+  interviews           Interview[]
+  humanBookings        HumanBooking[]
+  interviewerProfile   InterviewerProfile?
+  auditLogs            AuditLog[]  @relation("ActorLogs")
+  createdB2bJobs       B2BJob[]    @relation("JobCreator")
+
+  @@index([companyId])
 }
 
-model Post {
+// ─── Company ───
+model Company {
+  id          String           @id @default(cuid())
+  name        String
+  size        String           @default("SMALL") // ADAPTATION: enum → String, values: SMALL|MEDIUM|LARGE
+  industry    String
+  country     String
+  plan        String           @default("B2B_STARTER") // ADAPTATION: enum → String, values: B2B_STARTER|B2B_PRO|B2B_ENTERPRISE
+  credits     Int              @default(0)
+  slaHours    Int              @default(72)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  users       User[]
+  panel       CompanyPanel[]
+  b2bJobs     B2BJob[]
+}
+
+// ─── CompanyPanel (Many-to-Many: Company ↔ Interviewer) ───
+model CompanyPanel {
+  companyId     String
+  interviewerId String
+  company       Company            @relation(fields: [companyId], references: [id])
+  interviewer   InterviewerProfile @relation(fields: [interviewerId], references: [id])
+
+  @@id([companyId, interviewerId])
+}
+
+// ─── Interview ───
+model Interview {
+  id                   String    @id @default(cuid())
+  userId               String?
+  user                 User?     @relation(fields: [userId], references: [id])
+  companyId            String?
+  humanBookingId       String?
+  humanBooking         HumanBooking? @relation(fields: [humanBookingId], references: [id])
+  guestToken           String?   @unique
+  guestName            String?
+  guestEmail           String?
+  mode                 String    @default("AI")     // ADAPTATION: enum → String, values: AI|HUMAN
+  type                 String                       // ADAPTATION: enum → String, values: BEHAVIORAL|TECHNICAL
+  industry             String
+  experience           String?
+  position             String?
+  language             String    @default("AR")     // ADAPTATION: enum → String, values: AR|EN
+  status               String    @default("PENDING") // ADAPTATION: enum → String, values: PENDING|IN_PROGRESS|COMPLETED|EVALUATION_FAILED
+  overallScore         Int?                         // 0-100
+  contentScore         Int?                         // 0-100
+  clarityScore         Int?                         // 0-100
+  confidenceScore      Int?                         // 0-100
+  culturalFitScore     Int?                         // 0-100
+  feedback             String?                      // AR/EN feedback text
+  strengths            String?   // ADAPTATION: Json → String (JSON array) e.g. '["...","..."]'
+  improvements         String?   // ADAPTATION: Json → String (JSON array)
+  recommendation       String?                      // ADAPTATION: enum → String, values: RECOMMENDED|CONSIDER|NOT_RECOMMENDED
+  sessionDebited       Boolean   @default(false)
+  verificationId       String?   @unique             // e.g. MQBL-XXXX-XXXX-XXXX
+  pdfUrl               String?
+  b2bJobId             String?
+  b2bJob               B2BJob?   @relation(fields: [b2bJobId], references: [id])
+  expiresAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  messages             Message[]
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+// ─── Message ───
+model Message {
+  id          String   @id @default(cuid())
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  role        String                       // ADAPTATION: enum → String, values: INTERVIEWER|CANDIDATE
+  content     String
+  sequence    Int
+  createdAt   DateTime @default(now())
+
+  @@index([interviewId])
+}
+
+// ─── Payment ───
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  companyId       String?
+  packageType     String                       // ADAPTATION: enum → String, values: SESSION_1|SESSION_3|SESSION_5|VIP|B2B_STARTER|B2B_BUSINESS|HUMAN_SESSION|B2B_HUMAN_BATCH
+  amountUsdCents  Int                          // ADAPTATION: Decimal → Int (cents). Divide by 100 for display.
+  paypalOrderId   String   @unique
+  status          String   @default("CREATED") // ADAPTATION: enum → String, values: CREATED|CAPTURED|FAILED|REFUNDED
+  sessionsCredited Int     @default(0)
+  idempotencyKey  String   @unique
+  createdAt       DateTime @default(now())
+  capturedAt      DateTime?
+
+  @@index([paypalOrderId])
+}
+
+// ─── Question ───
+model Question {
+  id          String   @id @default(cuid())
+  textAr      String
+  textEn      String
+  industry    String
+  type        String                       // ADAPTATION: enum → String, values: BEHAVIORAL|TECHNICAL
+  difficulty  String   @default("MEDIUM")   // ADAPTATION: enum → String, values: EASY|MEDIUM|HARD
+  category    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── InterviewerProfile ───
+model InterviewerProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  slug              String    @unique
+  bioAr             String
+  bioEn             String
+  industries        String                       // ADAPTATION: array → String (JSON array) e.g. '["IT","FINANCE"]'
+  languages         String                       // ADAPTATION: array → String (JSON array) e.g. '["ar","en"]'
+  yearsExperience   Int
+  currentTitle      String
+  photoUrl          String?
+  sessionPriceUsdCents Int  @default(4900)   // ADAPTATION: Decimal → Int (cents). 4900 = $49.00
+  status            String    @default("PENDING") // ADAPTATION: enum → String, values: PENDING|APPROVED|SUSPENDED
+  avgRatingCents   Int      @default(0)           // ADAPTATION: Decimal → Int (cents × 100 for precision). 480 = 4.80
+  totalSessions     Int      @default(0)
+  payoutMethod      String?
+  excludedCompanies String?                       // ADAPTATION: array → String (JSON array)
+  excludedIndustries String?                      // ADAPTATION: array → String (JSON array)
+  ndaAcceptedAt     DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  availabilities     Availability[]
+  humanBookings      HumanBooking[]
+  companyPanel       CompanyPanel[]
+
+  @@index([status])
+}
+
+// ─── Availability ───
+model Availability {
+  id             String   @id @default(cuid())
+  interviewerId  String
+  interviewer    InterviewerProfile @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+  weekday        Int                            // 0=Sunday, 6=Saturday
+  startTime      String                         // "HH:mm"
+  endTime        String                         // "HH:mm"
+  timezone       String                         // IANA timezone
+
+  @@index([interviewerId])
+}
+
+// ─── HumanBooking ───
+model HumanBooking {
+  id                   String    @id @default(cuid())
+  userId               String?
+  user                 User?     @relation(fields: [userId], references: [id])
+  companyId            String?
+  b2bJobId             String?
+  interviewerId        String
+  interviewer          InterviewerProfile @relation(fields: [interviewerId], references: [id])
+  candidateName        String?
+  candidateEmail       String?
+  startsAt             DateTime
+  endsAt               DateTime
+  status               String    @default("REQUESTED") // ADAPTATION: enum → String, values: REQUESTED|CONFIRMED|COMPLETED|CANCELLED|NO_SHOW
+  meetingUrl           String?
+  priceUsdCents        Int                          // ADAPTATION: Decimal → Int (cents)
+  interviewerPayoutCents Int?                       // ADAPTATION: Decimal → Int (cents)
+  paypalOrderId        String?
+  rating               Int?
+  ratingComment        String?
+  payoutStatus        String    @default("NOT_DUE") // ADAPTATION: enum → String, values: NOT_DUE|DUE|PAID
+  payoutNote          String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  interviews           Interview[]
+
+  @@unique([interviewerId, startsAt])
+  @@index([interviewerId])
+}
+
+// ─── B2BJob ───
+model B2BJob {
+  id                String    @id @default(cuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  title             String
+  industry          String
+  type              String                       // ADAPTATION: enum → String, values: BEHAVIORAL|TECHNICAL
+  mode              String    @default("AI")     // ADAPTATION: enum → String, values: AI|HUMAN
+  assignmentMode    String    @default("AUTO")   // ADAPTATION: enum → String, values: AUTO|PANEL
+  mustAskQuestions  String?                       // ADAPTATION: Json → String (JSON array of question IDs)
+  humanPriceUsdCents Int?                          // ADAPTATION: Decimal → Int (cents)
+  inviteDeadline    DateTime?
+  createdById       String
+  createdBy         User      @relation("JobCreator", fields: [createdById], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  interviews        Interview[]
+
+  @@index([companyId])
+}
+
+// ─── AuditLog ───
+model AuditLog {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  actorId   String?
+  actor     User?    @relation("ActorLogs", fields: [actorId], references: [id])
+  event     String
+  metadata  String                        // ADAPTATION: Json → String (JSON object)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@index([actorId])
 }

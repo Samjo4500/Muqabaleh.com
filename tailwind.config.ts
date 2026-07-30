@@ -48,6 +48,10 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.4" },
         },
+        "pulse-cyan": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.4" },
+        },
         "float-particle": {
           "0%": { transform: "translateY(0) translateX(0)", opacity: "0" },
           "10%": { opacity: "1" },
@@ -83,6 +87,7 @@ const config: Config = {
       },
       animation: {
         "pulse-emerald": "pulse-emerald 2s ease-in-out infinite",
+        "pulse-cyan": "pulse-cyan 2s ease-in-out infinite",
         "float-particle": "float-particle 8s ease-in-out infinite",
         aurora: "aurora 12s ease-in-out infinite",
         "typing-dot": "typing-dot 1.4s ease-in-out infinite",

@@ -1,0 +1,346 @@
+     1→// ─── Muqabaleh (مقابلة) — Database Seed Script ───
+     2→// Run with: bun prisma/seed.ts
+     3→
+     4→import { db } from '../src/lib/db'
+     5→import { hashSync } from 'bcryptjs'
+     6→
+     7→async function main() {
+     8→  console.log('🌱 Seeding Muqabaleh database...')
+     9→  const counts = { users: 0, companies: 0, interviewerProfiles: 0, availabilities: 0, questions: 0, interviews: 0, messages: 0, b2bJobs: 0, humanBookings: 0 }
+    10→
+    11→  // ════════════════════════════════════════════════════════════
+    12→  // 1. ADMIN USER
+    13→  // ════════════════════════════════════════════════════════════
+    14→  const admin = await db.user.create({
+    15→    data: {
+    16→      email: 'admin@muqabaleh.com',
+    17→      passwordHash: hashSync('admin123', 10),
+    18→      name: 'مدير النظام',
+    19→      role: 'ADMIN',
+    20→      interviewerGender: 'MALE',
+    21→      language: 'AR',
+    22→      accountType: 'INDIVIDUAL',
+    23→      sessionsLeft: 0,
+    24→      isActive: true,
+    25→    },
+    26→  })
+    27→  counts.users++
+    28→  console.log('  ✓ Admin user created')
+    29→
+    30→  // ════════════════════════════════════════════════════════════
+    31→  // 2. SEED COMPANY
+    32→  // ════════════════════════════════════════════════════════════
+    33→  const seedCompany = await db.company.create({
+    34→    data: {
+    35→      name: 'شركة المستقبل التقنية',
+    36→      size: 'MEDIUM',
+    37→      industry: 'IT',
+    38→      country: 'SA',
+    39→      plan: 'B2B_PRO',
+    40→      credits: 25,
+    41→      slaHours: 48,
+    42→    },
+    43→  })
+    44→  counts.companies++
+    45→  console.log('  ✓ Seed company created')
+    46→
+    47→  // ════════════════════════════════════════════════════════════
+    48→  // 3. COMPANY ADMIN USER
+    49→  // ════════════════════════════════════════════════════════════
+    50→  const companyAdmin = await db.user.create({
+    51→    data: {
+    52→      email: 'company@seed.com',
+    53→      passwordHash: hashSync('company123', 10),
+    54→      name: 'سارة المهيري',
+    55→      role: 'COMPANY_ADMIN',
+    56→      companyId: seedCompany.id,
+    57→      interviewerGender: 'FEMALE',
+    58→      language: 'AR',
+    59→      accountType: 'B2B',
+    60→      sessionsLeft: 0,
+    61→      isActive: true,
+    62→    },
+    63→  })
+    64→  counts.users++
+    65→  console.log('  ✓ Company admin user created')
+    66→
+    67→  // ════════════════════════════════════════════════════════════
+    68→  // 4. REGULAR USER
+    69→  // ════════════════════════════════════════════════════════════
+    70→  const regularUser = await db.user.create({
+    71→    data: {
+    72→      email: 'user@seed.com',
+    73→      passwordHash: hashSync('user123', 10),
+    74→      name: 'أحمد الخالدي',
+    75→      role: 'USER',
+    76→      country: 'SA',
+    77→      industry: 'IT',
+    78→      experience: 'MID',
+    79→      interviewerGender: 'MALE',
+    80→      language: 'AR',
+    81→      accountType: 'INDIVIDUAL',
+    82→      sessionsLeft: 3,
+    83→      isActive: true,
+    84→    },
+    85→  })
+    86→  counts.users++
+    87→  console.log('  ✓ Regular user created')
+    88→
+    89→  // ════════════════════════════════════════════════════════════
+    90→  // 5. INTERVIEWER PROFILES (6 approved + 2 pending)
+    91→  // ════════════════════════════════════════════════════════════
+    92→  const interviewerDefs = [
+    93→    {
+    94→      email: 'huda@muqabaleh.com', password: 'interviewer1', name: 'هدا السالم', gender: 'FEMALE',
+    95→      slug: 'huda-al-salem',
+    96→      bioAr: 'خبيرة موارد بشرية بأكثر من ١٢ عامًا من الخبرة في قطاع البنوك والشركات الكبرى. متخصصة في المقابلات السلوكية وتقييم الكفاءات القيادية. حاصلة على شهادة SHRM-SCP وعضو في الجمعية السعودية للإدارة.',
+    97→      bioEn: 'HR expert with 12+ years of experience in banking and enterprise sector. Specialized in behavioral interviews and leadership competency assessment. SHRM-SCP certified.',
+    98→      industries: JSON.stringify(['HR', 'FINANCE']),
+    99→      languages: JSON.stringify(['ar', 'en']),
+   100→      yearsExperience: 12, currentTitle: 'مدير قسم التوظيف - البنك الأهلي',
+   101→      sessionPriceUsdCents: 4900, avgRatingCents: 483, totalSessions: 87, status: 'APPROVED',
+   102→    },
+   103→    {
+   104→      email: 'yasser@muqabaleh.com', password: 'interviewer2', name: 'ياسر الغامدي', gender: 'MALE',
+   105→      slug: 'yasser-al-ghamdi',
+   106→      bioAr: 'مهندس برمجيات أول مع خبرة ١٥ عامًا في تطوير الأنظمة الموزعة والبنية التحتية السحابية. عمل في شركات تقنية رائدة مثل STC وأرامكو ديجيتال. شغوف بتطوير المواهب التقنية وإعداد المرشحين لمقابلات الشركات الكبرى.',
+   107→      bioEn: 'Senior software engineer with 15 years of experience in distributed systems and cloud infrastructure. Worked at STC and aramco Digital. Passionate about developing technical talent.',
+   108→      industries: JSON.stringify(['IT', 'ENGINEERING']),
+   109→      languages: JSON.stringify(['ar', 'en']),
+   110→      yearsExperience: 15, currentTitle: 'مدير هندسة البرمجيات - أرامكو ديجيتال',
+   111→      sessionPriceUsdCents: 5900, avgRatingCents: 493, totalSessions: 142, status: 'APPROVED',
+   112→    },
+   113→    {
+   114→      email: 'rana@muqabaleh.com', password: 'interviewer3', name: 'رنا العتيبي', gender: 'FEMALE',
+   115→      slug: 'rana-al-otaibi',
+   116→      bioAr: 'محللة مالية معتمدة (CFA) بخبرة ١٠ سنوات في التحليل المالي وإدارة المخاطر. عملت في تداول وسابك. متخصصة في تقييم المرشحين لقطاع التمويل والاستثمار.',
+   117→      bioEn: 'CFA-certified financial analyst with 10 years of experience in financial analysis and risk management. Worked at Tadawul and SABIC.',
+   118→      industries: JSON.stringify(['FINANCE', 'SALES']),
+   119→      languages: JSON.stringify(['ar', 'en']),
+   120→      yearsExperience: 10, currentTitle: 'مدير التحليل المالي - تداول',
+   121→      sessionPriceUsdCents: 4900, avgRatingCents: 478, totalSessions: 63, status: 'APPROVED',
+   122→    },
+   123→    {
+   124→      email: 'sultan@muqabaleh.com', password: 'interviewer4', name: 'سلطان الدوسري', gender: 'MALE',
+   125→      slug: 'sultan-al-dosari',
+   126→      bioAr: 'مهندس مدني أول مع خبرة ١٨ عامًا في المشاريع الضخمة والبنية التحتية. شارك في مشاريع رؤية ٢٠٣٠ بما في ذلك مشروع البحر الأحمر ومطار الملك سلمان الدولي. خبرة واسعة في مقابلات المهندسين.',
+   127→      bioEn: 'Senior civil engineer with 18 years of experience in mega-projects and infrastructure. Participated in Vision 2030 projects including Red Sea Project and King Salman Airport.',
+   128→      industries: JSON.stringify(['ENGINEERING', 'IT']),
+   129→      languages: JSON.stringify(['ar', 'en']),
+   130→      yearsExperience: 18, currentTitle: 'مدير مشاريع - نيوم',
+   131→      sessionPriceUsdCents: 4900, avgRatingCents: 485, totalSessions: 51, status: 'APPROVED',
+   132→    },
+   133→    {
+   134→      email: 'mona@muqabaleh.com', password: 'interviewer5', name: 'منى القحطاني', gender: 'FEMALE',
+   135→      slug: 'mona-al-qahtani',
+   136→      bioAr: 'خبيرة تسويق رقمي بخبرة ٩ سنوات في إدارة الحملات الإعلانية والتسويق عبر المحتوى. عملت في وكالات إعلانية عالمية وشركات تجارة إلكترونية. حاصلة على شهادات Google Ads وHubSpot.',
+   137→      bioEn: 'Digital marketing expert with 9 years of experience in ad campaigns and content marketing. Worked at international agencies and e-commerce companies. Google Ads and HubSpot certified.',
+   138→      industries: JSON.stringify(['MARKETING', 'SALES']),
+   139→      languages: JSON.stringify(['ar', 'en']),
+   140→      yearsExperience: 9, currentTitle: 'مديرة التسويق الرقمي - نون',
+   141→      sessionPriceUsdCents: 4900, avgRatingCents: 470, totalSessions: 38, status: 'APPROVED',
+   142→    },
+   143→    {
+   144→      email: 'khalid@muqabaleh.com', password: 'interviewer6', name: 'خالد الشهري', gender: 'MALE',
+   145→      slug: 'khalid-al-shahri',
+   146→      bioAr: 'أكاديمي ومستشار تعليمي مع خبرة ٢٠ عامًا في قطاع التعليم العالي. شغل مناصب قيادية في جامعة الملك سعود وجامعة الأميرة نورة. متخصص في تقييم الكفاءات الأكاديمية والبحثية.',
+   147→      bioEn: 'Academic and education consultant with 20 years of experience in higher education. Held leadership positions at King Saud University and Princess Noura University.',
+   148→      industries: JSON.stringify(['EDUCATION', 'HR']),
+   149→      languages: JSON.stringify(['ar', 'en']),
+   150→      yearsExperience: 20, currentTitle: 'أستاذ مشارك - جامعة الملك سعود',
+   151→      sessionPriceUsdCents: 4900, avgRatingCents: 488, totalSessions: 95, status: 'APPROVED',
+   152→    },
+   153→    // PENDING interviewers
+   154→    {
+   155→      email: 'nora@muqabaleh.com', password: 'interviewer7', name: 'نورة الحربي', gender: 'FEMALE',
+   156→      slug: 'nora-al-harbi',
+   157→      bioAr: 'طبيبة أسنان متخصصة في طب الأسنان التجميلي مع ٧ سنوات خبرة. مهتمة بالانضمام كمحاور في مجال الطب.',
+   158→      bioEn: 'Dentist specializing in cosmetic dentistry with 7 years of experience. Interested in joining as a medical interviewer.',
+   159→      industries: JSON.stringify(['MEDICINE']),
+   160→      languages: JSON.stringify(['ar']),
+   161→      yearsExperience: 7, currentTitle: 'طبيبة أسنان - مستشفى الملك فيصل',
+   162→      sessionPriceUsdCents: 4900, avgRatingCents: 0, totalSessions: 0, status: 'PENDING',
+   163→    },
+   164→    {
+   165→      email: 'fahad@muqabaleh.com', password: 'interviewer8', name: 'فهد المالكي', gender: 'MALE',
+   166→      slug: 'fahad-al-malki',
+   167→      bioAr: 'مطور تطبيقات جوال مع ٤ سنوات خبرة في Flutter وReact Native. أريد المساعدة في تقييم المرشحين التقنيين.',
+   168→      bioEn: 'Mobile app developer with 4 years of experience in Flutter and React Native. Wants to help evaluate technical candidates.',
+   169→      industries: JSON.stringify(['IT']),
+   170→      languages: JSON.stringify(['ar', 'en']),
+   171→      yearsExperience: 4, currentTitle: 'مطور أول - شركة تقنية ناشئة',
+   172→      sessionPriceUsdCents: 4900, avgRatingCents: 0, totalSessions: 0, status: 'PENDING',
+   173→    },
+   174→  ]
+   175→
+   176→  for (const d of interviewerDefs) {
+   177→    const user = await db.user.create({
+   178→      data: {
+   179→        email: d.email,
+   180→        passwordHash: hashSync(d.password, 10),
+   181→        name: d.name,
+   182→        role: 'INTERVIEWER',
+   183→        interviewerGender: d.gender,
+   184→        language: 'AR',
+   185→        accountType: 'INDIVIDUAL',
+   186→        sessionsLeft: 0,
+   187→        isActive: true,
+   188→      },
+   189→    })
+   190→    counts.users++
+   191→    await db.interviewerProfile.create({
+   192→      data: {
+   193→        userId: user.id,
+   194→        slug: d.slug,
+   195→        bioAr: d.bioAr,
+   196→        bioEn: d.bioEn,
+   197→        industries: d.industries,
+   198→        languages: d.languages,
+   199→        yearsExperience: d.yearsExperience,
+   200→        currentTitle: d.currentTitle,
+   201→        sessionPriceUsdCents: d.sessionPriceUsdCents,
+   202→        status: d.status,
+   203→        avgRatingCents: d.avgRatingCents,
+   204→        totalSessions: d.totalSessions,
+   205→        ndaAcceptedAt: d.status === 'APPROVED' ? new Date() : null,
+   206→      },
+   207→    })
+   208→    counts.interviewerProfiles++
+   209→  }
+   210→  console.log('  ✓ 8 interviewer profiles created (6 approved, 2 pending)')
+   211→
+   212→  // ════════════════════════════════════════════════════════════
+   213→  // 5b. AVAILABILITY for approved interviewers (next 2 weeks)
+   214→  // ════════════════════════════════════════════════════════════
+   215→  const approvedSlugs = ['huda-al-salem', 'yasser-al-ghamdi', 'rana-al-otaibi', 'sultan-al-dosari', 'mona-al-qahtani', 'khalid-al-shahri']
+   216→  const profiles = await db.interviewerProfile.findMany({ where: { slug: { in: approvedSlugs } } })
+   217→
+   218→  const timeSlots = [
+   219→    { start: '09:00', end: '11:00' },
+   220→    { start: '11:30', end: '13:00' },
+   221→    { start: '14:00', end: '16:00' },
+   222→    { start: '16:30', end: '18:00' },
+   223→  ]
+   224→
+   225→  const dayPatterns: number[][] = [
+   226→    [0, 1, 3, 4],
+   227→    [0, 2, 4, 6],
+   228→    [1, 2, 3, 5],
+   229→    [0, 1, 2, 3, 4],
+   230→    [1, 3, 5],
+   231→    [0, 2, 4, 6],
+   232→  ]
+   233→
+   234→  for (let pi = 0; pi < profiles.length; pi++) {
+   235→    const profile = profiles[pi]
+   236→    const days = dayPatterns[pi % dayPatterns.length]
+   237→    const slots = timeSlots.slice(0, 2 + (pi % 3))
+   238→    for (const day of days) {
+   239→      for (const slot of slots) {
+   240→        await db.availability.create({
+   241→          data: { interviewerId: profile.id, weekday: day, startTime: slot.start, endTime: slot.end, timezone: 'Asia/Riyadh' },
+   242→        })
+   243→        counts.availabilities++
+   244→      }
+   245→    }
+   246→  }
+   247→  console.log(`  ✓ ${counts.availabilities} availability entries created`)
+   248→
+   249→  // ════════════════════════════════════════════════════════════
+   250→  // 6. QUESTION BANK (≥5 behavioral + ≥5 technical × 8 industries)
+   251→  // ════════════════════════════════════════════════════════════
+   252→  const Q: Array<{ textAr: string; textEn: string; industry: string; type: string; difficulty: string; category: string }> = [
+   253→
+   254→    // ── IT ──
+   255→    { textAr: 'اخبرني عن مرة واجهت فيها مشكلة تقنية معقدة في مشروع. كيف تعاملت معها؟', textEn: 'Tell me about a time you faced a complex technical problem in a project. How did you handle it?', industry: 'IT', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'حل المشكلات' },
+   256→    { textAr: 'كيف تدير أولوياتك عند العمل على عدة مشاريع تقنية في وقت واحد؟', textEn: 'How do you manage priorities when working on multiple technical projects simultaneously?', industry: 'IT', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'إدارة الوقت' },
+   257→    { textAr: 'صف مشروعًا تقنيًا فشل أو لم يحقق النتائج المتوقعة. ماذا تعلمت من التجربة؟', textEn: 'Describe a technical project that failed or did not meet expectations. What did you learn?', industry: 'IT', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التعلم من الأخطاء' },
+   258→    { textAr: 'كيف تشرح مفهومًا تقنيًا معقدًا لشخص غير تقني مثل المدير أو العميل؟', textEn: 'How do you explain a complex technical concept to a non-technical person?', industry: 'IT', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'التواصل' },
+   259→    { textAr: 'اخبرني عن مرة قمت فيها بتحسين أداء نظام أو تطبيق بشكل ملحوظ.', textEn: 'Tell me about a time you significantly improved the performance of a system or application.', industry: 'IT', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'الإنجازات' },
+   260→    { textAr: 'ما الفرق بين SQL و NoSQL؟ ومتى تختار كل واحد منهما؟', textEn: 'What is the difference between SQL and NoSQL? When would you choose each?', industry: 'IT', type: 'TECHNICAL', difficulty: 'EASY', category: 'قواعد البيانات' },
+   261→    { textAr: 'اشرح مفهوم الـ Microservices ومميزاته وعيوبه مقارنة بالـ Monolithic Architecture.', textEn: 'Explain Microservices and its pros and cons compared to Monolithic Architecture.', industry: 'IT', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'البنية التحتية' },
+   262→    { textAr: 'كيف تتعامل مع الـ Concurrency في تطبيق متعدد الخيوط؟', textEn: 'How do you handle Concurrency in a multi-threaded application?', industry: 'IT', type: 'TECHNICAL', difficulty: 'HARD', category: 'البرمجة' },
+   263→    { textAr: 'ما هي استراتيجيات الـ Caching الشائعة ومتى تستخدم كل واحدة؟', textEn: 'What are common Caching strategies and when do you use each?', industry: 'IT', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'الأداء' },
+   264→    { textAr: 'اشرح كيف يعمل REST API وما الفرق بينه وبين GraphQL.', textEn: 'Explain how REST API works and its difference from GraphQL.', industry: 'IT', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'تطوير الويب' },
+   265→
+   266→    // ── FINANCE ──
+   267→    { textAr: 'اخبرني عن مرة اكتشفت فيها خطأً ماليًا جوهريًا. كيف تعاملت مع الموقف؟', textEn: 'Tell me about a time you discovered a significant financial error. How did you handle it?', industry: 'FINANCE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'النزاهة' },
+   268→    { textAr: 'كيف تبقى محدّثًا على التغييرات في اللوائح المالية والضريبية؟', textEn: 'How do you stay updated on changes in financial and tax regulations?', industry: 'FINANCE', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'التطوير المهني' },
+   269→    { textAr: 'صف موقفًا كانت فيه البيانات المالية غير واضحة أو متناقضة. كيف حصلت على الإجابات الصحيحة؟', textEn: 'Describe a situation where financial data was unclear or contradictory.', industry: 'FINANCE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التحليل' },
+   270→    { textAr: 'كيف تتعامل مع ضغط المواعيد النهائية في إعداد التقارير المالية الدورية؟', textEn: 'How do you handle deadline pressure in preparing periodic financial reports?', industry: 'FINANCE', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'إدارة الوقت' },
+   271→    { textAr: 'اخبرني عن مرة قدمت فيها توصية مالية مهمة للإدارة. كيف اقنعتها بوجهة نظرك؟', textEn: 'Tell me about a time you presented an important financial recommendation to management.', industry: 'FINANCE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التواصل' },
+   272→    { textAr: 'ما الفرق بين البيانات المالية المتوقعة والفعلية؟ وكيف تحلل الانحرافات؟', textEn: 'What is the difference between forecasted and actual financial data? How do you analyze variances?', industry: 'FINANCE', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'المحاسبة' },
+   273→    { textAr: 'اشرح نسب التداول الرئيسية وكيف تستخدمها في تقييم شركة.', textEn: 'Explain key trading ratios and how you use them to evaluate a company.', industry: 'FINANCE', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التحليل المالي' },
+   274→    { textAr: 'ما هي طرق تقييم المشاريع الاستثمارية؟ قارن بين NPV و IRR.', textEn: 'What are the methods for evaluating investment projects? Compare NPV and IRR.', industry: 'FINANCE', type: 'TECHNICAL', difficulty: 'HARD', category: 'الاستثمار' },
+   275→    { textAr: 'كيف تحسب تكلفة رأس المال المرجحة (WACC)؟ وما أهميتها؟', textEn: 'How do you calculate WACC? Why is it important?', industry: 'FINANCE', type: 'TECHNICAL', difficulty: 'HARD', category: 'التمويل' },
+   276→    { textAr: 'ما الفرق بين المحاسبة المالية والمحاسبة الإدارية؟', textEn: 'What is the difference between financial accounting and managerial accounting?', industry: 'FINANCE', type: 'TECHNICAL', difficulty: 'EASY', category: 'المحاسبة' },
+   277→
+   278→    // ── MEDICINE ──
+   279→    { textAr: 'اخبرني عن موقف واجهت فيه مريضًا غير متعاون. كيف تعاملت معه؟', textEn: 'Tell me about a time you dealt with an uncooperative patient.', industry: 'MEDICINE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'مهارات التواصل' },
+   280→    { textAr: 'كيف تتعامل مع الضغط النفسي الناتج عن فقدان مريض؟', textEn: 'How do you cope with the emotional stress of losing a patient?', industry: 'MEDICINE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'الصحة النفسية' },
+   281→    { textAr: 'صف حالة طبية معقدة شاركت فيها في فريق متعدد التخصصات. ما كان دورك؟', textEn: 'Describe a complex medical case in a multidisciplinary team. What was your role?', industry: 'MEDICINE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'العمل الجماعي' },
+   282→    { textAr: 'كيف توازن بين السرعة في اتخاذ القرار الطبي والدقة في التشخيص؟', textEn: 'How do you balance speed in medical decision-making with diagnostic accuracy?', industry: 'MEDICINE', type: 'BEHAVIORAL', difficulty: 'HARD', category: 'اتخاذ القرار' },
+   283→    { textAr: 'اخبرني عن مرة اكتشفت فيها خطأً في وصفة طبية كتبها زميلك. ماذا فعلت؟', textEn: 'Tell me about a time you discovered an error in a colleague\'s prescription.', industry: 'MEDICINE', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'السلامة' },
+   284→    { textAr: 'ما هي بروتوكولات ACLS وكيف تطبقها في حالات الطوارئ القلبية؟', textEn: 'What are ACLS protocols and how do you apply them in cardiac emergencies?', industry: 'MEDICINE', type: 'TECHNICAL', difficulty: 'HARD', category: 'الطب الباطني' },
+   285→    { textAr: 'اشرح الفرق بين التشخيص التفريقي والتشخيص النهائي مع أمثلة.', textEn: 'Explain the difference between differential and final diagnosis with examples.', industry: 'MEDICINE', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التشخيص' },
+   286→    { textAr: 'ما هي الآثار الجانبية الشائعة للمضادات الحيوية من مجموعة البنسلين؟ وكيف تديرها؟', textEn: 'What are the common side effects of penicillin-group antibiotics?', industry: 'MEDICINE', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'الأدوية' },
+   287→    { textAr: 'كيف تقييم مريض يعاني من ألم صدري حاد في قسم الطوارئ؟', textEn: 'How do you evaluate a patient presenting with acute chest pain in the ER?', industry: 'MEDICINE', type: 'TECHNICAL', difficulty: 'HARD', category: 'طب الطوارئ' },
+   288→    { textAr: 'ما هي معايير التشخيص المرجعية لأمراض القلب حسب الجمعية الأمريكية للقلب؟', textEn: 'What are the gold standard diagnostic criteria for heart diseases per AHA?', industry: 'MEDICINE', type: 'TECHNICAL', difficulty: 'HARD', category: 'أمراض القلب' },
+   289→
+   290→    // ── ENGINEERING ──
+   291→    { textAr: 'اخبرني عن مشروع هندسي واجهت فيه تحديات في الميزانية أو الوقت. كيف تجاوزتها؟', textEn: 'Tell me about an engineering project with budget or time challenges. How did you overcome them?', industry: 'ENGINEERING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'إدارة المشاريع' },
+   292→    { textAr: 'كيف تضمن جودة العمل الهندسي في مشاريعك؟', textEn: 'How do you ensure quality in your engineering projects?', industry: 'ENGINEERING', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'الجودة' },
+   293→    { textAr: 'صف موقفًا اختلف فيه مع مهندس آخر حول حل تقني. كيف حلت الخلاف؟', textEn: 'Describe a situation where you disagreed with another engineer about a technical solution.', industry: 'ENGINEERING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'العمل الجماعي' },
+   294→    { textAr: 'كيف تدير العلاقة مع المقاولين والموردين في المشاريع الكبرى؟', textEn: 'How do you manage relationships with contractors and suppliers in major projects?', industry: 'ENGINEERING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'إدارة المشاريع' },
+   295→    { textAr: 'اخبرني عن مرة استخدمت فيها تقنية جديدة أو مبتكرة في مشروعك.', textEn: 'Tell me about a time you used a new or innovative technique in your project.', industry: 'ENGINEERING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'الابتكار' },
+   296→    { textAr: 'ما هي مراحل تصميم الخرسانة المسلحة حسب الكود السعودي؟', textEn: 'What are the stages of reinforced concrete design per the Saudi Building Code?', industry: 'ENGINEERING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التصميم الإنشائي' },
+   297→    { textAr: 'اشرح الفرق بين أنظمة HVAC المختلفة ومتى تستخدم كل نوع.', textEn: 'Explain the differences between HVAC systems and when to use each type.', industry: 'ENGINEERING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'الميكانيكا' },
+   298→    { textAr: 'كيف تختار نوع الأساس المناسب لمبنى معين؟ ما العوامل المؤثرة؟', textEn: 'How do you choose the appropriate foundation type for a building? What factors influence the choice?', industry: 'ENGINEERING', type: 'TECHNICAL', difficulty: 'HARD', category: 'الجيوتقنية' },
+   299→    { textAr: 'ما هي معايير السلامة الأساسية في مواقع البناء حسب OSHA؟', textEn: 'What are the basic safety standards at construction sites per OSHA?', industry: 'ENGINEERING', type: 'TECHNICAL', difficulty: 'EASY', category: 'السلامة' },
+   300→    { textAr: 'اشرح مفهوم الـ BIM وكيف يغير طريقة إدارة المشاريع الإنشائية.', textEn: 'Explain BIM and how it changes construction project management.', industry: 'ENGINEERING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'تكنولوجيا البناء' },
+   301→
+   302→    // ── EDUCATION ──
+   303→    { textAr: 'كيف تتعامل مع طالب يواجه صعوبات تعلمية في الفصل؟', textEn: 'How do you handle a student facing learning difficulties in class?', industry: 'EDUCATION', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'إدارة الفصل' },
+   304→    { textAr: 'اخبرني عن تجربة تطوير منهج دراسي جديد. ما التحديات التي واجهتها؟', textEn: 'Tell me about developing a new curriculum. What challenges did you face?', industry: 'EDUCATION', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التطوير الأكاديمي' },
+   305→    { textAr: 'كيف تقيس فعالية طرق التدريس الخاصة بك؟', textEn: 'How do you measure the effectiveness of your teaching methods?', industry: 'EDUCATION', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'التقييم' },
+   306→    { textAr: 'صف موقفًا تعاملت فيه مع أولياء أمور متذمرين. كيف حلت الموقف؟', textEn: 'Describe a situation where you dealt with complaining parents.', industry: 'EDUCATION', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التواصل' },
+   307→    { textAr: 'كيف تدمج التقنية في العملية التعليمية بشكل فعال؟', textEn: 'How do you effectively integrate technology into the learning process?', industry: 'EDUCATION', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'الابتكار' },
+   308→    { textAr: 'ما الفرق بين التقييم التكويني والتقييم الختامي؟ وأهمية كل منهما.', textEn: 'What is the difference between formative and summative assessment?', industry: 'EDUCATION', type: 'TECHNICAL', difficulty: 'EASY', category: 'التقييم' },
+   309→    { textAr: 'اشرح نظرية بلوم لتصنيف الأهداف التعليمية وكيف تطبقها.', textEn: 'Explain Bloom\'s taxonomy of educational objectives and how you apply it.', industry: 'EDUCATION', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'النظريات التربوية' },
+   310→    { textAr: 'كيف تصمم اختبارًا محكي المرجعية بدلاً من اختبار معياري المرجعية؟', textEn: 'How do you design a criterion-referenced test vs a norm-referenced test?', industry: 'EDUCATION', type: 'TECHNICAL', difficulty: 'HARD', category: 'القياس والتقويم' },
+   311→    { textAr: 'ما هي استراتيجيات التدريس النشط وكيف تطبقها في فصل كبير؟', textEn: 'What are active learning strategies and how do you apply them in a large class?', industry: 'EDUCATION', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'استراتيجيات التدريس' },
+   312→    { textAr: 'اشرح مفهوم التعلم التكاملي وكيف يختلف عن التعلم التقليدي.', textEn: 'Explain the concept of blended learning and how it differs from traditional learning.', industry: 'EDUCATION', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'تكنولوجيا التعليم' },
+   313→
+   314→    // ── MARKETING ──
+   315→    { textAr: 'اخبرني عن حملة تسويقية ناجحة قمت بإدارتها. ما كان السر وراء نجاحها؟', textEn: 'Tell me about a successful marketing campaign you managed. What was the secret to its success?', industry: 'MARKETING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التخطيط' },
+   316→    { textAr: 'كيف تتعامل مع حملة لم تحقق النتائج المتوقعة؟', textEn: 'How do you handle a campaign that did not achieve expected results?', industry: 'MARKETING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'حل المشكلات' },
+   317→    { textAr: 'كيف تتعاون مع فريق التصميم والمبيعات في إعداد حملة؟', textEn: 'How do you collaborate with the design and sales teams on a campaign?', industry: 'MARKETING', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'العمل الجماعي' },
+   318→    { textAr: 'اخبرني عن مرة استخدمت فيها البيانات لتحسين استراتيجية تسويقية.', textEn: 'Tell me about a time you used data to improve a marketing strategy.', industry: 'MARKETING', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التحليل' },
+   319→    { textAr: 'كيف تحافظ على العلامة التجارية ثابتة عبر جميع القنوات التسويقية؟', textEn: 'How do you maintain brand consistency across all marketing channels?', industry: 'MARKETING', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'إدارة العلامة التجارية' },
+   320→    { textAr: 'ما هي مراحل بناء خطة تسويقية متكاملة من الصفر؟', textEn: 'What are the stages of building an integrated marketing plan from scratch?', industry: 'MARKETING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التخطيط الاستراتيجي' },
+   321→    { textAr: 'اشرح مفهوم الـ SEO On-page و Off-page وكيف تطبقهما.', textEn: 'Explain On-page SEO and Off-page SEO and how you apply them.', industry: 'MARKETING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التسويق الرقمي' },
+   322→    { textAr: 'كيف تحسب العائد على الاستثمار التسويقي (ROI) لحملة إعلانية؟', textEn: 'How do you calculate marketing ROI for an advertising campaign?', industry: 'MARKETING', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التحليل' },
+   323→    { textAr: 'ما الفرق بين التسويق بالمحتوى والتسويق عبر وسائل التواصل الاجتماعي؟', textEn: 'What is the difference between content marketing and social media marketing?', industry: 'MARKETING', type: 'TECHNICAL', difficulty: 'EASY', category: 'استراتيجيات التسويق' },
+   324→    { textAr: 'اشرح مفهوم القمع التسويقي (Marketing Funnel) ومراحله.', textEn: 'Explain the Marketing Funnel concept and its stages.', industry: 'MARKETING', type: 'TECHNICAL', difficulty: 'EASY', category: 'التخطيط' },
+   325→
+   326→    // ── SALES ──
+   327→    { textAr: 'اخبرني عن أكبر صفقة حققتها. ما الاستراتيجية التي اتبعتها؟', textEn: 'Tell me about the biggest deal you closed. What strategy did you use?', industry: 'SALES', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'المبيعات' },
+   328→    { textAr: 'كيف تتعامل مع عميل يرفض العرض رغم الحاجة الفعلية للمنتج؟', textEn: 'How do you handle a client who rejects your offer despite needing the product?', industry: 'SALES', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التفاوض' },
+   329→    { textAr: 'صف موقفًا تعاملت فيه مع عميل غاضب أو غير راضٍ. كيف حلت المشكلة؟', textEn: 'Describe a situation with an angry or dissatisfied client. How did you resolve it?', industry: 'SALES', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'خدمة العملاء' },
+   330→    { textAr: 'كيف تبني علاقات طويلة الأمد مع العملاء؟', textEn: 'How do you build long-term relationships with clients?', industry: 'SALES', type: 'BEHAVIORAL', difficulty: 'EASY', category: 'بناء العلاقات' },
+   331→    { textAr: 'اخبرني عن مرة فشلت في إغلاق صفة. ما الذي تعلمته؟', textEn: 'Tell me about a time you failed to close a deal. What did you learn?', industry: 'SALES', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التعلم من الأخطاء' },
+   332→    { textAr: 'ما هي مراحل دورة البيع (Sales Cycle) وكيف تدير كل مرحلة؟', textEn: 'What are the stages of the Sales Cycle and how do you manage each?', industry: 'SALES', type: 'TECHNICAL', difficulty: 'EASY', category: 'عملية البيع' },
+   333→    { textAr: 'كيف تقوم بتحليل بيانات المبيعات لتحديد فرص النمو؟', textEn: 'How do you analyze sales data to identify growth opportunities?', industry: 'SALES', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'التحليل' },
+   334→    { textAr: 'ما هي تقنيات البيع الاستشاري (Consultative Selling) وكيف تطبقها؟', textEn: 'What are Consultative Selling techniques and how do you apply them?', industry: 'SALES', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'استراتيجيات البيع' },
+   335→    { textAr: 'اشرح كيف تبني forecast للمبيعات بدقة معقولة.', textEn: 'Explain how to build a reasonably accurate sales forecast.', industry: 'SALES', type: 'TECHNICAL', difficulty: 'HARD', category: 'التخطيط' },
+   336→    { textAr: 'ما الفرق بين B2B و B2C selling من حيث الاستراتيجية والتنفيذ؟', textEn: 'What is the difference between B2B and B2C selling in terms of strategy and execution?', industry: 'SALES', type: 'TECHNICAL', difficulty: 'EASY', category: 'استراتيجيات البيع' },
+   337→
+   338→    // ── HR ──
+   339→    { textAr: 'اخبرني عن مرة اضطررت فيها لإنهاء خدمات موظف. كيف تعاملت مع الموقف؟', textEn: 'Tell me about a time you had to terminate an employee. How did you handle it?', industry: 'HR', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'إدارة الموظفين' },
+   340→    { textAr: 'كيف تبني ثقافة مؤسسية إيجابية في بيئة العمل؟', textEn: 'How do you build a positive organizational culture in the workplace?', industry: 'HR', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'الثقافة المؤسسية' },
+   341→    { textAr: 'صف موقفًا كان فيه تعارض بين موظف ومديره. كيف تدخلت؟', textEn: 'Describe a situation of conflict between an employee and their manager. How did you intervene?', industry: 'HR', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'حل النزاعات' },
+   342→    { textAr: 'كيف تتعامل مع شكوى التحرش أو التمييز في بيئة العمل؟', textEn: 'How do you handle a harassment or discrimination complaint in the workplace?', industry: 'HR', type: 'BEHAVIORAL', difficulty: 'HARD', category: 'الامتثال' },
+   343→    { textAr: 'اخبرني عن برنامج تطوير مهني نفذته بنجاح. ما كانت النتائج؟', textEn: 'Tell me about a professional development program you successfully implemented.', industry: 'HR', type: 'BEHAVIORAL', difficulty: 'MEDIUM', category: 'التطوير المهني' },
+   344→    { textAr: 'ما هي مراحل عملية التوظيف من اعلان الوظيفة حتى التعيين؟', textEn: 'What are the stages of the recruitment process from posting to hiring?', industry: 'HR', type: 'TECHNICAL', difficulty: 'EASY', category: 'التوظيف' },
+   345→    { textAr: 'كيف تصمم خطة تقييم أداء فعالة ومنصفة؟', textEn: 'How do you design an effective and fair performance appraisal plan?', industry: 'HR', type: 'TECHNICAL', difficulty: 'MEDIUM', category: 'تقييم الأداء' },
+   346→    { textAr: 'اشرح الفرق بين التعوي

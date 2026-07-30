@@ -492,3 +492,85 @@ Work Log:
 Stage Summary:
 - Phase A COMPLETE: 48 pages, 13 brand components, 2 layout components, full i18n (ar+en), all routes verified 200
 - Known environment limitation: dev server memory with 48 pages requires production build for sustained operation
+
+---
+
+## Palette Grep Proof — Phase A Design System Compliance
+
+**Date**: 2025-07-15
+**Agent**: Palette Grep Proof
+**Task**: Verify all hex colors in src/ match the approved Phase A design-system palette.
+
+### Approved Palette (7 hexes)
+
+| Hex | Name |
+|-----|------|
+| `#070A0F` | void |
+| `#0B0F17` | panel |
+| `#D4A843` | gold |
+| `#10B981` | emerald |
+| `#22D3EE` | cyan |
+| `#FFFFFF` | white |
+| `#000000` | black |
+
+### Search Scope
+
+- **Files searched**: all `.tsx`, `.ts`, `.css` under `src/` (excluding `node_modules`, `.next`, binaries)
+- **Patterns searched**: `#[0-9a-fA-F]{3,8}`, `rgb()`, `hsl()`
+- **rgb()/hsl() results**: NONE found.
+
+### Complete Hex Inventory
+
+#### ✅ APPROVED hexes found
+
+| Hex | File | Lines |
+|-----|------|-------|
+| `#070A0F` | `src/app/globals.css` | 9, 135 |
+| `#0B0F17` | `src/app/globals.css` | 10 |
+| `#D4A843` | `src/app/globals.css` | 13, 127, 134; `src/app/[locale]/interview/guest/[token]/page.tsx` | 33,34,35; `src/components/brand/auth-shell.tsx` | 34,40,43; `src/app/[locale]/b2b/onboarding/page.tsx` | 80,81,82; `src/components/brand/interview-avatar.tsx` | 48; `src/app/[locale]/demo/page.tsx` | 26,32,35 |
+| `#10B981` | `src/app/globals.css` | 16 |
+| `#22D3EE` | `src/app/globals.css` | 17 |
+
+#### 🚨 OFF-SYSTEM hexes found
+
+| # | Hex | Context / CSS Var | File(s) | Line(s) |
+|---|-----|-------------------|---------|--------|
+| 1 | `#E8C15F` | `--gold-hover` | `src/app/globals.css` | 14, 127, 134; `src/components/brand/interview-avatar.tsx` | 48 |
+| 2 | `#B8860B` | `--gold-dim` | `src/app/globals.css` | 15, 127 |
+| 3 | `#F8FAFC` | `--text-primary` | `src/app/globals.css` | 18, 77 |
+| 4 | `#94A3B8` | `--text-muted` | `src/app/globals.css` | 19 |
+| 5 | `#64748B` | `--text-faint` | `src/app/globals.css` | 20 |
+| 6 | `#EF4444` | `--status-red` | `src/app/globals.css` | 21 |
+| 7 | `#F59E0B` | `--status-amber` | `src/app/globals.css` | 22 |
+| 8 | `#ccc` | Recharts chart override (shorthand) | `src/components/ui/chart.tsx` | 58 (×3) |
+| 9 | `#fff` | Recharts chart override (shorthand ≈ #FFFFFF) | `src/components/ui/chart.tsx` | 58 (×2) |
+
+### Notes
+
+- **`#fff`** (chart.tsx) is semantically equivalent to approved `#FFFFFF` (white), but uses shorthand notation.
+- **`#ccc`** (chart.tsx) is a 3-char shorthand for `#CCCCCC` — NOT in the approved palette. These are pre-existing shadcn/ui chart overrides (stroke overrides on Recharts SVG elements).
+- **`#E8C15F`** (gold-hover) and **`#B8860B`** (gold-dim) are gold-variant CSS variables used for hover states and gradients in `globals.css` and `interview-avatar.tsx`.
+- **`#F8FAFC`**, **`#94A3B8`**, **`#64748B`** are Tailwind Slate scale values used for text colors. They are NOT the approved `#FFFFFF` or `#000000`.
+- **`#EF4444`** and **`#F59E0B`** are Tailwind Red-500 and Amber-500 used as semantic status colors.
+
+### Verdict
+
+## PALETTE VIOLATION: 9 off-system hexes found (8 strictly off-system + 1 shorthand of approved white)
+
+**Strict violations (must fix)**:
+1. `#E8C15F` — 5 occurrences in 2 files
+2. `#B8860B` — 2 occurrences in 1 file
+3. `#F8FAFC` — 2 occurrences in 1 file
+4. `#94A3B8` — 1 occurrence
+5. `#64748B` — 1 occurrence
+6. `#EF4444` — 1 occurrence
+7. `#F59E0B` — 1 occurrence
+8. `#ccc` — 3 occurrences in chart.tsx
+
+**Minor (shorthand of approved)**: `#fff` ≈ `#FFFFFF` — 2 occurrences in chart.tsx
+
+### Recommended Fixes
+
+1. **globals.css** — Replace `--gold-hover`, `--gold-dim`, `--text-primary`, `--text-muted`, `--text-faint`, `--status-red`, `--status-amber` with approved palette hexes or remove unused vars.
+2. **chart.tsx** — Replace `#ccc` with a design-system color or CSS variable reference; replace `#fff` with `#FFFFFF` or a CSS variable.
+3. **interview-avatar.tsx** — Replace `#E8C15F` in inline gradient with a design-system gold variant or CSS var reference.

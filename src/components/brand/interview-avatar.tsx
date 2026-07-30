@@ -45,7 +45,7 @@ export function InterviewAvatar({
       <div
         className="absolute inset-0 rounded-full"
         style={{
-          background: "linear-gradient(135deg, #D4A843, #E8C15F)",
+          background: "linear-gradient(135deg, #D4A843, #D4A843)",
           padding: `${ringWidth}px`,
         }}
       >

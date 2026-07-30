@@ -11,15 +11,15 @@
     --bg-card: rgba(255,255,255,0.04);
     --border-card: rgba(255,255,255,0.08);
     --gold: #D4A843;
-    --gold-hover: #E8C15F;
-    --gold-dim: #B8860B;
+    --gold-hover: #D4A843;
+    --gold-dim: #D4A843;
     --emerald: #10B981;
     --cyan: #22D3EE;
-    --text-primary: #F8FAFC;
-    --text-muted: #94A3B8;
-    --text-faint: #64748B;
-    --status-red: #EF4444;
-    --status-amber: #F59E0B;
+    --text-primary: #FFFFFF;
+    --text-muted: rgba(255,255,255,0.55);
+    --text-faint: rgba(255,255,255,0.35);
+    --status-red: rgba(212,168,67,0.8);
+    --status-amber: rgba(212,168,67,0.6);
     --ring-gold: 0 0 24px rgba(212,168,67,0.25);
 
     /* shadcn bridge */
@@ -74,7 +74,7 @@
 
   ::selection {
     background: rgba(212,168,67,0.3);
-    color: #F8FAFC;
+    color: #FFFFFF;
   }
 
   /* Scrollbar */
@@ -124,14 +124,14 @@
   }
 
   .gold-gradient-text {
-    background: linear-gradient(135deg, #E8C15F, #D4A843, #B8860B);
+    background: linear-gradient(135deg, #D4A843, #D4A843, #D4A843);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .btn-gold {
-    background: linear-gradient(135deg, #D4A843, #E8C15F);
+    background: linear-gradient(135deg, #D4A843, #D4A843);
     color: #070A0F;
     font-weight: 700;
     border-radius: 9999px;
@@ -166,7 +166,7 @@
     transition: all 0.3s ease;
   }
   .btn-destructive:hover {
-    background: rgba(239,68,68,0.1);
+    background: rgba(212,168,67,0.1);
   }
 
   .eyebrow {

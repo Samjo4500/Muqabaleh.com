@@ -1,24 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-export default function GuestInterviewPage() {
+export default function GuestInterviewPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   const t = useTranslations('guest');
+  const router = useRouter();
+  const [token, setToken] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    params.then(({ token: tkn }) => {
+      setToken(tkn);
+    });
+  }, [params]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setConfirmed(true);
+    if (!token) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/guest/${token}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: 'start', guestName: name, guestEmail: email }),
+      });
+
+      if (res.ok) {
+        setConfirmed(true);
+        // Redirect to guest interview room
+        setTimeout(() => {
+          router.push(`/interview/guest/${token}/room`);
+        }, 1500);
+        return;
+      }
+
+      toast.error(t('startError'));
+    } catch {
+      toast.error(t('startError'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,9 +132,16 @@ export default function GuestInterviewPage() {
               <Button
                 type="submit"
                 className="btn-gold w-full cursor-pointer"
-                disabled={!consent}
+                disabled={!consent || loading}
               >
-                {t('startInterview')}
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="me-2 animate-spin" />
+                    {t('starting')}
+                  </>
+                ) : (
+                  t('startInterview')
+                )}
               </Button>
             </form>
           </div>

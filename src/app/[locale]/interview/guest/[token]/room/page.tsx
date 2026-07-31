@@ -6,7 +6,7 @@ import { Speaker, VolumeX, Volume2, Mic, MicOff, Send, ChevronRight, Loader2 } f
 import { Button } from '@/components/ui/button';
 import { InterviewAvatar, LiveBadge, SkeletonBlock } from '@/components/brand';
 import { toast } from 'sonner';
-import { useRouter as useRouterNext } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -19,20 +19,20 @@ interface ChatMessage {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Page                                                                */
+/*  Guest Interview Room                                               */
 /* ------------------------------------------------------------------ */
 
-export default function InterviewRoomPage({
+export default function GuestInterviewRoom({
   params,
 }: {
-  params: Promise<{ id: string; locale: string }>;
+  params: Promise<{ token: string; locale: string }>;
 }) {
   const t = useTranslations('app.room');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const router = useRouterNext();
+  const router = useRouter();
 
-  const [interviewId, setInterviewId] = useState<string>('');
+  const [token, setToken] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState('');
   const [seconds, setSeconds] = useState(0);
@@ -48,19 +48,18 @@ export default function InterviewRoomPage({
   const [totalQuestions, setTotalQuestions] = useState(7);
   const [interviewerWho, setInterviewerWho] = useState<'fahd' | 'noora'>('fahd');
   const [voice, setVoice] = useState<'fahd' | 'noora'>('fahd');
-  const [interviewStatus, setInterviewStatus] = useState<string>('');
+  const [isStarted, setIsStarted] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const hasLeftRef = useRef(false);
 
-  // Get params
+  // Resolve params
   useEffect(() => {
-    params.then(({ id }) => {
-      setInterviewId(id);
+    params.then(({ token: tkn }) => {
+      setToken(tkn);
     });
   }, [params]);
 
@@ -75,148 +74,16 @@ export default function InterviewRoomPage({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load interview on mount
+  // Check if interview was already started (first message already sent from form page)
   useEffect(() => {
-    if (!interviewId) return;
-
-    async function loadInterview() {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/interviews/${interviewId}`);
-        if (!res.ok) {
-          toast.error(t('errorLoading'));
-          router.push('/app/interviews');
-          return;
-        }
-
-        const { interview } = await res.json();
-
-        // Set interviewer avatar
-        const gender = interview.interviewerGender as string;
-        const who = gender === 'FEMALE' ? 'noora' : 'fahd';
-        setInterviewerWho(who);
-        setVoice(who);
-
-        // Map existing messages
-        const existing: ChatMessage[] = (interview.messages || []).map(
-          (m: { role: string; content: string }) => ({
-            role: m.role.toLowerCase() === 'interviewer' ? 'interviewer' : 'candidate',
-            text: m.content,
-          }),
-        );
-        setMessages(existing);
-
-        // Count interviewer messages for question number
-        const qCount = (interview.messages || []).filter(
-          (m: { role: string }) => m.role.toLowerCase() === 'interviewer',
-        ).length;
-        setCurrentQuestion(qCount);
-
-        // If PENDING, auto-start
-        if (interview.status === 'PENDING') {
-          setInterviewStatus('PENDING');
-          await startInterview();
-        } else if (interview.status === 'IN_PROGRESS') {
-          // Try resume to get question count
-          setInterviewStatus('IN_PROGRESS');
-          try {
-            const resumeRes = await fetch(`/api/interviews/${interviewId}/resume`, { method: 'POST' });
-            if (resumeRes.ok) {
-              const resumeData = await resumeRes.json();
-              setTotalQuestions(resumeData.interview.totalQuestions || 7);
-              setCurrentQuestion(resumeData.interview.questionNumber || qCount);
-              // If resume returned messages, use those
-              if (resumeData.interview.messages && resumeData.interview.messages.length > existing.length) {
-                const resumed: ChatMessage[] = resumeData.interview.messages.map(
-                  (m: { role: string; content: string }) => ({
-                    role: m.role === 'interviewer' ? 'interviewer' : 'candidate',
-                    text: m.content,
-                  }),
-                );
-                setMessages(resumed);
-              }
-            }
-          } catch {
-            // Resume failed, that's okay — we have the existing messages
-          }
-        } else if (interview.status === 'COMPLETED') {
-          setInterviewStatus('COMPLETED');
-          router.push(`/app/interview/${interviewId}/report`);
-          return;
-        }
-      } catch {
-        toast.error(t('errorLoading'));
-        router.push('/app/interviews');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadInterview();
-    }, [interviewId]);
-
-  // Leave confirmation
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (interviewStatus === 'IN_PROGRESS' && !hasLeftRef.current) {
-        e.preventDefault();
-      }
-    };
-
-    const handlePopState = () => {
-      if (interviewStatus === 'IN_PROGRESS' && !hasLeftRef.current) {
-        const confirmed = window.confirm(t('confirmLeave'));
-        if (!confirmed) {
-          window.history.pushState(null, '');
-        }
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.history.pushState(null, '');
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [interviewStatus, t]);
-
-  const startInterview = async () => {
-    setIsSending(true);
-    try {
-      const res = await fetch(`/api/interviews/${interviewId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: 'start' }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const errMsg = data.error?.[locale] || data.error?.ar || t('errorSending');
-        toast.error(errMsg);
-        return;
-      }
-
-      const data = await res.json();
-      setInterviewStatus('IN_PROGRESS');
-      setTotalQuestions(data.totalQuestions || 7);
-      setCurrentQuestion(data.questionNumber || 1);
-
-      setMessages((prev) => [
-        ...prev,
-        { role: 'interviewer', text: data.question },
-      ]);
-    } catch {
-      toast.error(t('errorSending'));
-    } finally {
-      setIsSending(false);
-    }
-  };
+    if (!token) return;
+    setIsLoading(false);
+    setIsStarted(true);
+  }, [token]);
 
   const handleSend = async () => {
     const trimmed = message.trim();
-    if (!trimmed || isSending) return;
+    if (!trimmed || isSending || !token) return;
 
     setMessage('');
     setIsSending(true);
@@ -228,7 +95,7 @@ export default function InterviewRoomPage({
     setMessages((prev) => [...prev, { role: 'interviewer', text: '', typing: true }]);
 
     try {
-      const res = await fetch(`/api/interviews/${interviewId}/messages`, {
+      const res = await fetch(`/api/guest/${token}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: trimmed }),
@@ -238,7 +105,6 @@ export default function InterviewRoomPage({
         const data = await res.json().catch(() => ({}));
         const errMsg = data.error?.[locale] || data.error?.ar || t('errorSending');
         toast.error(errMsg);
-        // Remove typing indicator
         setMessages((prev) => prev.filter((m) => !m.typing));
         setIsSending(false);
         return;
@@ -248,6 +114,12 @@ export default function InterviewRoomPage({
       setCurrentQuestion(data.questionNumber || currentQuestion);
       setTotalQuestions(data.totalQuestions || totalQuestions);
 
+      // Set interviewer avatar from first response
+      if (messages.length === 0) {
+        setInterviewerWho('fahd');
+        setVoice('fahd');
+      }
+
       // Replace typing indicator with actual response
       setMessages((prev) => {
         const withoutTyping = prev.filter((m) => !m.typing);
@@ -256,7 +128,6 @@ export default function InterviewRoomPage({
 
       // If done, show completion overlay
       if (data.done) {
-        setInterviewStatus('COMPLETED');
         handleComplete();
       }
     } catch {
@@ -290,84 +161,63 @@ export default function InterviewRoomPage({
     }, 30);
   };
 
-  // TTS: play audio for a message
+  // TTS
   const playTTS = useCallback(
     async (text: string) => {
       if (isMuted || !text) return;
-
-      // Stop any currently playing audio
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
         currentAudioRef.current = null;
       }
-
       try {
         const res = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, voice }),
         });
-
-        if (!res.ok) {
-          // 503 = TTS unavailable, show text only
-          return;
-        }
-
+        if (!res.ok) return;
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         currentAudioRef.current = audio;
-        audio.play().catch(() => {
-          // Autoplay blocked or error
-        });
+        audio.play().catch(() => {});
         audio.onended = () => {
           URL.revokeObjectURL(url);
           currentAudioRef.current = null;
         };
       } catch {
-        // TTS failed silently
+        // silent
       }
     },
     [isMuted, voice],
   );
 
-  // ASR: record and transcribe
+  // ASR
   const toggleRecording = useCallback(async () => {
     if (isRecording) {
-      // Stop recording
       mediaRecorderRef.current?.stop();
       setIsRecording(false);
       return;
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       audioChunksRef.current = [];
-
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
-
       mediaRecorder.onstop = async () => {
-        // Stop all tracks
         stream.getTracks().forEach((track) => track.stop());
-
         if (audioChunksRef.current.length === 0) return;
-
         setIsTranscribing(true);
         try {
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
-
-          const res = await fetch(`/api/interviews/${interviewId}/transcribe`, {
+          const res = await fetch(`/api/interviews/${token}/transcribe`, {
             method: 'POST',
             body: formData,
           });
-
           if (res.ok) {
             const data = await res.json();
             if (data.text) {
@@ -383,14 +233,13 @@ export default function InterviewRoomPage({
           setIsTranscribing(false);
         }
       };
-
       mediaRecorder.start();
       mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
     } catch {
       toast.error(t('micError'));
     }
-  }, [isRecording, interviewId, t]);
+  }, [isRecording, token, t]);
 
   const formatTime = useCallback((s: number) => {
     const m = Math.floor(s / 60);
@@ -398,10 +247,10 @@ export default function InterviewRoomPage({
     return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   }, []);
 
-  // Loading state
+  // Loading
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-3.5rem)] flex-col lg:h-screen lg:pt-0">
+      <div className="flex h-screen flex-col">
         <div className="flex items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 py-3">
           <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
           <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
@@ -410,7 +259,6 @@ export default function InterviewRoomPage({
           <div className="mx-auto max-w-3xl space-y-4">
             <SkeletonBlock lines={3} />
             <SkeletonBlock lines={2} />
-            <SkeletonBlock lines={4} />
           </div>
         </div>
       </div>
@@ -418,7 +266,7 @@ export default function InterviewRoomPage({
   }
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col lg:h-screen lg:pt-0">
+    <div className="flex h-screen flex-col">
       {/* Completion overlay */}
       {showComplete && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--bg-void)]/90 backdrop-blur-sm">
@@ -443,10 +291,7 @@ export default function InterviewRoomPage({
             </div>
             {showReportLink && (
               <Button
-                onClick={() => {
-                  hasLeftRef.current = true;
-                  router.push(`/app/interview/${interviewId}/report`);
-                }}
+                onClick={() => router.push('/')}
                 className="btn-gold cursor-pointer"
               >
                 {t('viewReport')}
@@ -473,7 +318,7 @@ export default function InterviewRoomPage({
           </span>
           <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-[var(--text-muted)]">
             {t('questionOf', {
-              current: Math.min(currentQuestion, totalQuestions),
+              current: Math.min(currentQuestion || 1, totalQuestions),
               total: totalQuestions,
             })}
           </span>
@@ -483,10 +328,9 @@ export default function InterviewRoomPage({
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-3xl space-y-4">
-          {messages.length === 0 && (
+          {messages.length === 0 && isStarted && (
             <div className="py-12 text-center">
-              <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-gold" />
-              <p className="text-sm text-[var(--text-muted)]">{t('waitingForResponse')}</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('typeAnswer')}</p>
             </div>
           )}
 
@@ -579,7 +423,7 @@ export default function InterviewRoomPage({
             )}
           </Button>
         </div>
-        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between">
+        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-end">
           <button
             type="button"
             onClick={() => setIsMuted(!isMuted)}
@@ -589,16 +433,6 @@ export default function InterviewRoomPage({
             {isMuted ? <VolumeX size={14} strokeWidth={1.75} /> : <Volume2 size={14} strokeWidth={1.75} />}
             {isMuted ? t('unmute') : t('mute')}
           </button>
-          {interviewStatus === 'IN_PROGRESS' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-[var(--text-muted)] hover:text-gold cursor-pointer"
-              onClick={handleComplete}
-            >
-              {t('completeInterview')}
-            </Button>
-          )}
         </div>
       </div>
     </div>

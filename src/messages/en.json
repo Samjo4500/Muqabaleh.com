@@ -371,9 +371,13 @@
     "score": "Score",
     "issuedAt": "Issued At",
     "expiresAt": "Expires At",
+    "industry": "Industry",
+    "type": "Type",
     "demoName": "Sara Al-Mansouri",
     "demoScore": "91/100",
-    "demoDate": "2025-07-15"
+    "demoDate": "2025-07-15",
+    "loading": "Verifying…",
+    "verifyError": "Error during verification"
   },
   "auth": {
     "signinTitle": "Sign In",
@@ -538,8 +542,25 @@
       "a2": "One of my most notable achievements was building an internal analytics platform used by the entire product team. I started the project from scratch and designed the infrastructure and dashboard. After launch, the team's decision-making efficiency increased by 40% based on an internal survey we conducted.",
       "q3": "How do you handle disagreements with team members during projects?",
       "mute": "Mute",
+      "unmute": "Unmute",
       "replay": "Replay",
-      "send": "Send"
+      "send": "Send",
+      "loadingInterview": "Loading interview…",
+      "errorLoading": "Error loading interview",
+      "errorSending": "Error sending message",
+      "interviewerName": "Interviewer",
+      "waitingForResponse": "Waiting for response…",
+      "recording": "Recording…",
+      "micError": "Could not access microphone",
+      "transcriptionError": "Transcription error",
+      "ttsUnavailable": "Audio unavailable",
+      "confirmLeave": "The interview is still in progress. Do you want to leave?",
+      "leave": "Leave",
+      "stay": "Stay",
+      "noSessions": "No sessions remaining. Please purchase a package.",
+      "noSessionsHint": "Buy a package",
+      "reportNotReady": "Report not ready yet. Please try again later.",
+      "certificateGenerated": "Certificate generated successfully"
     },
     "report": {
       "backToInterviews": "Back to Interviews",
@@ -565,7 +586,15 @@
       "downloadPdf": "Download PDF",
       "shareLinkedin": "Share on LinkedIn",
       "copyVerifyLink": "Copy Verify Link",
-      "retrain": "Retrain"
+      "retrain": "Retrain",
+      "loadingReport": "Loading report…",
+      "errorLoadingReport": "Error loading report",
+      "recommendationConsider": "Consider",
+      "noFeedback": "No feedback available",
+      "noStrengths": "No strengths identified",
+      "noImprovements": "No areas for improvement",
+      "downloadPdfComingSoon": "PDF download coming soon",
+      "pdfComingSoon": "This feature will be available soon"
     },
     "packages": {
       "title": "Packages",
@@ -713,7 +742,9 @@
     "consent": "I agree to the Terms of Service and Privacy Policy",
     "startInterview": "Start Interview",
     "confirmed": "Confirmed",
-    "confirmedSub": "You will receive the interview link on your email shortly"
+    "confirmedSub": "You will receive the interview link on your email shortly",
+    "starting": "Starting interview…",
+    "startError": "Error starting interview. Please try again later."
   },
   "b2b": {
     "sidebarTitle": "Business Dashboard",

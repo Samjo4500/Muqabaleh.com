@@ -752,3 +752,137 @@ Stage Summary:
 - API verified: register(individual+B2B) ✓, forgot-password ✓, duplicate register 409 ✓, validation 400 ✓
 - Browser verified: login → dashboard shows real name + scores, interviews page shows real data with filters, profile page shows real data with edit form
 - Credentials: admin@muqabaleh.com/admin123, user@seed.com/user123, demo@muqabaleh.com/demo123
+
+---
+
+## Phase C — Task C-frontend: Wire Frontend Pages for Interview Engine
+
+**Date**: 2025-08-01
+**Agent**: Frontend Wiring Agent
+**Task ID**: C-frontend
+**Task**: Wire 5 frontend pages to use real backend APIs instead of mock data
+
+### What was done
+
+Wired 5 pages + created 1 new guest room page to connect the Phase C backend APIs:
+
+#### 1. C1 New Interview Form (`src/app/[locale]/app/new-interview-form.tsx`)
+- Replaced toast placeholder with `POST /api/interviews` call
+- Added value mappers: `it→IT`, `finance→FINANCE`, `junior→JUNIOR`, `behavioral→BEHAVIORAL`, etc.
+- 201: redirects to `/app/interview/${interviewId}`
+- 403: shows toast with link to packages page
+- 409: redirects to existing in-progress interview
+- Loading spinner (Loader2) during submission
+- Added `cursor-pointer` to all clickable elements
+
+#### 2. C3 Interview Room (`src/app/[locale]/app/interview/[id]/page.tsx`)
+- Full rewrite from mock data to real API integration
+- **On mount**: `GET /api/interviews/[id]` to load existing messages
+- **Auto-start**: If PENDING, POSTs to `/api/interviews/[id]/messages` with `content: 'start'`
+- **Resume**: If IN_PROGRESS, calls `POST /api/interviews/[id]/resume` to get question count
+- **Real messages**: Messages displayed from DB, mapped from API format
+- **Send**: POSTs to `/api/interviews/[id]/messages` with input text, shows typing indicator, appends AI response
+- **Progress bar**: Uses `questionNumber / totalQuestions` from API response
+- **Timer**: Kept existing 1-second interval timer
+- **TTS (Speaker button)**: Per-message POST to `/api/tts` with `{ text, voice }`, creates Audio object, plays. 503 handled silently.
+- **Mute button**: Toggles `isMuted` flag, disables TTS playback globally. Shows Volume2/VolumeX icon.
+- **ASR (Mic button)**: MediaRecorder API with `getUserMedia({ audio: true })`. Records webm, sends FormData to `/api/interviews/[id]/transcribe`. Fills input with result. Red pulsing animation while recording.
+- **Completion overlay**: When `done: true`, shows progress bar animation, then "View Report" button redirects to report page
+- **Interviewer avatar**: Uses `interviewerGender` from interview data (MALE→fahd, FEMALE→noora)
+- **Leave page protection**: `beforeunload` event + `popstate` with `window.confirm` dialog when IN_PROGRESS
+- **Loading state**: SkeletonBlock while fetching interview data
+- **Error handling**: Toast notifications for all API errors, locale-aware error messages
+
+#### 3. C4 Report Page (`src/app/[locale]/app/interview/[id]/report/page.tsx`)
+- Full rewrite from mock scores to `GET /api/interviews/[id]/report`
+- Real scores: overallScore, contentScore, clarityScore, confidenceScore, culturalFitScore
+- Dynamic score circle color: emerald (≥80), amber (≥60), red (<60)
+- Real feedback: Split by `\n` into paragraphs
+- Real strengths[] and improvements[] arrays rendered dynamically
+- Recommendation badge: RECOMMENDED=emerald, CONSIDER=amber, NOT_RECOMMENDED=red with appropriate icons
+- QrCard with real `verificationId` from API
+- Certificate button: POSTs to `/api/interviews/[id]/certificate`, shows success toast + "coming soon" for PDF
+- Loading state with SkeletonBlock
+- Error state with retry button
+- Handles 400 (report not ready) with toast
+
+#### 4. Verify Page (`src/app/[locale]/verify/[id]/page.tsx`)
+- Replaced mock ID checks with `GET /api/verify/[inputValue]` API call
+- Valid: Green card with name, score, issuedAt, expiresAt, industry, type from API
+- Expired: Amber card with name
+- Not found: Red card
+- Error: Error card with retry
+- Loading state with Loader2 spinner
+- Pre-fill from URL param (existing behavior preserved)
+- Locale-aware date formatting
+
+#### 5. D1 Guest Interview Page (`src/app/[locale]/interview/guest/[token]/page.tsx`)
+- On submit: POSTs to `/api/guest/[token]/messages` with `{ content: 'start', guestName, guestEmail }`
+- On success: Shows confirmed state, then redirects to guest room
+- Loading spinner during submission
+- Error toast on failure
+
+#### 6. NEW: Guest Interview Room (`src/app/[locale]/interview/guest/[token]/room/page.tsx`)
+- New page created for guest interview experience
+- Reuses interview room UI pattern but uses `/api/guest/[token]/messages` instead of `/api/interviews/[id]/messages`
+- Same features: chat, TTS, ASR, timer, typing indicator, completion overlay
+- No auth required (guest mode)
+
+### Files created
+- `src/app/[locale]/interview/guest/[token]/room/page.tsx` — Guest interview room page
+
+### Files modified
+- `src/app/[locale]/app/new-interview-form.tsx` — Wired to POST /api/interviews
+- `src/app/[locale]/app/interview/[id]/page.tsx` — Full rewrite with real APIs
+- `src/app/[locale]/app/interview/[id]/report/page.tsx` — Full rewrite with real API
+- `src/app/[locale]/verify/[id]/page.tsx` — Wired to GET /api/verify/[id]
+- `src/app/[locale]/interview/guest/[token]/page.tsx` — Wired to POST /api/guest/[token]/messages
+- `src/messages/ar.json` — Added 16 keys to app.room, 8 keys to app.report, 2 keys to verify, 2 keys to guest
+- `src/messages/en.json` — Same keys added in English
+
+### Design decisions
+- **Interview room is most important page**: Full-featured with TTS, ASR, real-time progress, leave protection
+- **TTS 503 graceful handling**: On non-200 response from /api/tts, no error shown — text remains visible, audio just doesn't play
+- **Typing indicator**: Added as a temporary message while waiting for AI response, replaced when response arrives
+- **Guest room as separate page**: Created at `/interview/guest/[token]/room` since guest API uses tokens not interview IDs
+- **No router import in report page**: Removed unused useRouter import
+- **Mute button in bottom bar**: Global mute toggle for all TTS playback, with visual feedback (Volume2/VolumeX icons)
+- **Mic recording visual**: Red pulsing button while recording, separate transcribing state for input placeholder
+- **Completion overlay progress**: Linear 30ms-per-step progress bar, then shows "View Report" button
+- All strings from i18n. No hardcoded text. Dark glass-morphism design preserved throughout.
+
+### Lint status
+- `bun run lint` passes with 0 errors, 0 warnings
+- Dev server compiles cleanly with no errors
+
+---
+Task ID: C-backend
+Agent: main
+Task: Phase C — AI Interview Engine + API Routes + TTS/ASR
+
+Work Log:
+- Created `src/lib/ai.ts` — Full AI engine: LLM singleton (z-ai-web-dev-sdk), interview system prompt builder (AR/EN, BEHAVIORAL/TECHNICAL), question bank integration, adaptive follow-up, 7-question lifecycle, evaluation with STRICT JSON parsing + heuristic fallback, TTS with in-memory cache (100 entries, 30min TTL), ASR, rate limiter (20 msg/hr/interview)
+- Created 9 API routes:
+  - `POST/GET /api/interviews` — Create interview (auth, session check, 409 duplicate), list interviews with filters
+  - `GET /api/interviews/[id]` — Get interview detail with messages
+  - `POST /api/interviews/[id]/messages` — Core interview engine (auto-start, adaptive AI, completion + background evaluation)
+  - `POST /api/interviews/[id]/resume` — Resume in-progress interview
+  - `POST /api/tts` — Text-to-speech with hash-based caching, 503 fallback
+  - `POST /api/interviews/[id]/transcribe` — Speech-to-text via multipart upload
+  - `POST /api/interviews/[id]/certificate` — Generate verification ID
+  - `GET /api/interviews/[id]/report` — Get report data
+  - `GET /api/verify/[id]` — Public certificate verification
+  - `POST /api/guest/[token]/messages` — Guest interview flow (no auth)
+- Added NEXTAUTH_SECRET + NEXTAUTH_URL to .env
+- Fixed Prisma create call: `userId` → `user: { connect: { id: userId } }` (Turbopack compatibility)
+
+Stage Summary:
+- AI engine: Arabic system prompts for فهد/نورة, 7-question lifecycle, STAR/TECHNICAL modes
+- Evaluation: STRICT JSON parsing with 2 retries + heuristic fallback (never hangs)
+- Session debit: Atomic transaction, sessionDebited flag prevents double-debit
+- TTS: z-ai-web-dev-sdk with 'kazi' (fahd) and 'chuichui' (noora) voices, 1024 char limit, cache
+- ASR: z-ai-web-dev-sdk, base64 conversion, multipart upload
+- Certificate: MQBL-XXXX-XXXX-XXXX format, 2-year expiry
+- 28 new i18n keys added to both ar.json and en.json
+- ESLint: 0 errors
+- All API routes follow spec: zod validation, bilingual errors, RBAC, idempotent operations

@@ -1,16 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { AlertCircle, Clock, Search } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { AlertCircle, Clock, Search, Loader2 } from 'lucide-react';
 import { GlowCard, VerifiedBadge } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
-type VerifyResult = 'idle' | 'valid' | 'expired' | 'notFound';
+/* ------------------------------------------------------------------ */
+/*  Types                                                               */
+/* ------------------------------------------------------------------ */
+
+type VerifyResult = 'idle' | 'loading' | 'valid' | 'expired' | 'notFound' | 'error';
+
+interface VerifyData {
+  valid: boolean;
+  reason?: 'not_found' | 'expired';
+  name?: string;
+  score?: number;
+  level?: string;
+  issuedAt?: string;
+  expiresAt?: string;
+  industry?: string;
+  type?: string;
+}
 
 /* ------------------------------------------------------------------ */
-/*  Page                                                               */
+/*  Page                                                                */
 /* ------------------------------------------------------------------ */
 
 export default function VerifyPage({
@@ -19,26 +35,53 @@ export default function VerifyPage({
   params: Promise<{ id: string }>;
 }) {
   const t = useTranslations('verify');
+  const locale = useLocale();
   const [inputValue, setInputValue] = useState('');
   const [result, setResult] = useState<VerifyResult>('idle');
+  const [data, setData] = useState<VerifyData | null>(null);
 
   // Pre-fill from URL param
   useEffect(() => {
     params.then(({ id }) => {
-      if (id) setInputValue(id);
+      if (id) {
+        setInputValue(id);
+      }
     });
   }, [params]);
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const id = inputValue.trim();
+    if (!id) return;
 
-    if (id === 'MQBL-DEMO-2026') {
-      setResult('valid');
-    } else if (id === 'MQBL-EXPIRED-2024') {
-      setResult('expired');
-    } else {
-      setResult('notFound');
+    setResult('loading');
+    setData(null);
+
+    try {
+      const res = await fetch(`/api/verify/${encodeURIComponent(id)}`);
+      const json = await res.json();
+
+      if (json.valid === true) {
+        setResult('valid');
+        setData(json);
+      } else if (json.reason === 'expired') {
+        setResult('expired');
+        setData(json);
+      } else {
+        setResult('notFound');
+      }
+    } catch {
+      setResult('error');
     }
+  };
+
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
@@ -64,32 +107,49 @@ export default function VerifyPage({
                   placeholder={t('inputPlaceholder')}
                   className="glass-input flex-1 px-4 py-3 text-sm"
                   onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+                  disabled={result === 'loading'}
                 />
                 <button
                   onClick={handleVerify}
-                  className="btn-gold flex items-center gap-2 px-6 py-3 text-sm"
+                  disabled={result === 'loading' || !inputValue.trim()}
+                  className="btn-gold flex items-center gap-2 px-6 py-3 text-sm disabled:opacity-50 cursor-pointer"
                 >
-                  <Search size={16} strokeWidth={1.75} />
+                  {result === 'loading' ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Search size={16} strokeWidth={1.75} />
+                  )}
                   {t('verifyBtn')}
                 </button>
               </div>
             </GlowCard>
 
-            {/* Results */}
-            {result === 'valid' && (
+            {/* Valid result */}
+            {result === 'valid' && data && (
               <GlowCard className="mt-6 border-cyan/30 p-6" style={{ transform: 'none' }}>
                 <div className="flex flex-col items-center gap-4 text-center">
                   <VerifiedBadge size="lg" />
                   <p className="text-lg font-bold text-emerald">{t('valid')}</p>
                   <div className="w-full border-t border-white/5 pt-4 text-start">
-                    <InfoRow label={t('name')} value={t('demoName')} />
-                    <InfoRow label={t('score')} value={t('demoScore')} />
-                    <InfoRow label={t('issuedAt')} value={t('demoDate')} />
+                    <InfoRow label={t('name')} value={data.name || '—'} />
+                    <InfoRow
+                      label={t('score')}
+                      value={data.score != null ? `${data.score}/100` : '—'}
+                    />
+                    <InfoRow label={t('issuedAt')} value={formatDate(data.issuedAt)} />
+                    <InfoRow label={t('expiresAt')} value={formatDate(data.expiresAt)} />
+                    {data.industry && (
+                      <InfoRow label={t('industry')} value={data.industry} />
+                    )}
+                    {data.type && (
+                      <InfoRow label={t('type')} value={data.type} />
+                    )}
                   </div>
                 </div>
               </GlowCard>
             )}
 
+            {/* Expired result */}
             {result === 'expired' && (
               <GlowCard className="mt-6 border-[var(--status-amber)]/30 p-6" style={{ transform: 'none' }}>
                 <div className="flex flex-col items-center gap-3 text-center">
@@ -97,10 +157,14 @@ export default function VerifyPage({
                     <Clock size={24} strokeWidth={1.75} className="text-[var(--status-amber)]" />
                   </div>
                   <p className="text-lg font-bold text-[var(--status-amber)]">{t('expired')}</p>
+                  {data?.name && (
+                    <p className="text-sm text-[var(--text-muted)]">{data.name}</p>
+                  )}
                 </div>
               </GlowCard>
             )}
 
+            {/* Not found result */}
             {result === 'notFound' && (
               <GlowCard className="mt-6 border-[var(--status-red)]/30 p-6" style={{ transform: 'none' }}>
                 <div className="flex flex-col items-center gap-3 text-center">
@@ -108,6 +172,16 @@ export default function VerifyPage({
                     <AlertCircle size={24} strokeWidth={1.75} className="text-[var(--status-red)]" />
                   </div>
                   <p className="text-lg font-bold text-[var(--status-red)]">{t('notFound')}</p>
+                </div>
+              </GlowCard>
+            )}
+
+            {/* Error result */}
+            {result === 'error' && (
+              <GlowCard className="mt-6 border-[var(--status-red)]/30 p-6" style={{ transform: 'none' }}>
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <AlertCircle size={24} strokeWidth={1.75} className="text-[var(--status-red)]" />
+                  <p className="text-sm text-[var(--text-muted)]">{t('verifyError')}</p>
                 </div>
               </GlowCard>
             )}

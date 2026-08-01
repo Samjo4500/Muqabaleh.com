@@ -92,19 +92,22 @@ export default function LandingPage() {
 
 function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; isRTL: boolean }) {
   return (
-    <section id="hero" className="aurora-bg relative overflow-hidden pb-20 pt-28 md:pb-28 md:pt-36">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Left content (RTL: right) */}
-          <div className={isRTL ? 'order-2 lg:order-1' : ''}>
-            <div className="mb-4 flex items-center gap-2">
+    <HeroStoryboard>
+      {/* Navbar spacer + hero text floats over the storyboard */}
+      <div className="flex-1">
+        <div className="mx-auto max-w-7xl px-4 pt-28 sm:px-6 md:pt-36 lg:px-8">
+          <div className={`flex flex-col gap-8 ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}>
+            {/* Eyebrow */}
+            <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-pulse-emerald rounded-full bg-gold opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold" />
               </span>
               <span className="eyebrow">{t('heroEyebrow')}</span>
             </div>
-            <h1 className="text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl">
+
+            {/* H1 */}
+            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight drop-shadow-2xl md:text-5xl lg:text-6xl">
               {t('heroH1').split(t('heroH1Highlight')).map((part, i, arr) =>
                 i < arr.length - 1 ? (
                   <span key={i}>
@@ -116,33 +119,32 @@ function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; 
                 ),
               )}
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-[var(--text-muted)]">
+
+            {/* Sub */}
+            <p className="max-w-lg text-lg leading-relaxed text-white/70 drop-shadow-lg">
               {t('heroSub')}
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4">
               <Link href="/auth/register" className="btn-gold">
                 {t('heroCta1')}
               </Link>
-              <a href="#how" className="btn-ghost">
+              <a href="#how" className="btn-ghost border-white/20 text-white hover:bg-white/10">
                 {t('heroCta2')}
               </a>
             </div>
-          </div>
 
-          {/* Right — Fahad's Story storyboard (RTL: left) */}
-          <div className={`story-float ${isRTL ? 'order-1 lg:order-2' : ''}`}>
-            <HeroStoryboard />
+            {/* Trust chips */}
+            <div className="flex flex-wrap gap-3 pt-4">
+              <TrustChip icon={<Shield size={16} strokeWidth={1.75} />} label={t('trustPaypal')} />
+              <TrustChip icon={<QrCode size={16} strokeWidth={1.75} />} label={t('trustQR')} />
+              <TrustChip icon={<Globe size={16} strokeWidth={1.75} />} label={t('trustCountries')} />
+            </div>
           </div>
-        </div>
-
-        {/* Trust chips */}
-        <div className="mt-12 flex flex-wrap justify-center gap-3">
-          <TrustChip icon={<Shield size={16} strokeWidth={1.75} />} label={t('trustPaypal')} />
-          <TrustChip icon={<QrCode size={16} strokeWidth={1.75} />} label={t('trustQR')} />
-          <TrustChip icon={<Globe size={16} strokeWidth={1.75} />} label={t('trustCountries')} />
         </div>
       </div>
-    </section>
+    </HeroStoryboard>
   );
 }
 

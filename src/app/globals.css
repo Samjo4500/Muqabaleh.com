@@ -219,11 +219,11 @@
 
 /* ─── Hero Storyboard ─── */
   @keyframes story-ken-burns-in {
-    0% { transform: scale(1.12) translate(0%, 0%); }
+    0% { transform: scale(1.08) translate(0%, 0%); }
     100% { transform: scale(1) translate(0%, 0%); }
   }
   @keyframes story-ken-burns-pan {
-    0% { transform: scale(1.15) translate(-2%, 0%); }
+    0% { transform: scale(1.1) translate(-1.5%, 0%); }
     100% { transform: scale(1) translate(0%, 0%); }
   }
   @keyframes story-progress {
@@ -249,10 +249,10 @@
   }
 
   .story-ken-burns-in {
-    animation: story-ken-burns-in 6s ease-out forwards;
+    animation: story-ken-burns-in 8s ease-out forwards;
   }
   .story-ken-burns-pan {
-    animation: story-ken-burns-pan 6s ease-out forwards;
+    animation: story-ken-burns-pan 8s ease-out forwards;
   }
   .story-progress-fill {
     animation: story-progress 5s linear forwards;

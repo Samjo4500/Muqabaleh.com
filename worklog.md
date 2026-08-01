@@ -931,3 +931,27 @@ Stage Summary:
 - Logo: h-14 (56px) instead of h-10 (40px)
 - Arabic switch: localeDetection disabled, switchLocale uses window.location.href
 
+
+---
+Task ID: fix-gold-bar
+Agent: Main
+Task: Remove gold bar divider and clipPath from BeforeAfterSection
+
+Work Log:
+- Analyzed user screenshot with VLM - identified vertical gold bar between Before/After cards
+- Found root cause: BeforeAfterSection had a draggable slider with `motion.div` containing `bg-gold` bar and `clipPath` on both cards
+- Removed `clipPath` from both Before and After cards
+- Removed the draggable `motion.div` gold bar divider entirely
+- Removed unused `PanInfo` import and `useCallback` import
+- Removed unused `motion` import from framer-motion
+- Replaced with clean 3-column grid: Before card → Arrow divider → After card
+- Both cards now display full content without clipping
+- Arrow flips direction for RTL (Arabic)
+- Ran lint - passes cleanly
+- Verified page compiles: GET /en 200
+
+Stage Summary:
+- Gold bar covering text is eliminated
+- Before/After cards now display cleanly side-by-side
+- Removed framer-motion dependency from landing page (unused)
+- File modified: src/app/[locale]/page.tsx

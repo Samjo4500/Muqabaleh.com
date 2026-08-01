@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { motion, type PanInfo } from 'framer-motion';
 import {
   Shield,
   QrCode,
@@ -338,19 +337,6 @@ function HowSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL
 /* ================================================================== */
 
 function BeforeAfterSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pct, setPct] = useState(50);
-
-  const handleDrag = useCallback(
-    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const raw = ((info.point.x - rect.left) / rect.width) * 100;
-      setPct(Math.min(85, Math.max(15, raw)));
-    },
-    [],
-  );
-
   return (
     <section id="transform" className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -360,63 +346,30 @@ function BeforeAfterSection({ t, isRTL }: { t: ReturnType<typeof useTranslations
           titleHighlight={t('whyTitle')}
           sub=""
         />
-        <div className="relative mx-auto mt-12 max-w-4xl" ref={containerRef}>
-          {/* Desktop: side by side */}
-          <div className="hidden gap-4 md:grid md:grid-cols-2 md:gap-0">
-            {/* Before card */}
-            <div className="glass-card relative overflow-hidden rounded-2xl p-6" style={{ clipPath: `inset(0 ${100 - pct}% 0 0)` }}>
-              <div className="flex h-full flex-col items-center justify-center gap-4 text-center opacity-50">
-                <div className="flex gap-2">
-                  {[1, 2, 3].map((n) => (
-                    <CircleHelp key={n} size={32} strokeWidth={1.75} className="text-[var(--text-faint)]" />
-                  ))}
-                </div>
-                <h3 className="text-xl font-bold text-[var(--text-muted)]">{t('beforeTitle')}</h3>
-                <p className="text-sm text-[var(--text-faint)]">{t('beforeDesc')}</p>
-              </div>
+        <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 items-center gap-6 md:grid-cols-[1fr_auto_1fr]">
+          {/* Before card */}
+          <div className="glass-card flex flex-col items-center gap-4 p-8 text-center opacity-60">
+            <div className="flex gap-2">
+              {[1, 2, 3].map((n) => (
+                <CircleHelp key={n} size={32} strokeWidth={1.75} className="text-[var(--text-faint)]" />
+              ))}
             </div>
-
-            {/* After card */}
-            <div className="glass-card relative overflow-hidden rounded-2xl p-6" style={{ clipPath: `inset(0 0 0 ${pct}%)` }}>
-              <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-                <div className="text-4xl font-extrabold text-emerald">91</div>
-                <h3 className="text-xl font-bold text-emerald">{t('afterTitle')}</h3>
-                <p className="text-sm text-[var(--text-muted)]">{t('afterDesc')}</p>
-                <VerifiedBadge size="sm" />
-              </div>
-            </div>
+            <h3 className="text-xl font-bold text-[var(--text-muted)]">{t('beforeTitle')}</h3>
+            <p className="text-sm leading-relaxed text-[var(--text-faint)]">{t('beforeDesc')}</p>
           </div>
 
-          {/* Mobile: stacked */}
-          <div className="flex flex-col gap-4 md:hidden">
-            <div className="glass-card flex flex-col items-center gap-3 p-6 text-center opacity-50" style={{ transform: 'none' }}>
-              <div className="flex gap-2">
-                {[1, 2, 3].map((n) => (
-                  <CircleHelp key={n} size={28} strokeWidth={1.75} className="text-[var(--text-faint)]" />
-                ))}
-              </div>
-              <h3 className="text-lg font-bold text-[var(--text-muted)]">{t('beforeTitle')}</h3>
-              <p className="text-sm text-[var(--text-faint)]">{t('beforeDesc')}</p>
-            </div>
-            <div className="glass-card flex flex-col items-center gap-3 p-6 text-center" style={{ transform: 'none' }}>
-              <div className="text-3xl font-extrabold text-emerald">91</div>
-              <h3 className="text-lg font-bold text-emerald">{t('afterTitle')}</h3>
-              <p className="text-sm text-[var(--text-muted)]">{t('afterDesc')}</p>
-              <VerifiedBadge size="sm" />
-            </div>
+          {/* Arrow divider */}
+          <div className={`hidden items-center justify-center text-gold/50 md:flex ${isRTL ? 'rotate-180' : ''}`}>
+            <span className="text-3xl">→</span>
           </div>
 
-          {/* Draggable divider handle (desktop only) */}
-          <motion.div
-            className="absolute top-0 bottom-0 z-20 hidden w-6 -translate-x-1/2 cursor-grab items-center justify-center md:flex"
-            style={{ left: `${pct}%` }}
-            drag="x"
-            dragConstraints={containerRef}
-            dragElastic={0}
-            onDrag={handleDrag}
-          >
-            <div className="h-16 w-1 rounded-full bg-gold" />
-          </motion.div>
+          {/* After card */}
+          <div className="glass-card flex flex-col items-center gap-4 p-8 text-center">
+            <div className="text-4xl font-extrabold text-emerald">91</div>
+            <h3 className="text-xl font-bold text-emerald">{t('afterTitle')}</h3>
+            <p className="text-sm leading-relaxed text-[var(--text-muted)]">{t('afterDesc')}</p>
+            <VerifiedBadge size="sm" />
+          </div>
         </div>
       </div>
     </section>

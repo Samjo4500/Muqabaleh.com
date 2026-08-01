@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, AlertTriangle, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 
@@ -22,6 +22,18 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
+  const [demoMode, setDemoMode] = useState(false);
+  const [dbAvailable, setDbAvailable] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((data) => {
+        setDemoMode(data.demoMode === true);
+        setDbAvailable(data.services?.database === true);
+      })
+      .catch(() => {});
+  }, []);
 
   const emailError =
     touched.email && !email
@@ -36,6 +48,12 @@ export default function SignInPage() {
     e.preventDefault();
     setTouched({ email: true, password: true });
     if (emailError || passwordError || !email || !password) return;
+
+    // Demo mode: accept any credentials and redirect to app
+    if (demoMode || !dbAvailable) {
+      router.push(`/${locale}/app`);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -60,6 +78,28 @@ export default function SignInPage() {
 
   return (
     <AuthShell title={t("signinTitle")} showBack>
+      {/* Service status banner */}
+      {!dbAvailable && (
+        <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-xs text-amber-400">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+          <span>
+            {locale === 'ar'
+              ? 'قاعدة البيانات غير متصلة. أدخل أي بريد وكلمة مرور للدخول كوضع عرض.'
+              : 'Database not connected. Enter any email & password to browse as demo.'}
+          </span>
+        </div>
+      )}
+      {demoMode && dbAvailable && (
+        <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-xs text-amber-400">
+          <Zap size={14} className="mt-0.5 shrink-0" />
+          <span>
+            {locale === 'ar'
+              ? 'وضع العرض التوضيحي — أدخل أي بريد وكلمة مرور للدخول.'
+              : 'Demo mode — enter any email & password to sign in.'}
+          </span>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         {/* Email */}
         <div className="flex flex-col gap-2">

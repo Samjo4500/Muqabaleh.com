@@ -13,6 +13,7 @@ import { VerifiedBadge } from '@/components/brand';
 const STORIES = [
   {
     image: '/images/story-before.png',
+    altKey: 'storyBeforeAlt',
     kenBurns: 'story-ken-burns-in',
     gradient: 'from-black/90 via-black/60 to-black/80',
     accentColor: 'rgba(248,113,113,0.8)',
@@ -22,6 +23,7 @@ const STORIES = [
   },
   {
     image: '/images/story-practice.png',
+    altKey: 'storyPracticeAlt',
     kenBurns: 'story-ken-burns-pan',
     gradient: 'from-black/85 via-black/50 to-gold/5',
     accentColor: 'var(--gold)',
@@ -31,6 +33,7 @@ const STORIES = [
   },
   {
     image: '/images/story-after.png',
+    altKey: 'storyAfterAlt',
     kenBurns: 'story-ken-burns-in',
     gradient: 'from-black/80 via-black/40 to-emerald/5',
     accentColor: 'var(--emerald)',
@@ -124,7 +127,7 @@ export function HeroStoryboard({
         >
           <Image
             src={story.image}
-            alt=""
+            alt={t(story.altKey)}
             fill
             className="object-cover object-center"
             priority={active === 0}

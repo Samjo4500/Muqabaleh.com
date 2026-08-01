@@ -27,6 +27,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 
+import { AdminGate } from './admin-guard';
+
 const navItems = [
   { key: 'navOverview', icon: LayoutDashboard, href: '/admin' },
   { key: 'navUsers', icon: Users, href: '/admin/users' },
@@ -119,7 +121,8 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-void">
+    <AdminGate>
+      <div className="flex min-h-screen bg-void">
       {/* Demo Mode Banner */}
       {demoMode && (
         <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-amber-500/90 px-4 py-1.5 text-xs font-bold text-black">
@@ -209,5 +212,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+    </AdminGate>
   );
 }

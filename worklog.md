@@ -1094,3 +1094,40 @@ Stage Summary:
 - DEMO_MODE=true enables full UI testing without real APIs
 - Vercel will auto-deploy from this push
 
+
+---
+Task ID: 1
+Agent: Main
+Task: Fix all issues from muqabaleh-website-report.md audit
+
+Work Log:
+- Read and analyzed full website audit report (13 issues across P0/P1/P2)
+- Explored project structure: 50+ pages, i18n with ar/en, client components
+- Created /about page (src/app/[locale]/about/page.tsx) with mission, vision, 6 values, company story
+- Added about translations to both ar.json and en.json (~35 keys each)
+- Created admin password gate (admin-guard.tsx) using useSyncExternalStore + cookie auth
+- Created /api/admin/verify endpoint (checks ADMIN_PASSWORD env var, fallback 'admin')
+- Wrapped admin layout with AdminGate component
+- Added generateMetadata to locale layout with OG, Twitter, canonical, alternates, theme-color
+- Updated root layout with favicon.ico + SVG icon + apple-touch-icon
+- Created favicon.ico from logo PNG using Python PIL
+- Generated OG image (og-image.png) using AI image generation
+- Created sitemap.ts with 13 public routes × 2 locales = 26 URLs
+- Created JSON-LD component (Organization, FAQPage, Product schemas)
+- Added JSON-LD to homepage (3 structured data blocks)
+- Rewrote footer with social links (X, LinkedIn, Instagram, Facebook) + email contact
+- Added planSlug to pricing plans in both homepage and pricing page
+- Updated CTA links to /auth/register?plan={slug}
+- Changed Final CTA "Start Free" to link to /demo instead of /auth/register
+- Added descriptive alt text to hero storyboard images (3 new translation keys each locale)
+- Updated robots.txt with sitemap reference + Disallow for admin/app/b2b/interviewer
+- Deployed to Vercel production - build succeeded with 107 pages
+- Verified all routes via curl + agent-browser
+
+Stage Summary:
+- All P0 issues fixed: /about 404 resolved, /admin password-protected
+- All P1 issues fixed: OG/Twitter meta tags, favicon, sitemap.xml, JSON-LD, social links, plan params
+- All P2 issues fixed: alt text, robots.txt, theme-color, canonical tags
+- Remaining (not code): muqabaleh.com DNS (user action), image WebP compression (future)
+- Admin password: 'admin' (default) or set ADMIN_PASSWORD env var
+- Production URL: https://muqabaleh-com.vercel.app

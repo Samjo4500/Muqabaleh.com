@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /app
+Disallow: /b2b
+Disallow: /interviewer
+
+Sitemap: https://muqabaleh-com.vercel.app/sitemap.xml

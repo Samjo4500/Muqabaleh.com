@@ -22,6 +22,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria' as const,
     sar: '71', aed: '70', egp: '912', jod: '13',
     popular: false,
+    planSlug: '1-session',
   },
   {
     titleKey: 'session3Title' as const,
@@ -32,6 +33,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria' as const,
     sar: '183', aed: '180', egp: '2352', jod: '35',
     popular: true,
+    planSlug: '3-sessions',
   },
   {
     titleKey: 'session5Title' as const,
@@ -42,6 +44,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria' as const,
     sar: '258', aed: '253', egp: '3312', jod: '49',
     popular: false,
+    planSlug: '5-sessions',
   },
   {
     titleKey: 'vipTitle' as const,
@@ -52,6 +55,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature6CriteriaHuman' as const,
     sar: '108', aed: '106', egp: '1392', jod: '21',
     popular: false,
+    planSlug: 'vip',
   },
 ] as const;
 
@@ -131,7 +135,7 @@ export default function PricingPage() {
                     <PricingCheck text={t('featureLinkedin')} />
                   </ul>
 
-                  <Link href="/auth/register" className="btn-gold w-full text-center text-sm">
+                  <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">
                     {t('choosePlan')}
                   </Link>
                 </GlowCard>

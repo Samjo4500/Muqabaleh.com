@@ -40,6 +40,11 @@ import {
 } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import {
+  OrganizationJsonLd,
+  FaqJsonLd,
+  ProductJsonLd,
+} from '@/components/json-ld';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -65,6 +70,8 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <OrganizationJsonLd />
+      <ProductJsonLd />
       <Navbar />
       <main className="flex-1 pt-16">
         <HeroSection t={t} tc={tc} isRTL={isRTL} />
@@ -79,6 +86,7 @@ export default function LandingPage() {
         <ReportPreviewSection t={t} isRTL={isRTL} />
         <TestimonialsSection t={t} />
         <FaqSection t={t} />
+        <FaqJsonLd />
         <FinalCtaSection t={t} tc={tc} />
       </main>
       <Footer />
@@ -556,6 +564,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria',
     sar: '71', aed: '70', egp: '912', jod: '13',
     popular: false,
+    planSlug: '1-session',
   },
   {
     titleKey: 'session3Title',
@@ -566,6 +575,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria',
     sar: '183', aed: '180', egp: '2352', jod: '35',
     popular: true,
+    planSlug: '3-sessions',
   },
   {
     titleKey: 'session5Title',
@@ -576,6 +586,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature4Criteria',
     sar: '258', aed: '253', egp: '3312', jod: '49',
     popular: false,
+    planSlug: '5-sessions',
   },
   {
     titleKey: 'vipTitle',
@@ -586,6 +597,7 @@ const PRICING_PLANS = [
     criteriaKey: 'feature6CriteriaHuman',
     sar: '108', aed: '106', egp: '1392', jod: '21',
     popular: false,
+    planSlug: 'vip',
   },
 ] as const;
 
@@ -638,7 +650,7 @@ function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
                 <PricingCheck text={t('featureLinkedin')} />
               </ul>
 
-              <Link href="/auth/register" className="btn-gold w-full text-center text-sm">
+              <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">
                 {t('choosePlan')}
               </Link>
             </GlowCard>
@@ -827,9 +839,9 @@ function FinalCtaSection({ t, tc }: { t: ReturnType<typeof useTranslations>; tc:
         <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
           {t('finalCtaSub')}
         </p>
-        <Link href="/auth/register" className="btn-gold mt-8 inline-block">
+        <a href="/demo" className="btn-gold mt-8 inline-block">
           {tc('startFree')}
-        </Link>
+        </a>
       </div>
     </section>
   );

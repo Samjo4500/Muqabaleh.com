@@ -4,9 +4,75 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
+import type { Metadata } from 'next';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
+
+const META: Record<string, { title: string; description: string }> = {
+  ar: {
+    title: 'مقابلة | Muqabaleh — التدرّب على المقابلات الوظيفية بالذكاء الاصطناعي',
+    description: 'المنصة العربية الأولى للتدرّب على المقابلات الوظيفية بالذكاء الاصطناعي. محاور ذكي يقيّمك بأربعة معايير ويمنحك شهادة موثّقة بشارة QR.',
+  },
+  en: {
+    title: 'Muqabaleh — AI-Powered Job Interview Practice',
+    description: 'The first Arabic platform for AI-powered job interview practice. Get evaluated on 4 criteria and receive a QR-verified certificate.',
+  },
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const meta = META[locale] || META.ar;
+  const ogLocale = locale === 'ar' ? 'ar_SA' : 'en_US';
+  const url = `${SITE_URL}${locale === 'ar' ? '' : '/en'}`;
+
+  return {
+    title: {
+      default: meta.title,
+      template: `%s | مقابلة`,
+    },
+    description: meta.description,
+    metadataBase: new URL(SITE_URL),
+    alternates: {
+      canonical: url,
+      languages: {
+        'ar-SA': SITE_URL,
+        'en-US': `${SITE_URL}/en`,
+      },
+    },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      url,
+      siteName: 'مقابلة | Muqabaleh',
+      locale: ogLocale,
+      type: 'website',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'مقابلة | Muqabaleh — AI Interview Practice',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.title,
+      description: meta.description,
+      images: ['/og-image.png'],
+    },
+    other: {
+      'theme-color': '#0a0a0f',
+    },
+  };
 }
 
 export default async function LocaleLayout({
@@ -32,6 +98,7 @@ export default async function LocaleLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <meta name="theme-color" content="#0a0a0f" />
       </head>
       <body
         className={`${dir === 'rtl' ? 'font-cairo' : 'font-grotesk'} min-h-screen bg-void text-[var(--text-primary)] antialiased`}

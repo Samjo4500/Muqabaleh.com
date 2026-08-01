@@ -995,3 +995,24 @@ Stage Summary:
 - Hero section (full-screen cinematic storyboard) preserved as-is
 - No code changes made to any existing component or page
 
+
+---
+Task ID: arabic-fix
+Agent: Main
+Task: Fix Arabic language switch and improve translation quality
+
+Work Log:
+- Audited ar.json vs en.json: all 1569 keys present in both files
+- Found and fixed localeDetection bug: `localeDetection: false` was in middleware options instead of routing config (next-intl v4 requires it in defineRouting)
+- Fixed getLocaleSwitchPath: removed trailing slash on English switch, preserved hash/search params
+- Fixed 30+ instances of Western numerals (0-9) in Arabic text replaced with Arabic-Indic numerals (٠-٩)
+- Fixed JSON syntax error (missing comma after inv5Amount)
+- Verified: / serves Arabic (200), /en serves English (200), /ar redirects to / (307)
+- Verified: Agent Browser shows Arabic nav (لماذا مقابلة؟, كيف يعمل؟, ابدأ مجاناً) at root
+
+Stage Summary:
+- Root cause of Arabic switch not working: localeDetection was being ignored because it was in the wrong config location
+- Arabic content was already built (1569 keys, comprehensive translations)
+- All visible Arabic numerals now use Arabic-Indic numeral system
+- Hero section left untouched per founder instruction
+

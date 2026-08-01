@@ -75,13 +75,13 @@ export function PayPalSubscriptionButton({
             }
             return data.subscriptionId || '';
           },
-          onApprove: async (data: { subscriptionID: string }) => {
+          onApprove: async (data) => {
             setActivating(true);
             try {
               const res = await fetch('/api/paypal/activate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscriptionId: data.subscriptionID }),
+                body: JSON.stringify({ subscriptionId: data.subscriptionID || '' }),
               });
 
               if (res.ok) {

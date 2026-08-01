@@ -3,6 +3,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Toaster } from 'sonner';
+import { Providers } from '@/components/providers';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -36,10 +37,12 @@ export default async function LocaleLayout({
         className={`${dir === 'rtl' ? 'font-cairo' : 'font-grotesk'} min-h-screen bg-void text-[var(--text-primary)] antialiased`}
         style={{ fontFamily: `"${displayFont}", "${bodyFont}", sans-serif` }}
       >
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
-        <Toaster />
+        <Providers>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

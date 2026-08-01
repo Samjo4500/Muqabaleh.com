@@ -85,7 +85,7 @@ async function callLLM(messages: { role: string; content: string }[]): Promise<s
   // Fallback: z-ai-web-dev-sdk
   const zai = await getZAI();
   const completion = await zai.chat.completions.create({
-    messages,
+    messages: messages as any,
     thinking: { type: 'disabled' },
   });
   return completion.choices[0]?.message?.content || '';
@@ -513,7 +513,7 @@ export async function textToSpeech(text: string, voice: 'fahd' | 'noora'): Promi
     }
 
     if (ttsCache.size > 100) {
-      const firstKey = ttsCache.keys().next().value;
+      const firstKey = ttsCache.keys().next().value!;
       ttsCache.delete(firstKey);
     }
     ttsCache.set(cacheKey, buffer);

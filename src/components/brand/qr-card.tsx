@@ -8,7 +8,7 @@ interface QrCardProps {
   className?: string;
 }
 
-const QR_PATTERN: boolean[] = [
+const QR_PATTERN: number[] = [
   1,1,1,0,1,0,1,1,1,
   1,0,1,1,0,1,1,0,1,
   1,1,1,0,0,1,1,1,1,

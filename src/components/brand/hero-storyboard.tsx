@@ -18,6 +18,7 @@ const STORIES = [
     accentColor: 'rgba(248,113,113,0.8)',
     labelKey: 'storyBeforeLabel',
     quoteKey: 'storyBeforeQuote',
+    showScore: false,
   },
   {
     image: '/images/story-practice.png',
@@ -26,6 +27,7 @@ const STORIES = [
     accentColor: 'var(--gold)',
     labelKey: 'storyPracticeLabel',
     quoteKey: 'storyPracticeQuote',
+    showScore: false,
   },
   {
     image: '/images/story-after.png',
@@ -58,7 +60,7 @@ export function HeroStoryboard({
   const [paused, setPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
   const [scoreVisible, setScoreVisible] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartX = useRef(0);
 
   const goTo = useCallback(
@@ -77,7 +79,7 @@ export function HeroStoryboard({
   useEffect(() => {
     if (paused) return;
     timerRef.current = setTimeout(next, SLIDE_DURATION);
-    return () => clearTimeout(timerRef.current);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [active, paused, next]);
 
   useEffect(() => {

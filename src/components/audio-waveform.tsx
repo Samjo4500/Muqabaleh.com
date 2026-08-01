@@ -71,6 +71,7 @@ export function AudioWaveform({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const c = ctx; // non-null alias for closures
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
@@ -84,7 +85,7 @@ export function AudioWaveform({
     const gap = W / BAR_COUNT;
 
     function draw() {
-      ctx.clearRect(0, 0, W, H);
+      c.clearRect(0, 0, W, H);
 
       // Update target bars
       for (let i = 0; i < BAR_COUNT; i++) {
@@ -114,13 +115,13 @@ export function AudioWaveform({
         const barProgress = i / BAR_COUNT;
         const alpha = barProgress <= progress ? 1 : 0.3;
 
-        ctx.fillStyle = color;
-        ctx.globalAlpha = alpha;
-        ctx.beginPath();
-        ctx.roundRect(x, y, barW, barH, barW / 2);
-        ctx.fill();
+        c.fillStyle = color;
+        c.globalAlpha = alpha;
+        c.beginPath();
+        c.roundRect(x, y, barW, barH, barW / 2);
+        c.fill();
       }
-      ctx.globalAlpha = 1;
+      c.globalAlpha = 1;
 
       animFrameRef.current = requestAnimationFrame(draw);
     }

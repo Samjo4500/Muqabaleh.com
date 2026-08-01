@@ -1016,3 +1016,25 @@ Stage Summary:
 - All visible Arabic numerals now use Arabic-Indic numeral system
 - Hero section left untouched per founder instruction
 
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix preview — remove Z.ai placeholder, fix Arabic/English language switching
+
+Work Log:
+- Investigated project structure: found `src/app/page.tsx` contained a Z.ai logo placeholder that was overriding the `[locale]/page.tsx` landing page
+- Root cause: `src/app/page.tsx` was matching `/` before the next-intl middleware could rewrite it to the `[locale]` route
+- Deleted `src/app/page.tsx` (the Z.ai placeholder) so the middleware correctly routes `/` → `[locale]/page.tsx` with `locale=ar`
+- Fixed `package.json` dev script: removed `| tee dev.log` pipe that was causing silent failures in background/nohup mode
+- Verified via curl that both `/` (Arabic, `lang="ar" dir="rtl"`) and `/en` (English, `lang="en" dir="ltr"`) render correctly
+- Confirmed all Arabic translations are present in `src/messages/ar.json` (0 missing keys vs en.json)
+- Confirmed all English translations are present in `src/messages/en.json` (0 missing keys vs ar.json)
+- Language switch verified: `getLocaleSwitchPath()` correctly generates `/en` from `/` and `/` from `/en`
+- Ran `bun run lint` — passes clean
+- Agent-browser verification not possible due to 4GB container OOM: Chrome (~1.3GB) + Turbopack (~800MB) exceeds available memory
+
+Stage Summary:
+- Removed `src/app/page.tsx` (Z.ai placeholder) — this was the root cause of the broken preview
+- Fixed `package.json` dev script pipe issue
+- Both Arabic and English locales verified working via curl with full content and correct RTL/LTR
+- All translation keys are complete and in sync between ar.json and en.json

@@ -1291,10 +1291,11 @@
     "cred6": "Former lecturer at the Saudi Academy for Governance"
   },
   "demo": {
-    "title": "Try the Business Dashboard",
-    "subtitle": "A fully populated demo account will be created for you",
-    "start": "Start Demo",
-    "note": "Demo data refreshes every 24 hours"
+    "title": "Try a Demo Interview",
+    "subtitle": "Experience an AI-powered interview — no signup required",
+    "start": "Start Demo Interview",
+    "starting": "Starting…",
+    "note": "Free demo — your answers are evaluated in real time"
   },
   "interviewerPanel": {
     "sidebarTitle": "Interviewer Panel",

@@ -1,11 +1,36 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function DemoPage() {
   const t = useTranslations('demo');
+  const locale = useLocale();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const startDemo = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/guest/interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: locale }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to create demo interview');
+      }
+
+      const data = await res.json();
+      router.push(`/interview/guest/${data.token}/room`);
+    } catch {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void px-4 py-12">
@@ -41,10 +66,18 @@ export default function DemoPage() {
 
         <div className="glass-card rounded-2xl p-6">
           <Button
-            onClick={() => toast.info(t('start'))}
+            onClick={startDemo}
+            disabled={loading}
             className="btn-gold w-full cursor-pointer"
           >
-            {t('start')}
+            {loading ? (
+              <>
+                <Loader2 size={16} className="me-2 animate-spin" />
+                {t('starting')}
+              </>
+            ) : (
+              t('start')
+            )}
           </Button>
 
           <p className="mt-4 text-center text-xs text-[var(--text-faint)]">{t('note')}</p>

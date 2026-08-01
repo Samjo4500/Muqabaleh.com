@@ -886,3 +886,23 @@ Stage Summary:
 - 28 new i18n keys added to both ar.json and en.json
 - ESLint: 0 errors
 - All API routes follow spec: zod validation, bilingual errors, RBAC, idempotent operations
+
+---
+Task ID: 9
+Agent: Main
+Task: Fix demo/preview page — create guest interview API + wire demo page
+
+Work Log:
+- Investigated: demo page button only showed toast, no API call or redirect
+- Found /api/guest/interview endpoint was missing entirely
+- Added interviewerGender field to Prisma schema (was in DB/Prisma client but missing from schema file)
+- Ran db:push to sync schema
+- Created /api/guest/interview POST route that creates Interview with guestToken, returns token + interviewId
+- Rewrote demo page to call API on button click, show loading state, then router.push to /interview/guest/[token]/room
+- Updated demo translations in en.json and ar.json (interview-focused copy + starting key)
+
+Stage Summary:
+- Demo page now works end-to-end: click → API creates guest interview → redirect to interview room
+- Verified with agent-browser: both /en/demo and /ar/demo render correctly, button creates interview and redirects to chat room
+- Interview room renders with text input, mic button, send button, mute control
+

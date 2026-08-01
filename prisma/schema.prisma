@@ -93,6 +93,7 @@ model Interview {
   experience           String?
   position             String?
   language             String    @default("AR")     // ADAPTATION: enum → String, values: AR|EN
+  interviewerGender    String    @default("MALE")   // ADAPTATION: enum → String, values: MALE|FEMALE
   status               String    @default("PENDING") // ADAPTATION: enum → String, values: PENDING|IN_PROGRESS|COMPLETED|EVALUATION_FAILED
   overallScore         Int?                         // 0-100
   contentScore         Int?                         // 0-100

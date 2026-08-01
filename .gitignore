@@ -52,3 +52,8 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# Database binaries
+db/*.db
+db/*.db-*
+db/*.db.backup-*

@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
@@ -7,6 +10,7 @@ interface AuthShellProps {
   title: string;
   subtitle?: string;
   className?: string;
+  showBack?: boolean;
 }
 
 export function AuthShell({
@@ -14,12 +18,27 @@ export function AuthShell({
   title,
   subtitle,
   className,
+  showBack = false,
 }: AuthShellProps) {
+  const router = useRouter();
+  const locale = useLocale();
+  const BackArrow = locale === "ar" ? ArrowRight : ArrowLeft;
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void px-4 py-12">
       <div className="aurora-bg pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <div className="relative z-10 w-full max-w-md">
+        {/* Back button */}
+        {showBack && (
+          <button
+            onClick={() => router.back()}
+            className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            <BackArrow size={16} strokeWidth={1.75} />
+          </button>
+        )}
+
         <div className="mb-8 flex flex-col items-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
             <svg

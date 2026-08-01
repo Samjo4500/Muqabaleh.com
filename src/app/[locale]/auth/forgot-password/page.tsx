@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell title={t("forgotTitle")} subtitle={t("forgotSub")}>
+    <AuthShell title={t("forgotTitle")} subtitle={t("forgotSub")} showBack>
       {!sent ? (
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           {/* Email */}

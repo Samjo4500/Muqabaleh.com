@@ -906,3 +906,28 @@ Stage Summary:
 - Verified with agent-browser: both /en/demo and /ar/demo render correctly, button creates interview and redirects to chat room
 - Interview room renders with text input, mic button, send button, mute control
 
+
+---
+Task ID: 10
+Agent: Main
+Task: Fix 4 reported issues: fake stats, missing back buttons, logo size, Arabic switch
+
+Work Log:
+- Replaced CountUpStat with SimpleStat component showing generic text (no fake numbers)
+- Updated en.json stats: "Thousands of Practice Sessions", "Growing Community of Professionals", etc.
+- Updated ar.json stats: "آلاف جلسات التدريب", "مجتمع متنامٍ من المهنيين", etc.
+- Added showBack prop to AuthShell with RTL-aware arrow (ArrowLeft/ArrowRight)
+- Enabled showBack on register, signin, forgot-password pages
+- Added back button to demo page with RTL-aware arrow
+- Increased logo from h-10 to h-14 (bigger without expanding header)
+- Fixed language switch: replaced router.push with window.location.href + getLocaleSwitchPath helper
+- Added localeDetection: false to middleware to stop automatic English redirect
+- Created /src/i18n/navigation.ts helper for locale path computation
+- Verified with curl: GET / returns 200 (Arabic), GET /ar redirects to /, GET /en returns 200 (English)
+
+Stage Summary:
+- Stats: no more fake numbers, generic text labels
+- Back buttons: all auth pages + demo page have RTL-aware back navigation
+- Logo: h-14 (56px) instead of h-10 (40px)
+- Arabic switch: localeDetection disabled, switchLocale uses window.location.href
+

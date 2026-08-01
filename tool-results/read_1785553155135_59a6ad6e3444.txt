@@ -1,0 +1,689 @@
+   220→}
+   221→
+   222→/* ================================================================== */
+   223→/*  3. STATS BAND                                                       */
+   224→/* ================================================================== */
+   225→
+   226→function StatsBand({ t }: { t: ReturnType<typeof useTranslations> }) {
+   227→  return (
+   228→    <section id="stats" className="py-16">
+   229→      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
+   230→        <CountUpStat value={t('statsInterviews')} label={t('statsInterviews')} />
+   231→        <CountUpStat value={t('statsUsers')} label={t('statsUsers')} />
+   232→        <CountUpStat value={t('statsRating')} label={t('statsRating')} />
+   233→        <CountUpStat value={t('statsImprovement')} label={t('statsImprovement')} />
+   234→      </div>
+   235→    </section>
+   236→  );
+   237→}
+   238→
+   239→/* ================================================================== */
+   240→/*  4. WHY MUQABALEH                                                   */
+   241→/* ================================================================== */
+   242→
+   243→const WHY_ICONS = [Brain, BarChart3, Mic, QrCode, Shield] as const;
+   244→
+   245→function WhySection({ t }: { t: ReturnType<typeof useTranslations> }) {
+   246→  return (
+   247→    <section id="why" className="py-20">
+   248→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   249→        <SectionHeading
+   250→          eyebrow={t('whyTitle')}
+   251→          title={t('whyTitle')}
+   252→          titleHighlight={t('whyTitle')}
+   253→          sub={t('whySub')}
+   254→        />
+   255→        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   256→          {[1, 2, 3, 4, 5].map((i) => {
+   257→            const Icon = WHY_ICONS[i - 1];
+   258→            return (
+   259→              <GlowCard key={i} className="flex flex-col gap-4 p-6">
+   260→                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10">
+   261→                  <Icon size={20} strokeWidth={1.75} className="text-gold" />
+   262→                </div>
+   263→                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+   264→                  {t(`whyFeature${i}Title`)}
+   265→                </h3>
+   266→                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+   267→                  {t(`whyFeature${i}Desc`)}
+   268→                </p>
+   269→              </GlowCard>
+   270→            );
+   271→          })}
+   272→        </div>
+   273→      </div>
+   274→    </section>
+   275→  );
+   276→}
+   277→
+   278→/* ================================================================== */
+   279→/*  5. HOW IT WORKS                                                    */
+   280→/* ================================================================== */
+   281→
+   282→function HowSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   283→  return (
+   284→    <section id="how" className="py-20">
+   285→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   286→        <SectionHeading
+   287→          eyebrow={t('howTitle')}
+   288→          title={t('howTitle')}
+   289→          titleHighlight={t('howTitle')}
+   290→          sub={t('howSub')}
+   291→        />
+   292→        <div className="relative mx-auto mt-16 max-w-2xl">
+   293→          {/* Vertical connecting line */}
+   294→          <div
+   295→            className={`absolute top-0 bottom-0 w-px bg-gradient-to-b from-gold/40 via-gold/10 to-transparent ${isRTL ? 'start-6 md:start-8' : 'start-6 md:start-8'}`}
+   296→          />
+   297→
+   298→          {([1, 2, 3] as const).map((step) => (
+   299→            <div key={step} className="relative mb-12 flex gap-6 last:mb-0 md:gap-8">
+   300→              {/* Step number circle */}
+   301→              <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold bg-void text-base font-bold text-gold md:h-16 md:w-16 md:text-lg">
+   302→                {step}
+   303→              </div>
+   304→
+   305→              {/* Content */}
+   306→              <div className="pt-1 md:pt-3">
+   307→                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+   308→                  {t(`howStep${step}Title`)}
+   309→                </h3>
+   310→                <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
+   311→                  {t(`howStep${step}Desc`)}
+   312→                </p>
+   313→                {/* Step 2: show fahd and noora avatars */}
+   314→                {step === 2 && (
+   315→                  <div className="mt-4 flex items-center gap-3">
+   316→                    <InterviewAvatar who="fahd" size="sm" />
+   317→                    <InterviewAvatar who="noora" size="sm" />
+   318→                  </div>
+   319→                )}
+   320→              </div>
+   321→            </div>
+   322→          ))}
+   323→        </div>
+   324→      </div>
+   325→    </section>
+   326→  );
+   327→}
+   328→
+   329→/* ================================================================== */
+   330→/*  6. BEFORE / AFTER                                                  */
+   331→/* ================================================================== */
+   332→
+   333→function BeforeAfterSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   334→  const containerRef = useRef<HTMLDivElement>(null);
+   335→  const [pct, setPct] = useState(50);
+   336→
+   337→  const handleDrag = useCallback(
+   338→    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+   339→      const rect = containerRef.current?.getBoundingClientRect();
+   340→      if (!rect) return;
+   341→      const raw = ((info.point.x - rect.left) / rect.width) * 100;
+   342→      setPct(Math.min(85, Math.max(15, raw)));
+   343→    },
+   344→    [],
+   345→  );
+   346→
+   347→  return (
+   348→    <section id="transform" className="py-20">
+   349→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   350→        <SectionHeading
+   351→          eyebrow=""
+   352→          title={t('whyTitle')}
+   353→          titleHighlight={t('whyTitle')}
+   354→          sub=""
+   355→        />
+   356→        <div className="relative mx-auto mt-12 max-w-4xl" ref={containerRef}>
+   357→          {/* Desktop: side by side */}
+   358→          <div className="hidden gap-4 md:grid md:grid-cols-2 md:gap-0">
+   359→            {/* Before card */}
+   360→            <div className="glass-card relative overflow-hidden rounded-2xl p-6" style={{ clipPath: `inset(0 ${100 - pct}% 0 0)` }}>
+   361→              <div className="flex h-full flex-col items-center justify-center gap-4 text-center opacity-50">
+   362→                <div className="flex gap-2">
+   363→                  {[1, 2, 3].map((n) => (
+   364→                    <CircleHelp key={n} size={32} strokeWidth={1.75} className="text-[var(--text-faint)]" />
+   365→                  ))}
+   366→                </div>
+   367→                <h3 className="text-xl font-bold text-[var(--text-muted)]">{t('beforeTitle')}</h3>
+   368→                <p className="text-sm text-[var(--text-faint)]">{t('beforeDesc')}</p>
+   369→              </div>
+   370→            </div>
+   371→
+   372→            {/* After card */}
+   373→            <div className="glass-card relative overflow-hidden rounded-2xl p-6" style={{ clipPath: `inset(0 0 0 ${pct}%)` }}>
+   374→              <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+   375→                <div className="text-4xl font-extrabold text-emerald">91</div>
+   376→                <h3 className="text-xl font-bold text-emerald">{t('afterTitle')}</h3>
+   377→                <p className="text-sm text-[var(--text-muted)]">{t('afterDesc')}</p>
+   378→                <VerifiedBadge size="sm" />
+   379→              </div>
+   380→            </div>
+   381→          </div>
+   382→
+   383→          {/* Mobile: stacked */}
+   384→          <div className="flex flex-col gap-4 md:hidden">
+   385→            <div className="glass-card flex flex-col items-center gap-3 p-6 text-center opacity-50" style={{ transform: 'none' }}>
+   386→              <div className="flex gap-2">
+   387→                {[1, 2, 3].map((n) => (
+   388→                  <CircleHelp key={n} size={28} strokeWidth={1.75} className="text-[var(--text-faint)]" />
+   389→                ))}
+   390→              </div>
+   391→              <h3 className="text-lg font-bold text-[var(--text-muted)]">{t('beforeTitle')}</h3>
+   392→              <p className="text-sm text-[var(--text-faint)]">{t('beforeDesc')}</p>
+   393→            </div>
+   394→            <div className="glass-card flex flex-col items-center gap-3 p-6 text-center" style={{ transform: 'none' }}>
+   395→              <div className="text-3xl font-extrabold text-emerald">91</div>
+   396→              <h3 className="text-lg font-bold text-emerald">{t('afterTitle')}</h3>
+   397→              <p className="text-sm text-[var(--text-muted)]">{t('afterDesc')}</p>
+   398→              <VerifiedBadge size="sm" />
+   399→            </div>
+   400→          </div>
+   401→
+   402→          {/* Draggable divider handle (desktop only) */}
+   403→          <motion.div
+   404→            className="absolute top-0 bottom-0 z-20 hidden w-6 -translate-x-1/2 cursor-grab items-center justify-center md:flex"
+   405→            style={{ left: `${pct}%` }}
+   406→            drag="x"
+   407→            dragConstraints={containerRef}
+   408→            dragElastic={0}
+   409→            onDrag={handleDrag}
+   410→          >
+   411→            <div className="h-16 w-1 rounded-full bg-gold" />
+   412→          </motion.div>
+   413→        </div>
+   414→      </div>
+   415→    </section>
+   416→  );
+   417→}
+   418→
+   419→/* ================================================================== */
+   420→/*  7. INTERVIEW EXPERIENCE                                             */
+   421→/* ================================================================== */
+   422→
+   423→function ExperienceSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   424→  return (
+   425→    <section id="experience" className="py-20">
+   426→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   427→        <SectionHeading
+   428→          eyebrow={t('experienceTitle')}
+   429→          title={t('experienceTitle')}
+   430→          titleHighlight={t('experienceTitle')}
+   431→          sub={t('experienceSub')}
+   432→        />
+   433→
+   434→        <div className="mx-auto mt-12 max-w-2xl">
+   435→          <div className="glass-card flex flex-col gap-4 p-6" style={{ transform: 'none' }}>
+   436→            {/* Interviewer bubble */}
+   437→            <div className={`flex items-start gap-3 ${isRTL ? '' : ''}`}>
+   438→              <InterviewAvatar who="noora" size="sm" />
+   439→              <div className="max-w-[80%] rounded-2xl rounded-tl-none border border-gold/20 bg-gold/5 px-4 py-3">
+   440→                <p className="text-sm leading-relaxed text-[var(--text-primary)]">
+   441→                  {t('chatQuestion')}
+   442→                </p>
+   443→              </div>
+   444→            </div>
+   445→
+   446→            {/* Candidate bubble */}
+   447→            <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+   448→              <div className={`max-w-[80%] rounded-2xl rounded-tr-none border border-white/10 bg-white/5 px-4 py-3 ${isRTL ? 'rounded-tl-none rounded-tr-none' : ''}`}>
+   449→                <p className="text-sm leading-relaxed text-[var(--text-primary)]">
+   450→                  {t('chatAnswer')}
+   451→                </p>
+   452→              </div>
+   453→            </div>
+   454→
+   455→            {/* Disabled input */}
+   456→            <div className="mt-2 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+   457→              <span className="text-sm text-[var(--text-faint)]">{t('typeAnswerPlaceholder')}</span>
+   458→            </div>
+   459→          </div>
+   460→        </div>
+   461→      </div>
+   462→    </section>
+   463→  );
+   464→}
+   465→
+   466→/* ================================================================== */
+   467→/*  8. INTERVIEWERS                                                     */
+   468→/* ================================================================== */
+   469→
+   470→function InterviewersSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   471→  const [playingFahd, setPlayingFahd] = useState(false);
+   472→  const [playingNoora, setPlayingNoora] = useState(false);
+   473→  const fahdRef = useRef<HTMLAudioElement>(null);
+   474→  const nooraRef = useRef<HTMLAudioElement>(null);
+   475→
+   476→  return (
+   477→    <section id="interviewers" className="py-20">
+   478→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   479→        <SectionHeading
+   480→          eyebrow={t('interviewersTitle')}
+   481→          title={t('interviewersTitle')}
+   482→          titleHighlight={t('interviewersTitle')}
+   483→          sub={t('interviewersSub')}
+   484→        />
+   485→
+   486→        <Tabs defaultValue="ai" className="mt-12">
+   487→          <TabsList className="mx-auto flex w-fit rounded-xl border border-white/10 bg-white/[0.03]">
+   488→            <TabsTrigger value="ai" className="rounded-lg px-6 text-sm">
+   489→              {t('tabAI')}
+   490→            </TabsTrigger>
+   491→            <TabsTrigger value="human" className="rounded-lg px-6 text-sm">
+   492→              {t('tabHuman')}
+   493→            </TabsTrigger>
+   494→          </TabsList>
+   495→
+   496→          {/* AI Tab */}
+   497→          <TabsContent value="ai">
+   498→            <div className="mt-8 grid gap-6 md:grid-cols-2">
+   499→              {/* Fahd */}
+   500→              <GlowCard className="p-6">
+   501→                <div className="flex items-center gap-4">
+   502→                  <InterviewAvatar who="fahd" size="lg" />
+   503→                  <div>
+   504→                    <h3 className="text-lg font-bold text-[var(--text-primary)]">فهد</h3>
+   505→                    <p className="text-sm text-[var(--text-muted)]">{t('tabAI')}</p>
+   506→                  </div>
+   507→                </div>
+   508→                <div className="mt-5 flex items-center gap-4">
+   509→                  <button
+   510→                    onClick={() => {
+   511→                      if (playingFahd) {
+   512→                        fahdRef.current?.pause();
+   513→                        setPlayingFahd(false);
+   514→                      } else {
+   515→                        fahdRef.current?.play().catch(() => {});
+   516→                        setPlayingFahd(true);
+   517→                      }
+   518→                    }}
+   519→                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold transition-colors hover:bg-gold/20"
+   520→                    aria-label={t('playSample')}
+   521→                  >
+   522→                    {playingFahd ? <Pause size={16} strokeWidth={1.75} /> : <Play size={16} strokeWidth={1.75} className="ms-0.5" />}
+   523→                  </button>
+   524→                  <audio ref={fahdRef} src="/audio/fahd-sample.wav" onEnded={() => setPlayingFahd(false)} preload="none" />
+   525→                  <div className="flex items-end gap-[3px]">
+   526→                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+   527→                      <span
+   528→                        key={i}
+   529→                        className="waveform-bar"
+   530→                        style={{
+   531→                          animationDelay: `${i * 0.15}s`,
+   532→                          height: playingFahd ? undefined : '8px',
+   533→                          animationPlayState: playingFahd ? 'running' : 'paused',
+   534→                        }}
+   535→                      />
+   536→                    ))}
+   537→                  </div>
+   538→                </div>
+   539→              </GlowCard>
+   540→
+   541→              {/* Noora */}
+   542→              <GlowCard className="p-6">
+   543→                <div className="flex items-center gap-4">
+   544→                  <InterviewAvatar who="noora" size="lg" />
+   545→                  <div>
+   546→                    <h3 className="text-lg font-bold text-[var(--text-primary)]">نورة</h3>
+   547→                    <p className="text-sm text-[var(--text-muted)]">{t('tabAI')}</p>
+   548→                  </div>
+   549→                </div>
+   550→                <div className="mt-5 flex items-center gap-4">
+   551→                  <button
+   552→                    onClick={() => {
+   553→                      if (playingNoora) {
+   554→                        nooraRef.current?.pause();
+   555→                        setPlayingNoora(false);
+   556→                      } else {
+   557→                        nooraRef.current?.play().catch(() => {});
+   558→                        setPlayingNoora(true);
+   559→                      }
+   560→                    }}
+   561→                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 bg-gold/10 text-gold transition-colors hover:bg-gold/20"
+   562→                    aria-label={t('playSample')}
+   563→                  >
+   564→                    {playingNoora ? <Pause size={16} strokeWidth={1.75} /> : <Play size={16} strokeWidth={1.75} className="ms-0.5" />}
+   565→                  </button>
+   566→                  <audio ref={nooraRef} src="/audio/noora-sample.wav" onEnded={() => setPlayingNoora(false)} preload="none" />
+   567→                  <div className="flex items-end gap-[3px]">
+   568→                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+   569→                      <span
+   570→                        key={i}
+   571→                        className="waveform-bar"
+   572→                        style={{
+   573→                          animationDelay: `${i * 0.15}s`,
+   574→                          height: playingNoora ? undefined : '8px',
+   575→                          animationPlayState: playingNoora ? 'running' : 'paused',
+   576→                        }}
+   577→                      />
+   578→                    ))}
+   579→                  </div>
+   580→                </div>
+   581→              </GlowCard>
+   582→            </div>
+   583→          </TabsContent>
+   584→
+   585→          {/* Human Tab */}
+   586→          <TabsContent value="human">
+   587→            <div className="mt-8 grid gap-6 md:grid-cols-3">
+   588→              {HUMAN_INTERVIEWERS.map((person, i) => (
+   589→                <GlowCard key={i} className="flex flex-col items-center gap-4 p-6 text-center">
+   590→                  {/* Avatar placeholder — colored circle with initials */}
+   591→                  <div className={`flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${person.color} text-xl font-bold text-[var(--text-primary)]`}>
+   592→                    {person.initials}
+   593→                  </div>
+   594→                  <div>
+   595→                    <h3 className="text-lg font-bold text-[var(--text-primary)]">{t(person.nameKey)}</h3>
+   596→                    <p className="mt-1 text-sm text-[var(--text-muted)]">{t(person.titleKey)}</p>
+   597→                  </div>
+   598→                  <div className="flex items-center gap-1 text-sm text-gold">
+   599→                    <span className="font-bold">{person.rating}</span>
+   600→                    <span className="text-[var(--text-faint)]">/5</span>
+   601→                  </div>
+   602→                  <PriceTag
+   603→                    usd={`${t('humanFrom')} $${person.price}`}
+   604→                    className="mb-2"
+   605→                  />
+   606→                  <Link
+   607→                    href={`/interviewers/${i + 1}`}
+   608→                    className="btn-ghost w-full text-center text-sm"
+   609→                  >
+   610→                    {t('viewProfile')}
+   611→                  </Link>
+   612→                </GlowCard>
+   613→              ))}
+   614→            </div>
+   615→          </TabsContent>
+   616→        </Tabs>
+   617→      </div>
+   618→    </section>
+   619→  );
+   620→}
+   621→
+   622→/* ================================================================== */
+   623→/*  9. PRICING                                                          */
+   624→/* ================================================================== */
+   625→
+   626→const PRICING_PLANS = [
+   627→  {
+   628→    titleKey: 'session1Title',
+   629→    priceKey: 'session1Price',
+   630→    badge: null,
+   631→    featureKey: 'feature1Session',
+   632→    criteriaKey: 'feature4Criteria',
+   633→    sar: '71', aed: '70', egp: '912', jod: '13',
+   634→  },
+   635→  {
+   636→    titleKey: 'session3Title',
+   637→    priceKey: 'session3Price',
+   638→    badge: 'session3Badge',
+   639→    featureKey: 'feature3Sessions',
+   640→    criteriaKey: 'feature4Criteria',
+   641→    sar: '183', aed: '180', egp: '2352', jod: '35',
+   642→    popular: true,
+   643→  },
+   644→  {
+   645→    titleKey: 'session5Title',
+   646→    priceKey: 'session5Price',
+   647→    badge: null,
+   648→    featureKey: 'feature5Sessions',
+   649→    criteriaKey: 'feature4Criteria',
+   650→    sar: '258', aed: '253', egp: '3312', jod: '49',
+   651→  },
+   652→  {
+   653→    titleKey: 'vipTitle',
+   654→    priceKey: 'vipPrice',
+   655→    badge: null,
+   656→    subKey: 'vipSub',
+   657→    featureKey: 'featureVipSession',
+   658→    criteriaKey: 'feature6CriteriaHuman',
+   659→    sar: '108', aed: '106', egp: '1392', jod: '21',
+   660→  },
+   661→] as const;
+   662→
+   663→function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   664→  return (
+   665→    <section id="pricing" className="py-20">
+   666→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   667→        <SectionHeading
+   668→          eyebrow={t('pricingTitle')}
+   669→          title={t('pricingTitle')}
+   670→          titleHighlight={t('pricingTitle')}
+   671→          sub={t('pricingSub')}
+   672→        />
+   673→
+   674→        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+   675→          {PRICING_PLANS.map((plan, idx) => (
+   676→            <GlowCard
+   677→              key={idx}
+   678→              className={`relative flex flex-col items-center p-6 ${plan.popular ? 'border-gold/50 ring-1 ring-gold/30' : ''}`}
+   679→            >
+   680→              {plan.badge && (
+   681→                <Badge className="absolute -top-3 bg-gold text-void hover:bg-gold-hover">
+   682→                  {t(plan.badge)}
+   683→                </Badge>
+   684→              )}
+   685→
+   686→              <h3 className="text-base font-bold text-[var(--text-primary)]">
+   687→                {t(plan.titleKey)}
+   688→              </h3>
+   689→              {plan.subKey && (
+   690→                <p className="mt-1 text-xs text-[var(--text-faint)]">{t(plan.subKey)}</p>
+   691→              )}
+   692→
+   693→              <PriceTag
+   694→                usd={t(plan.priceKey)}
+   695→                localApprox={t('localApprox', {
+   696→                  sar: plan.sar,
+   697→                  aed: plan.aed,
+   698→                  egp: plan.egp,
+   699→                  jod: plan.jod,
+   700→                })}
+   701→                className="my-5"
+   702→              />
+   703→
+   704→              <ul className="mb-6 flex w-full flex-col gap-3">
+   705→                <PricingCheck text={t(plan.featureKey)} />
+   706→                <PricingCheck text={t(plan.criteriaKey)} />
+   707→                <PricingCheck text={t('featureCertificate')} />
+   708→                <PricingCheck text={t('featurePdf')} />
+   709→                <PricingCheck text={t('featureLinkedin')} />
+   710→              </ul>
+   711→
+   712→              <Link href="/auth/register" className="btn-gold w-full text-center text-sm">
+   713→                {t('choosePlan')}
+   714→              </Link>
+   715→            </GlowCard>
+   716→          ))}
+   717→        </div>
+   718→
+   719→        {/* Trust signals */}
+   720→        <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-[var(--text-faint)]">
+   721→          <span className="flex items-center gap-1.5">
+   722→            <Lock size={14} strokeWidth={1.75} />
+   723→            {t('trustSSL')}
+   724→          </span>
+   725→          <span className="flex items-center gap-1.5">
+   726→            <Shield size={14} strokeWidth={1.75} />
+   727→            {t('trustBuyer')}
+   728→          </span>
+   729→          <span>{t('trustRefund')}</span>
+   730→        </div>
+   731→      </div>
+   732→    </section>
+   733→  );
+   734→}
+   735→
+   736→function PricingCheck({ text }: { text: string }) {
+   737→  return (
+   738→    <li className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+   739→      <Check size={16} strokeWidth={1.75} className="shrink-0 text-emerald" />
+   740→      {text}
+   741→    </li>
+   742→  );
+   743→}
+   744→
+   745→/* ================================================================== */
+   746→/*  10. REPORT PREVIEW                                                  */
+   747→/* ================================================================== */
+   748→
+   749→function ReportPreviewSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+   750→  const scoreKeys = ['content', 'clarity', 'confidence', 'culturalFit'] as const;
+   751→
+   752→  return (
+   753→    <section id="report" className="py-20">
+   754→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   755→        <SectionHeading
+   756→          eyebrow={t('reportPreviewTitle')}
+   757→          title={t('reportPreviewTitle')}
+   758→          titleHighlight={t('reportPreviewTitle')}
+   759→          sub={t('reportPreviewSub')}
+   760→        />
+   761→
+   762→        <div className="mx-auto mt-12 max-w-3xl">
+   763→          <div className="glass-card relative overflow-hidden p-6 md:p-8" style={{ transform: 'none' }}>
+   764→            {/* Sample badge */}
+   765→            <Badge variant="outline" className="absolute top-4 end-4 border-gold/30 text-gold">
+   766→              {t('sampleBadge')}
+   767→            </Badge>
+   768→
+   769→            {/* Header */}
+   770→            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+   771→              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gold bg-void">
+   772→                <span className="text-2xl font-extrabold text-gold">91</span>
+   773→              </div>
+   774→              <div className="text-center sm:text-start">
+   775→                <p className="text-xs text-[var(--text-faint)]">{t('reportPreviewTitle')}</p>
+   776→                <h3 className="text-xl font-bold text-[var(--text-primary)]">{t('sampleName')}</h3>
+   777→                <p className="mt-1 text-sm text-[var(--text-muted)]">{t('sampleScore')}</p>
+   778→                <VerifiedBadge size="sm" className="mt-2" />
+   779→              </div>
+   780→            </div>
+   781→
+   782→            {/* Score bars */}
+   783→            <div className="mt-8 space-y-4">
+   784→              {scoreKeys.map((key, i) => (
+   785→                <ScoreBar key={key} label={t(key)} value={SCORES[i]} />
+   786→              ))}
+   787→            </div>
+   788→
+   789→            {/* AI Feedback */}
+   790→            <div className="mt-8 rounded-xl border border-white/5 bg-white/[0.02] p-4">
+   791→              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gold">AI</p>
+   792→              <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+   793→                {t('reportFeedback')}
+   794→              </p>
+   795→            </div>
+   796→
+   797→            {/* QR Code + actions */}
+   798→            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-between">
+   799→              <QrCard verificationId="MQBL-DEMO-2026" className="!p-4" />
+   800→              <div className="flex flex-col gap-3 sm:items-end">
+   801→                <button disabled className="btn-ghost flex items-center gap-2 text-sm opacity-50">
+   802→                  <Download size={16} strokeWidth={1.75} />
+   803→                  {t('downloadPdfDisabled')}
+   804→                </button>
+   805→                <button disabled className="btn-ghost flex items-center gap-2 text-sm opacity-50">
+   806→                  <Share2 size={16} strokeWidth={1.75} />
+   807→                  {t('shareLinkedinDisabled')}
+   808→                </button>
+   809→              </div>
+   810→            </div>
+   811→          </div>
+   812→        </div>
+   813→      </div>
+   814→    </section>
+   815→  );
+   816→}
+   817→
+   818→/* ================================================================== */
+   819→/*  11. TESTIMONIALS                                                    */
+   820→/* ================================================================== */
+   821→
+   822→function TestimonialsSection({ t }: { t: ReturnType<typeof useTranslations> }) {
+   823→  return (
+   824→    <section id="testimonials" className="py-20">
+   825→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   826→        <SectionHeading
+   827→          eyebrow={t('testimonialsTitle')}
+   828→          title={t('testimonialsTitle')}
+   829→          titleHighlight={t('testimonialsTitle')}
+   830→          sub={t('testimonialsSub')}
+   831→        />
+   832→
+   833→        <div className="mt-12 grid gap-6 md:grid-cols-3">
+   834→          {([1, 2, 3] as const).map((n) => (
+   835→            <GlowCard key={n} className="p-6">
+   836→              <Quote size={20} strokeWidth={1.75} className="mb-3 text-gold/40" />
+   837→              <p className="mb-4 text-sm leading-relaxed text-[var(--text-muted)]">
+   838→                {t(`testimonial${n}Text`)}
+   839→              </p>
+   840→              <div className="border-t border-white/5 pt-4">
+   841→                <p className="text-sm font-bold text-[var(--text-primary)]">
+   842→                  {t(`testimonial${n}Name`)}
+   843→                </p>
+   844→                <p className="text-xs text-[var(--text-faint)]">
+   845→                  {t(`testimonial${n}Role`)}
+   846→                </p>
+   847→              </div>
+   848→            </GlowCard>
+   849→          ))}
+   850→        </div>
+   851→      </div>
+   852→    </section>
+   853→  );
+   854→}
+   855→
+   856→/* ================================================================== */
+   857→/*  12. FAQ                                                             */
+   858→/* ================================================================== */
+   859→
+   860→function FaqSection({ t }: { t: ReturnType<typeof useTranslations> }) {
+   861→  return (
+   862→    <section id="faq" className="py-20">
+   863→      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+   864→        <SectionHeading
+   865→          eyebrow={t('faqTitle')}
+   866→          title={t('faqTitle')}
+   867→          titleHighlight={t('faqTitle')}
+   868→        />
+   869→
+   870→        <Accordion type="single" collapsible className="mt-12">
+   871→          {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+   872→            <AccordionItem key={n} value={`faq-${n}`} className="border-white/5">
+   873→              <AccordionTrigger className="text-start text-sm font-medium text-[var(--text-primary)] hover:no-underline">
+   874→                {t(`faqQ${n}`)}
+   875→              </AccordionTrigger>
+   876→              <AccordionContent className="text-sm leading-relaxed text-[var(--text-muted)]">
+   877→                {t(`faqA${n}`)}
+   878→              </AccordionContent>
+   879→            </AccordionItem>
+   880→          ))}
+   881→        </Accordion>
+   882→      </div>
+   883→    </section>
+   884→  );
+   885→}
+   886→
+   887→/* ================================================================== */
+   888→/*  13. FINAL CTA                                                      */
+   889→/* ================================================================== */
+   890→
+   891→function FinalCtaSection({ t, tc }: { t: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations> }) {
+   892→  return (
+   893→    <section className="aurora-bg relative overflow-hidden py-24">
+   894→      <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+   895→        <h2 className="text-3xl font-extrabold md:text-5xl">
+   896→          <span className="gold-gradient-text">{t('finalCta')}</span>
+   897→        </h2>
+   898→        <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
+   899→          {t('finalCtaSub')}
+   900→        </p>
+   901→        <Link href="/auth/register" className="btn-gold mt-8 inline-block">
+   902→          {tc('startFree')}
+   903→        </Link>
+   904→      </div>
+   905→    </section>
+   906→  );
+   907→}
+   908→

@@ -59,7 +59,7 @@ export default function SignInPage() {
   }
 
   return (
-    <AuthShell title={t("signinTitle")}>
+    <AuthShell title={t("signinTitle")} showBack>
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         {/* Email */}
         <div className="flex flex-col gap-2">

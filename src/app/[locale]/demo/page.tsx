@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -37,6 +37,13 @@ export default function DemoPage() {
       <div className="aurora-bg pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <div className="relative z-10 w-full max-w-md">
+        <button
+          onClick={() => router.back()}
+          className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] cursor-pointer"
+        >
+          {locale === 'ar' ? <ArrowRight size={16} strokeWidth={1.75} /> : <ArrowLeft size={16} strokeWidth={1.75} />}
+        </button>
+
         <div className="mb-8 flex flex-col items-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
             <svg

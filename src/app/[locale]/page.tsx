@@ -32,7 +32,6 @@ import {
   GlowCard,
   SectionHeading,
   ScoreBar,
-  CountUpStat,
   VerifiedBadge,
   PriceTag,
   InterviewAvatar,
@@ -223,14 +222,22 @@ function CountryMarquee({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
 /*  3. STATS BAND                                                       */
 /* ================================================================== */
 
+function SimpleStat({ label }: { label: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-sm font-semibold text-gold">{label}</div>
+    </div>
+  );
+}
+
 function StatsBand({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <section id="stats" className="py-16">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
-        <CountUpStat value={t('statsInterviews')} label={t('statsInterviews')} />
-        <CountUpStat value={t('statsUsers')} label={t('statsUsers')} />
-        <CountUpStat value={t('statsRating')} label={t('statsRating')} />
-        <CountUpStat value={t('statsImprovement')} label={t('statsImprovement')} />
+        <SimpleStat label={t('statsInterviews')} />
+        <SimpleStat label={t('statsUsers')} />
+        <SimpleStat label={t('statsRating')} />
+        <SimpleStat label={t('statsImprovement')} />
       </div>
     </section>
   );

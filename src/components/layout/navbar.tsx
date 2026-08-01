@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Menu, Globe } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { routing } from '@/i18n/routing';
+import { getLocaleSwitchPath } from '@/i18n/navigation';
 
 const NAV_LINKS = [
   { key: 'why', href: '#why' },
@@ -24,7 +24,6 @@ export function Navbar() {
   const tc = useTranslations('common');
   const locale = useLocale();
   const pathname = usePathname();
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -36,18 +35,8 @@ export function Navbar() {
 
   const switchLocale = () => {
     const next = locale === 'ar' ? 'en' : 'ar';
-    let pathWithoutLocale = pathname;
-    for (const loc of routing.locales) {
-      if (pathname.startsWith(`/${loc}`)) {
-        pathWithoutLocale = pathname.slice(`/${loc}`.length) || '/';
-        break;
-      }
-    }
-    const newPath =
-      next === routing.defaultLocale
-        ? pathWithoutLocale || '/'
-        : `/${next}${pathWithoutLocale}`;
-    router.push(newPath);
+    const newPath = getLocaleSwitchPath(pathname, locale, next);
+    window.location.href = newPath;
   };
 
   const localeLabel = locale === 'ar' ? 'EN' : 'AR';
@@ -67,9 +56,9 @@ export function Navbar() {
           <Image
             src="/images/logos/v2-balanced-a-T.png"
             alt="مقابلة | Muqabaleh"
-            width={140}
-            height={40}
-            className="h-10 w-auto"
+            width={200}
+            height={56}
+            className="h-14 w-auto"
             priority
           />
         </Link>

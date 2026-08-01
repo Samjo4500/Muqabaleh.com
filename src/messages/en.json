@@ -200,7 +200,12 @@
     "human3Title": "Former Marketing Manager — Flynas",
     "viewProfile": "View Profile",
     "typeAnswerPlaceholder": "Type your answer…",
-    "copyright": "© 2025 Muqabaleh. All rights reserved."
+    "copyright": "© 2025 Muqabaleh. All rights reserved.",
+    "premiumTitle": "Premium — Unlimited Interviews",
+    "premiumDesc": "Unlimited AI mock interviews, 4-criteria evaluation, QR-verified certificates, and PDF reports. Cancel anytime.",
+    "premiumF1": "Unlimited sessions",
+    "premiumF2": "4-criteria evaluation",
+    "premiumF3": "QR-verified certificates"
   },
   "business": {
     "heroEyebrow": "Muqabaleh for Business",
@@ -625,7 +630,14 @@
       "logDesc2": "Interview: Behavioral",
       "logDesc3": "Interview: Technical",
       "logDesc4": "Refund: Connection lost",
-      "logDesc5": "Purchased 5-session package"
+      "logDesc5": "Purchased 5-session package",
+      "active": "Active",
+      "premiumActive": "Premium Active",
+      "unlimitedSessions": "Unlimited Sessions",
+      "premiumLabel": "Premium Plan",
+      "freeLabel": "Free Plan — 1 session/month",
+      "oneTimeTitle": "One-Time Session Packs",
+      "comingSoon": "Coming Soon"
     },
     "payments": {
       "title": "Payments",
@@ -1702,5 +1714,27 @@
       "commission": "Platform Commission (%)",
       "commissionPlaceholder": "35"
     }
+  },
+  "paypal": {
+    "loadingGateway": "Loading payment gateway…",
+    "createError": "Failed to create subscription. Please try again.",
+    "activateError": "Activation failed. Contact support if the issue persists.",
+    "generalError": "An error occurred with PayPal. Please try again.",
+    "loadError": "Could not load PayPal. Check your connection.",
+    "activating": "Activating your subscription…",
+    "retry": "Try Again",
+    "priceNote": "$19 / month — cancel anytime",
+    "premiumActive": "Premium Active",
+    "premiumDesc": "You have unlimited interview sessions.",
+    "signInToSubscribe": "Sign In to Subscribe",
+    "upgradeTitle": "Upgrade to Premium",
+    "upgradeDesc": "Get unlimited AI mock interviews, detailed reports, and QR-verified certificates.",
+    "successTitle": "Payment Successful!",
+    "successDesc": "Your subscription is now active. Enjoy unlimited interview practice sessions.",
+    "goToDashboard": "Go to Dashboard",
+    "cancelTitle": "Payment Cancelled",
+    "cancelDesc": "Your subscription was not created. You can try again anytime.",
+    "tryAgain": "Try Again",
+    "goHome": "Go Home"
   }
 }

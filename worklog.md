@@ -1038,3 +1038,37 @@ Stage Summary:
 - Fixed `package.json` dev script pipe issue
 - Both Arabic and English locales verified working via curl with full content and correct RTL/LTR
 - All translation keys are complete and in sync between ar.json and en.json
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Build PayPal subscription integration (no Stripe)
+
+Work Log:
+- Audited existing payment system: Prisma/SQLite + NextAuth, session-based model with `sessionsLeft`
+- Added `PaypalSubscription` model to Prisma schema (id, userId, paypalSubscriptionId, paypalPlanId, status, startTime, nextBillingTime, payerEmail)
+- Added `subscriptionTier` (FREE|PREMIUM) and `subscriptionExpiresAt` fields to User model
+- Ran `db:push` to sync schema
+- Installed `@paypal/paypal-js` (v10.1.0)
+- Created `src/lib/paypal.ts` — shared helpers: getPayPalAccessToken, getPayPalSubscription, deactivateSubscription, verifyWebhookSignature
+- Created `src/app/api/paypal/create-subscription/route.ts` — creates PayPal billing subscription, returns approve link
+- Created `src/app/api/paypal/activate/route.ts` — verifies subscription is ACTIVE, upserts DB record, upgrades user to PREMIUM
+- Created `src/app/api/paypal/webhook/route.ts` — handles CANCELLED/SUSPENDED/EXPIRED/ACTIVATED/SALE.COMPLETED events
+- Created `src/app/api/paypal/cancel/route.ts` — server-side subscription cancellation via PayPal API
+- Updated `src/app/api/interviews/route.ts` — paywall checks `subscriptionTier === 'PREMIUM'` before enforcing session limit
+- Created `src/components/PayPalSubscriptionButton.tsx` — full PayPal button with loading/error/activating/premium states, RTL gold theme
+- Created `src/app/[locale]/payment/success/page.tsx` — subscription success page
+- Created `src/app/[locale]/payment/cancel/page.tsx` — subscription cancelled page
+- Rewrote `src/app/[locale]/app/packages/page.tsx` — premium CTA card with PayPal button on top, session balance, one-time packs (disabled, coming soon)
+- Added 20 PayPal translation keys to both ar.json and en.json
+- Added 5 premium landing keys to both ar.json and en.json
+- Added 7 packages page keys to both ar.json and en.json
+- Updated `.env.example` with NEXT_PUBLIC_PAYPAL_CLIENT_ID, PAYPAL_PLAN_ID, PAYPAL_MODE
+- Updated NextAuth session/JWT/User types with `subscriptionTier`
+- ESLint passes clean
+
+Stage Summary:
+- PayPal subscription fully integrated: schema, API routes, UI component, webhook, paywall
+- NO Stripe anywhere in the codebase
+- All translations added for ar/en
+- Packages page now shows premium subscription as primary, one-time packs as secondary (coming soon)

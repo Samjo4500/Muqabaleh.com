@@ -32,6 +32,8 @@ model User {
   companyId            String?
   company              Company?  @relation(fields: [companyId], references: [id])
   sessionsLeft         Int       @default(1)
+  subscriptionTier     String    @default("FREE")   // ADAPTATION: enum → String, values: FREE|PREMIUM
+  subscriptionExpiresAt DateTime?
   isActive             Boolean   @default(true)
   passwordResetToken   String?
   passwordResetExpiry  DateTime?
@@ -44,6 +46,7 @@ model User {
   interviewerProfile   InterviewerProfile?
   auditLogs            AuditLog[]  @relation("ActorLogs")
   createdB2bJobs       B2BJob[]    @relation("JobCreator")
+  paypalSubscriptions  PaypalSubscription[]
 
   @@index([companyId])
 }
@@ -237,6 +240,24 @@ model HumanBooking {
 
   @@unique([interviewerId, startsAt])
   @@index([interviewerId])
+}
+
+// ─── PaypalSubscription ───
+model PaypalSubscription {
+  id                   String    @id @default(cuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paypalSubscriptionId String    @unique
+  paypalPlanId         String
+  status               String    @default("ACTIVE") // ADAPTATION: enum → String, values: ACTIVE|SUSPENDED|CANCELLED|EXPIRED
+  startTime            DateTime?
+  nextBillingTime      DateTime?
+  payerEmail           String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([paypalSubscriptionId])
 }
 
 // ─── B2BJob ───

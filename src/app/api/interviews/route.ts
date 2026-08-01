@@ -30,10 +30,24 @@ export async function POST(req: NextRequest) {
 
     const { industry, experience, type, interviewerGender, language } = parsed.data;
 
-    // Check sessions left
+    // Check sessions left — PREMIUM users always have access
     const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user || user.sessionsLeft < 1) {
-      return NextResponse.json({ error: { ar: 'لا توجد جلسات متبقية. يرجى شراء باقة.', en: 'No sessions left. Please purchase a package.' } }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: { ar: 'المستخدم غير موجود', en: 'User not found' } }, { status: 404 });
+    }
+
+    const isPremium = user.subscriptionTier === 'PREMIUM';
+    if (!isPremium && user.sessionsLeft < 1) {
+      return NextResponse.json(
+        {
+          error: {
+            ar: 'لقد استخدمت مقابلتك المجانية. اشترك بـ $19/شهر للحصول على جلسات غير محدودة.',
+            en: 'You\'ve used your free interview. Subscribe for $19/month for unlimited sessions.',
+          },
+          code: 'FREE_LIMIT_REACHED',
+        },
+        { status: 403 },
+      );
     }
 
     // Check for IN_PROGRESS interview

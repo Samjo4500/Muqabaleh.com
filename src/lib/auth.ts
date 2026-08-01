@@ -33,6 +33,7 @@ export const authOptions: NextAuthOptions = {
           companyId: user.companyId ?? undefined,
           sessionsLeft: user.sessionsLeft,
           language: user.language,
+          subscriptionTier: user.subscriptionTier,
         };
       },
     }),
@@ -49,7 +50,7 @@ export const authOptions: NextAuthOptions = {
         token.accountType = user.accountType;
         token.companyId = user.companyId;
         token.sessionsLeft = user.sessionsLeft;
-        token.language = user.language;
+        token.subscriptionTier = user.subscriptionTier;
       }
       return token;
     },
@@ -61,6 +62,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as Record<string, unknown>).companyId = token.companyId;
         (session.user as Record<string, unknown>).sessionsLeft = token.sessionsLeft;
         (session.user as Record<string, unknown>).language = token.language;
+        (session.user as Record<string, unknown>).subscriptionTier = token.subscriptionTier;
       }
       return session;
     },
@@ -83,6 +85,7 @@ declare module 'next-auth' {
       companyId?: string;
       sessionsLeft: number;
       language: string;
+      subscriptionTier: string;
     } & DefaultSession['user'];
   }
   interface User {
@@ -91,6 +94,7 @@ declare module 'next-auth' {
     companyId?: string;
     sessionsLeft: number;
     language: string;
+    subscriptionTier: string;
   }
 }
 
@@ -102,5 +106,6 @@ declare module 'next-auth/jwt' {
     companyId?: string;
     sessionsLeft: number;
     language: string;
+    subscriptionTier: string;
   }
 }

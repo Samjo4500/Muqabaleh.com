@@ -29,31 +29,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
-/* ------------------------------------------------------------------ */
-/*  Static option lists                                                */
-/* ------------------------------------------------------------------ */
-
-const COUNTRIES = [
-  { value: 'SAUDI_ARABIA', ar: 'المملكة العربية السعودية', en: 'Saudi Arabia' },
-  { value: 'UAE', ar: 'الإمارات العربية المتحدة', en: 'UAE' },
-  { value: 'EGYPT', ar: 'مصر', en: 'Egypt' },
-  { value: 'JORDAN', ar: 'الأردن', en: 'Jordan' },
-  { value: 'KUWAIT', ar: 'الكويت', en: 'Kuwait' },
-  { value: 'BAHRAIN', ar: 'البحرين', en: 'Bahrain' },
-  { value: 'OMAN', ar: 'عمان', en: 'Oman' },
-  { value: 'QATAR', ar: 'قطر', en: 'Qatar' },
-  { value: 'LEBANON', ar: 'لبنان', en: 'Lebanon' },
-  { value: 'IRAQ', ar: 'العراق', en: 'Iraq' },
-  { value: 'MOROCCO', ar: 'المغرب', en: 'Morocco' },
-  { value: 'ALGERIA', ar: 'الجزائر', en: 'Algeria' },
-  { value: 'TUNISIA', ar: 'تونس', en: 'Tunisia' },
-  { value: 'YEMEN', ar: 'اليمن', en: 'Yemen' },
-  { value: 'SUDAN', ar: 'السودان', en: 'Sudan' },
-  { value: 'LIBYA', ar: 'ليبيا', en: 'Libya' },
-] as const;
-
-const INDUSTRIES = ['IT', 'FINANCE', 'MEDICINE', 'ENGINEERING', 'EDUCATION', 'MARKETING', 'SALES', 'HR'] as const;
-const EXPERIENCES = ['JUNIOR', 'MID', 'SENIOR', 'EXECUTIVE'] as const;
+import { MENA_COUNTRIES, INDUSTRIES, EXPERIENCES } from '@/lib/constants';
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -179,7 +155,7 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   /*  Helpers                                                          */
   /* ================================================================ */
   const countryLabel = (val: string) => {
-    const found = COUNTRIES.find((c) => c.value === val);
+    const found = MENA_COUNTRIES.find((c) => c.value === val);
     return found ? (locale === 'ar' ? found.ar : found.en) : val;
   };
 
@@ -243,7 +219,7 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
               <SelectValue placeholder={t('countryPlaceholder')} />
             </SelectTrigger>
             <SelectContent className="bg-[var(--bg-panel)] border-white/10">
-              {COUNTRIES.map((c) => (
+              {MENA_COUNTRIES.map((c) => (
                 <SelectItem
                   key={c.value}
                   value={c.value}

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Speaker, VolumeX, Volume2, Mic, MicOff, Send, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InterviewAvatar, LiveBadge, SkeletonBlock } from '@/components/brand';
+import { AudioWaveform } from '@/components/audio-waveform';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -16,6 +17,7 @@ interface ChatMessage {
   role: 'interviewer' | 'candidate';
   text: string;
   typing?: boolean;
+  audioUrl?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -49,6 +51,7 @@ export default function GuestInterviewRoom({
   const [interviewerWho, setInterviewerWho] = useState<'fahd' | 'noora'>('fahd');
   const [voice, setVoice] = useState<'fahd' | 'noora'>('fahd');
   const [isStarted, setIsStarted] = useState(false);
+  const [playingMsgIdx, setPlayingMsgIdx] = useState<number | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -161,32 +164,42 @@ export default function GuestInterviewRoom({
     }, 30);
   };
 
-  // TTS
+  // TTS with waveform
   const playTTS = useCallback(
-    async (text: string) => {
+    async (text: string, msgIdx: number) => {
       if (isMuted || !text) return;
+      // Stop any current audio
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
         currentAudioRef.current = null;
       }
+      setPlayingMsgIdx(msgIdx);
       try {
         const res = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, voice }),
         });
-        if (!res.ok) return;
+        if (!res.ok) { setPlayingMsgIdx(null); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
+        // Store audio URL on the message
+        setMessages((prev) =>
+          prev.map((m, i) => (i === msgIdx ? { ...m, audioUrl: url } : m))
+        );
         const audio = new Audio(url);
         currentAudioRef.current = audio;
         audio.play().catch(() => {});
         audio.onended = () => {
+          setPlayingMsgIdx(null);
+          setMessages((prev) =>
+            prev.map((m, i) => (i === msgIdx ? { ...m, audioUrl: null } : m))
+          );
           URL.revokeObjectURL(url);
           currentAudioRef.current = null;
         };
       } catch {
-        // silent
+        setPlayingMsgIdx(null);
       }
     },
     [isMuted, voice],
@@ -360,15 +373,28 @@ export default function GuestInterviewRoom({
                   )}
                 </div>
                 {isInterviewer && !msg.typing && (
-                  <div className="flex items-center gap-1 self-end">
+                  <div className="flex flex-col items-end gap-1.5 self-end">
                     <button
                       type="button"
-                      onClick={() => playTTS(msg.text)}
+                      onClick={() => playTTS(msg.text, i)}
                       className="rounded-lg p-1.5 text-[var(--text-faint)] transition-colors hover:bg-white/5 hover:text-[var(--text-muted)] cursor-pointer"
                       aria-label={t('replay')}
                     >
                       <Speaker size={16} strokeWidth={1.75} />
                     </button>
+                    <AudioWaveform
+                      audioUrl={msg.audioUrl ?? null}
+                      isPlaying={playingMsgIdx === i}
+                      onPlayPause={() => {
+                        if (playingMsgIdx === i) {
+                          currentAudioRef.current?.pause();
+                          setPlayingMsgIdx(null);
+                        } else {
+                          playTTS(msg.text, i);
+                        }
+                      }}
+                      className="w-48"
+                    />
                   </div>
                 )}
               </div>

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-// GET /api/interviews/[id]/report — get report data (PDF generation can be added later)
+// GET /api/interviews/[id]/report — returns report JSON data
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -11,7 +11,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: { ar: 'يجب تسجيل الدخول', en: 'Login required' } }, { status: 401 });
+      return NextResponse.json({ error: { ar: '\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644', en: 'Login required' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -22,11 +22,11 @@ export async function GET(
     });
 
     if (!interview) {
-      return NextResponse.json({ error: { ar: 'المقابلة غير موجودة', en: 'Interview not found' } }, { status: 404 });
+      return NextResponse.json({ error: { ar: '\u0627\u0644\u0645\u0642\u0627\u0628\u0644\u0629 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f\u0629', en: 'Interview not found' } }, { status: 404 });
     }
 
     if (interview.status !== 'COMPLETED') {
-      return NextResponse.json({ error: { ar: 'التقرير غير جاهز بعد', en: 'Report not ready' } }, { status: 400 });
+      return NextResponse.json({ error: { ar: '\u0627\u0644\u062a\u0642\u0631\u064a\u0631 \u063a\u064a\u0631 \u062c\u0627\u0647\u0632 \u0628\u0639\u062f', en: 'Report not ready' } }, { status: 400 });
     }
 
     const report = {
@@ -52,6 +52,6 @@ export async function GET(
     return NextResponse.json({ report });
   } catch (err) {
     console.error('Report error:', err);
-    return NextResponse.json({ error: { ar: 'حدث خطأ في الخادم', en: 'Server error' } }, { status: 500 });
+    return NextResponse.json({ error: { ar: '\u062d\u062f\u062b \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062e\u0627\u062f\u0645', en: 'Server error' } }, { status: 500 });
   }
 }

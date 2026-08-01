@@ -53,6 +53,8 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Tool results
+tool-results/
 
 # Database binaries
 db/*.db

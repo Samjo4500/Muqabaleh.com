@@ -126,6 +126,35 @@ export interface EvaluationResult {
 }
 
 const TOTAL_QUESTIONS = 5;
+const IS_DEMO = process.env.DEMO_MODE === 'true';
+
+// ─── Demo Mode: Pre-written mock responses ───
+const DEMO_QUESTIONS_AR = [
+  'أهلاً وسهلاً بك في مقابلة مقابلة. أنا فهد، المحاور اليوم. خلينا نبدأ بالسؤال الأول: أخبرني عن آخر مشروع عملت عليه وكيف ساهمت في نجاحه؟',
+  'ممتاز، إجابة واضحة. السؤال الثاني: إذا واجهتك مشكلة تقنية معقدة في العمل وزميلك يختلف معك في الحل، كيف تتعامل مع الموقف؟',
+  'رد رائع. السؤال الثالث: ما هي أكبر تحدٍ واجهته في مجالك وكيف تعاملت معه؟',
+  'إجابة ممتازة. السؤال الرابع: أين ترى نفسك خلال ثلاث سنوات من الآن في مسيرتك المهنية؟',
+  'شكراً لك على وقتك. هذا كان آخر سؤال. شكراً لمشاركتك في هذه المقابلة. [INTERVIEW_DONE]',
+];
+const DEMO_QUESTIONS_EN = [
+  'Welcome to Muqabaleh! I\'m Fahd, your interviewer today. Let\'s start with the first question: Tell me about the last project you worked on and how you contributed to its success?',
+  'Great answer. Second question: If you faced a complex technical problem at work and your colleague disagreed with your approach, how would you handle it?',
+  'Excellent response. Third question: What is the biggest challenge you\'ve faced in your field and how did you overcome it?',
+  'Outstanding answer. Fourth question: Where do you see yourself in three years in your career?',
+  'Thank you for your time. That was the final question. Thank you for participating in this interview. [INTERVIEW_DONE]',
+];
+const DEMO_EVALUATION = {
+  overallScore: 78,
+  contentScore: 82,
+  clarityScore: 75,
+  confidenceScore: 80,
+  culturalFitScore: 74,
+  feedback: 'أداء جيد بشكل عام في المقابلة. أظهر المرشح فهماً جيداً لمجال العمل وقدرة على التعبير عن تجاربه بوضوح.',
+  strengths: '["التعبير الواضح عن التجارب المهنية","القدرة على تحليل المشكلات","الوعي بالتطور المهني"]',
+  improvements: '["تحسين الأمثلة المحددة","تطوير الإجابات بالأرقام والنتائج","التحضير الأفضل للأسئلة السلوكية"]',
+  recommendation: 'CONSIDER' as const,
+};
+
 const EXPERIENCE_LABELS_AR: Record<string, string> = {
   JUNIOR: '\u0645\u0628\u062a\u062f\u0626 (0-2 \u0633\u0646\u0648\u0627\u062a)',
   MID: '\u0645\u062a\u0648\u0633\u0637 (3-6 \u0633\u0646\u0648\u0627\u062a)',
@@ -225,6 +254,23 @@ export async function generateInterviewResponse(
     return { question: '', questionNumber: TOTAL_QUESTIONS, totalQuestions: TOTAL_QUESTIONS, done: true };
   }
 
+  // Demo mode: return next mock question
+  if (IS_DEMO) {
+    const questions = params.language === 'AR' ? DEMO_QUESTIONS_AR : DEMO_QUESTIONS_EN;
+    const idx = Math.min(questionCount, questions.length - 1);
+    const mockResponse = questions[idx];
+    const isDone = mockResponse.includes('[INTERVIEW_DONE]');
+    const cleaned = mockResponse.replace(/\[INTERVIEW_DONE\]/g, '').trim();
+    const nextSeq = (dbMessages[dbMessages.length - 1]?.sequence || 0) + 1;
+    await db.message.create({
+      data: { interviewId, role: 'CANDIDATE', content: candidateMessage, sequence: nextSeq },
+    });
+    await db.message.create({
+      data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: nextSeq + 1 },
+    });
+    return { question: cleaned, questionNumber: questionCount + 1, totalQuestions: TOTAL_QUESTIONS, done: isDone };
+  }
+
   const systemPrompt = buildSystemPrompt(params);
   const questionBank = await fetchQuestionBank(params.industry, params.type, params.language);
   const bankContext = questionBank.length > 0
@@ -272,6 +318,16 @@ export async function startInterview(
   interviewId: string,
   params: InterviewParams,
 ): Promise<QuestionResult> {
+  // Demo mode: return mock first question
+  if (IS_DEMO) {
+    const questions = params.language === 'AR' ? DEMO_QUESTIONS_AR : DEMO_QUESTIONS_EN;
+    const cleaned = questions[0].replace(/\[INTERVIEW_DONE\]/g, '').trim();
+    await db.message.create({
+      data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: 1 },
+    });
+    return { question: cleaned, questionNumber: 1, totalQuestions: TOTAL_QUESTIONS, done: false };
+  }
+
   const systemPrompt = buildSystemPrompt(params);
   const questionBank = await fetchQuestionBank(params.industry, params.type, params.language);
   const bankContext = questionBank.length > 0
@@ -355,6 +411,15 @@ export async function evaluateInterview(
   interviewId: string,
   language: 'AR' | 'EN',
 ): Promise<EvaluationResult> {
+  // Demo mode: return mock evaluation
+  if (IS_DEMO) {
+    return {
+      ...DEMO_EVALUATION,
+      strengths: JSON.parse(DEMO_EVALUATION.strengths),
+      improvements: JSON.parse(DEMO_EVALUATION.improvements),
+    };
+  }
+
   const messages = await db.message.findMany({
     where: { interviewId },
     orderBy: { sequence: 'asc' },

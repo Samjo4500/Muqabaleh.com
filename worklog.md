@@ -1072,3 +1072,25 @@ Stage Summary:
 - NO Stripe anywhere in the codebase
 - All translations added for ar/en
 - Packages page now shows premium subscription as primary, one-time packs as secondary (coming soon)
+---
+Task ID: 1
+Agent: Main
+Task: Admin access, graceful fallbacks, DEMO_MODE enhancements
+
+Work Log:
+- Created /api/config endpoint (reveals which services are available)
+- Modified admin layout: added DEMO_MODE banner, accessible without login
+- Modified guest interview route: in-memory fallback when no DB
+- Modified guest messages route: in-memory mock questions when no DB or DEMO_MODE
+- Modified demo page: shows service status, quick links to admin and pricing
+- Modified PayPal button: moved conditional check after hooks (React lint fix)
+- Modified auth.ts: dynamic DB import with try/catch for graceful failure
+- Updated .env.example: clear DEMO_MODE documentation at top
+- Committed and pushed to GitHub
+
+Stage Summary:
+- Admin dashboard at /admin works without any env vars (all mock data)
+- Site fully visible without API keys (landing, pricing, demo, admin)
+- DEMO_MODE=true enables full UI testing without real APIs
+- Vercel will auto-deploy from this push
+

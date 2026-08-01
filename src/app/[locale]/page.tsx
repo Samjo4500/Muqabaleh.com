@@ -36,6 +36,7 @@ import {
   InterviewAvatar,
   QrCard,
   LiveBadge,
+  HeroStoryboard,
 } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -90,17 +91,6 @@ export default function LandingPage() {
 /* ================================================================== */
 
 function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; isRTL: boolean }) {
-  const [phase, setPhase] = useState<'analyzing' | 'complete'>('analyzing');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPhase((prev) => (prev === 'analyzing' ? 'complete' : 'analyzing'));
-    }, 9000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const scoreKeys = ['content', 'clarity', 'confidence', 'culturalFit'] as const;
-
   return (
     <section id="hero" className="aurora-bg relative overflow-hidden pb-20 pt-28 md:pb-28 md:pt-36">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -139,38 +129,9 @@ function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; 
             </div>
           </div>
 
-          {/* Right — animated preview card (RTL: left) */}
-          <div className={isRTL ? 'order-1 lg:order-2' : ''}>
-            <div className="glass-card mx-auto max-w-sm p-5" style={{ transform: 'none' }}>
-              <div className="mb-4 flex items-center gap-3">
-                <InterviewAvatar who="fahd" size="sm" />
-                <div>
-                  <p className="text-sm font-bold text-[var(--text-primary)]">فهد</p>
-                  <LiveBadge />
-                </div>
-              </div>
-
-              {phase === 'analyzing' ? (
-                <>
-                  <p className="mb-3 text-sm text-[var(--text-muted)]">{t('previewAnalyzing')}</p>
-                  <div className="mb-4 h-2 w-full overflow-hidden rounded-full bg-white/5">
-                    <div className="h-full rounded-full bg-gold animate-progress-fill" style={{ '--progress-width': '78%' } as React.CSSProperties} />
-                  </div>
-                  <div className="space-y-3">
-                    {scoreKeys.map((key, i) => (
-                      <ScoreBar key={key} label={t(key)} value={SCORES[i]} />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center gap-3 py-6">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald/10">
-                    <Check size={28} strokeWidth={1.75} className="text-emerald" />
-                  </div>
-                  <p className="text-sm font-semibold text-emerald">{t('previewComplete')}</p>
-                </div>
-              )}
-            </div>
+          {/* Right — Fahad's Story storyboard (RTL: left) */}
+          <div className={`story-float ${isRTL ? 'order-1 lg:order-2' : ''}`}>
+            <HeroStoryboard />
           </div>
         </div>
 

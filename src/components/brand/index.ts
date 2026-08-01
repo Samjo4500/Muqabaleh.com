@@ -11,3 +11,4 @@ export { SkeletonBlock } from "./skeleton-block";
 export { CopyLinkButton } from "./copy-link-button";
 export { QrCard } from "./qr-card";
 export { InterviewAvatar } from "./interview-avatar";
+export { HeroStoryboard } from "./hero-storyboard";

@@ -955,3 +955,22 @@ Stage Summary:
 - Before/After cards now display cleanly side-by-side
 - Removed framer-motion dependency from landing page (unused)
 - File modified: src/app/[locale]/page.tsx
+
+---
+Task ID: hero-storyboard
+Agent: Main
+Task: Build cinematic hero storyboard slider
+
+Work Log:
+- Searched 3 real human photos via image-search (stressed, practicing, celebrating)
+- Verified images with VLM (8/10, 7/10, 8/10)
+- Added 7 storyboard translations to en.json and ar.json
+- Added 7 cinematic CSS animations to globals.css
+- Built HeroStoryboard component with AnimatePresence, Stories progress, Ken Burns, score reveal, swipe, RTL
+- Replaced old preview card in HeroSection
+- Lint clean, page compiles 200
+- Browser verified EN: photos, progress bar, quotes, glow, score all working
+
+Stage Summary:
+- Created: src/components/brand/hero-storyboard.tsx
+- Modified: en.json, ar.json, globals.css, brand/index.ts, page.tsx

@@ -217,6 +217,61 @@
   }
 }
 
+/* ─── Hero Storyboard ─── */
+  @keyframes story-ken-burns-in {
+    0% { transform: scale(1.12) translate(0%, 0%); }
+    100% { transform: scale(1) translate(0%, 0%); }
+  }
+  @keyframes story-ken-burns-pan {
+    0% { transform: scale(1.15) translate(-2%, 0%); }
+    100% { transform: scale(1) translate(0%, 0%); }
+  }
+  @keyframes story-progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+  @keyframes story-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes story-pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(212,168,67,0.15), inset 0 0 20px rgba(212,168,67,0.05); }
+    50% { box-shadow: 0 0 40px rgba(212,168,67,0.3), inset 0 0 30px rgba(212,168,67,0.1); }
+  }
+  @keyframes story-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes story-score-count {
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .story-ken-burns-in {
+    animation: story-ken-burns-in 6s ease-out forwards;
+  }
+  .story-ken-burns-pan {
+    animation: story-ken-burns-pan 6s ease-out forwards;
+  }
+  .story-progress-fill {
+    animation: story-progress 5s linear forwards;
+  }
+  .story-shimmer-border {
+    background: linear-gradient(90deg, transparent 0%, rgba(212,168,67,0.3) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: story-shimmer 3s linear infinite;
+  }
+  .story-pulse-glow {
+    animation: story-pulse-glow 3s ease-in-out infinite;
+  }
+  .story-float {
+    animation: story-float 4s ease-in-out infinite;
+  }
+  .story-score-pop {
+    animation: story-score-count 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
 /* ─── Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *,

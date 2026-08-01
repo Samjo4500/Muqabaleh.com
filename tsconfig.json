@@ -41,6 +41,8 @@
     "node_modules",
     "examples",
     "mini-services",
-    "db"
+    "db",
+    "skills",
+    "tool-results"
   ]
 }

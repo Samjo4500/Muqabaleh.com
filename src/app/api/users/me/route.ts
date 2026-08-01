@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'بيانات غير صالحة', details: e.errors },
+        { error: 'بيانات غير صالحة', details: e.issues },
         { status: 400 }
       );
     }

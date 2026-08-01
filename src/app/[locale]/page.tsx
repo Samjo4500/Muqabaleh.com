@@ -551,14 +551,17 @@ const PRICING_PLANS = [
     titleKey: 'session1Title',
     priceKey: 'session1Price',
     badge: null,
+    subKey: null,
     featureKey: 'feature1Session',
     criteriaKey: 'feature4Criteria',
     sar: '71', aed: '70', egp: '912', jod: '13',
+    popular: false,
   },
   {
     titleKey: 'session3Title',
     priceKey: 'session3Price',
     badge: 'session3Badge',
+    subKey: null,
     featureKey: 'feature3Sessions',
     criteriaKey: 'feature4Criteria',
     sar: '183', aed: '180', egp: '2352', jod: '35',
@@ -568,9 +571,11 @@ const PRICING_PLANS = [
     titleKey: 'session5Title',
     priceKey: 'session5Price',
     badge: null,
+    subKey: null,
     featureKey: 'feature5Sessions',
     criteriaKey: 'feature4Criteria',
     sar: '258', aed: '253', egp: '3312', jod: '49',
+    popular: false,
   },
   {
     titleKey: 'vipTitle',
@@ -580,6 +585,7 @@ const PRICING_PLANS = [
     featureKey: 'featureVipSession',
     criteriaKey: 'feature6CriteriaHuman',
     sar: '108', aed: '106', egp: '1392', jod: '21',
+    popular: false,
   },
 ] as const;
 

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const hash = crypto.createHash('md5').update(`${voice}:${text}`).digest('hex');
     const cached = cache.get(hash);
     if (cached && Date.now() - cached.createdAt < CACHE_TTL) {
-      return new NextResponse(cached.buffer, {
+      return new NextResponse(new Uint8Array(cached.buffer), {
         status: 200,
         headers: {
           'Content-Type': 'audio/mpeg',
@@ -44,12 +44,12 @@ export async function POST(req: NextRequest) {
 
     // Save to cache
     if (cache.size >= CACHE_MAX) {
-      const oldestKey = cache.keys().next().value;
+      const oldestKey = cache.keys().next().value!;
       cache.delete(oldestKey);
     }
     cache.set(hash, { buffer, createdAt: Date.now() });
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': 'audio/mpeg',

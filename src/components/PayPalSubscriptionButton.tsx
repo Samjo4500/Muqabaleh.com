@@ -46,7 +46,7 @@ export function PayPalSubscriptionButton({
           intent: 'subscription',
           locale: locale === 'ar' ? 'ar_SA' : 'en_US',
           currency: 'USD',
-        });
+        } as any);
 
         if (!mounted || !paypal || !paypal.Buttons || !containerRef.current) return;
 

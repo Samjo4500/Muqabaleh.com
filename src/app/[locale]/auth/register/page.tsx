@@ -70,7 +70,7 @@ export default function RegisterPage() {
   const [companySector, setCompanySector] = useState("");
 
   const [tab, setTab] = useState("individual");
-  const [touched, setTouched] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 

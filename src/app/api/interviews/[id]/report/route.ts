@@ -46,7 +46,7 @@ export async function GET(
       industry: interview.industry,
       language: interview.language,
       completedAt: interview.updatedAt,
-      candidateName: interview.user ? undefined : interview.guestName,
+      candidateName: interview.userId ? undefined : interview.guestName,
     };
 
     return NextResponse.json({ report });

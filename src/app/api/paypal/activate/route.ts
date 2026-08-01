@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       | undefined;
 
     await db.paypalSubscription.upsert({
-      where: { paypalSubscriptionId },
+      where: { paypalSubscriptionId: subscriptionId },
       create: {
         userId,
         paypalSubscriptionId: subscriptionId,

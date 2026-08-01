@@ -125,7 +125,7 @@ export interface EvaluationResult {
   recommendation: 'RECOMMENDED' | 'CONSIDER' | 'NOT_RECOMMENDED';
 }
 
-const TOTAL_QUESTIONS = 7;
+const TOTAL_QUESTIONS = 5;
 const EXPERIENCE_LABELS_AR: Record<string, string> = {
   JUNIOR: '\u0645\u0628\u062a\u062f\u0626 (0-2 \u0633\u0646\u0648\u0627\u062a)',
   MID: '\u0645\u062a\u0648\u0633\u0637 (3-6 \u0633\u0646\u0648\u0627\u062a)',

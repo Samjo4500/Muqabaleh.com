@@ -47,7 +47,7 @@ export default function GuestInterviewRoom({
   const [showReportLink, setShowReportLink] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [totalQuestions, setTotalQuestions] = useState(7);
+  const [totalQuestions, setTotalQuestions] = useState(5);
   const [interviewerWho, setInterviewerWho] = useState<'fahd' | 'noora'>('fahd');
   const [voice, setVoice] = useState<'fahd' | 'noora'>('fahd');
   const [isStarted, setIsStarted] = useState(false);

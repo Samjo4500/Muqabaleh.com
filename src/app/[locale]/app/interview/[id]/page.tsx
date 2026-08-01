@@ -45,7 +45,7 @@ export default function InterviewRoomPage({
   const [showReportLink, setShowReportLink] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [totalQuestions, setTotalQuestions] = useState(7);
+  const [totalQuestions, setTotalQuestions] = useState(5);
   const [interviewerWho, setInterviewerWho] = useState<'fahd' | 'noora'>('fahd');
   const [voice, setVoice] = useState<'fahd' | 'noora'>('fahd');
   const [interviewStatus, setInterviewStatus] = useState<string>('');
@@ -123,7 +123,7 @@ export default function InterviewRoomPage({
             const resumeRes = await fetch(`/api/interviews/${interviewId}/resume`, { method: 'POST' });
             if (resumeRes.ok) {
               const resumeData = await resumeRes.json();
-              setTotalQuestions(resumeData.interview.totalQuestions || 7);
+              setTotalQuestions(resumeData.interview.totalQuestions || 5);
               setCurrentQuestion(resumeData.interview.questionNumber || qCount);
               // If resume returned messages, use those
               if (resumeData.interview.messages && resumeData.interview.messages.length > existing.length) {
@@ -200,7 +200,7 @@ export default function InterviewRoomPage({
 
       const data = await res.json();
       setInterviewStatus('IN_PROGRESS');
-      setTotalQuestions(data.totalQuestions || 7);
+      setTotalQuestions(data.totalQuestions || 5);
       setCurrentQuestion(data.questionNumber || 1);
 
       setMessages((prev) => [

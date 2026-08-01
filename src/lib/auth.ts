@@ -1,7 +1,6 @@
 import { NextAuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
-import { db } from './db';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,28 +12,33 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+        try {
+          const { db } = await import('./db');
+          const user = await db.user.findUnique({
+            where: { email: credentials.email },
+          });
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-        });
+          if (!user || !user.passwordHash) return null;
+          if (!user.isActive) return null;
 
-        if (!user || !user.passwordHash) return null;
-        if (!user.isActive) return null;
+          const valid = await compare(credentials.password, user.passwordHash);
+          if (!valid) return null;
 
-        const valid = await compare(credentials.password, user.passwordHash);
-        if (!valid) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          accountType: user.accountType,
-          companyId: user.companyId ?? undefined,
-          sessionsLeft: user.sessionsLeft,
-          language: user.language,
-          subscriptionTier: user.subscriptionTier,
-        };
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            accountType: user.accountType,
+            companyId: user.companyId ?? undefined,
+            sessionsLeft: user.sessionsLeft,
+            language: user.language,
+            subscriptionTier: user.subscriptionTier,
+          };
+        } catch {
+          // DB unavailable — cannot authenticate
+          return null;
+        }
       },
     }),
   ],

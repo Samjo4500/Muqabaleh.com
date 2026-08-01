@@ -28,29 +28,13 @@ export function PayPalSubscriptionButton({
     (session?.user as Record<string, unknown> | undefined)?.subscriptionTier ===
     'PREMIUM';
 
-  // Graceful fallback: show unavailable message if PayPal not configured
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  if (!paypalClientId) {
-    return (
-      <div className={`${compact ? '' : 'w-full max-w-md mx-auto'} ${className}`}>
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-5 py-6">
-          <Crown size={28} className="text-[var(--text-faint)]" />
-          <p className="text-center text-sm text-[var(--text-muted)]">
-            {locale === 'ar'
-              ? 'الاشتراك غير متاح حالياً'
-              : 'Subscription unavailable at this time'}
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   useEffect(() => {
-    if (!session || isPremium) {
+    if (!paypalClientId || !session || isPremium) {
       setLoading(false);
       return;
     }
-
     let mounted = true;
 
     const initPayPal = async () => {
@@ -134,6 +118,22 @@ export function PayPalSubscriptionButton({
       mounted = false;
     };
   }, [session, isPremium, locale, t, compact]);
+
+  // --- PayPal not configured ---
+  if (!paypalClientId) {
+    return (
+      <div className={`${compact ? '' : 'w-full max-w-md mx-auto'} ${className}`}>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-5 py-6">
+          <Crown size={28} className="text-[var(--text-faint)]" />
+          <p className="text-center text-sm text-[var(--text-muted)]">
+            {locale === 'ar'
+              ? 'الاشتراك غير متاح حالياً'
+              : 'Subscription unavailable at this time'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // --- Premium user: show badge ---
   if (isPremium) {

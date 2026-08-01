@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   LogOut,
   Menu,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Sheet,
@@ -63,7 +64,7 @@ function SidebarNav({
             key={item.key}
             href={item.href}
             onClick={onNavigate}
-            className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
               isActive
                 ? 'border-s-gold text-gold bg-gold/10'
                 : 'border-s-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
@@ -89,7 +90,7 @@ function SidebarBottom({ t }: { t: ReturnType<typeof useTranslations> }) {
       </div>
       <button
         type="button"
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400"
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
         aria-label={t('signOut')}
       >
         <LogOut size={18} strokeWidth={1.75} />
@@ -108,11 +109,27 @@ export default function AdminLayout({
   const locale = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then((data) => setDemoMode(data.demoMode === true))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-void">
+      {/* Demo Mode Banner */}
+      {demoMode && (
+        <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-amber-500/90 px-4 py-1.5 text-xs font-bold text-black">
+          <AlertTriangle size={14} />
+          DEMO MODE — {locale === 'ar' ? 'هذه بيانات تجريبية وليست حقيقية' : 'This is demo data, not real'}
+        </div>
+      )}
+
       {/* Desktop sidebar — RTL: fixed right */}
-      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-panel)]">
+      <aside className={`hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-panel)] ${demoMode ? 'pt-8' : ''}`}>
         {/* Top: logo + title */}
         <div className="p-4 pb-2">
           <div className="flex items-center gap-3">
@@ -134,13 +151,13 @@ export default function AdminLayout({
       </aside>
 
       {/* Mobile top bar */}
-      <div className="flex flex-1 flex-col">
+      <div className={`flex flex-1 flex-col ${demoMode ? 'pt-8' : ''}`}>
         <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 backdrop-blur-md lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5"
+                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5 cursor-pointer"
                 aria-label="Menu"
               >
                 <Menu size={20} strokeWidth={1.75} />

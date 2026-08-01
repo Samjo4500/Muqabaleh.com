@@ -2,8 +2,8 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, ArrowLeft, ArrowRight, AlertTriangle, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function DemoPage() {
@@ -11,6 +11,14 @@ export default function DemoPage() {
   const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<{ demoMode: boolean; services: Record<string, boolean> } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then((r) => r.json())
+      .then(setConfig)
+      .catch(() => setConfig({ demoMode: false, services: {} }));
+  }, []);
 
   const startDemo = async () => {
     setLoading(true);
@@ -72,6 +80,30 @@ export default function DemoPage() {
         </div>
 
         <div className="glass-card rounded-2xl p-6">
+          {/* Service Status Banner */}
+          {config && (
+            <div className="mb-4 space-y-2">
+              {config.demoMode && (
+                <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-400">
+                  <Zap size={14} />
+                  {locale === 'ar'
+                    ? 'وضع العرض التوضيحي — إجابات محاكاة'
+                    : 'Demo Mode — Simulated responses'}
+                </div>
+              )}
+              {(!config.services.database || !config.services.gemini) && !config.demoMode && (
+                <div className="flex items-start gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-[var(--text-muted)]">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-400" />
+                  <span>
+                    {locale === 'ar'
+                      ? 'بعض الخدمات غير متوفرة. ستتم المحاكاة تلقائياً.'
+                      : 'Some services unavailable. Will auto-simulate.'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           <Button
             onClick={startDemo}
             disabled={loading}
@@ -88,6 +120,22 @@ export default function DemoPage() {
           </Button>
 
           <p className="mt-4 text-center text-xs text-[var(--text-faint)]">{t('note')}</p>
+        </div>
+
+        {/* Quick links for browsing without signing up */}
+        <div className="mt-6 flex flex-col gap-2">
+          <a
+            href="/admin"
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+          >
+            {locale === 'ar' ? 'لوحة تحكم المسؤول (عرض تجريبي)' : 'Admin Dashboard (demo preview)'}
+          </a>
+          <a
+            href="/pricing"
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+          >
+            {locale === 'ar' ? 'عرض الأسعار والباقات' : 'Pricing & Plans'}
+          </a>
         </div>
       </div>
     </div>

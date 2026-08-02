@@ -1131,3 +1131,23 @@ Stage Summary:
 - Remaining (not code): muqabaleh.com DNS (user action), image WebP compression (future)
 - Admin password: 'admin' (default) or set ADMIN_PASSWORD env var
 - Production URL: https://muqabaleh-com.vercel.app
+---
+Task ID: 1
+Agent: Main
+Task: Review website audit report, fix remaining issues, and fix hydration error
+
+Work Log:
+- Read and analyzed the full website audit report from upload/muqabaleh-website-report (1).md
+- Verified each reported issue against actual codebase — found most issues were already fixed
+- Converted all PNG images to WebP (massive savings: logo.png 1.7MB→110KB, v2-balanced-a-T 871KB→135KB)
+- Updated all 18 code files referencing .png to use .webp instead
+- Fixed empty sameAs in OrganizationJsonLd with social URLs
+- Fixed hydration mismatch: added suppressHydrationWarning to <html> for next-themes
+- Committed and deployed 2 changesets to Vercel production
+- Verified zero console errors across AR, EN, and /about pages via agent-browser
+
+Stage Summary:
+- Report was largely outdated — 10/13 issues were already fixed in codebase
+- Real remaining fixes: image optimization (WebP), JSON-LD sameAs, hydration error
+- Total image weight reduced from ~1.8MB to ~600KB (67% reduction)
+- Production verified at muqabaleh-com.vercel.app with zero console errors

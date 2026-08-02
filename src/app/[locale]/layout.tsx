@@ -94,7 +94,7 @@ export default async function LocaleLayout({
   const bodyFont = locale === 'ar' ? 'Tajawal' : 'Inter';
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -155,8 +155,8 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   /*  Helpers                                                          */
   /* ================================================================ */
   const countryLabel = (val: string) => {
-    const found = MENA_COUNTRIES.find((c) => c.value === val);
-    return found ? (locale === 'ar' ? found.ar : found.en) : val;
+    const found = MENA_COUNTRIES.find((c) => c.code === val);
+    return found ? (locale === 'ar' ? found.name_ar : found.name_en) : val;
   };
 
   const industryKey = (val: string) => {
@@ -221,11 +221,11 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
             <SelectContent className="bg-[var(--bg-panel)] border-white/10">
               {MENA_COUNTRIES.map((c) => (
                 <SelectItem
-                  key={c.value}
-                  value={c.value}
+                  key={c.code}
+                  value={c.code}
                   className="text-[var(--text-primary)] focus:bg-white/5"
                 >
-                  {locale === 'ar' ? c.ar : c.en}
+                  {locale === 'ar' ? c.name_ar : c.name_en}
                 </SelectItem>
               ))}
             </SelectContent>

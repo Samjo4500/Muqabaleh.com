@@ -35,9 +35,7 @@ const WaveformBars = memo(function WaveformBars({ active, barCount = 12, classNa
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
+    const ctx = canvas.getContext('2d')!;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;

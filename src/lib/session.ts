@@ -1,16 +1,21 @@
+import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 
 export async function getSession() {
-  return getServerSession(authOptions);
-}
-
-export async function requireAuth() {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  try {
+    return await getServerSession(authOptions);
+  } catch {
     return null;
   }
-  return session;
+}
+
+/**
+ * Returns the session if valid, or null.
+ * Does NOT throw — callers must check the return value.
+ */
+export async function requireAuth() {
+  return getSession();
 }
 
 export async function requireRole(...roles: string[]) {

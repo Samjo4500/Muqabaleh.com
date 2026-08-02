@@ -17,26 +17,28 @@ function hasSession(request: NextRequest): boolean {
 
 function getLocaleFromPath(pathname: string): string {
   if (pathname.startsWith('/en')) return 'en';
-  if (pathname.startsWith('/ar')) return 'ar';
   return 'ar';
+}
+
+function stripLocale(pathname: string): string {
+  return pathname.replace(/^\/(ar|en)(\/|$)/, '/');
+}
+
+function isProtectedPath(pathname: string): boolean {
+  const bare = stripLocale(pathname);
+  return PROTECTED_PATHS.some((p) => bare === p || bare.startsWith(p + '/'));
 }
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only check auth after locale prefix is present
-  const hasLocale = /^\/(ar|en)\//.test(pathname) || /^\/(ar|en)$/.test(pathname);
-
-  if (hasLocale) {
-    const pathWithoutLocale = pathname.replace(/^\/(ar|en)(\/|$)/, '/');
-    const isProtected = PROTECTED_PATHS.some((p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(p + '/'));
-
-    if (isProtected && !hasSession(request)) {
-      const locale = getLocaleFromPath(pathname);
-      const signinUrl = new URL(`/${locale}/auth/signin`, request.url);
-      signinUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(signinUrl);
-    }
+  // Check auth for ALL protected paths — with or without locale prefix.
+  // This must happen BEFORE intlMiddleware rewrites the path internally.
+  if (isProtectedPath(pathname) && !hasSession(request)) {
+    const locale = getLocaleFromPath(pathname);
+    const signinUrl = new URL(`/${locale}/auth/signin`, request.url);
+    signinUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(signinUrl);
   }
 
   return intlMiddleware(request);

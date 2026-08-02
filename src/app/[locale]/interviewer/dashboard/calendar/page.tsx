@@ -91,7 +91,7 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { delay: 0.15, duration: 0.45, ease: 'easeOut' },
+    transition: { delay: 0.15, duration: 0.45, ease: 'easeOut' as const },
   },
 };
 

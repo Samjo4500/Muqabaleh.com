@@ -143,7 +143,6 @@ export async function POST(req: NextRequest) {
           userId: 'pending', // Will be linked to a user account
           fullName: fullName!.trim(),
           fullNameAr: fullNameAr?.trim() || null,
-          email: '', // Store on User model
           phone: phone!.trim(),
           linkedInUrl: linkedInUrl?.trim() || null,
           yearsExperience: years,

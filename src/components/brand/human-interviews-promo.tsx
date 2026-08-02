@@ -22,7 +22,7 @@ const INTERVIEWER_PREVIEWS = [
 /* ------------------------------------------------------------------ */
 
 export function HumanInterviewsPromo() {
-  const t = useTranslations('landing');
+  const t = useTranslations('humanInterviews');
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -45,30 +45,30 @@ export function HumanInterviewsPromo() {
           className="text-4xl font-bold md:text-3xl"
           style={{ color: '#d4af37' }}
         >
-          {t('humanInterviews.promoHeadline')}
+          {t('promoHeadline')}
         </h2>
 
         {/* Subtext */}
         <p className="mt-4 max-w-[600px] text-lg text-white">
-          {t('humanInterviews.promoSubtext')}
+          {t('promoSubtext')}
         </p>
 
         {/* Stats Row */}
         <div className="mt-8 flex gap-8">
           <StatItem
             icon={<Users size={20} style={{ color: '#d4af37' }} />}
-            number={t('humanInterviews.statInterviewers')}
-            label={t('humanInterviews.statInterviewersLabel')}
+            number={t('statInterviewers')}
+            label={t('statInterviewersLabel')}
           />
           <StatItem
             icon={<Star size={20} style={{ color: '#d4af37' }} />}
-            number={t('humanInterviews.statRating')}
-            label={t('humanInterviews.statRatingLabel')}
+            number={t('statRating')}
+            label={t('statRatingLabel')}
           />
           <StatItem
             icon={<Clock size={20} style={{ color: '#d4af37' }} />}
-            number={t('humanInterviews.statPrice')}
-            label={t('humanInterviews.statPriceLabel')}
+            number={t('statPrice')}
+            label={t('statPriceLabel')}
           />
         </div>
 
@@ -82,7 +82,7 @@ export function HumanInterviewsPromo() {
               color: '#070A0F',
             }}
           >
-            {t('humanInterviews.becomeInterviewer')}
+            {t('becomeInterviewer')}
           </Link>
           <Link
             href="/human-interviews"
@@ -92,7 +92,7 @@ export function HumanInterviewsPromo() {
               color: '#d4af37',
             }}
           >
-            {t('humanInterviews.bookHuman')}
+            {t('bookHuman')}
           </Link>
         </div>
 

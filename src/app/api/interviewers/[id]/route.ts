@@ -154,12 +154,13 @@ function getMockProfile(id: string): Record<string, unknown> {
   };
 
   const d = defaults[id] || defaults['int-003']!;
+  const specs = d.specialties as string[];
   return {
     id,
-    fullName: d.fullName,
-    fullNameAr: d.fullNameAr,
-    bio: `Experienced ${d.specialties[0].replace(/_/g, ' ')} with ${d.yearsExperience} years of professional experience. Passionate about helping candidates succeed in their interviews.`,
-    bioAr: `${d.specialties[0].replace(/_/g, ' ')} ذو خبرة ${d.yearsExperience} عاماً. شغوف بمساعدة المرشحين على النجاح في مقابلاتهم.`,
+    fullName: d.fullName as string,
+    fullNameAr: d.fullNameAr as string,
+    bio: `Experienced ${specs[0].replace(/_/g, ' ')} with ${d.yearsExperience as number} years of professional experience. Passionate about helping candidates succeed in their interviews.`,
+    bioAr: `${specs[0].replace(/_/g, ' ')} ذو خبرة ${d.yearsExperience as number} عاماً. شغوف بمساعدة المرشحين على النجاح في مقابلاتهم.`,
     currentTitle: 'Senior Consultant',
     currentTitleAr: 'استشاري أول',
     yearsExperience: d.yearsExperience,

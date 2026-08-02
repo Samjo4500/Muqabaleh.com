@@ -574,7 +574,7 @@ export function HeroSimulation() {
                     <div className="flex flex-col items-center gap-2">
                       <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-faint)]">Q</span>
-                        <span className="text-xs font-bold text-gold">{step === 'fahd-greeting' || step === 'fahd-question' ? '1' : step === 'user-reply' || step === 'analyzing-score' ? '1' : step === 'fahd-next' ? '2' : '0'}/5</span>
+                        <span className="text-xs font-bold text-gold">{step === 'fahd-greeting' || step === 'fahd-question' ? '1' : step === 'user-reply' ? '1' : '0'}/5</span>
                       </div>
                       <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5">
                         <span className="text-[10px] font-bold text-[var(--text-faint)]">⏱</span>

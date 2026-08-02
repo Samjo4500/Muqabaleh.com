@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -112,7 +112,7 @@ function downloadICS(content: string, filename: string) {
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
 
-export default function BookingConfirmationPage() {
+function BookingConfirmationContent() {
   const t = useTranslations('booking');
   const locale = useLocale();
   const searchParams = useSearchParams();
@@ -196,7 +196,7 @@ export default function BookingConfirmationPage() {
             className="inline-flex"
             initial={{ scale: 0 }}
             animate={{ scale: [0, 1.2, 1] }}
-            transition={{ duration: 1, ease: 'easeOut' }}
+            transition={{ duration: 1, ease: 'easeOut' as const }}
           >
             <CheckCircle size={64} className="text-[var(--gold)]" strokeWidth={1.5} />
           </motion.div>
@@ -305,5 +305,13 @@ export default function BookingConfirmationPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function BookingConfirmationPage() {
+  return (
+    <Suspense>
+      <BookingConfirmationContent />
+    </Suspense>
   );
 }

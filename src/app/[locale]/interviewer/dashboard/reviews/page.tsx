@@ -12,7 +12,7 @@ import { Star, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 type Review = {
   id: string;
   candidate: string;
-  specialty: string;
+  specialty?: string;
   date: string;
   rating: number;
   comment: string;
@@ -109,7 +109,7 @@ const headerVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.1, duration: 0.45, ease: 'easeOut' },
+    transition: { delay: 0.1, duration: 0.45, ease: 'easeOut' as const },
   },
 };
 
@@ -118,7 +118,7 @@ const breakdownVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.3, duration: 0.45, ease: 'easeOut' },
+    transition: { delay: 0.3, duration: 0.45, ease: 'easeOut' as const },
   },
 };
 
@@ -127,7 +127,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: 0.4 + i * 0.08, duration: 0.45, ease: 'easeOut' },
+    transition: { delay: 0.4 + i * 0.08, duration: 0.45, ease: 'easeOut' as const },
   }),
 };
 

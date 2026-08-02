@@ -63,7 +63,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.45, ease: 'easeOut' },
+    transition: { delay: i * 0.1, duration: 0.45, ease: 'easeOut' as const },
   }),
 };
 
@@ -72,7 +72,7 @@ const sectionVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.5, duration: 0.5, ease: 'easeOut' },
+    transition: { delay: 0.5, duration: 0.5, ease: 'easeOut' as const },
   },
 };
 
@@ -81,7 +81,7 @@ const chartVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.6, duration: 0.5, ease: 'easeOut' },
+    transition: { delay: 0.6, duration: 0.5, ease: 'easeOut' as const },
   },
 };
 
@@ -90,7 +90,7 @@ const tableVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.8, duration: 0.5, ease: 'easeOut' },
+    transition: { delay: 0.8, duration: 0.5, ease: 'easeOut' as const },
   },
 };
 

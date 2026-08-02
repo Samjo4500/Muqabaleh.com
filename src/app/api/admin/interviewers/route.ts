@@ -285,7 +285,6 @@ export async function GET(req: NextRequest) {
             id: true,
             fullName: true,
             fullNameAr: true,
-            email: true,
             phone: true,
             status: true,
             priceTier: true,

@@ -11,7 +11,7 @@ const forgotSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp();
+  const ip = await getClientIp();
 
   // Rate limit: 3 attempts per IP per 15 min
   const rl = checkRateLimit(ip, '/api/auth/forgot-password', 3);

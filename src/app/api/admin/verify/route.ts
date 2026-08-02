@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { getClientIp, auditLog, isAdminPassword } from '@/lib/security';
+import { getClientIp, auditLog } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
-  const ip = getClientIp();
+  const ip = await getClientIp();
 
   // Strict rate limit: 5 attempts per 15 min per IP
   const rl = checkRateLimit(ip, '/api/admin/verify', 5);

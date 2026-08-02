@@ -22,7 +22,7 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp();
+  const ip = await getClientIp();
 
   // Rate limit: 5 registrations per IP per 15 min
   const rl = checkRateLimit(ip, '/api/auth/register', 5);

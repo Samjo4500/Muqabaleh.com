@@ -39,14 +39,14 @@ export type PublicApiHandlerFn = (
  *     return NextResponse.json({ ... });
  *   }, { roles: ['SUPER_ADMIN'] });
  */
-export function withAuth(
+export async function withAuth(
   handler: ApiHandlerFn,
   config?: ApiHandlerConfig,
 ) {
   const cfg = { ...DEFAULT_CONFIG, ...config };
 
   return async (req: NextRequest): Promise<NextResponse> => {
-    const ip = getClientIp();
+    const ip = await getClientIp();
     const route = req.nextUrl.pathname;
 
     // Rate limit check
@@ -109,12 +109,12 @@ export function withAuth(
 /**
  * Wrap a PUBLIC API route with rate limiting only.
  */
-export function withRateLimit(
+export async function withRateLimit(
   handler: PublicApiHandlerFn,
   limit = 100,
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    const ip = getClientIp();
+    const ip = await getClientIp();
     const route = req.nextUrl.pathname;
     const rl = checkRateLimit(ip, route, limit);
 

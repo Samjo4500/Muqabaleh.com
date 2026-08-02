@@ -74,8 +74,8 @@ export function isAdminPassword(pw: string): {
 // ─── Request Info Helpers ────────────────────────────────────────
 
 /** Extract client IP from request headers */
-export function getClientIp(): string {
-  const h = headers();
+export async function getClientIp(): Promise<string> {
+  const h = await headers();
   return (
     h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     h.get('x-real-ip') ||
@@ -84,8 +84,9 @@ export function getClientIp(): string {
 }
 
 /** Extract User-Agent from request headers */
-export function getUserAgent(): string {
-  return headers().get('user-agent') || 'unknown';
+export async function getUserAgent(): Promise<string> {
+  const h = await headers();
+  return h.get('user-agent') || 'unknown';
 }
 
 // ─── Audit Logging ──────────────────────────────────────────────
@@ -108,8 +109,8 @@ export type AuditAction =
 interface AuditLogEntry {
   userId?: string;
   action: AuditAction;
-  ipAddress: string;
-  userAgent: string;
+  ipAddress?: string;
+  userAgent?: string;
   success: boolean;
   metadata?: Record<string, unknown>;
 }
@@ -120,13 +121,14 @@ interface AuditLogEntry {
  */
 export async function auditLog(entry: AuditLogEntry): Promise<void> {
   try {
+    const [ip, ua] = await Promise.all([getClientIp(), getUserAgent()]);
     await db.auditLog.create({
       data: {
         actorId: entry.userId,
         event: entry.action,
         metadata: JSON.stringify({
-          ip: entry.ipAddress,
-          userAgent: entry.userAgent,
+          ip: entry.ipAddress || ip,
+          userAgent: entry.userAgent || ua,
           success: entry.success,
           ...entry.metadata,
         }),
@@ -145,8 +147,6 @@ export async function auditLoginFailed(
 ): Promise<void> {
   await auditLog({
     action: 'LOGIN_FAILED',
-    ipAddress: getClientIp(),
-    userAgent: getUserAgent(),
     success: false,
     metadata: { email },
   });
@@ -162,8 +162,6 @@ export async function auditLoginSuccess(
   await auditLog({
     userId,
     action: 'LOGIN_SUCCESS',
-    ipAddress: getClientIp(),
-    userAgent: getUserAgent(),
     success: true,
     metadata: { email },
   });

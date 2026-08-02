@@ -314,9 +314,9 @@
     animation: story-score-count 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
-/* ─── The Neural Core — Hero Styles ─── */
+/* ─── The Neural Command Deck — Hero Styles ─── */
 
-/* Mesh orbs (subtle, behind neural net) */
+/* Mesh orbs */
 @keyframes hero-mesh-1 {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
   25% { transform: translate(60px, -40px) scale(1.15); opacity: 1; }
@@ -327,6 +327,10 @@
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(-50px, 40px) scale(1.1); }
   66% { transform: translate(30px, -60px) scale(0.85); }
+}
+@keyframes hero-mesh-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(40px, -30px) scale(1.2); opacity: 0.9; }
 }
 .hero-mesh-orb {
   position: absolute; border-radius: 50%; pointer-events: none; will-change: transform;
@@ -341,13 +345,31 @@
   background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 60%);
   filter: blur(70px); animation: hero-mesh-2 25s ease-in-out infinite;
 }
+.hero-mesh-orb-3 {
+  width: 400px; height: 400px; top: 30%; left: 50%; transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 55%);
+  filter: blur(60px); animation: hero-mesh-3 18s ease-in-out infinite;
+}
 
 /* Vignette */
 .hero-vignette {
-  background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 40%, rgba(7,10,15,0.7) 100%);
+  background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 40%, rgba(7,10,15,0.65) 100%);
 }
 
-/* Text shimmer */
+/* Aurora text — multi-color rotating gradient */
+@keyframes hero-aurora-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-aurora-text {
+  background: linear-gradient(135deg, #D4A843 0%, #F5D67B 20%, #E8B94A 35%, #C49330 50%, #F5D67B 70%, #D4A843 85%, #B8912A 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: hero-aurora-shift 8s ease-in-out infinite;
+}
+
+/* Text shimmer (legacy, keep for other sections) */
 @keyframes hero-shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -360,11 +382,12 @@
 }
 
 /* CTA pulse */
-@keyframes hero-cta-pulse {
+@keyframes hero-cta-pulse-anim {
   0%, 100% { box-shadow: 0 0 24px rgba(212,168,67,0.25), 0 0 60px rgba(212,168,67,0.1); }
   50% { box-shadow: 0 0 32px rgba(212,168,67,0.4), 0 0 80px rgba(212,168,67,0.15); }
 }
-.hero-cta-glow { animation: hero-cta-pulse 3s ease-in-out infinite; }
+.hero-cta-pulse { animation: hero-cta-pulse-anim 3s ease-in-out infinite; }
+.hero-cta-glow { animation: hero-cta-pulse-anim 3s ease-in-out infinite; }
 
 /* Scan line */
 @keyframes hero-scan-sweep {
@@ -394,13 +417,26 @@
     background: linear-gradient(135deg, rgba(212,168,67,0.3), rgba(139,92,246,0.2), rgba(16,185,129,0.15));
   }
 }
+.hero-holo-border > .hero-deck { border-radius: calc(1rem - 2px); }
 .hero-holo-border > .hero-terminal { border-radius: calc(1rem - 2px); }
 @media (min-width: 1024px) {
   .hero-holo-border { border-radius: 1.5rem; }
+  .hero-holo-border > .hero-deck { border-radius: calc(1.5rem - 2px); }
   .hero-holo-border > .hero-terminal { border-radius: calc(1.5rem - 2px); }
 }
 
-/* Terminal glass */
+/* Command Deck glass */
+.hero-deck {
+  background: linear-gradient(145deg, rgba(11,15,23,0.97), rgba(7,10,15,0.99));
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 25px 60px -12px rgba(0,0,0,0.5),
+    0 0 100px -20px rgba(212,168,67,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Terminal glass (legacy) */
 .hero-terminal {
   background: linear-gradient(145deg, rgba(11,15,23,0.97), rgba(7,10,15,0.99));
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -426,22 +462,10 @@
 .hero-hud-corner {
   position: absolute; width: 24px; height: 24px; pointer-events: none;
 }
-.hero-hud-tl {
-  top: 8px; left: 8px;
-  border-top: 2px solid rgba(212,168,67,0.4); border-left: 2px solid rgba(212,168,67,0.4);
-}
-.hero-hud-tr {
-  top: 8px; right: 8px;
-  border-top: 2px solid rgba(212,168,67,0.4); border-right: 2px solid rgba(212,168,67,0.4);
-}
-.hero-hud-bl {
-  bottom: 8px; left: 8px;
-  border-bottom: 2px solid rgba(212,168,67,0.4); border-left: 2px solid rgba(212,168,67,0.4);
-}
-.hero-hud-br {
-  bottom: 8px; right: 8px;
-  border-bottom: 2px solid rgba(212,168,67,0.4); border-right: 2px solid rgba(212,168,67,0.4);
-}
+.hero-hud-tl { top: 8px; left: 8px; border-top: 2px solid rgba(212,168,67,0.4); border-left: 2px solid rgba(212,168,67,0.4); }
+.hero-hud-tr { top: 8px; right: 8px; border-top: 2px solid rgba(212,168,67,0.4); border-right: 2px solid rgba(212,168,67,0.4); }
+.hero-hud-bl { bottom: 8px; left: 8px; border-bottom: 2px solid rgba(212,168,67,0.4); border-left: 2px solid rgba(212,168,67,0.4); }
+.hero-hud-br { bottom: 8px; right: 8px; border-bottom: 2px solid rgba(212,168,67,0.4); border-right: 2px solid rgba(212,168,67,0.4); }
 
 /* HUD inner ring spin */
 @keyframes hero-hud-inner-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -455,9 +479,9 @@
   background-image: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 18px,
-    rgba(212,168,67,0.015) 18px,
-    rgba(212,168,67,0.015) 19px
+    transparent 20px,
+    rgba(212,168,67,0.012) 20px,
+    rgba(212,168,67,0.012) 21px
   );
   animation: hero-data-drift 30s linear infinite;
 }
@@ -490,4 +514,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

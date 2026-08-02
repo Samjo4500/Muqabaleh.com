@@ -272,7 +272,7 @@ function HowSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL
             className={`absolute top-0 bottom-0 w-px bg-gradient-to-b from-gold/40 via-gold/10 to-transparent ${isRTL ? 'start-6 md:start-8' : 'start-6 md:start-8'}`}
           />
 
-          {([1, 2, 3] as const).map((step) => (
+          {([1, 2, 3, 4] as const).map((step) => (
             <div key={step} className="relative mb-12 flex gap-6 last:mb-0 md:gap-8">
               {/* Step number circle */}
               <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold bg-void text-base font-bold text-gold md:h-16 md:w-16 md:text-lg">
@@ -290,8 +290,15 @@ function HowSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL
                 {/* Step 2: show fahd and noora avatars */}
                 {step === 2 && (
                   <div className="mt-4 flex items-center gap-3">
-                    <InterviewAvatar who="fahd" size="sm" />
-                    <InterviewAvatar who="noora" size="sm" />
+                    <InterviewAvatar who="fahd" size="sm" pro />
+                    <InterviewAvatar who="noora" size="sm" pro />
+                  </div>
+                )}
+                {/* Step 4: show score ring preview */}
+                {step === 4 && (
+                  <div className="mt-4 flex items-center gap-3">
+                    <VerifiedBadge size="sm" />
+                    <span className="text-xs text-[var(--text-faint)]">MQBL-XXXX-XXXX-XXXX</span>
                   </div>
                 )}
               </div>
@@ -366,7 +373,7 @@ function ExperienceSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>
           <div className="glass-card flex flex-col gap-4 p-6" style={{ transform: 'none' }}>
             {/* Interviewer bubble */}
             <div className={`flex items-start gap-3 ${isRTL ? '' : ''}`}>
-              <InterviewAvatar who="noora" size="sm" />
+              <InterviewAvatar who="noora" size="sm" pro />
               <div className="max-w-[80%] rounded-2xl rounded-tl-none border border-gold/20 bg-gold/5 px-4 py-3">
                 <p className="text-sm leading-relaxed text-[var(--text-primary)]">
                   {t('chatQuestion')}
@@ -430,7 +437,7 @@ function InterviewersSection({ t, isRTL }: { t: ReturnType<typeof useTranslation
               {/* Fahd */}
               <GlowCard className="p-6">
                 <div className="flex items-center gap-4">
-                  <InterviewAvatar who="fahd" size="lg" />
+                  <InterviewAvatar who="fahd" size="lg" pro />
                   <div>
                     <h3 className="text-lg font-bold text-[var(--text-primary)]">فهد</h3>
                     <p className="text-sm text-[var(--text-muted)]">{t('tabAI')}</p>
@@ -472,7 +479,7 @@ function InterviewersSection({ t, isRTL }: { t: ReturnType<typeof useTranslation
               {/* Noora */}
               <GlowCard className="p-6">
                 <div className="flex items-center gap-4">
-                  <InterviewAvatar who="noora" size="lg" />
+                  <InterviewAvatar who="noora" size="lg" pro />
                   <div>
                     <h3 className="text-lg font-bold text-[var(--text-primary)]">نورة</h3>
                     <p className="text-sm text-[var(--text-muted)]">{t('tabAI')}</p>

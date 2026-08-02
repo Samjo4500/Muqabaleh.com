@@ -1,7 +1,10 @@
 export { GlowCard } from "./glow-card";
 export { SectionHeading } from "./section-heading";
 export { ScoreBar } from "./score-bar";
+export { ScoreRing } from "./score-ring";
 export { LiveBadge } from "./live-badge";
+export { StatusIndicator } from "./status-indicator";
+export { TtsWaveBars, AudioReactBars } from "./tts-wave-bars";
 export { CountUpStat } from "./count-up-stat";
 export { VerifiedBadge } from "./verified-badge";
 export { PriceTag } from "./price-tag";

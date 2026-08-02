@@ -54,14 +54,9 @@ export default function SignInPage() {
     setTouched({ email: true, password: true });
     if (emailError || passwordError || !email || !password) return;
 
-    // Demo mode: set session cookie and redirect
-    if (demoMode || !dbAvailable) {
-      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `muqabaleh_session=1; path=/; expires=${expires}; SameSite=Lax`;
-      const callbackUrl = new URLSearchParams(window.location.search).get('callbackUrl');
-      router.push(callbackUrl || `/${locale}/app`);
-      return;
-    }
+    // Demo mode: still use NextAuth credentials flow
+    // (the backend will accept any creds when DATABASE_URL is not set)
+    // No client-side cookie tricks — all auth goes through NextAuth JWT.
 
     setLoading(true);
     try {

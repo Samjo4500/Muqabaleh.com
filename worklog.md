@@ -1210,3 +1210,14 @@ Stage Summary:
 - VLM confirmed Arabic hero: text starts from RIGHT, aligned right, Arabic font (Cairo), CTA buttons on right
 - English still LTR with Space Grotesk font — not broken
 - Browser verify: /b2b redirects to /auth/signin?callbackUrl=%2Fb2b
+---
+Task ID: 5a
+Agent: subagent
+Task: Add server-side RBAC guard to /app layout
+
+Work Log:
+- Created auth-guard.tsx with server-side role check
+- Redirects to signin if no session, /forbidden if wrong role
+
+Stage Summary:
+- /app/* now requires USER or SUPER_ADMIN role

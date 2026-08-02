@@ -1,6 +1,7 @@
 import { NextAuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
+import { auditLoginFailed, auditLoginSuccess, isAdminPassword } from './security';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,11 +19,25 @@ export const authOptions: NextAuthOptions = {
             where: { email: credentials.email },
           });
 
-          if (!user || !user.passwordHash) return null;
-          if (!user.isActive) return null;
+          if (!user || !user.passwordHash) {
+            await auditLoginFailed(credentials.email);
+            return null;
+          }
+          if (!user.isActive) {
+            await auditLoginFailed(credentials.email);
+            return null;
+          }
 
           const valid = await compare(credentials.password, user.passwordHash);
-          if (!valid) return null;
+          if (!valid) {
+            await auditLoginFailed(credentials.email);
+            return null;
+          }
+
+          // SUPER_ADMIN login audit
+          if (user.role === 'SUPER_ADMIN') {
+            await auditLoginSuccess(user.id, user.email);
+          }
 
           return {
             id: user.id,
@@ -36,7 +51,7 @@ export const authOptions: NextAuthOptions = {
             subscriptionTier: user.subscriptionTier,
           };
         } catch {
-          // DB unavailable — cannot authenticate
+          await auditLoginFailed(credentials.email);
           return null;
         }
       },
@@ -44,7 +59,18 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 hours (was 30 days)
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   callbacks: {
     async jwt({ token, user }) {

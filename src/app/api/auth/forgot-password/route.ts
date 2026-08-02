@@ -3,12 +3,25 @@ import { hashSync } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { getClientIp } from '@/lib/security';
 
 const forgotSchema = z.object({
   email: z.string().email(),
 });
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp();
+
+  // Rate limit: 3 attempts per IP per 15 min
+  const rl = checkRateLimit(ip, '/api/auth/forgot-password', 3);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = await req.json();
     const { email } = forgotSchema.parse(body);

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hashSync } from 'bcryptjs';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { getClientIp, sanitizeObject, auditLog } from '@/lib/security';
 
 const registerSchema = z.object({
   accountType: z.enum(['INDIVIDUAL', 'B2B']),
@@ -20,9 +22,20 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp();
+
+  // Rate limit: 5 registrations per IP per 15 min
+  const rl = checkRateLimit(ip, '/api/auth/register', 5);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many registration attempts' },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = await req.json();
-    const data = registerSchema.parse(body);
+    const data = registerSchema.parse(sanitizeObject(body));
 
     // Check if email exists
     const existing = await db.user.findUnique({ where: { email: data.email } });

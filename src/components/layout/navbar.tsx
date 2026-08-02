@@ -54,7 +54,7 @@ export function Navbar() {
         {/* Logo — RTL: right, LTR: left */}
         <Link href="/" className="shrink-0">
           <Image
-            src="/images/logos/v2-balanced-a-T.png"
+            src="/images/logos/v2-balanced-a-T.webp"
             alt="مقابلة | Muqabaleh"
             width={200}
             height={56}

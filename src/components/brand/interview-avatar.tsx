@@ -17,8 +17,8 @@ const sizeMap: Record<AvatarSize, number> = {
 };
 
 const imageMap: Record<Interviewer, string> = {
-  fahd: "/images/fahd.png",
-  noora: "/images/noora.png",
+  fahd: "/images/fahd.webp",
+  noora: "/images/noora.webp",
 };
 
 const altMap: Record<Interviewer, string> = {

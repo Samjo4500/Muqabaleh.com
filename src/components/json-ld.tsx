@@ -21,14 +21,19 @@ export function OrganizationJsonLd() {
         '@type': 'Organization',
         name: 'مقابلة | Muqabaleh',
         url: SITE_URL,
-        logo: `${SITE_URL}/images/logos/v2-balanced-a-T.png`,
+        logo: `${SITE_URL}/images/logos/v2-balanced-a-T.webp`,
         description:
           'المنصة العربية الأولى للتدرّب على المقابلات الوظيفية بالذكاء الاصطناعي',
         foundingLocation: {
           '@type': 'Place',
           name: 'Saudi Arabia',
         },
-        sameAs: [],
+        sameAs: [
+          'https://x.com/muqabaleh',
+          'https://linkedin.com/company/muqabaleh',
+          'https://instagram.com/muqabaleh',
+          'https://facebook.com/muqabaleh',
+        ],
       }}
     />
   );

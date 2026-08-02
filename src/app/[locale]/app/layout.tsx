@@ -78,7 +78,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 pb-2">
           <Link href="/app" className="inline-block">
             <Image
-              src="/images/logos/v2-balanced-a-T.png"
+              src="/images/logos/v2-balanced-a-T.webp"
               alt="Muqabaleh"
               width={120}
               height={32}
@@ -138,7 +138,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="p-4 pb-2">
                 <Image
-                  src="/images/logos/v2-balanced-a-T.png"
+                  src="/images/logos/v2-balanced-a-T.webp"
                   alt="Muqabaleh"
                   width={120}
                   height={32}
@@ -159,7 +159,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
           <Image
-            src="/images/logos/v2-balanced-a-T.png"
+            src="/images/logos/v2-balanced-a-T.webp"
             alt="Muqabaleh"
             width={100}
             height={28}

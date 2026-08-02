@@ -188,7 +188,7 @@ export function Footer() {
             {t('copyright')}
           </p>
           <Image
-            src="/images/logos/v2-balanced-a-T.png"
+            src="/images/logos/v2-balanced-a-T.webp"
             alt="مقابلة | Muqabaleh"
             width={100}
             height={28}

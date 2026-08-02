@@ -12,7 +12,7 @@ import { VerifiedBadge } from '@/components/brand';
 
 const STORIES = [
   {
-    image: '/images/story-before.png',
+    image: '/images/story-before.webp',
     altKey: 'storyBeforeAlt',
     kenBurns: 'story-ken-burns-in',
     gradient: 'from-black/90 via-black/60 to-black/80',
@@ -22,7 +22,7 @@ const STORIES = [
     showScore: false,
   },
   {
-    image: '/images/story-practice.png',
+    image: '/images/story-practice.webp',
     altKey: 'storyPracticeAlt',
     kenBurns: 'story-ken-burns-pan',
     gradient: 'from-black/85 via-black/50 to-gold/5',
@@ -32,7 +32,7 @@ const STORIES = [
     showScore: false,
   },
   {
-    image: '/images/story-after.png',
+    image: '/images/story-after.webp',
     altKey: 'storyAfterAlt',
     kenBurns: 'story-ken-burns-in',
     gradient: 'from-black/80 via-black/40 to-emerald/5',

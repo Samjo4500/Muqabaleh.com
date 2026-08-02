@@ -137,7 +137,7 @@ export default function AdminLayout({
         <div className="p-4 pb-2">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/logos/v2-balanced-a-T.png"
+              src="/images/logos/v2-balanced-a-T.webp"
               alt="Muqabaleh"
               width={32}
               height={32}
@@ -174,7 +174,7 @@ export default function AdminLayout({
               <div className="p-4 pb-2">
                 <div className="flex items-center gap-3">
                   <Image
-                    src="/images/logos/v2-balanced-a-T.png"
+                    src="/images/logos/v2-balanced-a-T.webp"
                     alt="Muqabaleh"
                     width={32}
                     height={32}
@@ -195,7 +195,7 @@ export default function AdminLayout({
             </SheetContent>
           </Sheet>
           <Image
-            src="/images/logos/v2-balanced-a-T.png"
+            src="/images/logos/v2-balanced-a-T.webp"
             alt="Muqabaleh"
             width={28}
             height={28}

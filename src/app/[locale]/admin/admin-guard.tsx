@@ -79,7 +79,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
             <Lock size={28} className="text-gold" strokeWidth={1.75} />
           </div>
           <Image
-            src="/images/logos/v2-balanced-a-T.png"
+            src="/images/logos/v2-balanced-a-T.webp"
             alt="Muqabaleh Admin"
             width={120}
             height={34}

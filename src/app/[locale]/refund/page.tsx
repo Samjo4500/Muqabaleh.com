@@ -10,6 +10,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return {
+    absolute: true,
     title: locale === 'ar' ? 'سياسة الاسترجاع — مقابلة | Muqabaleh' : 'Refund Policy — Muqabaleh',
   };
 }

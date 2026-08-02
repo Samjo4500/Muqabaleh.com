@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { startInterview, generateInterviewResponse, evaluateInterview, generateVerificationId } from '@/lib/ai';
+import { getDemoQuestions, type Role, LEVEL_MAP } from '@/lib/interview-questions';
 import { z } from 'zod';
 
 const IS_DEMO = process.env.DEMO_MODE === 'true';
@@ -10,29 +11,14 @@ const guestMessageSchema = z.object({
   content: z.string().min(1).max(5000),
 });
 
-// In-memory demo state (shared via import from interview route)
+// In-memory demo state
 const demoInterviews = new Map<string, {
   id: string;
   language: string;
   status: string;
   messageCount: number;
+  questions: string[];
 }>();
-
-// Demo question sequences
-const DEMO_QUESTIONS_AR = [
-  'أهلاً وسهلاً بك في مقابلة. أنا فهد، المحاور اليوم. خلينا نبدأ بالسؤال الأول: أخبرني عن آخر مشروع عملت عليه وكيف ساهمت في نجاحه؟',
-  'ممتاز، إجابة واضحة. السؤال الثاني: إذا واجهتك مشكلة تقنية معقدة في العمل وزميلك يختلف معك في الحل، كيف تتعامل مع الموقف؟',
-  'رد رائع. السؤال الثالث: ما هي أكبر تحدٍ واجهته في مجالك وكيف تعاملت معه؟',
-  'إجابة ممتازة. السؤال الرابع: أين ترى نفسك خلال ثلاث سنوات من الآن في مسيرتك المهنية؟',
-  'شكراً لك على وقتك. هذا كان آخر سؤال. شكراً لمشاركتك في هذه المقابلة. [INTERVIEW_DONE]',
-];
-const DEMO_QUESTIONS_EN = [
-  'Welcome to Muqabaleh! I\'m Fahd, your interviewer today. Let\'s start with the first question: Tell me about the last project you worked on and how you contributed to its success?',
-  'Great answer. Second question: If you faced a complex technical problem at work and your colleague disagreed with your approach, how would you handle it?',
-  'Excellent response. Third question: What is the biggest challenge you\'ve faced in your field and how did you overcome it?',
-  'Outstanding answer. Fourth question: Where do you see yourself in three years in your career?',
-  'Thank you for your time. That was the final question. Thank you for participating in this interview. [INTERVIEW_DONE]',
-];
 
 // POST /api/guest/[token]/messages — guest candidate message flow
 export async function POST(
@@ -144,16 +130,24 @@ async function handleDemoMessage(req: NextRequest, token: string) {
 
   // Auto-create if doesn't exist (e.g. fallback from DB failure)
   if (!state) {
+    const defaultQs = getDemoQuestions('SOFTWARE_ENGINEER', 'MID', 'TECH', 'AR');
     state = {
       id: `demo-${crypto.randomUUID()}`,
       language: 'AR',
       status: 'PENDING',
       messageCount: 0,
+      questions: defaultQs,
     };
     demoInterviews.set(token, state);
   }
 
-  const questions = state.language === 'EN' ? DEMO_QUESTIONS_EN : DEMO_QUESTIONS_AR;
+  // Fallback: if questions empty, initialize with defaults
+  if (!state.questions || state.questions.length === 0) {
+    const defaultQs = getDemoQuestions('SOFTWARE_ENGINEER', 'MID', 'TECH', state.language as 'AR' | 'EN');
+    state.questions = defaultQs;
+  }
+
+  const questions = state.questions;
   const totalQuestions = questions.length;
 
   if (state.status === 'COMPLETED') {

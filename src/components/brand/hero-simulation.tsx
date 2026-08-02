@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 
 /* ================================================================== */
 /*  Types                                                              */
@@ -21,7 +22,7 @@ type SimStep =
   | 'cta';
 
 /* ================================================================== */
-/*  Waveform Bars (lightweight, CSS + tiny canvas)                       */
+/*  Waveform Bars (Canvas)                                              */
 /* ================================================================== */
 
 type WaveformBarsProps = { active: boolean; barCount?: number; className?: string };
@@ -36,6 +37,7 @@ const WaveformBars = memo(function WaveformBars({ active, barCount = 12, classNa
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
+
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
@@ -81,7 +83,7 @@ const WaveformBars = memo(function WaveformBars({ active, barCount = 12, classNa
 });
 
 /* ================================================================== */
-/*  Score Ring (inline, minimal)                                         */
+/*  Score Ring (SVG, animated)                                           */
 /* ================================================================== */
 
 function SimScoreRing({ value, max = 10, size = 72, strokeWidth = 4, show }: { value: number; max?: number; size?: number; strokeWidth?: number; show: boolean }) {
@@ -102,31 +104,18 @@ function SimScoreRing({ value, max = 10, size = 72, strokeWidth = 4, show }: { v
     >
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeWidth} />
       <motion.circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
+        cx={size / 2} cy={size / 2} r={r}
+        fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
         strokeDasharray={circ}
         initial={{ strokeDashoffset: circ }}
         animate={show ? { strokeDashoffset: circ * (1 - pct) } : { strokeDashoffset: circ }}
         transition={{ duration: 1.5, ease: 'easeOut' }}
-        style={{ filter: `drop-shadow(0 0 8px rgba(212,168,67,0.5))` }}
+        style={{ filter: 'drop-shadow(0 0 8px rgba(212,168,67,0.5))' }}
       />
       <motion.text
-        x={size / 2}
-        y={size / 2}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill={color}
-        fontSize={size * 0.28}
-        fontWeight="bold"
-        className="rotate-90"
-        initial={{ opacity: 0 }}
-        animate={show ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ delay: 0.8, duration: 0.4 }}
+        x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central"
+        fill={color} fontSize={size * 0.28} fontWeight="bold" className="rotate-90"
+        initial={{ opacity: 0 }} animate={show ? { opacity: 1 } : { opacity: 0 }} transition={{ delay: 0.8, duration: 0.4 }}
       >
         {value}/{max}
       </motion.text>
@@ -175,25 +164,46 @@ function BlinkingCursor({ show }: { show: boolean }) {
 }
 
 /* ================================================================== */
-/*  Floating Particles (CSS only)                                        */
+/*  Floating Grid Dots (background decoration)                          */
 /* ================================================================== */
 
-function FloatingParticles() {
+function GridDots() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {Array.from({ length: 20 }).map((_, i) => (
-        <span
-          key={i}
-          className="absolute rounded-full bg-gold/[0.07]"
-          style={{
-            width: `${3 + (i % 4) * 2}px`,
-            height: `${3 + (i % 4) * 2}px`,
-            left: `${(i * 37) % 100}%`,
-            top: `${(i * 53) % 100}%`,
-            animation: `hero-float-particle ${6 + (i % 5)}s ease-in-out ${(i % 3)}s infinite alternate`,
-          }}
-        />
-      ))}
+      <svg className="absolute inset-0 h-full w-full opacity-[0.03]">
+        <defs>
+          <pattern id="hero-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="1" fill="#D4A843" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hero-dots)" />
+      </svg>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  Floating Orbs (aurora-like background blurs)                        */
+/* ================================================================== */
+
+function FloatingOrbs() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="hero-orb hero-orb-1" />
+      <div className="hero-orb hero-orb-2" />
+      <div className="hero-orb hero-orb-3" />
+    </div>
+  );
+}
+
+/* ================================================================== */
+/*  Scan Line Effect                                                    */
+/* ================================================================== */
+
+function ScanLine() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl" aria-hidden="true">
+      <div className="hero-scan-line" />
     </div>
   );
 }
@@ -213,7 +223,7 @@ export function HeroSimulation() {
   const [status, setStatus] = useState<SimStatus>('online');
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // IntersectionObserver for lazy load + pause
+  // IntersectionObserver
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -229,28 +239,16 @@ export function HeroSimulation() {
   useEffect(() => {
     if (!isVisible) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
-
     const at = (ms: number, fn: () => void) => { timers.push(setTimeout(fn, ms)); };
 
-    // Step 1: Fahd greeting
     at(0, () => { setStep('fahd-greeting'); setStatus('online'); setIsSpeaking(true); });
     at(3500, () => { setIsSpeaking(false); setStatus('preparing'); });
-
-    // Step 2: Fahd question
     at(5500, () => { setStep('fahd-question'); setStatus('online'); setIsSpeaking(true); });
     at(9000, () => { setIsSpeaking(false); });
-
-    // Step 3: User reply
     at(9500, () => { setStep('user-reply'); });
-
-    // Step 4: Analyzing
     at(15000, () => { setStatus('analyzing'); setStep('analyzing-score'); });
-
-    // Step 5: Fahd next question
     at(22000, () => { setStatus('online'); setStep('fahd-next'); setIsSpeaking(true); });
     at(28000, () => { setIsSpeaking(false); });
-
-    // Step 6: CTA
     at(30000, () => { setStep('cta'); setStatus('done'); });
 
     return () => timers.forEach(clearTimeout);
@@ -277,135 +275,254 @@ export function HeroSimulation() {
   };
   const sc = statusCfg[status];
 
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
   return (
     <section
       ref={containerRef}
-      className="relative min-h-[500px] md:min-h-[600px] overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0a1628, #0f1d2e)' }}
+      className="relative min-h-[600px] lg:min-h-[700px] overflow-hidden"
+      style={{ backgroundColor: 'var(--bg-void)' }}
     >
-      <FloatingParticles />
+      {/* ─── Background layers ─── */}
+      <FloatingOrbs />
+      <GridDots />
 
-      <div className="relative z-10 mx-auto flex min-h-[500px] md:min-h-[600px] max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className={`flex flex-col md:flex-row items-stretch gap-6 md:gap-0 py-16 md:py-0 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+      {/* ─── Main content ─── */}
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-10 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:gap-16 lg:px-8 lg:py-24">
 
-          {/* ─── LEFT (40%): Interviewer Panel ─── */}
-          <div className="flex flex-col items-center justify-center gap-5 md:w-[40%] md:py-16">
-            {/* Avatar */}
-            <div className="relative">
-              <div
-                className="rounded-full p-[4px]"
-                style={{ background: 'linear-gradient(135deg, #F5D67B, #D4A843, #B8912A, #D4A843, #F5D67B)' }}
+        {/* ═══════ LEFT: Copy + CTA ═══════ */}
+        <div className={`flex flex-1 flex-col items-center gap-6 text-center lg:items-start lg:text-start ${isRTL ? 'lg:order-2' : ''}`}>
+          {/* Eyebrow */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="eyebrow"
+          >
+            {t('heroEyebrow')}
+          </motion.div>
+
+          {/* H1 */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-3xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)] sm:text-4xl lg:text-5xl xl:text-[3.5rem]"
+          >
+            {t('heroH1')}{' '}
+            <span className="gold-gradient-text">{t('heroH1Highlight')}</span>
+          </motion.h1>
+
+          {/* Sub */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="max-w-lg text-base leading-relaxed text-[var(--text-muted)] lg:text-lg"
+          >
+            {t('heroSub')}
+          </motion.p>
+
+          {/* CTA buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="flex flex-wrap items-center justify-center gap-4 lg:justify-start"
+          >
+            <Link href="/auth/register" className="btn-gold inline-flex items-center gap-2 no-underline text-base">
+              {t('heroCta1')}
+              <ArrowIcon size={18} strokeWidth={2.5} />
+            </Link>
+            <a href="#how" className="btn-ghost inline-flex items-center gap-2 no-underline text-base">
+              <Sparkles size={16} strokeWidth={2} className="text-gold" />
+              {t('heroCta2')}
+            </a>
+          </motion.div>
+
+          {/* Trust chips */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={isVisible ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+          >
+            {['20+ Countries', '4-Criteria AI', 'QR Verified'].map((chip) => (
+              <span
+                key={chip}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5 text-xs font-medium text-[var(--text-faint)]"
               >
-                <div className="rounded-full bg-[#0a1628] p-[3px]">
-                  <img
-                    src="/images/fahd-pro.webp"
-                    alt="Fahd"
-                    className="h-[120px] w-[120px] md:h-[200px] md:w-[200px] rounded-full object-cover"
-                    loading="eager"
-                  />
+                <span className="h-1.5 w-1.5 rounded-full bg-gold/60" />
+                {chip}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ═══════ RIGHT: 3D Floating Terminal ═══════ */}
+        <div className={`relative flex-1 ${isRTL ? 'lg:order-1' : ''}`}>
+          {/* Glow behind terminal */}
+          <div className="hero-terminal-glow" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 40, rotateX: 8 }}
+            animate={isVisible ? { opacity: 1, y: 0, rotateX: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="hero-terminal relative overflow-hidden rounded-2xl border border-white/[0.08]"
+            style={{ perspective: '1200px' }}
+          >
+            <ScanLine />
+
+            {/* Terminal header bar */}
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5">
+              <div className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+              </div>
+              <div className="flex-1 text-center text-[11px] font-medium tracking-wider text-[var(--text-faint)] uppercase">
+                Muqabaleh — AI Interview
+              </div>
+              <div className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold ${sc.cls}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${status !== 'done' ? 'animate-pulse' : ''}`} />
+                {sc.label}
+              </div>
+            </div>
+
+            {/* Terminal body: interviewer + chat */}
+            <div className="flex min-h-[340px] flex-col sm:flex-row">
+
+              {/* ─── Interviewer sidebar ─── */}
+              <div className="flex flex-col items-center gap-3 border-b sm:border-b-0 sm:border-e border-white/[0.06] px-5 py-5 sm:w-[140px] sm:shrink-0">
+                {/* Avatar with gold ring */}
+                <div className="relative hero-avatar-float">
+                  <div className="rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #F5D67B, #D4A843, #B8912A, #D4A843, #F5D67B)' }}>
+                    <div className="rounded-full p-[2px]" style={{ background: 'var(--bg-panel)' }}>
+                      <img
+                        src="/images/fahd-pro.webp"
+                        alt="Fahd"
+                        className="h-[64px] w-[64px] rounded-full object-cover"
+                        loading="eager"
+                      />
+                    </div>
+                  </div>
+                  <span className="absolute bottom-0 end-0 z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--bg-panel)] bg-emerald">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald animate-pulse" />
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-white/90 text-center leading-tight">{t('simFahdTitle')}</p>
+                {/* Waveform */}
+                <div className="w-[80px] h-5 mt-1">
+                  <WaveformBars active={isSpeaking} className="h-full w-full" />
                 </div>
               </div>
-              {/* Online dot */}
-              <span className="absolute bottom-2 end-2 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#0a1628] bg-emerald">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald animate-pulse" />
-              </span>
+
+              {/* ─── Chat area ─── */}
+              <div className="flex flex-1 flex-col justify-center gap-3 p-4 sm:p-5 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  {/* Fahd speech bubble */}
+                  {isCurrentlyTypingFahd && currentFahdText && (
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className={`relative flex items-start gap-2.5 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}
+                    >
+                      <div className={`relative max-w-[88%] rounded-2xl rounded-tl-sm ${isRTL ? 'rounded-tr-sm rounded-tl-2xl' : 'rounded-tl-sm rounded-tr-2xl'} border border-gold/15 bg-gold/[0.07] px-4 py-3 text-[13px] sm:text-sm leading-relaxed text-white/90`}
+                      >
+                        {currentFahdText}
+                        <BlinkingCursor show={isCurrentlyTypingFahd && currentFahdText.length < (step === 'fahd-greeting' ? t('simStep1').length : step === 'fahd-question' ? t('simStep2').length : t('simStep5').length)} />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* User reply bubble */}
+                  {showUserBubble && userReply && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className={`flex items-start ${isRTL ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div className={`max-w-[82%] rounded-2xl ${isRTL ? 'rounded-tl-sm' : 'rounded-tr-sm'} border border-white/[0.08] bg-white/[0.05] backdrop-blur-sm px-4 py-3 text-[13px] sm:text-sm leading-relaxed text-white/70`}
+                      >
+                        {userReply}
+                        <BlinkingCursor show={step === 'user-reply' && userReply.length < t('simUserReply').length} />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Score + Feedback card */}
+                  {showScoreCard && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.4, delay: 0.15 }}
+                      className={`flex items-center gap-4 rounded-xl border border-gold/10 bg-white/[0.03] backdrop-blur-sm p-4 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    >
+                      <SimScoreRing value={7} max={10} size={64} strokeWidth={3.5} show={showScoreCard} />
+                      <div className={`flex flex-col gap-0.5 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gold">AI Feedback</p>
+                        <p className="text-xs leading-relaxed text-white/60">{t('simFeedback')}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
-            {/* Name */}
-            <p className="text-base md:text-lg font-bold text-white">{t('simFahdTitle')}</p>
-
-            {/* Status badge */}
-            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold ${sc.cls}`}>
-              <span className={`h-2 w-2 rounded-full ${sc.dot} ${status !== 'done' ? 'animate-pulse' : ''}`} />
-              {sc.label}
-            </div>
-
-            {/* Waveform */}
-            <div className="w-[80px] md:w-[160px] h-6">
-              <WaveformBars active={isSpeaking} className="h-full w-full" />
-            </div>
-          </div>
-
-          {/* ─── RIGHT (60%): Chat Simulation ─── */}
-          <div className="flex flex-1 flex-col justify-center gap-4 md:px-8">
-            <AnimatePresence mode="wait">
-              {/* Fahd speech bubble */}
-              {isCurrentlyTypingFahd && currentFahdText && (
+            {/* ─── CTA Overlay inside terminal ─── */}
+            <AnimatePresence>
+              {showCta && (
                 <motion.div
-                  key={step}
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex items-start gap-3 ${isRTL ? 'flex-row' : 'flex-row-reverse'}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                  className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl px-6"
+                  style={{ background: 'rgba(7,10,15,0.88)', backdropFilter: 'blur(6px)' }}
                 >
-                  <div className={`relative max-w-[85%] rounded-2xl ${isRTL ? 'rounded-tl-sm' : 'rounded-tr-sm'} border border-gold/20 bg-gold/[0.08] px-5 py-3.5 text-sm md:text-base leading-relaxed text-white`}
-                  >
-                    {currentFahdText}
-                    <BlinkingCursor show={isCurrentlyTypingFahd && currentFahdText.length < (step === 'fahd-greeting' ? t('simStep1').length : step === 'fahd-question' ? t('simStep2').length : t('simStep5').length)} />
-                  </div>
-                </motion.div>
-              )}
-
-              {/* User reply bubble */}
-              {showUserBubble && userReply && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex items-start ${isRTL ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[80%] rounded-2xl ${isRTL ? 'rounded-tr-sm' : 'rounded-tl-sm'} border border-white/10 bg-white/[0.06] backdrop-blur-sm px-5 py-3.5 text-sm md:text-base leading-relaxed text-white/80`}
-                  >
-                    {userReply}
-                    <BlinkingCursor show={step === 'user-reply' && userReply.length < t('simUserReply').length} />
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Score + Feedback card */}
-              {showScoreCard && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className={`flex items-center gap-5 rounded-2xl border border-gold/15 bg-white/[0.04] backdrop-blur-sm p-5 ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  <SimScoreRing value={7} max={10} size={72} strokeWidth={4} show={showScoreCard} />
-                  <div className={`flex flex-col gap-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gold">AI Feedback</p>
-                    <p className="text-sm leading-relaxed text-white/70">{t('simFeedback')}</p>
-                  </div>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-white text-center">
+                    <span className="gold-gradient-text">{t('simCtaHeadline')}</span>
+                  </h3>
+                  <Link href="/auth/register" className="btn-gold mt-1 no-underline text-sm sm:text-base">
+                    {t('simCtaButton')}
+                  </Link>
+                  <p className="text-xs text-white/40">{t('simCtaSub')}</p>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
+
+          {/* Floating decorative badges around terminal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className={`hero-float-badge hero-float-badge-1 absolute -top-4 ${isRTL ? '-start-4' : '-end-4'}`}
+          >
+            <div className="flex items-center gap-2 rounded-xl border border-gold/20 bg-[var(--bg-panel)]/90 backdrop-blur-sm px-3 py-2 shadow-lg">
+              <SimScoreRing value={7} max={10} size={36} strokeWidth={2.5} show={true} />
+              <span className="text-[10px] font-bold text-gold/80">7/10</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5, delay: 1.0 }}
+            className={`hero-float-badge hero-float-badge-2 absolute -bottom-3 ${isRTL ? '-end-6' : '-start-6'}`}
+          >
+            <div className="flex items-center gap-2 rounded-xl border border-emerald/20 bg-[var(--bg-panel)]/90 backdrop-blur-sm px-3 py-2 shadow-lg">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald/20">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald animate-pulse" />
+              </span>
+              <span className="text-[10px] font-bold text-emerald/80">Live</span>
+            </div>
+          </motion.div>
         </div>
-
-        {/* ─── CTA Overlay ─── */}
-        <AnimatePresence>
-          {showCta && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 px-4"
-              style={{ background: 'rgba(10,22,40,0.85)', backdropFilter: 'blur(4px)' }}
-            >
-              <h2 className="text-2xl md:text-4xl font-extrabold text-white text-center">
-                <span className="gold-gradient-text">{t('simCtaHeadline')}</span>
-              </h2>
-              <Link href="/auth/register" className="btn-gold mt-2 text-base md:text-lg no-underline">
-                {t('simCtaButton')}
-              </Link>
-              <p className="text-sm text-white/50">{t('simCtaSub')}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-
-      {/* Particle keyframes injected once */}
-      <style dangerouslySetInnerHTML={{ __html: `@keyframes hero-float-particle { 0% { transform: translateY(0px) translateX(0px); opacity: 0.3; } 100% { transform: translateY(-30px) translateX(15px); opacity: 0.7; } }` }} />
     </section>
   );
 }

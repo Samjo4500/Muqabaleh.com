@@ -1191,3 +1191,22 @@ Added unique Arabic and English page titles to 7 routes via `generateMetadata`:
 - `bun run lint` passed with zero errors
 - Dev server compiles successfully
 - No changes to client component logic — only file renaming and server wrapper creation
+---
+Task ID: 1
+Agent: main
+Task: Fix P0 security bypass (middleware) + RTL direction override
+
+Work Log:
+- Diagnosed middleware bug: /b2b (without /ar prefix) was returning 200 because auth check only ran when URL had locale prefix. intlMiddleware internally rewrote /b2b → /ar/b2b, bypassing auth.
+- Fixed middleware.ts: moved protected path check BEFORE intlMiddleware, using stripLocale() to handle both /b2b and /ar/b2b
+- Diagnosed RTL bug: Tailwind CSS 4 preflight sets html { direction: ltr } which overrides HTML dir="rtl" attribute (presentational hints lose to author CSS)
+- Fixed globals.css: added explicit [dir="rtl"] { direction: rtl; text-align: right; } and [dir="ltr"] { direction: ltr; text-align: left; } in @layer base
+- Added try-catch in requireAuth() for robustness against broken sessions
+- Committed, pushed, deployed to Vercel
+
+Stage Summary:
+- All 7 protected path variants (with/without locale, ar/en) now return HTTP 307 redirect to signin
+- curl -sI /b2b → 307 location: /ar/auth/signin?callbackUrl=%2Fb2b
+- VLM confirmed Arabic hero: text starts from RIGHT, aligned right, Arabic font (Cairo), CTA buttons on right
+- English still LTR with Space Grotesk font — not broken
+- Browser verify: /b2b redirects to /auth/signin?callbackUrl=%2Fb2b

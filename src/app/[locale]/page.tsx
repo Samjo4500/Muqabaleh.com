@@ -37,6 +37,7 @@ import {
   QrCard,
   LiveBadge,
   HeroStoryboard,
+  HeroSimulation,
 } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -99,61 +100,7 @@ export default function LandingPage() {
 /* ================================================================== */
 
 function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; isRTL: boolean }) {
-  return (
-    <HeroStoryboard>
-      {/* Navbar spacer + hero text floats over the storyboard */}
-      <div className="flex-1">
-        <div className="mx-auto max-w-7xl px-4 pt-28 sm:px-6 md:pt-36 lg:px-8">
-          <div className={`flex flex-col gap-8 ${isRTL ? 'items-start text-right' : 'items-start text-left'}`}>
-            {/* Eyebrow */}
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-pulse-emerald rounded-full bg-gold opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold" />
-              </span>
-              <span className="eyebrow">{t('heroEyebrow')}</span>
-            </div>
-
-            {/* H1 */}
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight drop-shadow-2xl md:text-5xl lg:text-6xl">
-              {t('heroH1').split(t('heroH1Highlight')).map((part, i, arr) =>
-                i < arr.length - 1 ? (
-                  <span key={i}>
-                    {part}
-                    <span className="gold-gradient-text">{t('heroH1Highlight')}</span>
-                  </span>
-                ) : (
-                  <span key={i}>{part}</span>
-                ),
-              )}
-            </h1>
-
-            {/* Sub */}
-            <p className="max-w-lg text-lg leading-relaxed text-white/70 drop-shadow-lg">
-              {t('heroSub')}
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-4">
-              <Link href="/auth/register" className="btn-gold">
-                {t('heroCta1')}
-              </Link>
-              <a href="#how" className="btn-ghost border-white/20 text-white hover:bg-white/10">
-                {t('heroCta2')}
-              </a>
-            </div>
-
-            {/* Trust chips */}
-            <div className="flex flex-wrap gap-3 pt-4">
-              <TrustChip icon={<Shield size={16} strokeWidth={1.75} />} label={t('trustPaypal')} />
-              <TrustChip icon={<QrCode size={16} strokeWidth={1.75} />} label={t('trustQR')} />
-              <TrustChip icon={<Globe size={16} strokeWidth={1.75} />} label={t('trustCountries')} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </HeroStoryboard>
-  );
+  return <HeroSimulation />;
 }
 
 function TrustChip({ icon, label }: { icon: React.ReactNode; label: string }) {

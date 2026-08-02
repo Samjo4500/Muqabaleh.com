@@ -45,14 +45,14 @@ type MockUser = {
 };
 
 const mockUsers: MockUser[] = [
-  { name: 'سارة المحمدي', email: 'sara@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 3, active: true, created: '2025-06-15' },
-  { name: 'أحمد العتيبي', email: 'ahmed@example.com', role: 'COMPANY_ADMIN', accountType: 'b2b', sessionsLeft: 47, active: true, created: '2025-05-20' },
-  { name: 'نورة القحطاني', email: 'noura@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 0, active: false, created: '2025-04-10' },
-  { name: 'فهد العنزي', email: 'fahad@example.com', role: 'INTERVIEWER', accountType: 'personal', sessionsLeft: 12, active: true, created: '2025-03-22' },
-  { name: 'خالد الشمري', email: 'khalid@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 8, active: true, created: '2025-06-01' },
-  { name: 'ليلى الدوسري', email: 'layla@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 1, active: true, created: '2025-07-05' },
-  { name: 'سلطان الحربي', email: 'sultan@example.com', role: 'ADMIN', accountType: 'personal', sessionsLeft: 0, active: true, created: '2025-01-01' },
-  { name: 'هند السالم', email: 'hind@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 5, active: false, created: '2025-05-18' },
+  { name: 'سارة المحمدي', email: 'sara@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 3, active: true, created: '2026-06-15' },
+  { name: 'أحمد العتيبي', email: 'ahmed@example.com', role: 'COMPANY_ADMIN', accountType: 'b2b', sessionsLeft: 47, active: true, created: '2026-05-20' },
+  { name: 'نورة القحطاني', email: 'noura@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 0, active: false, created: '2026-04-10' },
+  { name: 'فهد العنزي', email: 'fahad@example.com', role: 'INTERVIEWER', accountType: 'personal', sessionsLeft: 12, active: true, created: '2026-03-22' },
+  { name: 'خالد الشمري', email: 'khalid@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 8, active: true, created: '2026-06-01' },
+  { name: 'ليلى الدوسري', email: 'layla@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 1, active: true, created: '2026-07-05' },
+  { name: 'سلطان الحربي', email: 'sultan@example.com', role: 'ADMIN', accountType: 'personal', sessionsLeft: 0, active: true, created: '2026-01-01' },
+  { name: 'هند السالم', email: 'hind@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 5, active: false, created: '2026-05-18' },
 ];
 
 const ROLE_BADGE_KEYS: Record<Role, string> = {

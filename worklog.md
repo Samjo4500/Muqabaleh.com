@@ -1151,3 +1151,43 @@ Stage Summary:
 - Real remaining fixes: image optimization (WebP), JSON-LD sameAs, hydration error
 - Total image weight reduced from ~1.8MB to ~600KB (67% reduction)
 - Production verified at muqabaleh-com.vercel.app with zero console errors
+
+## Task 5 — Add Unique Arabic/English Page Titles via generateMetadata
+
+**Date**: 2025-07-15
+**Agent**: Metadata Title Agent
+**Task**: Add locale-aware page titles to 7 routes using `generateMetadata`
+
+### What was done
+
+Added unique Arabic and English page titles to 7 routes via `generateMetadata`:
+
+| Route | Arabic Title | English Title | Approach |
+|-------|-------------|---------------|----------|
+| `/pricing` | الأسعار — مقابلة \| Muqabaleh | Pricing — Muqabaleh | Extracted client component to `pricing-content.tsx`, new server `page.tsx` wrapper |
+| `/about` | من نحن — مقابلة \| Muqabaleh | About — Muqabaleh | Extracted client component to `about-content.tsx`, new server `page.tsx` wrapper |
+| `/business` | الشركات — مقابلة \| Muqabaleh | Business — Muqabaleh | Extracted client component to `business-content.tsx`, new server `page.tsx` wrapper |
+| `/demo` | جرب المقابلة — مقابلة \| Muqabaleh | Try Muqabaleh | Extracted client component to `demo-content.tsx`, new server `page.tsx` wrapper |
+| `/privacy` | سياسة الخصوصية — مقابلة \| Muqabaleh | Privacy Policy — Muqabaleh | Added `generateMetadata` directly (already server component) |
+| `/terms` | شروط الاستخدام — مقابلة \| Muqabaleh | Terms of Service — Muqabaleh | Added `generateMetadata` directly (already server component) |
+| `/refund` | سياسة الاسترجاع — مقابلة \| Muqabaleh | Refund Policy — Muqabaleh | Added `generateMetadata` directly (already server component) |
+
+### Files created
+- `src/app/[locale]/pricing/pricing-content.tsx` — Client component extracted from pricing/page.tsx
+- `src/app/[locale]/about/about-content.tsx` — Client component extracted from about/page.tsx
+- `src/app/[locale]/business/business-content.tsx` — Client component extracted from business/page.tsx
+- `src/app/[locale]/demo/demo-content.tsx` — Client component extracted from demo/page.tsx
+
+### Files modified
+- `src/app/[locale]/pricing/page.tsx` — Replaced with server component wrapper + `generateMetadata`
+- `src/app/[locale]/about/page.tsx` — Replaced with server component wrapper + `generateMetadata`
+- `src/app/[locale]/business/page.tsx` — Replaced with server component wrapper + `generateMetadata`
+- `src/app/[locale]/demo/page.tsx` — Replaced with server component wrapper + `generateMetadata`
+- `src/app/[locale]/privacy/page.tsx` — Added `generateMetadata`, `Props` type, `Metadata` import
+- `src/app/[locale]/terms/page.tsx` — Added `generateMetadata`, `Props` type, `Metadata` import
+- `src/app/[locale]/refund/page.tsx` — Added `generateMetadata`, `Props` type, `Metadata` import
+
+### Verification
+- `bun run lint` passed with zero errors
+- Dev server compiles successfully
+- No changes to client component logic — only file renaming and server wrapper creation

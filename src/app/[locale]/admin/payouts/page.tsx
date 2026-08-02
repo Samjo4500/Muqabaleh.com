@@ -51,14 +51,14 @@ type MockDue = {
 };
 
 const mockPayments: MockPayment[] = [
-  { date: '2025-07-28', user: 'شركة نيوم', amount: '$149.00', status: 'PAID', orderId: 'ORD-8f3a2' },
-  { date: '2025-07-27', user: 'سارة المحمدي', amount: '$19.00', status: 'PAID', orderId: 'ORD-7b1c4' },
-  { date: '2025-07-26', user: 'شركة أرامكو', amount: '$399.00', status: 'PAID', orderId: 'ORD-6d2e8' },
-  { date: '2025-07-25', user: 'أحمد العتيبي', amount: '$49.00', status: 'REFUNDED', orderId: 'ORD-5a9f1' },
-  { date: '2025-07-24', user: 'نورة القحطاني', amount: '$19.00', status: 'PAID', orderId: 'ORD-4c8d3' },
-  { date: '2025-07-23', user: 'شركة STC', amount: '$149.00', status: 'PENDING', orderId: 'ORD-3e7b5' },
-  { date: '2025-07-22', user: 'فهد العنزي', amount: '$39.00', status: 'PAID', orderId: 'ORD-2f6a9' },
-  { date: '2025-07-21', user: 'خالد الشمري', amount: '$19.00', status: 'PAID', orderId: 'ORD-1d5c7' },
+  { date: '2026-07-28', user: 'شركة نيوم', amount: '$149.00', status: 'PAID', orderId: 'ORD-8f3a2' },
+  { date: '2026-07-27', user: 'سارة المحمدي', amount: '$19.00', status: 'PAID', orderId: 'ORD-7b1c4' },
+  { date: '2026-07-26', user: 'شركة أرامكو', amount: '$399.00', status: 'PAID', orderId: 'ORD-6d2e8' },
+  { date: '2026-07-25', user: 'أحمد العتيبي', amount: '$49.00', status: 'REFUNDED', orderId: 'ORD-5a9f1' },
+  { date: '2026-07-24', user: 'نورة القحطاني', amount: '$19.00', status: 'PAID', orderId: 'ORD-4c8d3' },
+  { date: '2026-07-23', user: 'شركة STC', amount: '$149.00', status: 'PENDING', orderId: 'ORD-3e7b5' },
+  { date: '2026-07-22', user: 'فهد العنزي', amount: '$39.00', status: 'PAID', orderId: 'ORD-2f6a9' },
+  { date: '2026-07-21', user: 'خالد الشمري', amount: '$19.00', status: 'PAID', orderId: 'ORD-1d5c7' },
 ];
 
 const mockDues: MockDue[] = [

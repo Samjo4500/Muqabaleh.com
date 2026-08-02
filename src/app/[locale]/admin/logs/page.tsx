@@ -36,16 +36,16 @@ type MockLog = {
 };
 
 const mockLogs: MockLog[] = [
-  { timestamp: '2025-07-28 14:32:05', user: 'سارة المحمدي', event: 'eventUserRegistered', description: 'تسجيل حساب جديد' },
-  { timestamp: '2025-07-28 14:15:22', user: 'أحمد العتيبي', event: 'eventInterviewCompleted', description: 'اكتملت مقابلة تقنية مع درجة 92' },
-  { timestamp: '2025-07-28 13:48:10', user: 'شركة نيوم', event: 'eventPaymentCaptured', description: 'دفعة $149.00 — خطة احترافية' },
-  { timestamp: '2025-07-28 12:30:00', user: 'د. هدى السالم', event: 'eventInterviewerApplied', description: 'طلب انضمام كمحاور بشري' },
-  { timestamp: '2025-07-28 11:22:45', user: 'م. سلطان الحربي', event: 'eventInterviewerApproved', description: 'تم اعتماد المحاور بعد المراجعة' },
-  { timestamp: '2025-07-28 10:05:18', user: 'أ. سعاد المالكي', event: 'eventInterviewerRejected', description: 'تم رفض الطلب — عدم استيفاء المعايير' },
-  { timestamp: '2025-07-27 22:10:33', user: 'فهد العنزي', event: 'eventSessionAdded', description: 'تمت إضافة 10 جلسات بواسطة المدير' },
-  { timestamp: '2025-07-27 20:45:00', user: 'م. عمر البلوي', event: 'eventQuestionAdded', description: 'تم إضافة سؤال جديد: مفهوم microservices' },
-  { timestamp: '2025-07-27 18:30:12', user: 'سلطان الحربي', event: 'eventSettingsUpdated', description: 'تحديث عمولة المنصة من 30% إلى 35%' },
-  { timestamp: '2025-07-27 15:20:44', user: 'نورة القحطاني', event: 'eventPasswordReset', description: 'طلب إعادة تعيين كلمة المرور' },
+  { timestamp: '2026-07-28 14:32:05', user: 'سارة المحمدي', event: 'eventUserRegistered', description: 'تسجيل حساب جديد' },
+  { timestamp: '2026-07-28 14:15:22', user: 'أحمد العتيبي', event: 'eventInterviewCompleted', description: 'اكتملت مقابلة تقنية مع درجة 92' },
+  { timestamp: '2026-07-28 13:48:10', user: 'شركة نيوم', event: 'eventPaymentCaptured', description: 'دفعة $149.00 — خطة احترافية' },
+  { timestamp: '2026-07-28 12:30:00', user: 'د. هدى السالم', event: 'eventInterviewerApplied', description: 'طلب انضمام كمحاور بشري' },
+  { timestamp: '2026-07-28 11:22:45', user: 'م. سلطان الحربي', event: 'eventInterviewerApproved', description: 'تم اعتماد المحاور بعد المراجعة' },
+  { timestamp: '2026-07-28 10:05:18', user: 'أ. سعاد المالكي', event: 'eventInterviewerRejected', description: 'تم رفض الطلب — عدم استيفاء المعايير' },
+  { timestamp: '2026-07-27 22:10:33', user: 'فهد العنزي', event: 'eventSessionAdded', description: 'تمت إضافة 10 جلسات بواسطة المدير' },
+  { timestamp: '2026-07-27 20:45:00', user: 'م. عمر البلوي', event: 'eventQuestionAdded', description: 'تم إضافة سؤال جديد: مفهوم microservices' },
+  { timestamp: '2026-07-27 18:30:12', user: 'سلطان الحربي', event: 'eventSettingsUpdated', description: 'تحديث عمولة المنصة من 30% إلى 35%' },
+  { timestamp: '2026-07-27 15:20:44', user: 'نورة القحطاني', event: 'eventPasswordReset', description: 'طلب إعادة تعيين كلمة المرور' },
 ];
 
 const EVENT_COLORS: Record<LogEvent, string> = {

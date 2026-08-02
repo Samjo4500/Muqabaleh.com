@@ -37,14 +37,14 @@ type MockInterview = {
 };
 
 const mockInterviews: MockInterview[] = [
-  { id: 'INT-8f3a2b1c4', user: 'سارة المحمدي', mode: 'AI', industry: 'تقنية المعلومات', type: 'TECHNICAL', status: 'COMPLETED', score: '92', date: '2025-07-28' },
-  { id: 'INT-7b1c4d5e8', user: 'أحمد العتيبي', mode: 'HUMAN', industry: 'الموارد البشرية', type: 'BEHAVIORAL', status: 'COMPLETED', score: '88', date: '2025-07-27' },
-  { id: 'INT-6d2e8f0a3', user: 'نورة القحطاني', mode: 'AI', industry: 'التسويق', type: 'BEHAVIORAL', status: 'IN_PROGRESS', score: '—', date: '2025-07-27' },
-  { id: 'INT-5a9f1b2c6', user: 'فهد العنزي', mode: 'AI', industry: 'الهندسة', type: 'TECHNICAL', status: 'PENDING', score: '—', date: '2025-07-26' },
-  { id: 'INT-4c8d3e7f0', user: 'خالد الشمري', mode: 'HUMAN', industry: 'المالية', type: 'BEHAVIORAL', status: 'COMPLETED', score: '75', date: '2025-07-25' },
-  { id: 'INT-3e7b5a1d9', user: 'ليلى الدوسري', mode: 'AI', industry: 'تقنية المعلومات', type: 'TECHNICAL', status: 'EVALUATION_FAILED', score: '—', date: '2025-07-25' },
-  { id: 'INT-2f6a9c4b8', user: 'سلطان الحربي', mode: 'AI', industry: 'التعليم', type: 'BEHAVIORAL', status: 'COMPLETED', score: '81', date: '2025-07-24' },
-  { id: 'INT-1d5c7e2a6', user: 'هند السالم', mode: 'HUMAN', industry: 'الصحة', type: 'BEHAVIORAL', status: 'EVALUATION_FAILED', score: '—', date: '2025-07-23' },
+  { id: 'INT-8f3a2b1c4', user: 'سارة المحمدي', mode: 'AI', industry: 'تقنية المعلومات', type: 'TECHNICAL', status: 'COMPLETED', score: '92', date: '2026-07-28' },
+  { id: 'INT-7b1c4d5e8', user: 'أحمد العتيبي', mode: 'HUMAN', industry: 'الموارد البشرية', type: 'BEHAVIORAL', status: 'COMPLETED', score: '88', date: '2026-07-27' },
+  { id: 'INT-6d2e8f0a3', user: 'نورة القحطاني', mode: 'AI', industry: 'التسويق', type: 'BEHAVIORAL', status: 'IN_PROGRESS', score: '—', date: '2026-07-27' },
+  { id: 'INT-5a9f1b2c6', user: 'فهد العنزي', mode: 'AI', industry: 'الهندسة', type: 'TECHNICAL', status: 'PENDING', score: '—', date: '2026-07-26' },
+  { id: 'INT-4c8d3e7f0', user: 'خالد الشمري', mode: 'HUMAN', industry: 'المالية', type: 'BEHAVIORAL', status: 'COMPLETED', score: '75', date: '2026-07-25' },
+  { id: 'INT-3e7b5a1d9', user: 'ليلى الدوسري', mode: 'AI', industry: 'تقنية المعلومات', type: 'TECHNICAL', status: 'EVALUATION_FAILED', score: '—', date: '2026-07-25' },
+  { id: 'INT-2f6a9c4b8', user: 'سلطان الحربي', mode: 'AI', industry: 'التعليم', type: 'BEHAVIORAL', status: 'COMPLETED', score: '81', date: '2026-07-24' },
+  { id: 'INT-1d5c7e2a6', user: 'هند السالم', mode: 'HUMAN', industry: 'الصحة', type: 'BEHAVIORAL', status: 'EVALUATION_FAILED', score: '—', date: '2026-07-23' },
 ];
 
 const STATUS_COLORS: Record<InterviewStatus, string> = {

@@ -14,8 +14,6 @@ const PUBLIC_ROUTES = [
   '/refund',
   '/join-as-interviewer',
   '/interviewers',
-  '/auth/signin',
-  '/auth/register',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

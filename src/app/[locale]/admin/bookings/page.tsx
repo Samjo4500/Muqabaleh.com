@@ -43,12 +43,12 @@ type MockBooking = {
 };
 
 const mockBookings: MockBooking[] = [
-  { candidate: 'سارة المحمدي', interviewer: 'أ. ريم العتيبي', company: null, date: '2025-07-28', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
-  { candidate: 'أحمد العتيبي', interviewer: 'م. سلطان الحربي', company: 'نيوم', date: '2025-07-27', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
-  { candidate: 'نورة القحطاني', interviewer: 'د. طارق النعيمي', company: 'أرامكو', date: '2025-07-25', status: 'IN_PROGRESS', payout: 'PENDING', slaOverdue: true },
-  { candidate: 'فهد العنزي', interviewer: 'د. منى الراشد', company: null, date: '2025-07-24', status: 'UPCOMING', payout: 'PENDING', slaOverdue: false },
-  { candidate: 'خالد الشمري', interviewer: 'م. فيصل العمري', company: 'STC', date: '2025-07-20', status: 'NO_SHOW', payout: 'PENDING', slaOverdue: true },
-  { candidate: 'ليلى الدوسري', interviewer: 'أ. ريم العتيبي', company: null, date: '2025-07-18', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
+  { candidate: 'سارة المحمدي', interviewer: 'أ. ريم العتيبي', company: null, date: '2026-07-28', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
+  { candidate: 'أحمد العتيبي', interviewer: 'م. سلطان الحربي', company: 'نيوم', date: '2026-07-27', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
+  { candidate: 'نورة القحطاني', interviewer: 'د. طارق النعيمي', company: 'أرامكو', date: '2026-07-25', status: 'IN_PROGRESS', payout: 'PENDING', slaOverdue: true },
+  { candidate: 'فهد العنزي', interviewer: 'د. منى الراشد', company: null, date: '2026-07-24', status: 'UPCOMING', payout: 'PENDING', slaOverdue: false },
+  { candidate: 'خالد الشمري', interviewer: 'م. فيصل العمري', company: 'STC', date: '2026-07-20', status: 'NO_SHOW', payout: 'PENDING', slaOverdue: true },
+  { candidate: 'ليلى الدوسري', interviewer: 'أ. ريم العتيبي', company: null, date: '2026-07-18', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
 ];
 
 const STATUS_COLORS: Record<BookingStatus, string> = {

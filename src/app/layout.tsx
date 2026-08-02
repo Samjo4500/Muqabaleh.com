@@ -7,7 +7,6 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/logo.svg', type: 'image/svg+xml' },
     ],
-    apple: '/apple-touch-icon.png',
   },
   robots: {
     index: true,

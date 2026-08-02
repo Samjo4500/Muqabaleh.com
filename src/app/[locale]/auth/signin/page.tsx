@@ -30,9 +30,14 @@ export default function SignInPage() {
       .then((r) => r.json())
       .then((data) => {
         setDemoMode(data.demoMode === true);
-        setDbAvailable(data.services?.database === true);
+        // In demo mode, database is not available
+        setDbAvailable(!data.demoMode);
       })
-      .catch(() => {});
+      .catch(() => {
+        // If config fails, assume demo mode
+        setDemoMode(true);
+        setDbAvailable(false);
+      });
   }, []);
 
   const emailError =
@@ -49,9 +54,12 @@ export default function SignInPage() {
     setTouched({ email: true, password: true });
     if (emailError || passwordError || !email || !password) return;
 
-    // Demo mode: accept any credentials and redirect to app
+    // Demo mode: set session cookie and redirect
     if (demoMode || !dbAvailable) {
-      router.push(`/${locale}/app`);
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `muqabaleh_session=1; path=/; expires=${expires}; SameSite=Lax`;
+      const callbackUrl = new URLSearchParams(window.location.search).get('callbackUrl');
+      router.push(callbackUrl || `/${locale}/app`);
       return;
     }
 

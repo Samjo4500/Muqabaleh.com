@@ -416,10 +416,10 @@ export function HeroSimulation() {
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={vis ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.4 }}
             className="mt-7 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/auth/register" className="hero-cta-pulse btn-gold inline-flex items-center gap-2.5 no-underline text-base sm:text-lg">
+            <Link href="/demo" className="hero-cta-pulse btn-gold inline-flex items-center gap-2.5 no-underline text-base sm:text-lg">
               {t('heroCta1')} <Arrow size={20} strokeWidth={2.5} />
             </Link>
-            <a href="#how" className="btn-ghost inline-flex items-center gap-2 no-underline text-base">
+            <a href="#how" className="btn-ghost inline-flex items-center gap-2 no-underline text-base" id="how">
               <Sparkles size={16} strokeWidth={2} className="text-gold" /> {t('heroCta2')}
             </a>
           </motion.div>
@@ -594,7 +594,7 @@ export function HeroSimulation() {
                     <h3 className="text-2xl sm:text-3xl font-extrabold text-white text-center">
                       <span className="hero-aurora-text">{t('simCtaHeadline')}</span>
                     </h3>
-                    <Link href="/auth/register" className="hero-cta-pulse btn-gold mt-2 no-underline text-base sm:text-lg">{t('simCtaButton')}</Link>
+                    <Link href="/demo" className="hero-cta-pulse btn-gold mt-2 no-underline text-base sm:text-lg">{t('simCtaButton')}</Link>
                     <p className="text-sm text-white/40">{t('simCtaSub')}</p>
                   </motion.div>
                 )}

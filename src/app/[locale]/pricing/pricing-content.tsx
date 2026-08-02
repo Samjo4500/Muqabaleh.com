@@ -2,144 +2,161 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Check, X } from 'lucide-react';
+import { Check, X, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { GlowCard, SectionHeading, PriceTag } from '@/components/brand';
+import { Button } from '@/components/ui/button';
+import { GlowCard, SectionHeading } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                          */
+/*  Comparison table configuration                                     */
 /* ------------------------------------------------------------------ */
 
-const PRICING_PLANS = [
-  {
-    titleKey: 'session1Title' as const,
-    priceKey: 'session1Price' as const,
-    badge: null,
-    subKey: null,
-    featureKey: 'feature1Session' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '71', aed: '70', egp: '912', jod: '13',
-    popular: false,
-    planSlug: '1-session',
-  },
-  {
-    titleKey: 'session3Title' as const,
-    priceKey: 'session3Price' as const,
-    badge: 'session3Badge' as const,
-    subKey: null,
-    featureKey: 'feature3Sessions' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '183', aed: '180', egp: '2352', jod: '35',
-    popular: true,
-    planSlug: '3-sessions',
-  },
-  {
-    titleKey: 'session5Title' as const,
-    priceKey: 'session5Price' as const,
-    badge: null,
-    subKey: null,
-    featureKey: 'feature5Sessions' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '258', aed: '253', egp: '3312', jod: '49',
-    popular: false,
-    planSlug: '5-sessions',
-  },
-  {
-    titleKey: 'vipTitle' as const,
-    priceKey: 'vipPrice' as const,
-    badge: null,
-    subKey: 'vipSub' as const,
-    featureKey: 'featureVipSession' as const,
-    criteriaKey: 'feature6CriteriaHuman' as const,
-    sar: '108', aed: '106', egp: '1392', jod: '21',
-    popular: false,
-    planSlug: 'vip',
-  },
-] as const;
+type TierKey = 'free' | 'pro' | 'unlimited';
 
-/* Comparison table rows: rowKey, then values for [1 Session, 3 Sessions, 5 Sessions, VIP] */
-type CellValue = 'val' | 'text';
-
-const COMPARISON_ROWS: { rowKey: string; cells: ('val1' | 'val3' | 'val5' | 'val1Vip' | 'val4' | 'val6' | 'included' | 'notIncluded')[] }[] = [
-  { rowKey: 'rowSessionCount', cells: ['val1', 'val3', 'val5', 'val1Vip'] },
-  { rowKey: 'rowCriteria', cells: ['val4', 'val4', 'val4', 'val6'] },
-  { rowKey: 'rowCertificate', cells: ['included', 'included', 'included', 'included'] },
-  { rowKey: 'rowHumanReview', cells: ['notIncluded', 'notIncluded', 'notIncluded', 'included'] },
-  { rowKey: 'rowPdf', cells: ['included', 'included', 'included', 'included'] },
-  { rowKey: 'rowLinkedin', cells: ['included', 'included', 'included', 'included'] },
+const COMPARISON_FEATURES: {
+  key: 'featureInterviews' | 'featureReport' | 'featureBadge' | 'featureHumanDiscount' | 'featureHumanAccess' | 'featureDatabase';
+  tiers: Record<TierKey, boolean>;
+}[] = [
+  {
+    key: 'featureInterviews',
+    tiers: { free: true, pro: true, unlimited: true },
+  },
+  {
+    key: 'featureReport',
+    tiers: { free: false, pro: true, unlimited: true },
+  },
+  {
+    key: 'featureBadge',
+    tiers: { free: false, pro: true, unlimited: true },
+  },
+  {
+    key: 'featureHumanDiscount',
+    tiers: { free: false, pro: false, unlimited: true },
+  },
+  {
+    key: 'featureHumanAccess',
+    tiers: { free: false, pro: false, unlimited: true },
+  },
+  {
+    key: 'featureDatabase',
+    tiers: { free: true, pro: true, unlimited: true },
+  },
 ];
 
-const COLUMN_KEYS = ['colSession', 'col3Session', 'col5Session', 'colVip'] as const;
+const TIER_KEYS: TierKey[] = ['free', 'pro', 'unlimited'];
+const TIER_NAME_KEYS: Record<TierKey, 'freeName' | 'proName' | 'unlimitedName'> = {
+  free: 'freeName',
+  pro: 'proName',
+  unlimited: 'unlimitedName',
+};
 
 /* ------------------------------------------------------------------ */
-/*  Page                                                               */
+/*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
 export default function PricingContent() {
-  const t = useTranslations('landing');
-  const tp = useTranslations('pricing');
-  const tc = useTranslations('common');
+  const t = useTranslations('pricing');
   const locale = useLocale();
+  const isRTL = locale === 'ar';
 
   return (
-    <div className="flex min-h-screen flex-col bg-void">
+    <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
       <Navbar />
       <main className="flex-1 pt-16">
         {/* ── Pricing Cards ── */}
         <section className="py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
-              eyebrow={t('pricingTitle')}
-              title={t('pricingTitle')}
-              titleHighlight={t('pricingTitle')}
-              sub={t('pricingSub')}
+              eyebrow="Muqabaleh"
+              title={t('title')}
+              titleHighlight={isRTL ? '' : ''}
+              sub={t('sub')}
             />
 
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {PRICING_PLANS.map((plan, idx) => (
-                <GlowCard
-                  key={idx}
-                  className={`relative flex flex-col items-center p-6 ${plan.popular ? 'border-gold/50 ring-1 ring-gold/30' : ''}`}
-                >
-                  {plan.badge && (
-                    <Badge className="absolute -top-3 bg-gold text-void hover:bg-gold-hover">
-                      {t(plan.badge)}
-                    </Badge>
-                  )}
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {/* ── Free Card ── */}
+              <GlowCard className="flex flex-col items-center p-6">
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  {t('freeName')}
+                </h3>
+                <p className="mt-2 text-4xl font-extrabold text-[var(--text-primary)]">
+                  {t('freePrice')}
+                </p>
 
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">
-                    {t(plan.titleKey)}
-                  </h3>
-                  {plan.subKey && (
-                    <p className="mt-1 text-xs text-[var(--text-faint)]">{t(plan.subKey)}</p>
-                  )}
+                <ul className="mt-6 flex w-full flex-col gap-3">
+                  <FeatureCheck text={t('freeSessions')} />
+                  <FeatureItem text={t('freeReport')} included={false} />
+                  <FeatureItem text={t('freePdf')} included={false} />
+                  <FeatureItem text={t('freeBadge')} included={false} />
+                </ul>
 
-                  <PriceTag
-                    usd={t(plan.priceKey)}
-                    localApprox={t('localApprox', {
-                      sar: plan.sar,
-                      aed: plan.aed,
-                      egp: plan.egp,
-                      jod: plan.jod,
-                    })}
-                    className="my-5"
-                  />
+                <Link href="/demo" className="mt-8 w-full">
+                  <Button variant="outline" className="w-full border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10">
+                    {t('freeCta')}
+                  </Button>
+                </Link>
+              </GlowCard>
 
-                  <ul className="mb-6 flex w-full flex-col gap-3">
-                    <PricingCheck text={t(plan.featureKey)} />
-                    <PricingCheck text={t(plan.criteriaKey)} />
-                    <PricingCheck text={t('featureCertificate')} />
-                    <PricingCheck text={t('featurePdf')} />
-                    <PricingCheck text={t('featureLinkedin')} />
-                  </ul>
+              {/* ── Pro Card (Popular) ── */}
+              <GlowCard className="relative flex flex-col items-center border-[var(--gold)]/50 p-6 ring-1 ring-[var(--gold)]/30">
+                <Badge className="absolute -top-3 bg-[var(--gold)] text-[var(--bg-void)] hover:bg-[var(--gold)]">
+                  <Crown size={14} className="me-1.5" />
+                  {t('proPopular')}
+                </Badge>
 
-                  <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">
-                    {t('choosePlan')}
-                  </Link>
-                </GlowCard>
-              ))}
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  {t('proName')}
+                </h3>
+                <p className="mt-2 text-4xl font-extrabold text-[var(--text-primary)]">
+                  {t('proPrice')}
+                </p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {t('proPeriod')}
+                </p>
+
+                <ul className="mt-6 flex w-full flex-col gap-3">
+                  <FeatureCheck text={t('proSessions')} />
+                  <FeatureCheck text={t('proReport')} />
+                  <FeatureCheck text={t('proPdf')} />
+                  <FeatureCheck text={t('proBadge')} />
+                </ul>
+
+                <Link href="/api/paypal/create-order?plan=PRO" className="mt-8 w-full">
+                  <Button className="btn-gold w-full">
+                    {t('proCta')}
+                  </Button>
+                </Link>
+              </GlowCard>
+
+              {/* ── Unlimited Card ── */}
+              <GlowCard className="flex flex-col items-center p-6">
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  {t('unlimitedName')}
+                </h3>
+                <p className="mt-2 text-4xl font-extrabold text-[var(--text-primary)]">
+                  {t('unlimitedPrice')}
+                  <span className="text-base font-normal text-[var(--text-muted)]">
+                    {t('unlimitedPeriod')}
+                  </span>
+                </p>
+
+                <ul className="mt-6 flex w-full flex-col gap-3">
+                  <FeatureCheck text={t('unlimitedSessions')} />
+                  <FeatureCheck text={t('unlimitedReport')} />
+                  <FeatureCheck text={t('unlimitedPdf')} />
+                  <FeatureCheck text={t('unlimitedBadge')} />
+                  <FeatureCheck text={t('unlimitedDiscount')} />
+                  <FeatureCheck text={t('unlimitedHuman')} />
+                </ul>
+
+                <Link href="/api/paypal/create-order?plan=UNLIMITED" className="mt-8 w-full">
+                  <Button variant="outline" className="w-full border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10">
+                    {t('unlimitedCta')}
+                  </Button>
+                </Link>
+              </GlowCard>
             </div>
           </div>
         </section>
@@ -148,34 +165,45 @@ export default function PricingContent() {
         <section className="border-t border-white/5 py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
-              eyebrow={tp('comparisonTitle')}
-              title={tp('comparisonTitle')}
-              titleHighlight={tp('comparisonTitle')}
+              eyebrow={t('comparisonTitle')}
+              title={t('comparisonTitle')}
+              titleHighlight={isRTL ? '' : ''}
             />
 
             <div className="mt-12 overflow-x-auto">
-              <table className="w-full min-w-[520px] text-sm">
+              <table className="w-full min-w-[480px] text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="py-3 pe-4 text-start font-semibold text-[var(--text-muted)]">
-                      {tp('sessions')}
+                    <th className={`py-3 ${isRTL ? 'pe-4 text-start' : 'pe-4 text-start'} font-semibold text-[var(--text-muted)]`}>
+                      &nbsp;
                     </th>
-                    {COLUMN_KEYS.map((ck) => (
-                      <th key={ck} className="px-4 py-3 text-center font-semibold text-[var(--text-primary)]">
-                        {tp(ck)}
+                    {TIER_KEYS.map((tk) => (
+                      <th
+                        key={tk}
+                        className={`px-4 py-3 text-center font-semibold text-[var(--text-primary)] ${tk === 'pro' ? 'text-[var(--gold)]' : ''}`}
+                      >
+                        {t(TIER_NAME_KEYS[tk])}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {COMPARISON_ROWS.map((row) => (
-                    <tr key={row.rowKey} className="border-b border-white/5">
-                      <td className="py-3 pe-4 text-start text-[var(--text-muted)]">
-                        {tp(row.rowKey)}
+                  {COMPARISON_FEATURES.map((row) => (
+                    <tr key={row.key} className="border-b border-white/5">
+                      <td className={`py-3 ${isRTL ? 'pe-4 text-start' : 'pe-4 text-start'} text-[var(--text-muted)]`}>
+                        {t(row.key)}
                       </td>
-                      {row.cells.map((cell, ci) => (
-                        <td key={ci} className="px-4 py-3 text-center">
-                          <CellValueCell value={cell} t={tp} />
+                      {TIER_KEYS.map((tk) => (
+                        <td key={tk} className="px-4 py-3 text-center">
+                          {row.tiers[tk] ? (
+                            <span className="inline-flex items-center justify-center text-emerald">
+                              <Check size={18} strokeWidth={1.75} />
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center text-[var(--text-faint)]">
+                              <X size={18} strokeWidth={1.75} />
+                            </span>
+                          )}
                         </td>
                       ))}
                     </tr>
@@ -195,7 +223,7 @@ export default function PricingContent() {
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function PricingCheck({ text }: { text: string }) {
+function FeatureCheck({ text }: { text: string }) {
   return (
     <li className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
       <Check size={16} strokeWidth={1.75} className="shrink-0 text-emerald" />
@@ -204,24 +232,11 @@ function PricingCheck({ text }: { text: string }) {
   );
 }
 
-function CellValueCell({ value, t }: { value: string; t: ReturnType<typeof useTranslations> }) {
-  if (value === 'included') {
-    return (
-      <span className="inline-flex items-center justify-center text-emerald">
-        <Check size={18} strokeWidth={1.75} />
-      </span>
-    );
-  }
-  if (value === 'notIncluded') {
-    return (
-      <span className="inline-flex items-center justify-center text-[var(--text-faint)]">
-        <X size={18} strokeWidth={1.75} />
-      </span>
-    );
-  }
+function FeatureItem({ text, included }: { text: string; included: boolean }) {
   return (
-    <span className="text-[var(--text-primary)] font-medium">
-      {t(value as Parameters<typeof t>[0])}
-    </span>
+    <li className="flex items-center gap-2 text-sm text-[var(--text-faint)]">
+      <X size={16} strokeWidth={1.75} className="shrink-0" />
+      {text}
+    </li>
   );
 }

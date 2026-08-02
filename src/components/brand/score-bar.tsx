@@ -8,6 +8,8 @@ interface ScoreBarProps {
   value: number;
   max?: number;
   goldTicks?: boolean;
+  color?: string;
+  suffix?: string;
   className?: string;
 }
 
@@ -16,6 +18,8 @@ export function ScoreBar({
   value,
   max = 100,
   goldTicks = true,
+  color,
+  suffix,
   className,
 }: ScoreBarProps) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
@@ -26,7 +30,7 @@ export function ScoreBar({
         <span className="text-sm font-medium text-[var(--text-primary)]">
           {label}
         </span>
-        <span className="text-sm font-bold text-gold">{value}</span>
+        <span className={cn("text-sm font-bold", color ?? "text-gold")}>{value}{suffix ? `/${suffix}` : ''}</span>
       </div>
       <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-white/5">
         {goldTicks && (
@@ -40,10 +44,10 @@ export function ScoreBar({
           </div>
         )}
         <motion.div
-          className="absolute inset-y-0 start-0 rounded-full bg-gold"
+          className={cn("absolute inset-y-0 start-0 rounded-full", color ? color.replace('text-', 'bg-') : "bg-gold")}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
-          transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 }}
+          transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] as const, delay: 0.2 }}
         />
       </div>
     </div>

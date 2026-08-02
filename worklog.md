@@ -1729,3 +1729,85 @@ Stage Summary:
 - **17 files modified**, 51 insertions, 38 deletions
 - Build now passes 100% — Vercel will auto-deploy from pushed commit
 - Lint: zero errors
+
+---
+
+Task ID: 5-b
+Agent: fullstack-developer
+Task: Add all remaining i18n keys + pages
+
+Work Log:
+- Replaced entire `pricing` namespace in `src/messages/ar.json` with new 3-tier pricing keys (Free/Pro/Unlimited) including comparison table features
+- Added `settings` namespace to both `ar.json` and `en.json` (13 keys each: database section, job status, location, industry, score info)
+- Added `optIn` namespace to both `ar.json` and `en.json` (10 keys each: headline, body, checkbox, save/later, messages)
+- Rewrote `src/app/[locale]/pricing/pricing-content.tsx` with new 3-card design (Free | Pro highlighted with gold border + "Most Popular" badge | Unlimited), feature comparison table (6 rows × 3 columns), using GlowCard/SectionHeading/Button/Badge from design system
+- Created `src/app/[locale]/app/settings/page.tsx` — employer database settings page with Switch toggle, job status Select, location/industry Inputs, save button with toast notifications, read-only score info section
+- Created `src/app/api/paypal/create-order/route.ts` — PayPal one-time order creation endpoint supporting PRO ($9.99), HUMAN_STD ($29), HUMAN_PRO ($49) plans with access token flow
+- Created `src/app/api/candidate-pool/route.ts` — POST for opt-in upsert, PATCH for visibility updates, graceful demo fallback when DB unavailable
+
+Stage Summary:
+- **2 i18n files modified** (ar.json, en.json) — new `pricing`, `settings`, `optIn` namespaces
+- **1 existing file rewritten** (pricing-content.tsx)
+- **3 new files created** (settings page, PayPal create-order API, candidate-pool API)
+- All components use dark theme (bg-void), gold accent colors, RTL/LTR-aware
+- No build run per instructions — all files written and ready for validation
+
+## Phase 6-c — Homepage Stats + Trusted By + Report Scoring + Opt-In Modal
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Update homepage StatsBand & add TrustedBy section, convert report page to 1-10 Muqabaleh scoring, add opt-in modal component
+
+### What was done
+
+#### TASK 1: Homepage StatsBand + TrustedBySection
+
+**`src/app/[locale]/page.tsx`**:
+- Added `Star, Building2` to lucide-react imports (Mic already present)
+- Removed `HumanInterviewsPromo` from brand imports
+- Replaced `<HumanInterviewsPromo />` in main render with `<TrustedBySection t={t} />`
+- Replaced entire `StatsBand` function: now shows 3 icon+number stats (Mic/10,000+ interviews, Star/4.8/5 rating, Building2/47 hiring partners) in a responsive `grid-cols-1 sm:grid-cols-3` layout with dark bg, gold numbers, muted labels, `border-y border-white/5 py-12`
+- Added `TrustedBySection` component: displays ARAMCO, NEOM, STC, SABIC company name badges in styled bordered pills with `trustedByHeadline` translation
+
+#### TASK 2: Report Page 1-10 Scoring
+
+**`src/app/[locale]/app/interview/[id]/report/page.tsx`**:
+- Added imports: `useRef` from React, `toMuqabalehScore`, `toCriterionScore`, `getScoreColor` from `@/lib/scoring`, `OptInModal` from `@/components/opt-in-modal`
+- Added `useTranslations('landing')` for muqabalehScore label
+- Converted `overallScore` (0-100) → Muqabaleh 1-10 score with `toMuqabalehScore()`, displaying `mScore.score/10` with `getScoreColor()` coloring
+- Added "Muqabaleh Interview Score" label above score circle
+- Added locale-aware level label (mScore.levelAr / mScore.levelEn) below circle
+- Converted all 4 criterion scores (Content, Clarity, Confidence, Cultural Fit) to 1-10 with `toCriterionScore()`, displayed as `X/10` with per-bar color
+- Replaced `getRecommendationStyle(rec)` (API-based) with `getRecommendationFromScore(mScore.score)`: ≥6 = RECOMMENDED (green), ≥4 = CONSIDER (amber), <4 = NOT_RECOMMENDED (red)
+- Added opt-in modal state (`showOptIn`, `optInShown` ref) with 2-second auto-trigger via useEffect
+- Rendered `<OptInModal>` at bottom of page
+
+**`src/components/brand/score-bar.tsx`**:
+- Added optional `color` prop (Tailwind text color class) — applies to both the score number text and the bar fill
+- Added optional `suffix` prop (e.g. "10") to display "X/10" format
+- Added `as const` to framer-motion ease array (Vercel build requirement)
+- Bar fill color derived from text color via `color.replace('text-', 'bg-')`
+
+#### TASK 3: Opt-In Modal
+
+**`src/components/opt-in-modal.tsx`** (NEW):
+- Dialog-based modal using shadcn/ui Dialog + Button components
+- Props: `open`, `onOpenChange`, `muqabalehScore`, `interviewId`, `onSave`
+- Shows headline, body, checkbox (pre-checked), low-score warning (if score < 6), Save/Later buttons
+- On save: POSTs to `/api/candidate-pool` with optIn, score, interviewId
+- Shows success confirmation after save
+- All text from `optIn` i18n namespace
+
+### Files modified/created
+
+| File | Action | Summary |
+|------|--------|----------|
+| `src/app/[locale]/page.tsx` | Modified | StatsBand redesign, TrustedBySection added, HumanInterviewsPromo removed |
+| `src/app/[locale]/app/interview/[id]/report/page.tsx` | Modified | 1-10 Muqabaleh scoring, opt-in modal integration |
+| `src/components/brand/score-bar.tsx` | Modified | Added `color` and `suffix` props, `as const` on ease |
+| `src/components/opt-in-modal.tsx` | Created | Dialog modal for talent pool opt-in |
+
+### Notes
+- Translation keys (`statInterviews`, `statRating`, `statPartners`, `trustedByHeadline`, `muqabalehScore`, `optIn.*`) already existed in both en.json and ar.json — no translation changes needed
+- `src/lib/scoring.ts` already existed with all required functions (`toMuqabalehScore`, `toCriterionScore`, `getScoreColor`)
+- No build run per instructions

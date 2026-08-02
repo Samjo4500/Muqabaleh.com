@@ -41,6 +41,7 @@ model User {
   auditLogs            AuditLog[]  @relation("ActorLogs")
   createdB2bJobs       B2BJob[]    @relation("JobCreator")
   paypalSubscriptions  PaypalSubscription[]
+  candidatePool        CandidatePool?
 
   @@index([companyId])
 }
@@ -365,4 +366,28 @@ model InterviewerPayout {
 
   @@index([interviewerId])
   @@index([status])
+}
+
+// ─── Candidate Pool (Opt-In) ───
+model CandidatePool {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOptedIn       Boolean   @default(false)
+  isVisible       Boolean   @default(false)
+  role            String
+  level           String
+  industry        String?
+  location        String?
+  muqabalehScore  Float?
+  averageScore    Float?
+  interviewCount  Int       @default(0)
+  languages       String    @default("AR")
+  availability    String    @default("AVAILABLE") // AVAILABLE, OPEN_TO_OFFERS, NOT_LOOKING
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isVisible])
+  @@index([role])
+  @@index([muqabalehScore])
 }

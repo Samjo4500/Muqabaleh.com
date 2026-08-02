@@ -104,7 +104,7 @@ function HeroSection({ t, tc, isRTL }: { t: ReturnType<typeof useTranslations>; 
       {/* Navbar spacer + hero text floats over the storyboard */}
       <div className="flex-1">
         <div className="mx-auto max-w-7xl px-4 pt-28 sm:px-6 md:pt-36 lg:px-8">
-          <div className={`flex flex-col gap-8 ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}>
+          <div className={`flex flex-col gap-8 ${isRTL ? 'items-start text-right' : 'items-start text-left'}`}>
             {/* Eyebrow */}
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">

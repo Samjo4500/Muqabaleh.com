@@ -53,11 +53,9 @@
   /* Override Tailwind CSS 4 preflight which sets html { direction: ltr } */
   [dir="rtl"] {
     direction: rtl;
-    text-align: right;
   }
   [dir="ltr"] {
     direction: ltr;
-    text-align: left;
   }
 
   * {

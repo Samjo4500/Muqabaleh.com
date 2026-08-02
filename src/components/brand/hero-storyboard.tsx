@@ -177,7 +177,7 @@ export function HeroStoryboard({
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, y: -20, filter: 'blur(6px)' }}
                 transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
-                className={`flex flex-col gap-3 ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}
+                className={`flex flex-col gap-3 ${isRTL ? 'items-start text-right' : 'items-start text-left'}`}
               >
                 {/* Label pill */}
                 <span

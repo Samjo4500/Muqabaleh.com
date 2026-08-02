@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
-import { jwtDecode } from 'jose';
+import { decodeJwt } from 'jose';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -45,7 +45,7 @@ function getRoleFromRequest(request: NextRequest): string | null {
     const token = request.cookies.get(name)?.value;
     if (!token) continue;
     try {
-      const payload = jwtDecode(token);
+      const payload = decodeJwt(token);
       return (payload.role as string) || 'USER';
     } catch {
       // Invalid/expired token — treat as no session

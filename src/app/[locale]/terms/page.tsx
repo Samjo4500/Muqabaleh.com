@@ -3,14 +3,18 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
   return {
-    title: {
-      absolute: locale === 'ar' ? 'شروط الاستخدام — مقابلة | Muqabaleh' : 'Terms of Service — Muqabaleh',
-    },
+    title: locale === 'ar' ? 'شروط الاستخدام — مقابلة | Muqabaleh' : 'Terms of Service — Muqabaleh',
   };
 }
-export default async function TermsPage() {
+
+export default async function TermsPage({ params }: Props) {
   const t = await getTranslations('legal');
 
   const paragraphs: string[] = Array.from({ length: 15 }, (_, i) =>

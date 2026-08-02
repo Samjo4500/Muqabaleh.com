@@ -1275,3 +1275,434 @@ Stage Summary:
 - Interview room completely redesigned with split-screen, speech bubbles, score ring, waveform, status indicators
 - Landing page updated: 4-step how-it-works, pro avatars, improved marketing copy in AR+EN
 - All changes pass ESLint clean, JSON valid, browser renders correctly
+---
+Task ID: 1
+Agent: fullstack-developer
+Task: Add Prisma schema for Human Interview Marketplace
+
+Work Log:
+- Added Interviewer, InterviewerAvailability, HumanBooking, InterviewerReview, InterviewerPayout models
+- Removed old HumanBooking model that conflicted with new one, cleaned up references in User, Interview, InterviewerProfile
+- Added named relations to resolve ambiguity (InterviewerSlots, InterviewerReviews, InterviewerBookings, InterviewerPayouts)
+- Added interviewerId FK to InterviewerReview to support direct relation to Interviewer
+- Ran prisma generate successfully
+
+Stage Summary:
+- 5 new models added to schema.prisma
+- Prisma client types generated
+
+---
+
+## Task 2 — i18n: Add Human Interviewer Translation Keys
+
+**Agent**: fullstack-developer
+
+### What was done
+
+Added 7 new translation sections to both `src/messages/ar.json` and `src/messages/en.json`:
+
+1. **`humanInterviews`** (22 keys) — Promo section, filters, interviewer browsing, booking CTA
+2. **`interviewerProfile`** (11 keys) — Profile page, intro video, bio, reviews, availability/slots
+3. **`joinInterviewer`** (28 keys) — Recruiting landing page, how-it-works steps, requirements, earnings calculator, FAQ
+4. **`apply`** (22 keys) — Interviewer application form fields, file upload hints, success state
+5. **`booking`** (15 keys) — Booking confirmation, cancellation terms, post-booking checklist, calendar
+6. **`interviewerDash`** (25 keys) — Interviewer dashboard tabs, stats, booking statuses, payouts
+7. **`adminInterviewers`** (16 keys) — Admin management table, statuses, bulk actions, analytics
+
+All existing keys preserved unchanged. Both JSON files validated successfully.
+
+Stage Summary:
+- 139 new translation keys added per locale (278 total)
+- ar.json: 1817 → 1981 lines
+- en.json: 1817 → 1981 lines
+
+## Task 3 — Human Interviews Promo Section
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Add HumanInterviewsPromo section after hero on homepage
+
+### What was done
+
+1. **Created** `/src/components/brand/human-interviews-promo.tsx` — a `"use client"` component with:
+   - Full-width section with `bg-gradient(#0a1628 → #0f1d2e)`, `py-20`
+   - Gold headline (`text-4xl md:text-3xl`), white subtext (`max-w-[600px]`)
+   - 3-column stats row (interviewers, rating, price) with gold numbers and white labels
+   - Two CTAs: primary gold button → `/join-as-interviewer`, secondary outline → `/human-interviews`
+   - Horizontal scrollable row of 4 interviewer preview cards (`w-[280px]`, gold border, hover effects)
+   - Each card: initials avatar in gold ring, name + flag, star rating, price pill badge
+   - Framer Motion `useInView` fade-up animation on scroll
+   - Uses `useTranslations` from next-intl with `landing` namespace
+   - Named export: `HumanInterviewsPromo`
+
+2. **Updated** `/src/components/brand/index.ts` — added named export for `HumanInterviewsPromo`
+
+3. **Updated** `/src/app/[locale]/page.tsx` — imported `HumanInterviewsPromo` from `@/components/brand` and placed it immediately after `<HeroSection />` (before CountryMarquee and HowSection)
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 4 — Join-as-Interviewer Landing Page
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Create the `/join-as-interviewer` marketing landing page (public, no auth)
+
+### What was done
+
+Completely replaced `/src/app/[locale]/join-as-interviewer/page.tsx` (was a form-based page) with a marketing landing page using the `joinInterviewer` i18n namespace.
+
+**File**: `/src/app/[locale]/join-as-interviewer/page.tsx`
+
+Sections built:
+1. **Hero** — Gold headline (`text-4xl md:text-5xl font-bold`), white subtext (`text-xl mt-4`), 3-stat row (earnings/schedule/free) with DollarSign, Calendar, CreditCard icons from lucide-react
+2. **How It Works** (`mt-24`) — Centered title, 3-step cards in `md:grid-cols-3 gap-6` grid, each card: `bg-[#0B0F17]`, gold border, gold numbered circle, white title, gray desc. Framer Motion stagger animation via `containerVariants`/`itemVariants` with `whileInView`
+3. **Requirements** (`mt-24`) — Title + `ul` with `space-y-3`, each item has `CheckCircle2` icon in emerald-500 + white text
+4. **Earnings Calculator** (`mt-24`) — Interactive section with range slider (`accent-[#d4af37]`), `useState` for sessions (1–20, default 5). Card shows: sessions × $29 × 4 = gross, minus 20% platform fee = net. Gold numbers for earnings.
+5. **CTA** (`mt-16`) — Centered gold button Link to `/apply`, `bg-[#d4af37] text-black rounded-xl py-4 px-12 text-lg font-bold`
+6. **FAQ** (`mt-24`) — shadcn/ui Accordion, 5 items from `faq1q/faq1a` through `faq5q/faq5a`. Styled `bg-transparent text-white border-[rgba(212,175,55,0.2)]`
+
+Uses `Navbar` and `Footer` from `@/components/layout`, all i18n via `useTranslations('joinInterviewer')`.
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 5 — /apply Application Form Page
+
+**File:** `src/app/[locale]/apply/page.tsx`
+
+### What was built
+Public interviewer application form page with two states (form view / success view).
+
+### Layout
+- `'use client'` with `useTranslations('apply')` and `useLocale()` for RTL support.
+- Uses `Navbar` + `Footer` from `@/components/layout`, dark `bg-[var(--bg-void)]` background.
+- `max-w-2xl mx-auto`, `pt-8 pb-16`, staggered Framer Motion entrance animations.
+
+### Form fields (14 total)
+1. **fullNameAr** — text Input, `dir="rtl"`
+2. **fullNameEn** — text Input, `dir="ltr"`
+3. **email** — email Input, `dir="ltr"`
+4. **phone** — tel Input with `+966` placeholder
+5. **linkedIn** — url Input
+6. **yearsExperience** — shadcn `Select` dropdown (1-3, 4-7, 8-15, 15+)
+7. **roles** — 10-option checkbox grid (2-col mobile, 3-col desktop) with custom gold Check icon
+8. **industries** — 11-option checkbox grid, same pattern
+9. **languages** — 3 toggle pill chips (Arabic, English, French) with gold border/bg when active
+10. **priceTier** — 3 radio cards (Standard $29, Pro $49, Executive $99) with gold border + CheckCircle2
+11. **videoIntro** — drag-and-drop upload zone (MP4/MOV/WebM, 50MB note)
+12. **idVerification** — drag-and-drop upload zone (JPG/PNG/PDF, 10MB note)
+13. **terms** — shadcn Checkbox with long label
+14. **submit** — gold Button, full-width, disabled until required fields + terms are filled
+
+### File uploads
+- `useState<File | null>` for each file.
+- Reusable `FileUploadZone` component with drag/drop, click-to-browse, filename display, remove button.
+- On submit, builds `FormData` and POSTs to `/api/interviewers/apply`.
+- Loading spinner on button during submission.
+
+### Success view
+- Centered layout with 64px gold `CheckCircle2`, gold title, white subtext.
+- "Back to home" button using `btn-gold` class, with RTL-aware arrow.
+
+### RTL/LTR support
+- `isRTL` flag from `useLocale()`, used for language labels and arrow direction.
+- Text inputs have explicit `dir` attributes.
+- All layout uses logical properties / flexbox (no explicit left/right).
+
+### Components used
+shadcn/ui: `Input`, `Label`, `Checkbox`, `Button`, `Select`/`SelectContent`/`SelectItem`/`SelectTrigger`/`SelectValue`.
+Lucide: `CheckCircle2`, `Upload`, `FileVideo`, `FileText`, `Check`, `Loader2`, `ArrowRight`.
+
+### Lint
+ESLint passed with zero errors.
+
+---
+
+## Task 6 — Human Interview Marketplace API Routes
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Create API routes for the human interview marketplace with mock data fallback
+
+### What was done
+
+Created 6 API route files following the existing `next/server` + `NextRequest`/`NextResponse` pattern. All routes attempt DB access first via `import('@/lib/db')` wrapped in try/catch, falling back to rich mock data when the database is unavailable.
+
+| # | Route | Method | File | Description |
+|---|-------|--------|------|-------------|
+| 1 | `/api/interviewers/apply` | POST | `src/app/api/interviewers/apply/route.ts` | Multipart FormData application submission with full validation |
+| 2 | `/api/interviewers` | GET | `src/app/api/interviewers/route.ts` | List 12 approved interviewers with filtering (role, language, price, rating) and pagination |
+| 3 | `/api/interviewers/[id]` | GET | `src/app/api/interviewers/[id]/route.ts` | Single interviewer profile with reviews and weekly availability slots |
+| 4 | `/api/admin/interviewers` | GET | `src/app/api/admin/interviewers/route.ts` | Admin list of all interviewers with status filter (PENDING/APPROVED/REJECTED/SUSPENDED) |
+| 5 | `/api/admin/interviewers/[id]/approve` | POST | `src/app/api/admin/interviewers/[id]/approve/route.ts` | Approve interviewer application |
+| 6 | `/api/admin/interviewers/[id]/reject` | POST | `src/app/api/admin/interviewers/[id]/reject/route.ts` | Reject interviewer application with optional reason |
+
+### Mock Data
+
+- **12 diverse interviewers** with Arabic names (فهد الراشد, مريم العتيبي, سلطان الحربي, عائشة الدوسري, خالد المطيري, نورة القحطاني, عبدالله الشمري, سارة العنزي, محمد الزهراني, لينا السبيعي, أحمد الغامدي, هند المالكي)
+- Each has unique specialties spanning all 10 roles, different price tiers (STANDARD/PREMIUM/ELITE), ratings 4.2–5.0
+- **3 reviews** per interviewer with bilingual (ar/en) comments and dates
+- **Weekly availability** with day slots, some pre-booked
+- **Admin mock data** includes 3 PENDING, 2 REJECTED (with reasons), 1 SUSPENDED (with reason), plus approved ones
+
+### Error Handling
+
+- All routes return `{ error: { ar: '...', en: '...' } }` on failure
+- Validation errors return 400 with bilingual messages
+- Server errors return 500 with bilingual messages
+
+### Lint
+ESLint passed with zero errors.
+
+---
+
+## Task 8 — Human Interviews Browse Page with Filters
+
+**Date**: $(date -u +%Y-%m-%d)
+**Agent**: fullstack-developer
+**Task**: Create /human-interviews browse page with sidebar filters (public page)
+
+### What was done
+
+Created a fully-featured human interviewers browse page at `src/app/[locale]/human-interviews/page.tsx`.
+
+#### Features
+- **Layout**: Responsive flex layout with sticky sidebar (desktop) and Sheet-based filter drawer (mobile)
+- **Sidebar Filters** (5 groups, all `useState`-driven):
+  1. **Role**: 10 checkbox options (Sales, Tech, Marketing, HR, Finance, Operations, Design, CS, PM, Data)
+  2. **Experience**: 4 radio-like pill buttons (Junior, Mid, Senior, Executive)
+  3. **Language**: 3 toggle pills (Arabic, English, Bilingual)
+  4. **Price**: 3 checkbox options ($29, $49, $99)
+  5. **Rating**: 2 pill options (4.0+, 4.5+)
+- **Clear all** button appears when any filter is active
+- **Gold accent** styling on all selected states
+- **Main Grid**: `grid-cols-1 md:grid-cols-2 xl:grid-cols-3` with result count header
+- **Cards**: 120px avatar circle with gold ring, name, star rating + review count, title, 2 gold Badge tags (specialty + region), price per session, full-width CTA button
+- **API Fetching**: Fetches from `/api/interviewers` with query params; 300ms debounce on filter changes
+- **Loading**: 6 pulse skeleton cards via shadcn Skeleton
+- **Empty State**: Icon + message + clear filters CTA
+- **Load More**: Button at bottom with spinner when loading more pages
+- **Framer Motion**: Staggered card entrance animations
+- **Mobile**: Filter toggle button with active count badge; Sheet slides from RTL-aware side
+
+#### Files created
+- `src/app/[locale]/human-interviews/page.tsx` — Main page component (~380 lines)
+
+#### Files modified
+- `src/messages/ar.json` — Added 20 new keys to `humanInterviews` namespace (filter labels, role/experience/language/price/rating options, UI strings)
+- `src/messages/en.json` — Same 20 keys in English
+
+### Lint
+ESLint passed with zero errors.
+
+---
+
+## Task 9: Interviewer Public Profile Page (`/interviewer/[id]`)
+
+### Files Created
+- `src/app/[locale]/interviewer/[id]/page.tsx` — Full interviewer public profile page
+
+### Implementation Details
+
+**Layout**: Two-column grid (md:grid-cols-5) with Navbar + Footer. Left panel (md:col-span-2) is sticky, right panel (md:col-span-3) scrolls.
+
+**Left Panel** (dark card, bg-[#0B0F17]):
+- 200px circular avatar with gold gradient ring (3px border) and gold initials
+- Green pulsing online indicator dot
+- Name (white, bold, 2xl), title (gray-400), location (flag emoji + city)
+- Star rating display with review count
+- "معتمد من مقابلة" certified badge (gold border pill)
+- Price display (gold, bold, 2xl)
+- Languages (joined with middle dot)
+- Specialty Badge chips (gold/10 bg, gold text)
+- "احجز هذا الموعد" button — disabled (gray) until a time slot is selected, then gold
+
+**Right Panel**:
+- **Video section**: 16:9 aspect ratio container with dark gradient bg, subtle dot pattern, centered gold play button with hover scale animation, "فيديو تعريفي" pill label
+- **Bio section**: Gold heading, truncated text (200 chars), "اقرأ المزيد" toggle with directional chevron
+- **Reviews section**: Header with rating score + star, 3 review cards (initials avatar, anonymized name, date, star rating, comment), "عرض كل التقييمات" link
+- **Availability calendar**: Week view with 7 columns, 30-min time slots (9:00-17:00), three states: available (gold border, clickable), booked (gray, line-through, not-allowed), selected (gold bg, black text, bold)
+
+**Data flow**: Fetches `/api/interviewers/[id]` on mount. Falls back to mock data on API error. Shows loading skeleton during fetch.
+
+**Animations**: Framer Motion `fadeInUp` variants with staggered delays per section.
+
+**i18n**: Uses `interviewerProfile` and `humanInterviews` translation namespaces.
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 7 — Admin Interviewer Management Page
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Rewrite /admin/interviewers with full-featured interviewer management UI
+
+### What was done
+
+1. **Enhanced i18n messages** — Added 43 new keys to `adminInterviewers` namespace in both `ar.json` and `en.json` (profile fields, search placeholder, tab labels, CSV export, bulk actions, confirmation modals, loading/error states).
+
+2. **Updated GET /api/admin/interviewers** — Enriched mock data with `bio`, `bioAr`, `linkedInUrl`, `industries`, `languages`, `videoIntroUrl` fields. Extended DB select to include these fields. Mock data now has 12 interviewers across all 4 statuses.
+
+3. **Created POST /api/admin/interviewers/[id]/suspend** — New API route mirroring the approve/reject pattern. Supports optional `reason` body param. Falls back to mock mode when DB unavailable.
+
+4. **Rewrote admin interviewers page** (`/admin/interviewers/page.tsx`):
+   - **Header**: Gold title (text-3xl, font-bold) + Export CSV button (outline, right-aligned)
+   - **Status filter tabs**: 5 tabs (All, Pending, Approved, Rejected, Suspended) with counts, gold active state
+   - **Search**: Rounded-full input with dark bg, gold border, Search icon, gray placeholder
+   - **Desktop table** (hidden on mobile): Checkbox | Name+Email | Experience | Specialties | Status | Rating | Actions
+   - **Mobile cards** (hidden on desktop): Stacked card layout with same info
+   - **Status badges**: PENDING=yellow, APPROVED=green, REJECTED=red, SUSPENDED=gray
+   - **Actions per row**: Eye (view), Check (approve), X (reject), Ban (suspend) — contextual
+   - **Bulk actions bar**: Animated bar with selected count + approve/reject selected buttons
+   - **View Profile Modal**: Full application details (name, email, phone, LinkedIn, experience, specialties badges, industries, languages, price tier, ID verification, bio, video intro link, rejection/suspension reasons). Approve/Reject/Suspend action buttons.
+   - **Reject Modal**: Confirmation with optional reason textarea
+   - **Suspend Modal**: Confirmation with optional reason textarea
+   - **CSV Export**: Generates downloadable CSV from filtered list
+   - **framer-motion**: AnimatePresence on bulk actions bar, motion.div on profile modal content
+   - **Loading state**: Skeleton blocks while fetching
+   - **Error state**: Retry button
+   - **Empty state**: Message when no results match
+   - Uses `useTranslations('adminInterviewers')` namespace
+   - RTL-aware with `useLocale()`
+   - Existing admin layout (sidebar, admin gate) already wraps this page
+
+### Files created/modified
+- `src/app/[locale]/admin/interviewers/page.tsx` — Rewritten (976 lines)
+- `src/app/api/admin/interviewers/route.ts` — Enhanced mock data + DB select
+- `src/app/api/admin/interviewers/[id]/suspend/route.ts` — New
+- `src/messages/ar.json` — Added 43 keys to adminInterviewers
+- `src/messages/en.json` — Added 43 keys to adminInterviewers
+
+### Notes
+- Lint passes with zero errors
+- Page is guarded by existing AdminGate component (cookie-based auth)
+- Middleware enforces SUPER_ADMIN role for /admin/* routes
+- All API calls use relative paths (no port in URL)
+
+---
+
+## Task 10: Booking Confirmation & Booking Success Pages
+
+### Files Created
+- `src/app/[locale]/book/[interviewerId]/page.tsx` — Booking confirmation/details page
+- `src/app/[locale]/booking/confirmation/page.tsx` — Booking success page
+
+### Files Modified
+- `src/messages/ar.json` — Added `booking.copied` and `booking.backToHome` keys
+- `src/messages/en.json` — Added `booking.copied` and `booking.backToHome` keys
+
+### Implementation Details
+
+#### Book Page (`/book/[interviewerId]`)
+- Reads `interviewerId` from URL params, `date` and `time` from searchParams
+- Fetches interviewer data from `/api/interviewers/[id]` on mount
+- Displays booking summary card with interviewer avatar (40px), name, title, date/time, duration (30 min), meeting method (Jitsi), and price
+- Price derived from `priceTier`: STANDARD=$29, PREMIUM=$49, ELITE=$99
+- Note textarea with i18n placeholder
+- Terms checkbox (shadcn Checkbox) — pay button disabled until accepted
+- Pay button redirects to `/booking/confirmation` with all query params + random `meetingId`
+- RTL-aware back arrow, locale-aware date/time formatting
+- Uses Navbar + Footer layout, max-w-2xl centered
+
+#### Confirmation Page (`/booking/confirmation`)
+- Reads interviewerId, date, time, meetingId from searchParams
+- Fetches interviewer data for name/avatar display
+- Success CheckCircle icon (64px, gold) with framer-motion scale animation (0→1.2→1, 1s)
+- Booking summary card with interviewer info, date/time, Jitsi meeting URL
+- Copy link button using `navigator.clipboard.writeText` with sonner toast feedback
+- Add to Calendar button generates .ics file and triggers download (with 15-min alarm)
+- Preparation checklist (3 items) with emerald CheckCircle2 icons
+- Back to home link
+- Uses sonner toast (already in layout) for "Copied!" feedback
+
+### Notes
+- Lint passes with zero errors
+- Both pages are 'use client' components
+- All i18n keys use `useTranslations('booking')` namespace
+- Consistent dark theme with bg-[#0B0F17] cards and gold accents
+
+## Task 11 — Interviewer Dashboard (Layout + Overview Page)
+- **Created** `src/app/[locale]/interviewer/dashboard/layout.tsx` — Sidebar layout for interviewer role
+- **Created** `src/app/[locale]/interviewer/dashboard/page.tsx` — Overview tab with stats + bookings table
+- Layout mirrors admin pattern: `w-64` sticky sidebar (`bg-[#0a0a0f]`, `border-[rgba(212,175,55,0.1)]`), mobile Sheet hamburger, RTL-aware
+- Sidebar nav: overview, upcoming, calendar, earnings, reviews, settings, help — with gold active state
+- Logout link at sidebar bottom using `common.logout` translation
+- Page: 4 animated stat cards (framer-motion staggered entrance) + recent bookings table
+- Table: 5 mock rows with status badges (confirmed=green, completed=gold, cancelled=red, no-show=gray)
+- "Start Interview" action button shown only for confirmed bookings
+- Uses `useTranslations('interviewerDash')` for all labels
+- Lint passes with zero errors
+
+---
+
+## Task 12 — Interviewer Dashboard Tab Pages
+
+**Date**: 2025-07-30
+**Agent**: fullstack-developer
+**Task**: Create remaining interviewer dashboard tab pages (upcoming, calendar, earnings, reviews)
+
+### What was done
+
+#### 1. Upcoming Page (`/interviewer/dashboard/upcoming/page.tsx`)
+- Title: `t('upcoming')` in gold text-2xl
+- Subtitle indicating next 30 days scope
+- 5 mock booking cards sorted by date ascending, each with:
+  - `bg-[#0B0F17]`, `rounded-xl`, `p-5`, `border-l-4 border-gold`
+  - Candidate name (bold white), role specialty, date/time
+  - Countdown timer (dynamic: "بعد 3 ساعات" / "in 3 hours") calculated from current time
+  - Two action buttons: "بدء المقابلة" (gold bg, ExternalLink icon) + "إلغاء" (outline, red text, X icon)
+- Responsive layout (stacks vertically on mobile, horizontal on sm+)
+- Framer-motion staggered entrance animation
+
+#### 2. Calendar Page (`/interviewer/dashboard/calendar/page.tsx`)
+- Title: `t('calendar')`
+- Month calendar grid with 7 columns matching Arabic day names (الأحد through السبت)
+- Day header row with RTL-aware labels
+- Each day cell shows 30-min time slots (9:00–17:00)
+- Color coding:
+  - Available: `border-gold/50 outline text-gold`, clickable → toggles to blocked
+  - Blocked: `bg-gray-800 text-gray-600 line-through`, clickable → toggles back to available
+  - Booked: `bg-gold/20 text-gold` with candidate name, not clickable
+  - Past: `bg-gray-900 text-gray-700`, not interactive
+- `useState` for availability state management
+- Current month display with prev/next month navigation (RTL-aware chevron direction)
+- Color legend (4 items)
+- "Save changes" button at bottom (gold, Check icon)
+- Mock data seeded: some blocked, booked, and past slots
+- Today highlighted with gold border
+
+#### 3. Earnings Page (`/interviewer/dashboard/earnings/page.tsx`)
+- Title: `t('earnings')`
+- Stats row (4 cards):
+  - إجمالي الأرباح: $2,340 (gold)
+  - العمولة المخصومة: $468 (red-400)
+  - صافي الدخل: $1,872 (emerald)
+  - الجلسات المكتملة: 78 (white)
+- Current balance card: "$487 — تُصرف يوم ١٥ أغسطس" with "Request early payout" button (gold outline)
+- CSS-only bar chart: 6 bars for last 6 months (يناير–يونيو), gold gradient fill, amount labels above bars, month labels below
+- Payout history table (5 mock rows):
+  - Columns: التاريخ | المبلغ | الحالة | معرف العملية
+  - Status badges: PAID=green, PENDING=yellow
+- Framer-motion staggered animations for all sections
+
+#### 4. Reviews Page (`/interviewer/dashboard/reviews/page.tsx`)
+- Title: `t('reviews')`
+- Big average rating: "4.8" in gold text-6xl with 5-star visual
+- Rating breakdown bars (horizontal): 5★(89), 4★(28), 3★(7), 2★(2), 1★(1) — gold progress bars proportional to count
+- Additional breakdown cards grid (4 columns) showing per-star count and percentage
+- 8 mock review cards, each with:
+  - Anonymized candidate name (e.g., "مرشح · مبيعات"), date, gold star rating
+  - Comment text in muted color
+  - "Reply" button (outline, text-xs, MessageSquare icon)
+  - Expandable reply section: toggle button with ChevronDown/ChevronUp, reply shown in gray indented box with gold left border
+- Framer-motion staggered entrance animation
+
+### Technical notes
+- All pages are `'use client'` components
+- No Navbar/Footer — renders within existing dashboard layout
+- Uses `useTranslations('interviewerDash')` and `useLocale()` for i18n
+- RTL-aware navigation chevrons (arrows flip based on locale)
+- Mock data only, no API calls
+- Lint passes with zero errors

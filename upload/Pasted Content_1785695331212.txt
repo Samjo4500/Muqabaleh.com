@@ -1,0 +1,917 @@
+═══════════════════════════════════════════════════════════════════════════════
+MUQABALEH — HUMAN INTERVIEW MARKETPLACE
+Complete Build Specification (Single Prompt)
+═══════════════════════════════════════════════════════════════════════════════
+
+BUSINESS MODEL
+═══════════════════════════════════════════════════════════════════════════════
+
+Two-sided marketplace: Candidates book live mock interviews with real HR 
+professionals. Platform takes commission on every booking.
+
+REVENUE SPLIT (Locked: 20% platform fee)
+┌─────────────┬──────────────┬──────────────────┬──────────┐
+│ Tier        │ Candidate Pays│ Interviewer Gets │ You Keep │
+├─────────────┼──────────────┼──────────────────┼──────────┤
+│ Standard    │ $29           │ $23.20           │ $5.80    │
+│ Pro         │ $49           │ $39.20           │ $9.80    │
+│ Executive   │ $99           │ $79.20           │ $19.80   │
+└─────────────┴──────────────┴──────────────────┴──────────┘
+
+Loyalty bonus:
+• 10+ completed sessions → interviewer keeps +5% (platform fee drops to 15%)
+• 50+ completed sessions → interviewer keeps +10% (platform fee drops to 10%)
+
+Payout schedule: Every 2 weeks (biweekly) via PayPal
+
+═══════════════════════════════════════════════════════════════════════════════
+1. HOMEPAGE PROMO SECTION
+═══════════════════════════════════════════════════════════════════════════════
+
+Add a new section to the homepage, positioned BELOW the AI interview CTA 
+and ABOVE the "How It Works" section.
+
+Section container: Full-width, background gradient #0a1628 → #0f1d2e, 
+padding 80px vertical.
+
+Content:
+• Headline (AR): "مقابلات مع محاورين حقيقيين"
+  Headline (EN): "Interview with Real HR Professionals"
+  Font: Bold, 36px desktop / 28px mobile, gold #d4af37
+
+• Subtext (AR): "تدرّب مع مدير موارد بشرية متمرس — مباشرة عبر الفيديو"
+  Subtext (EN): "Practice with a seasoned HR manager — live via video"
+  Font: Regular, 18px, white #ffffff, max-width 600px
+
+• Stats row (3 columns):
+  - "٥٠+ محاور معتمد" / "50+ Certified Interviewers"
+  - "٤.٨/٥ متوسط التقييم" / "4.8/5 Average Rating"  
+  - "جلسات من $٢٩" / "Sessions from $29"
+  Font: 16px, gold numbers, white labels
+
+• Two CTAs side by side (stacked on mobile):
+  Primary (gold button): "احجز مقابلة بشرية" / "Book a Human Interview" 
+    → href: /human-interviews
+  Secondary (outline button): "سجّل كمحاور" / "Become an Interviewer"
+    → href: /join-as-interviewer
+
+• Visual: Horizontal scrollable row of 4 interviewer preview cards:
+  - Avatar (80px circle, gold ring)
+  - Name + flag emoji
+  - ⭐ rating + review count
+  - Price tag badge: "$29"
+
+═══════════════════════════════════════════════════════════════════════════════
+2. BROWSE INTERVIEWERS PAGE (/human-interviews)
+═══════════════════════════════════════════════════════════════════════════════
+
+Layout: Sidebar filters (left LTR / right RTL) + Main grid
+
+FILTERS SIDEBAR:
+• Role: Sales, Tech, Marketing, HR, Finance, Operations, Design, Customer Service, 
+  Project Manager, Data Analyst, Accountant
+• Experience: Junior (1-3y), Mid (4-7y), Senior (8-15y), Executive (15y+)
+• Language: Arabic, English, Bilingual
+• Price: $29, $49, $99
+• Rating: 4.0+, 4.5+
+• Availability: Today, This Week, This Month
+• Industry: Tech, Retail, Healthcare, Fintech, E-commerce, Construction, 
+  Logistics, Media, Telecom, Banking
+
+Each filter is a checkbox group or dropdown. "Clear All" button at top.
+
+MAIN GRID:
+• Desktop: 3 columns
+• Tablet: 2 columns  
+• Mobile: 1 column
+• Gap: 24px
+
+INTERVIEWER CARD:
+┌─────────────────────────────┐
+│  [Avatar 120px circle]      │
+│  Fahd Al-Rashid 🇸🇦          │
+│  ⭐ 4.8 (127 reviews)        │
+│  "مدير مبيعات — ٨ سنوات"     │
+│                             │
+│  [Tag] مبيعات  [Tag] الخليج  │
+│                             │
+│  $29 / جلسة                 │
+│                             │
+│  [احجز الآن]                │
+└─────────────────────────────┘
+
+Card styling: Glassmorphism background #0B0F17, border 1px solid rgba(212,175,55,0.2),
+hover: border-color gold, scale 1.02, transition 0.3s.
+
+Empty state: "لا يوجد محاورون متاحون بهذه المعايير" / "No interviewers match your filters"
++ "امسح الفلاتر" / "Clear filters" button.
+
+Pagination: 12 per page, "تحميل المزيد" / "Load more" button.
+
+═══════════════════════════════════════════════════════════════════════════════
+3. INTERVIEWER PROFILE PAGE (/interviewer/[id])
+═══════════════════════════════════════════════════════════════════════════════
+
+Split layout: Left 40% / Right 60% (RTL: reverse)
+
+LEFT PANEL:
+• Avatar: 200px circle, gold gradient ring, pulsing green dot if currently online
+• Name: Bold, 24px, white
+• Title: "مدير مبيعات — شركة سابقة" / "Sales Manager — Former Company"
+• Location: Flag emoji + city/country
+• ⭐ Rating: 4.8 / 5.0 with star icon + "(127 تقييم)" / "(127 reviews)"
+• "معتمد من مقابلة" / "Muqabaleh Certified" badge (gold border, dark bg)
+• Price: "$29 / جلسة" — large, gold, bold
+• Languages: "العربية · الإنجليزية" / "Arabic · English"
+• Specialties: Chip tags (مبيعات, تقنية, الخليج)
+
+RIGHT PANEL:
+• Video intro: 16:9 aspect ratio, auto-play muted, max 60 seconds
+  - Poster image (first frame) while loading
+  - Play button overlay
+  - "فيديو تعريفي" / "Intro Video" label
+
+• Bio: 2-3 paragraphs, collapsible "اقرأ المزيد" / "Read more" if >200 chars
+  - Both AR and EN versions (tabs or stacked)
+
+• Reviews section:
+  - Average rating big number
+  - 3 latest reviews (avatar, name, rating, date, comment)
+  - "عرض كل التقييمات (127)" / "View all 127 reviews" → expandable or modal
+
+• Availability calendar:
+  - Week view (Sun-Sat)
+  - Clickable time slots (30-min blocks)
+  - Booked slots: gray, disabled
+  - Available slots: gold outline, clickable
+  - Selected slot: gold fill, white text
+  - Timezone label: "التوقيت: الرياض (GMT+3)" / "Timezone: Riyadh (GMT+3)"
+
+• "احجز هذا الموعد" / "Book This Slot" button:
+  - Disabled until slot selected
+  - Gold background, full width on mobile
+  - Price displayed: "$29 — ٣٠ دقيقة"
+
+═══════════════════════════════════════════════════════════════════════════════
+4. BOOKING FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1 — SELECT SLOT (on profile page)
+User clicks available time slot → slot highlighted → price shown
+
+STEP 2 — CONFIRM DETAILS (/book/[interviewerId])
+• Interviewer avatar + name (small)
+• Selected date/time
+• Duration: 30 minutes (default, fixed for MVP)
+• Price: $29 / $49 / $99
+• Meeting method: "Jitsi Meet (متصفح)" / "Jitsi Meet (Browser)"
+• "أضف ملاحظة للمحاور" / "Add a note for the interviewer" (textarea, optional)
+
+• Terms checkbox: "أوافق على شروط الإلغاء (٢٤ ساعة قبل الموعد)"
+  / "I agree to cancellation terms (24 hours before session)"
+
+• CTA: "ادفع واحجز" / "Pay & Book" → PayPal checkout
+
+STEP 3 — PAYPAL CHECKOUT
+• Same PayPal integration as existing platform
+• Candidate pays platform (you hold funds)
+• Platform fee auto-calculated and stored
+• Interviewer payout auto-calculated and stored
+
+STEP 4 — CONFIRMATION PAGE (/booking/confirmation)
+• Success animation (checkmark, gold, 2 seconds)
+• Booking summary card:
+  - Interviewer name + avatar
+  - Date/time
+  - Meeting link (Jitsi)
+  - "أضف للتقويم" / "Add to Calendar" button (.ics file download)
+  - "نسخ الرابط" / "Copy link" button
+
+• Preparation checklist:
+  - "اختبر الكاميرا والمايك"
+  - "جهّز سيرتك الذاتية"
+  - "اكتب ٣ أسئلة تبي تسألها"
+  / "Test camera and mic", "Prepare your CV", "Write 3 questions to ask"
+
+• Email confirmation sent via Resend (see Email Templates section)
+
+STEP 5 — POST-INTERVIEW
+• Interviewer submits feedback form (score 1-10 + written feedback)
+• Candidate receives notification: "تقريرك جاهز"
+• Candidate rates interviewer (1-5 stars + optional comment)
+• Platform releases payout to interviewer (batch every 2 weeks)
+
+═══════════════════════════════════════════════════════════════════════════════
+5. INTERVIEWER APPLICATION FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+LANDING PAGE (/join-as-interviewer)
+Hero section:
+• Headline (AR): "شارك خبرتك. اكسب دخلاً إضافياً."
+  Headline (EN): "Share Your Expertise. Earn Extra Income."
+• Subtext (AR): "المحاورون يكسبون $٥٠٠+ شهرياً من منازلهم"
+  Subtext (EN): "Interviewers earn $500+/month from home"
+• Stats row: "$٥٠٠+ شهرياً" / "$500+/month" · "أنت تحدد مواعيدك" / "You set your schedule" · "٠ عمولة تسجيل" / "$0 signup fee"
+
+How it works (3 steps):
+1. "قدّم طلبك" / "Apply" — Fill form, upload video, verify ID
+2. "احصل على الموافقة" / "Get Approved" — We review within 48 hours
+3. "ابدأ المقابلات" / "Start Interviewing" — Set your calendar, accept bookings
+
+Requirements list:
+• ٣+ سنوات خبرة في الموارد البشرية أو التوظيف / 3+ years in HR or recruitment
+• حساب LinkedIn نشط / Active LinkedIn profile
+• القدرة على إجراء مقابلات بالعربية أو الإنجليزية / Ability to interview in Arabic or English
+• كاميرا ومايك جيدين / Good camera and microphone
+
+Earnings calculator (interactive slider):
+• "كم جلسة في الأسبوع؟" / "How many sessions per week?"
+• Slider: 1-20 sessions
+• Calculation updates live:
+  - 5 sessions/week × $29 × 4 weeks = $580/month
+  - Platform fee: -$116 (20%)
+  - You earn: $464/month
+
+CTA: "قدّم طلبك الآن" / "Apply Now" → /apply
+
+FAQ accordion (5 items):
+• "كم تستغرق الموافقة؟" / "How long does approval take?" → ٢-٤ أيام عمل
+• "كيف أستلم أرباحي؟" / "How do I get paid?" → PayPal كل أسبوعين
+• "هل يمكنني رفض حجز؟" / "Can I decline a booking?" → نعم، بشرط ٢٤ ساعة إشعار
+• "هل أحتاج شهادات معتمدة؟" / "Do I need certifications?" → لا، الخبرة العملية تكفي
+• "هل المقابلات مسجّلة؟" / "Are interviews recorded?" → بإذن المرشح فقط
+
+APPLICATION FORM (/apply)
+Form fields:
+1. Full name (AR): ____________
+2. Full name (EN): ____________
+3. Email: ____________ (must match account)
+4. Phone (with country code): ____________
+5. LinkedIn URL: ____________ (required, validated)
+6. Years of HR experience: Dropdown (1-3, 4-7, 8-15, 15+)
+7. Roles you can interview for: Multi-select checkbox
+   (Sales Manager, Software Engineer, Marketing, HR Manager, Accountant, 
+    Customer Service, Project Manager, Data Analyst, Operations Manager, 
+    Graphic Designer)
+8. Industries: Multi-select
+   (Tech, Retail, Healthcare, Fintech, E-commerce, Construction, Logistics, 
+    Media, Telecom, Banking, General)
+9. Languages spoken: Multi-select (Arabic, English, French)
+10. Preferred price tier: Radio buttons
+    - $29 Standard (recommended for new interviewers)
+    - $49 Pro
+    - $99 Executive
+11. Video intro upload:
+    - Max 60 seconds
+    - Max 50MB
+    - Accepted: MP4, MOV, WebM
+    - Instructions: "عرفنا عن نفسك وخبرتك في ٦٠ ثانية"
+      / "Introduce yourself and your experience in 60 seconds"
+    - Preview player after upload
+12. ID verification upload:
+    - Government ID or passport
+    - Max 10MB
+    - JPG, PNG, PDF
+    - Label: "للتحقق فقط — نحذفها بعد المراجعة"
+      / "For verification only — deleted after review"
+13. Terms checkbox:
+    - "أوافق على شروط المحاورين وأنني سألتزم بمعايير الجودة"
+      / "I agree to interviewer terms and quality standards"
+14. Submit button: "إرسال الطلب" / "Submit Application"
+
+Success state: "تم استلام طلبك! نراجعه خلال ٢-٤ أيام عمل."
+  / "Application received! We review within 2-4 business days."
++ "العودة للرئيسية" / "Back to home" button
+
+═══════════════════════════════════════════════════════════════════════════════
+6. INTERVIEWER DASHBOARD (/interviewer/dashboard)
+═══════════════════════════════════════════════════════════════════════════════
+
+Layout: Sidebar navigation + Main content area
+
+SIDEBAR:
+• Overview (النظرة العامة)
+• Upcoming Bookings (الحجوزات القادمة)
+• Calendar (التقويم)
+• Earnings (الأرباح)
+• Reviews (التقييمات)
+• Settings (الإعدادات)
+• Help (المساعدة)
+
+Mobile: Bottom tab bar or hamburger menu
+
+OVERVIEW PAGE:
+Stats cards (4 columns desktop, 2x2 mobile):
+┌─────────────┬─────────────┬─────────────┬─────────────┐
+│ $487        │ 23          │ 4.8 ⭐       │ 5           │
+│ هذا الشهر   │ مكتملة      │ متوسط       │ قادمة       │
+│ This Month  │ Completed   │ Avg Rating  │ Upcoming    │
+└─────────────┴─────────────┴─────────────┴─────────────┘
+
+Recent bookings table:
+| المرشح | التخصص | التاريخ | الحالة | الإجراء |
+| Candidate | Role | Date | Status | Action |
+
+Status badges:
+• مؤكد / Confirmed (green)
+• مكتمل / Completed (gold)
+• ملغى / Cancelled (red)
+• لم يحضر / No-show (gray)
+
+UPCOMING BOOKINGS PAGE:
+• Calendar list view (next 30 days)
+• Each card: Candidate name, role, date/time, meeting link, countdown
+• "بدء المقابلة" / "Start Interview" button (opens meeting link)
+• "إلغاء" / "Cancel" button (with confirmation modal, 24h policy warning)
+
+CALENDAR PAGE:
+• Full calendar (month view default, week toggle)
+• Color coding:
+  - Booked: Gold solid
+  - Available: Green outline
+  - Blocked: Gray solid
+  - Past: Muted
+• Click available slot → toggle blocked/unblocked
+• Drag to select multiple slots
+• "حفظ التغييرات" / "Save changes" button
+
+EARNINGS PAGE:
+• Chart: Line chart, earnings last 6 months
+• Stats:
+  - إجمالي الأرباح / Total earnings: $2,340
+  - العمولة المخصومة / Platform fees deducted: $468
+  - صافي الدخل / Net income: $1,872
+  - الجلسات المكتملة / Sessions completed: 78
+• Payout history table:
+  | التاريخ | المبلغ | الحالة | معرف العملية |
+  | Date | Amount | Status | Transaction ID |
+• Current balance: "$487 — تُصرف يوم ١٥ أغسطس" / "$487 — disbursed Aug 15"
+• "اطلب دفع مبكر" / "Request early payout" button (min $100, 5% fee)
+
+REVIEWS PAGE:
+• Average rating big display: "4.8" with 5-star visual
+• Rating breakdown: 5★ (89), 4★ (28), 3★ (7), 2★ (2), 1★ (1)
+• Review cards:
+  - Candidate name (anonymized: "مرشح · مبيعات" / "Candidate · Sales")
+  - Date
+  - Stars
+  - Comment
+• "الرد على التقييم" / "Reply to review" button (optional)
+
+SETTINGS PAGE:
+• Profile: Edit bio, specialties, languages, price tier
+• Availability: Same as calendar page
+• Payout: PayPal email, payout method
+• Notifications: Email preferences
+• Account: Change password, deactivate
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ADMIN DASHBOARD UPDATES
+═══════════════════════════════════════════════════════════════════════════════
+
+New admin pages under /admin:
+
+/admin/interviewers
+• Table: Name | Email | Applied | Experience | Status | Rating | Actions
+• Status filter: Pending | Approved | Rejected | Suspended
+• Actions per row:
+  - View profile (opens modal with full application)
+  - Approve → sends approval email + creates interviewer record
+  - Reject → sends soft rejection email (see Email Templates)
+  - Suspend → blocks from new bookings, existing bookings honoured
+• Bulk actions: Approve selected, Reject selected, Export CSV
+• Search by name/email
+
+/admin/bookings
+• All human bookings table
+• Filters: Status, Date range, Interviewer, Price tier
+• Columns: ID | Candidate | Interviewer | Date | Amount | Status | Actions
+• Actions: View details, Cancel & refund, Resolve dispute
+• Dispute flag: Candidate or interviewer reported issue
+
+/admin/payouts
+• Pending payouts list
+• Columns: Interviewer | Amount | Period | Status | Actions
+• "Process payout" button → triggers PayPal payout API
+• Payout history: Date | Interviewer | Amount | PayPal TXID | Status
+
+/admin/interviewer-analytics
+• Total interviewers: 45
+• Active this month: 32
+• Average rating: 4.6
+• Total human interview revenue: $12,450
+• Commission earned: $2,490
+
+═══════════════════════════════════════════════════════════════════════════════
+8. DATABASE SCHEMA (Add to Prisma)
+═══════════════════════════════════════════════════════════════════════════════
+
+model Interviewer {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED, SUSPENDED
+  fullName        String
+  fullNameAr      String?
+  bio             String?  @db.Text
+  bioAr           String?  @db.Text
+  linkedInUrl     String?
+  phone           String?
+  yearsExperience Int
+  specialties     String[] // Role slugs
+  industries      String[] // Industry slugs
+  languages       String[] // AR, EN, FR
+  priceTier       String   @default("STANDARD") // STANDARD, PRO, EXECUTIVE
+  hourlyRate      Int      // in cents (e.g., 2900 for $29)
+  rating          Float    @default(0)
+  totalInterviews Int      @default(0)
+  totalEarnings   Int      @default(0) // cents earned lifetime
+  videoIntroUrl   String?
+  idDocumentUrl   String?
+  idVerified      Boolean  @default(false)
+  payoutEmail     String?
+  payoutMethod    String   @default("PAYPAL") // PAYPAL, BANK
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  availability    InterviewerAvailability[]
+  bookings        HumanBooking[] @relation("InterviewerBookings")
+  payouts         InterviewerPayout[]
+  reviews         InterviewerReview[]
+}
+
+model InterviewerAvailability {
+  id            String    @id @default(uuid())
+  interviewerId String
+  interviewer   Interviewer @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+  dayOfWeek     Int       // 0=Sunday, 1=Monday...6=Saturday
+  startTime     String    // "09:00" in 24h format
+  endTime       String    // "17:00"
+  isAvailable   Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  
+  @@index([interviewerId])
+}
+
+model HumanBooking {
+  id                String   @id @default(uuid())
+  candidateId       String
+  candidate         User     @relation("CandidateBookings", fields: [candidateId], references: [id])
+  interviewerId     String
+  interviewer       Interviewer @relation("InterviewerBookings", fields: [interviewerId], references: [id])
+  status            String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW, DISPUTED
+  scheduledAt       DateTime
+  durationMinutes   Int      @default(30)
+  priceTotal        Int      // cents (what candidate paid)
+  platformFee       Int      // cents (20%, 15%, or 10%)
+  interviewerPayout Int      // cents
+  provider          String   @default("JITSI") // JITSI, ZOOM
+  meetingLink       String?
+  hostLink          String?  // for Zoom start_url
+  recordingUrl      String?
+  candidateNote     String?  @db.Text
+  interviewerNotes  String?  @db.Text
+  candidateFeedback String?  @db.Text
+  candidateRating   Int?
+  interviewerRating Int?
+  disputeReason     String?
+  cancelledBy       String?  // CANDIDATE, INTERVIEWER, PLATFORM
+  cancelledAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([candidateId])
+  @@index([interviewerId])
+  @@index([status])
+}
+
+model InterviewerPayout {
+  id                  String   @id @default(uuid())
+  interviewerId       String
+  interviewer         Interviewer @relation(fields: [interviewerId], references: [id])
+  amount              Int      // cents
+  status              String   @default("PENDING") // PENDING, PAID, FAILED
+  paidAt              DateTime?
+  paypalTransactionId String?
+  periodStart         DateTime
+  periodEnd           DateTime
+  createdAt           DateTime @default(now())
+  
+  @@index([interviewerId])
+  @@index([status])
+}
+
+model InterviewerReview {
+  id            String   @id @default(uuid())
+  bookingId     String   @unique
+  booking       HumanBooking @relation(fields: [bookingId], references: [id])
+  reviewerId    String   // User who left review (candidate)
+  rating        Int      // 1-5
+  comment       String?  @db.Text
+  isPublic      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+// Add to existing User model:
+// relation CandidateBookings HumanBooking[]
+// relation Interviewer      Interviewer?
+
+═══════════════════════════════════════════════════════════════════════════════
+9. VIDEO CALL INFRASTRUCTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 1 (MVP — Implement Now): Jitsi Meet (Free)
+• No API key required
+• Generate URL: https://meet.jit.si/muqabaleh-{bookingId}-{randomString(6)}
+• Store in HumanBooking.meetingLink
+• Send to candidate + interviewer in confirmation email
+• Works in browser, no download needed
+• 100 participant limit, 60-minute limit (fine for 1-on-1)
+
+PHASE 2 (Scale — Later): Zoom API
+• Zoom Pro account ($14.99/month)
+• Server-to-Server OAuth app
+• API: POST /v2/users/me/meetings
+• Settings: host_video=true, participant_video=true, waiting_room=true, 
+  auto_recording="cloud", join_before_host=false
+• Webhook: meeting.ended → store recording URL
+• Store hostLink (start_url) for interviewer
+
+Provider selection:
+• Default: JITSI for all bookings
+• Admin can toggle individual bookings to Zoom
+• Executive tier ($99) auto-uses Zoom when available
+
+═══════════════════════════════════════════════════════════════════════════════
+10. EMAIL TEMPLATES (Resend)
+═══════════════════════════════════════════════════════════════════════════════
+
+EMAIL 1: INTERVIEWER APPROVED
+Trigger: Admin changes status PENDING → APPROVED
+To: interviewer.email
+Subject AR: 🎉 تم قبولك! أهلاً بك في فريق محاوري مقابلة
+Subject EN: 🎉 You're Approved! Welcome to the Muqabaleh Interviewer Team
+
+Body AR:
+أهلاً {name}،
+
+تم قبول طلبك للانضمام كمحاور معتمد في منصة مقابلة.
+
+وش اللي يصير الحين؟
+١. سجّل دخولك: https://muqabaleh.com/interviewer/dashboard
+٢. أكمل ملفك الشخصي (تخصصات، فيديو، أسعار)
+٣. فعّل التقويم
+٤. ربط حساب PayPal
+
+كيف تكسب؟
+• $29 جلسة → تستلم $23.20 (عمولة ٢٠٪)
+• بعد ١٠ جلسات → العمولة ١٥٪
+• بعد ٥٠ جلسة → العمولة ١٠٪
+
+قواعد سريعة:
+✅ كن في الموعد
+✅ التقييم خلال ٢٤ ساعة
+✅ احترام الخصوصية
+✅ التقييم بناء
+
+هل تحتاج مساعدة؟ hello@muqabaleh.com
+
+يالله، نبي نسمع رأي المرشحين الأول! 🚀
+
+فريق مقابلة
+
+Body EN:
+Hi {name},
+
+Your application to join Muqabaleh as a certified interviewer has been approved.
+
+Next steps:
+1. Log in: https://muqabaleh.com/interviewer/dashboard
+2. Complete your profile (specialties, video, pricing)
+3. Activate your calendar
+4. Connect PayPal
+
+Earnings:
+• $29 session → You keep $23.20 (20% fee)
+• After 10 sessions → Fee drops to 15%
+• After 50 sessions → Fee drops to 10%
+
+Quick rules:
+✅ Be on time
+✅ Submit feedback within 24 hours
+✅ Respect privacy
+✅ Give constructive feedback
+
+Need help? hello@muqabaleh.com
+
+Let's hear what your first candidates think! 🚀
+
+The Muqabaleh Team
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 2: INTERVIEWER REJECTED (Soft Rejection)
+Trigger: Admin changes status PENDING → REJECTED
+To: applicant.email
+Subject AR: شكراً لاهتمامك بمنصة مقابلة
+Subject EN: Thank You for Your Interest in Muqabaleh
+
+Body AR:
+{name}،
+
+نشكرك على تقديم طلبك للانضمام كمحاور في منصة مقابلة.
+
+بعد مراجعة طلبك، قررنا عدم المضي قدماً في هذه المرحلة. السبب الأكثر شيوعاً:
+• الخبرة أقل من ٣ سنوات في الموارد البشرية
+• عدم اكتمال الملف الشخصي أو الفيديو التعريفي
+• عدم تطابق التخصص مع احتياجاتنا الحالية
+
+هذا لا يعني رفض نهائي. يمكنك:
+• التقديم مجدداً بعد ٣ أشهر مع ملف أقوى
+• متابعتنا على LinkedIn لمعرفة فرص مستقبلية
+
+نقدر وقتك ونتمنى لك التوفيق.
+
+فريق مقابلة
+
+Body EN:
+{name},
+
+Thank you for applying to join Muqabaleh as an interviewer.
+
+After reviewing your application, we've decided not to move forward at this time. Common reasons:
+• Less than 3 years of HR experience
+• Incomplete profile or intro video
+• Specialty doesn't match current demand
+
+This is not a permanent rejection. You can:
+• Reapply in 3 months with a stronger profile
+• Follow us on LinkedIn for future opportunities
+
+We appreciate your time and wish you the best.
+
+The Muqabaleh Team
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 3: NEW BOOKING NOTIFICATION
+Trigger: Booking status → CONFIRMED
+To: interviewer.email
+Subject AR: 🔔 حجز جديد — مقابلة يوم {date}
+Subject EN: 🔔 New Booking — Interview on {date}
+
+Body AR:
+{name}،
+
+مرشح جديد حجز مقابلة معاك!
+
+التفاصيل:
+• المرشح: {candidateName}
+• التخصص: {role}
+• التاريخ: {date}
+• الوقت: {time} (توقيت الرياض)
+• المدة: ٣٠ دقيقة
+• الرابط: {meetingLink}
+
+[تأكيد المقابلة]
+
+تذكير:
+• ادخل ٥ دقايق قبل الموعد
+• جرب الكاميرا والمايك
+• جهّز نفسك بأسئلة مناسبة
+
+بالتوفيق!
+
+فريق مقابلة
+
+Body EN:
+{name},
+
+A new candidate has booked an interview with you!
+
+Details:
+• Candidate: {candidateName}
+• Role: {role}
+• Date: {date}
+• Time: {time} (Riyadh time)
+• Duration: 30 minutes
+• Link: {meetingLink}
+
+[Confirm Interview]
+
+Reminders:
+• Join 5 minutes early
+• Test your camera and mic
+• Prepare role-specific questions
+
+Good luck!
+
+The Muqabaleh Team
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 4: BOOKING CONFIRMATION (Candidate)
+Trigger: Booking status → CONFIRMED
+To: candidate.email
+Subject AR: ✅ تم تأكيد حجزك — مقابلة يوم {date}
+Subject EN: ✅ Booking Confirmed — Interview on {date}
+
+Body AR:
+{name}،
+
+تم تأكيد مقابلتك مع {interviewerName}!
+
+التفاصيل:
+• المحاور: {interviewerName}
+• التخصص: {role}
+• التاريخ: {date}
+• الوقت: {time}
+• الرابط: {meetingLink}
+• السعر: ${price}
+
+[أضف للتقويم] [نسخ الرابط]
+
+تحضيرات سريعة:
+١. اختبر الكاميرا والمايك
+٢. جهّز سيرتك الذاتية
+٣. اكتب ٣ أسئلة تبي تسألها
+
+بالتوفيق! 🚀
+
+فريق مقابلة
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 5: INTERVIEW REMINDER (1 hour before)
+Trigger: Cron job, 1 hour before scheduledAt
+To: candidate.email + interviewer.email
+Subject AR: ⏰ مقابلتك بعد ساعة!
+Subject EN: ⏰ Your Interview is in 1 Hour!
+
+Body AR:
+{name}،
+
+مقابلتك مع {interviewerName} تبدأ بعد ساعة.
+
+• التاريخ: {date}
+• الوقت: {time}
+• الرابط: {meetingLink}
+
+[انضم للمقابلة]
+
+لا تنسى:
+✅ كاميرا شغالة
+✅ مايك واضح
+✅ مكان هادئ
+
+بالتوفيق!
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 6: FEEDBACK READY
+Trigger: Interviewer submits feedback
+To: candidate.email
+Subject AR: 📊 تقرير مقابلتك جاهز!
+Subject EN: 📊 Your Interview Report is Ready!
+
+Body AR:
+{name}،
+
+{interviewerName} أكمل تقييم مقابلتك!
+
+• درجتك: {score}/10
+• ملخص: {summary}
+
+[عرض التقرير الكامل]
+
+لا تنسى تقييم المحاور — يساعدنا نحسن الخدمة.
+
+[قيّم المحاور]
+
+─────────────────────────────────────────────────────────────
+
+EMAIL 7: PAYOUT PROCESSED
+Trigger: InterviewerPayout status → PAID
+To: interviewer.payoutEmail
+Subject AR: 💰 تم إيداع ${amount} — أرباح مقابلة
+Subject EN: 💰 ${amount} Deposited — Muqabaleh Earnings
+
+Body AR:
+{name}،
+
+تم إيداع أرباحك في PayPal:
+
+• المبلغ: ${amount}
+• الفترة: {periodStart} — {periodEnd}
+• عدد الجلسات: {sessionCount}
+• معرف العملية: {transactionId}
+
+يستغرق ١-٢ يوم عمل.
+
+شكراً لمجهودك! 🙏
+
+فريق مقابلة
+
+═══════════════════════════════════════════════════════════════════════════════
+11. i18n KEYS REQUIRED
+═══════════════════════════════════════════════════════════════════════════════
+
+Add to ar.json and en.json for ALL new pages:
+- Homepage promo section
+- Browse filters and labels
+- Interviewer card labels
+- Profile page sections
+- Booking flow steps
+- Application form fields and validation
+- Dashboard navigation and all page content
+- Earnings/currency terminology
+- Calendar labels (days, months, time slots)
+- Status badges (confirmed, completed, cancelled, etc.)
+- Email template strings (or handle in email service with locale param)
+- Review system ("التقييم", "المراجعات", "نجوم", "رد")
+
+═══════════════════════════════════════════════════════════════════════════════
+12. API ROUTES TO CREATE
+═══════════════════════════════════════════════════════════════════════════════
+
+POST   /api/interviewers/apply              → Submit application
+GET    /api/interviewers                    → List approved (public, with filters)
+GET    /api/interviewers/[id]               → Profile + availability
+PUT    /api/interviewers/[id]               → Update profile (self only)
+POST   /api/interviewers/[id]/availability  → Set availability slots
+POST   /api/bookings/create                 → Create booking + charge candidate
+POST   /api/bookings/[id]/confirm           → Interviewer confirms
+POST   /api/bookings/[id]/complete          → Mark done, release payout
+POST   /api/bookings/[id]/cancel            → Refund logic
+POST   /api/bookings/[id]/review            → Submit review
+GET    /api/interviewer/earnings            → Dashboard stats
+GET    /api/interviewer/bookings            → My bookings
+POST   /api/payouts/process                 → Admin triggers payout
+POST   /api/admin/interviewers/[id]/approve → Admin approve
+POST   /api/admin/interviewers/[id]/reject  → Admin reject
+GET    /api/admin/bookings                  → All bookings
+GET    /api/admin/payouts                   → All payouts
+
+═══════════════════════════════════════════════════════════════════════════════
+13. DELIVERABLES CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+PHASE 1 — THIS WEEK:
+□ Homepage promo section (human interviews CTA)
+□ /join-as-interviewer landing page
+□ /apply application form with file uploads
+□ Interviewer database schema (Prisma)
+□ Admin interviewer approval/rejection flow
+□ Approval + rejection email templates
+□ Jitsi meeting link generation in booking flow
+
+PHASE 2 — NEXT WEEK:
+□ /human-interviews browse page with filters
+□ /interviewer/[id] profile page
+□ Booking flow (select slot → PayPal → confirmation)
+□ Interviewer dashboard (/interviewer/dashboard)
+□ Booking confirmation + reminder emails
+□ Calendar availability management
+
+PHASE 3 — LATER:
+□ Zoom API integration
+□ Recording storage and playback
+□ Review system (1-5 stars + comments)
+□ Automated payout processing
+□ Earnings analytics charts
+□ Dispute resolution system
+
+═══════════════════════════════════════════════════════════════════════════════
+14. ENVIRONMENT VARIABLES TO ADD
+═══════════════════════════════════════════════════════════════════════════════
+
+# Jitsi (no key needed)
+JITSI_BASE_URL=https://meet.jit.si
+
+# Zoom (Phase 2 only)
+ZOOM_ACCOUNT_ID=
+ZOOM_CLIENT_ID=
+ZOOM_CLIENT_SECRET=
+ZOOM_WEBHOOK_SECRET=
+
+# Existing vars must be set for auth to work:
+NEXTAUTH_SECRET=
+DATABASE_URL=
+NEXTAUTH_URL=
+PAYPAL_CLIENT_ID=
+PAYPAL_SECRET=
+PAYPAL_PLAN_ID= (for AI interviews, separate from human bookings)
+
+═══════════════════════════════════════════════════════════════════════════════
+15. RULES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Do NOT break existing AI interview functionality
+2. Do NOT modify existing PayPal subscription flow for AI interviews
+3. Human bookings use ONE-TIME PayPal payments (not subscriptions)
+4. All new pages must be bilingual (AR/EN) with full i18n
+5. All new pages must support RTL/LTR switching
+6. Security: Interviewer endpoints must check role === 'INTERVIEWER' or 'SUPER_ADMIN'
+7. File uploads: Video max 50MB, ID max 10MB, store in Supabase Storage
+8. Push to main branch only. I test live URL only.
+9. ESLint clean. No console errors.

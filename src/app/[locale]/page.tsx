@@ -38,6 +38,7 @@ import {
   LiveBadge,
   HeroStoryboard,
   HeroSimulation,
+  HumanInterviewsPromo,
 } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -76,6 +77,7 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 pt-16">
         <HeroSection t={t} tc={tc} isRTL={isRTL} />
+        <HumanInterviewsPromo />
         <CountryMarquee t={t} isRTL={isRTL} />
         <StatsBand t={t} />
         <WhySection t={t} />

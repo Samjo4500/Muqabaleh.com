@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getDemoQuestions, type Role, LEVEL_MAP } from '@/lib/interview-questions';
+import { demoInterviews } from '@/lib/demo-state';
 
 const IS_DEMO = process.env.DEMO_MODE === 'true';
-
-// In-memory demo state
-const demoInterviews = new Map<string, {
-  id: string;
-  language: string;
-  status: string;
-  messageCount: number;
-  questions: string[];
-}>();
 
 // Map form values to roles
 const ROLE_FROM_FORM: Record<string, Role> = {
@@ -108,5 +100,4 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Export for use by messages route
-export { demoInterviews };
+// Shared demo state is now in src/lib/demo-state.ts and imported above.

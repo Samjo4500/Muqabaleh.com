@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { startInterview, generateInterviewResponse, evaluateInterview, generateVerificationId } from '@/lib/ai';
 import { getDemoQuestions, type Role, LEVEL_MAP } from '@/lib/interview-questions';
+import { demoInterviews, type DemoInterviewState } from '@/lib/demo-state';
 import { z } from 'zod';
 
 const IS_DEMO = process.env.DEMO_MODE === 'true';
@@ -10,15 +11,6 @@ const NO_DB = !process.env.DATABASE_URL;
 const guestMessageSchema = z.object({
   content: z.string().min(1).max(5000),
 });
-
-// In-memory demo state
-const demoInterviews = new Map<string, {
-  id: string;
-  language: string;
-  status: string;
-  messageCount: number;
-  questions: string[];
-}>();
 
 // POST /api/guest/[token]/messages — guest candidate message flow
 export async function POST(
@@ -175,7 +167,7 @@ async function handleDemoMessage(req: NextRequest, token: string) {
   }
 
   state.messageCount++;
-  const nextQIdx = Math.min(state.messageCount, totalQuestions - 1);
+  const nextQIdx = Math.min(state.messageCount - 1, totalQuestions - 1);
   const isLast = nextQIdx === totalQuestions - 1;
 
   if (isLast) {

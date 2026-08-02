@@ -326,9 +326,9 @@ export async function startInterview(
   interviewId: string,
   params: InterviewParams,
 ): Promise<QuestionResult> {
-  // Demo mode: return mock first question
+  // Demo mode: return mock first question from question bank
   if (IS_DEMO) {
-    const questions = params.language === 'AR' ? DEMO_QUESTIONS_AR : DEMO_QUESTIONS_EN;
+    const questions = getDemoQuestionsForParams(params);
     const cleaned = questions[0].replace(/\[INTERVIEW_DONE\]/g, '').trim();
     await db.message.create({
       data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: 1 },

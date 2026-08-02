@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import PricingContent from './pricing-content';
+import PageContent from './pricing-content';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -9,12 +9,13 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return {
-    absolute: true,
-    title: locale === 'ar' ? 'الأسعار — مقابلة | Muqabaleh' : 'Pricing — Muqabaleh',
+    title: {
+      absolute: locale === 'ar' ? 'الأسعار — مقابلة | Muqabaleh' : 'Pricing — Muqabaleh',
+    },
   };
 }
 
 export default async function Page({ params }: Props) {
   const { locale } = await params;
-  return <PricingContent />;
+  return <PageContent />;
 }

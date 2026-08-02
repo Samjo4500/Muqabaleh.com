@@ -22,8 +22,8 @@ const imageMap: Record<Interviewer, string> = {
 };
 
 const altMap: Record<Interviewer, string> = {
-  fahd: "Fahd",
-  noora: "Noora",
+  fahd: "فهد — محاورك المهني | Fahd — Your Professional Interviewer",
+  noora: "نورة — محاورتك المهنية | Noora — Your Professional Interviewer",
 };
 
 export function InterviewAvatar({

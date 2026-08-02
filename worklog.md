@@ -1221,3 +1221,31 @@ Work Log:
 
 Stage Summary:
 - /app/* now requires USER or SUPER_ADMIN role
+
+---
+Task ID: 7
+Agent: subagent
+Task: Generate professional interviewer avatars
+
+Work Log:
+- Generated fahd.webp and noora.webp using z-ai image generation CLI
+- Source images generated at 1024x1024 PNG, then converted to WebP via ffmpeg
+- File sizes: fahd.webp = 85.8 KB (85,822 bytes), noora.webp = 26.7 KB (26,692 bytes)
+- Both files saved to /home/z/my-project/public/images/
+- Temporary PNG files cleaned up
+
+Stage Summary:
+- Both avatars generated successfully
+---
+Task ID: 6
+Agent: subagent
+Task: Add back button + home link to all dashboard layouts
+
+Work Log:
+- Modified app/layout.tsx, b2b/layout.tsx, interviewer/layout.tsx
+- Added Home link to sidebar, BackButton to content area
+- Added Home import to lucide-react imports in all 3 files
+- Added BackButton import from @/components/navigation in all 3 files
+
+Stage Summary:
+- All 3 dashboards now have Back button + Home navigation

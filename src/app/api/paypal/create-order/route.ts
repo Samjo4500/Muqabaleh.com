@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
   // Create PayPal order
   try {
     const accessToken = await getPayPalAccessToken();
-    const order = await fetch('https://api-m.paypal.com/v2/checkout/orders', {
+    const baseUrl = process.env.PAYPAL_MODE === 'live'
+      ? 'https://api-m.paypal.com'
+      : 'https://api-m.sandbox.paypal.com';
+    const order = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +67,8 @@ export async function POST(req: NextRequest) {
     });
     const data = await order.json();
     if (data.error) {
-      return NextResponse.json({ error: data.error.message }, { status: 400 });
+      const msg = typeof data.error === 'string' ? data.error : (data.error.message || data.name || 'PayPal error');
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
     return NextResponse.json({
       orderId: data.id,

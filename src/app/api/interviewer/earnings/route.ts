@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-// GET /api/interviewer/earnings — total earnings, pending payout, stats
+// GET /api/interviewer/earnings — total earnings, available balance, stats
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -16,56 +16,67 @@ export async function GET() {
 
     const userId = (session.user as Record<string, unknown>).id as string;
 
-    // Try DB first
     try {
       const interviewer = await db.interviewer.findUnique({
         where: { userId },
-        select: { id: true, totalEarnings: true, rating: true, totalInterviews: true, payoutEmail: true },
+        select: {
+          id: true,
+          totalEarnings: true,
+          rating: true,
+          totalInterviews: true,
+          payoutEmail: true,
+        },
       });
 
-      if (interviewer) {
-        const completedBookings = await db.humanBooking.aggregate({
-          where: { interviewerId: interviewer.id, status: 'COMPLETED' },
-          _sum: { priceTotal: true, interviewerPayout: true, platformFee: true },
-          _count: true,
-        });
-
-        const upcomingBookings = await db.humanBooking.count({
-          where: {
-            interviewerId: interviewer.id,
-            status: { in: ['PENDING', 'CONFIRMED'] },
-            scheduledAt: { gte: new Date() },
-          },
-        });
-
-        const totalEarnings = completedBookings._sum.priceTotal || 0;
-        const platformFees = completedBookings._sum.platformFee || 0;
-        const netIncome = completedBookings._sum.interviewerPayout || 0;
-        const sessionsCompleted = completedBookings._count || 0;
-
+      if (!interviewer) {
         return NextResponse.json({
-          totalEarnings,
-          platformFees,
-          netIncome,
-          sessionsCompleted,
-          currentBalance: netIncome,
-          upcomingCount: upcomingBookings,
-          avgRating: interviewer.rating || 0,
+          totalEarnings: 0,
+          totalWithdrawn: 0,
+          availableBalance: 0,
+          sessionsCompleted: 0,
+          payoutEmail: null,
         });
       }
+
+      // Sum of interviewerPayout from completed bookings
+      const bookingAgg = await db.humanBooking.aggregate({
+        where: { interviewerId: interviewer.id, status: 'COMPLETED' },
+        _sum: { interviewerPayout: true },
+        _count: true,
+      });
+
+      const totalEarned = bookingAgg._sum.interviewerPayout || 0;
+      const sessionsCompleted = bookingAgg._count || 0;
+
+      // Sum of payouts that are COMPLETED or PROCESSING (money already sent/out)
+      const payoutAgg = await db.interviewerPayout.aggregate({
+        where: {
+          interviewerId: interviewer.id,
+          status: { in: ['COMPLETED', 'PROCESSING'] },
+        },
+        _sum: { amount: true },
+      });
+
+      const totalWithdrawn = payoutAgg._sum.amount || 0;
+      const availableBalance = totalEarned - totalWithdrawn;
+
+      return NextResponse.json({
+        totalEarnings: totalEarned,
+        totalWithdrawn,
+        availableBalance,
+        sessionsCompleted,
+        payoutEmail: interviewer.payoutEmail,
+      });
     } catch (dbErr) {
       console.warn('[GET /api/interviewer/earnings] DB unavailable:', dbErr);
     }
 
-    // Fallback: return zeros (no interviewer profile yet)
     return NextResponse.json({
       totalEarnings: 0,
-      platformFees: 0,
-      netIncome: 0,
+      totalWithdrawn: 0,
+      availableBalance: 0,
       sessionsCompleted: 0,
-      currentBalance: 0,
-      upcomingCount: 0,
-      avgRating: 0,
+      payoutEmail: null,
     });
   } catch (err) {
     console.error('GET /api/interviewer/earnings error:', err);

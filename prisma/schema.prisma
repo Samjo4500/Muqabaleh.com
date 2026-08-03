@@ -322,6 +322,7 @@ model HumanBooking {
   dailyRoomUrl     String?
   dailyRoomName    String?
   recordingUrl     String?
+  earnings          Int      @default(0)
   meetingLink       String?
   candidateNote     String?  @db.Text
   interviewerNotes  String?  @db.Text
@@ -361,17 +362,22 @@ model InterviewerPayout {
   id                  String   @id @default(uuid())
   interviewerId       String
   amount              Int
+  paypalEmail         String
   status              String   @default("PENDING")
-  paidAt              DateTime?
-  paypalTransactionId String?
-  periodStart         DateTime
-  periodEnd           DateTime
+  adminNote           String?  @db.Text
+  paypalBatchId       String?
+  requestedAt         DateTime @default(now())
+  processedAt         DateTime?
+  completedAt         DateTime?
+  periodStart         DateTime?
+  periodEnd           DateTime?
   createdAt           DateTime @default(now())
 
   interviewer   Interviewer @relation("InterviewerPayouts", fields: [interviewerId], references: [id])
 
   @@index([interviewerId])
   @@index([status])
+  @@index([paypalBatchId])
 }
 
 // ─── Admin Log ───

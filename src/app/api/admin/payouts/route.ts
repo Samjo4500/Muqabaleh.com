@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { requestedAt: 'desc' },
       include: {
         interviewer: {
           select: {

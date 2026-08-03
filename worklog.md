@@ -2170,3 +2170,18 @@ Stage Summary:
 - New file: src/lib/daily.ts
 - Modified: create-room/route.ts, capture-booking-order/route.ts, en.json, ar.json
 - Commit: 7547648 fix(phase-3c): extract shared Daily.co utility, fix auth and i18n bugs
+
+---
+Task ID: 7
+Agent: UI Builder
+Task: Build interviewer earnings page with payout request modal and history table
+
+Work Log:
+- Rewrote /src/app/[locale]/interviewer/earnings/page.tsx
+- Added Request Payout modal with PayPal email and amount inputs
+- Added payout history table with status badges
+- Connected to /api/interviewer/earnings, /api/interviewer/payouts, /api/interviewer/payouts/request
+
+Stage Summary:
+- Interviewer can view earnings stats, request payouts (min $50), and see payout history
+- Status badges: PENDING (yellow), PROCESSING (blue), COMPLETED (green), REJECTED (red)

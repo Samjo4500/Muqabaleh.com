@@ -168,8 +168,9 @@ export async function PATCH(
         updateData.status = status;
       }
 
-      // If completing, increment interviewer totalInterviews and totalEarnings
+      // If completing, set earnings and increment interviewer stats
       if (status === 'COMPLETED') {
+        updateData.earnings = booking.interviewerPayout;
         await db.interviewer.update({
           where: { id: booking.interviewerId },
           data: {

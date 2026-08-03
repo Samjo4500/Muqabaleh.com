@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Loader2, Send, Ban, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,12 +21,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string | null) {
+  if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -34,15 +44,16 @@ function formatDate(dateStr: string) {
   });
 }
 
+const STATUS_STYLES: Record<string, string> = {
+  PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+  PROCESSING: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
+  COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',
+};
+
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-    REQUESTED: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-    PROCESSING: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  };
   return (
-    <Badge variant="outline" className={map[status] ?? 'bg-white/5 text-[var(--text-muted)] border-white/10'}>
+    <Badge variant="outline" className={STATUS_STYLES[status] ?? 'bg-white/5 text-[var(--text-muted)] border-white/10'}>
       {status}
     </Badge>
   );
@@ -51,12 +62,13 @@ function StatusBadge({ status }: { status: string }) {
 interface Payout {
   id: string;
   amount: number;
+  paypalEmail: string;
   status: string;
-  paidAt: string | null;
-  paypalTransactionId: string | null;
-  periodStart: string;
-  periodEnd: string;
-  createdAt: string;
+  adminNote: string | null;
+  paypalBatchId: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+  completedAt: string | null;
   interviewer: {
     id: string;
     fullName: string;
@@ -75,6 +87,16 @@ export default function AdminPayoutsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Action states
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [paypalLoading, setPaypalLoading] = useState<string | null>(null);
+
+  // Reject dialog state
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectId, setRejectId] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState('');
+  const [rejectLoading, setRejectLoading] = useState(false);
 
   const limit = 20;
 
@@ -100,13 +122,84 @@ export default function AdminPayoutsPage() {
     fetchData();
   }, [fetchData]);
 
+  // Mark as paid manually
   const handleMarkPaid = async (id: string) => {
-    await fetch(`/api/admin/payouts/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'COMPLETED' }),
-    });
-    fetchData();
+    setProcessingId(id);
+    try {
+      const res = await fetch(`/api/admin/payouts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'COMPLETED' }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || 'Failed');
+        return;
+      }
+      toast.success(t('markAsPaid'));
+      fetchData();
+    } catch {
+      toast.error('Error');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  // Process via PayPal
+  const handlePayPal = async (id: string) => {
+    setPaypalLoading(id);
+    try {
+      const res = await fetch('/api/paypal/send-payout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payoutId: id }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(t('paypalError', { error: json.error || 'Unknown error' }));
+        return;
+      }
+      toast.success(t('paypalSent'));
+      fetchData();
+    } catch {
+      toast.error('Error');
+    } finally {
+      setPaypalLoading(null);
+    }
+  };
+
+  // Reject flow
+  const openRejectDialog = (id: string) => {
+    setRejectId(id);
+    setRejectNote('');
+    setRejectDialogOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectId || !rejectNote.trim()) {
+      toast.error(t('rejectReasonRequired'));
+      return;
+    }
+    setRejectLoading(true);
+    try {
+      const res = await fetch(`/api/admin/payouts/${rejectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'REJECTED', adminNote: rejectNote.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || 'Failed');
+        return;
+      }
+      toast.success(t('rejected'));
+      setRejectDialogOpen(false);
+      fetchData();
+    } catch {
+      toast.error('Error');
+    } finally {
+      setRejectLoading(false);
+    }
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -119,15 +212,16 @@ export default function AdminPayoutsPage() {
 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v === 'ALL' ? '' : v); setPage(1); }}>
+        <Select value={statusFilter || 'ALL'} onValueChange={(v) => { setStatusFilter(v === 'ALL' ? '' : v); setPage(1); }}>
           <SelectTrigger className="w-full border-white/10 bg-white/5 sm:w-40 text-[var(--text-primary)]">
             <SelectValue placeholder={t('statusFilter')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">{t('statusAll')}</SelectItem>
-            <SelectItem value="REQUESTED">{t('statusPending')}</SelectItem>
+            <SelectItem value="PENDING">{t('statusPending')}</SelectItem>
             <SelectItem value="PROCESSING">{t('statusProcessing')}</SelectItem>
             <SelectItem value="COMPLETED">{t('statusCompleted')}</SelectItem>
+            <SelectItem value="REJECTED">{t('rejected')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -153,15 +247,15 @@ export default function AdminPayoutsPage() {
           <p className="py-12 text-center text-sm text-[var(--text-faint)]">{t('noData')}</p>
         ) : (
           <>
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[500px] overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/[0.06] hover:bg-transparent">
                     <TableHead className="text-[var(--text-muted)]">{t('colInterviewer')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colPaypalEmail')}</TableHead>
                     <TableHead className="text-[var(--text-muted)]">{t('colAmount')}</TableHead>
                     <TableHead className="text-[var(--text-muted)]">{t('colStatus')}</TableHead>
                     <TableHead className="text-[var(--text-muted)]">{t('colRequestedDate')}</TableHead>
-                    <TableHead className="text-[var(--text-muted)]">{t('colPeriod')}</TableHead>
                     <TableHead className="text-[var(--text-muted)]">{t('colActions')}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -171,25 +265,64 @@ export default function AdminPayoutsPage() {
                       <TableCell className="text-sm font-medium text-[var(--text-primary)]">
                         <div>
                           <p>{item.interviewer?.fullName ?? '—'}</p>
-                          <p className="text-xs text-[var(--text-faint)]">{item.interviewer?.payoutEmail ?? ''}</p>
+                          {item.adminNote && (
+                            <p className="mt-1 text-xs text-red-400">{item.adminNote}</p>
+                          )}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">
+                        {item.paypalEmail}
                       </TableCell>
                       <TableCell className="text-sm font-medium text-[var(--text-primary)]">{formatCents(item.amount)}</TableCell>
                       <TableCell><StatusBadge status={item.status} /></TableCell>
-                      <TableCell className="text-sm text-[var(--text-muted)]">{formatDate(item.createdAt)}</TableCell>
-                      <TableCell className="text-sm text-[var(--text-muted)]">
-                        {formatDate(item.periodStart)} - {formatDate(item.periodEnd)}
-                      </TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">{formatDate(item.requestedAt)}</TableCell>
                       <TableCell>
-                        {item.status !== 'COMPLETED' && (
-                          <Button
-                            size="sm" variant="ghost"
-                            className="h-7 px-2 text-emerald-400 hover:text-emerald-300"
-                            onClick={() => handleMarkPaid(item.id)}
-                          >
-                            {t('markAsPaid')}
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {item.status === 'PENDING' && (
+                            <>
+                              <Button
+                                size="sm" variant="ghost"
+                                className="h-7 px-2 text-sky-400 hover:text-sky-300"
+                                disabled={paypalLoading === item.id}
+                                onClick={() => handlePayPal(item.id)}
+                              >
+                                {paypalLoading === item.id
+                                  ? <Loader2 size={14} className="animate-spin" />
+                                  : <Send size={14} className="me-1" />}
+                                {t('processPaypal')}
+                              </Button>
+                              <Button
+                                size="sm" variant="ghost"
+                                className="h-7 px-2 text-emerald-400 hover:text-emerald-300"
+                                disabled={processingId === item.id}
+                                onClick={() => handleMarkPaid(item.id)}
+                              >
+                                {processingId === item.id
+                                  ? <Loader2 size={14} className="animate-spin" />
+                                  : <CheckCircle2 size={14} className="me-1" />}
+                                {t('markPaidManually')}
+                              </Button>
+                              <Button
+                                size="sm" variant="ghost"
+                                className="h-7 px-2 text-red-400 hover:text-red-300"
+                                onClick={() => openRejectDialog(item.id)}
+                              >
+                                <Ban size={14} className="me-1" />
+                                {t('reject')}
+                              </Button>
+                            </>
+                          )}
+                          {item.status === 'PROCESSING' && (
+                            <span className="text-xs text-[var(--text-faint)]">
+                              {item.paypalBatchId ? `Batch: ${item.paypalBatchId.slice(0, 12)}…` : ''}
+                            </span>
+                          )}
+                          {item.status === 'COMPLETED' && item.completedAt && (
+                            <span className="text-xs text-[var(--text-faint)]">
+                              {formatDate(item.completedAt)}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -212,6 +345,44 @@ export default function AdminPayoutsPage() {
           </>
         )}
       </div>
+
+      {/* Reject Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="border-white/10 bg-[var(--bg-panel)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[var(--text-primary)]">{t('rejectPayout')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-[var(--text-muted)]">{t('rejectReason')}</Label>
+              <Input
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                placeholder={t('rejectReasonRequired')}
+                className="border-white/10 bg-white/5 text-[var(--text-primary)]"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                className="border-white/10 text-[var(--text-muted)]"
+                onClick={() => setRejectDialogOpen(false)}
+                disabled={rejectLoading}
+              >
+                {t('statusPending').replace('Pending', 'Cancel')}
+              </Button>
+              <Button
+                className="bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+                onClick={handleReject}
+                disabled={rejectLoading || !rejectNote.trim()}
+              >
+                {rejectLoading && <Loader2 size={14} className="me-2 animate-spin" />}
+                {t('reject')}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

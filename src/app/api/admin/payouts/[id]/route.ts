@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdmin } from '../../_lib';
 import { triggerInterviewerPayoutSentEmail } from '@/lib/email-triggers';
+import { z } from 'zod';
+
+const patchSchema = z.object({
+  status: z.enum(['COMPLETED', 'REJECTED']),
+  adminNote: z.string().optional(),
+});
 
 export async function PATCH(
   req: NextRequest,
@@ -12,27 +18,56 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const payout = await db.interviewerPayout.update({
+  const body = await req.json();
+  const parsed = patchSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
+  }
+
+  const { status, adminNote } = parsed.data;
+
+  // Fetch payout
+  const payout = await db.interviewerPayout.findUnique({ where: { id } });
+  if (!payout) {
+    return NextResponse.json({ error: 'Payout not found' }, { status: 404 });
+  }
+
+  if (payout.status === 'COMPLETED') {
+    return NextResponse.json({ error: 'Payout already completed' }, { status: 400 });
+  }
+
+  // Build update data
+  const data: Record<string, unknown> = { status };
+
+  if (status === 'COMPLETED') {
+    data.completedAt = new Date();
+  }
+
+  if (status === 'REJECTED') {
+    data.adminNote = adminNote || 'No reason provided';
+  }
+
+  const updated = await db.interviewerPayout.update({
     where: { id },
-    data: {
-      status: 'COMPLETED',
-      paidAt: new Date(),
-    },
+    data,
   });
 
+  // Log admin action
   await db.adminLog.create({
     data: {
-      action: 'PAYOUT_COMPLETED',
+      action: status === 'COMPLETED' ? 'PAYOUT_COMPLETED_MANUAL' : 'PAYOUT_REJECTED',
       adminEmail: auth.adminEmail!,
       targetType: 'INTERVIEWER_PAYOUT',
       targetId: id,
-      metadata: JSON.stringify({ amount: payout.amount }),
+      metadata: JSON.stringify({ amount: payout.amount, adminNote }),
     },
   });
 
-  // Send payout confirmation email (fire and forget)
-  triggerInterviewerPayoutSentEmail(id, 'ar').catch(() => {});
-  triggerInterviewerPayoutSentEmail(id, 'en').catch(() => {});
+  // Send email on completion
+  if (status === 'COMPLETED') {
+    triggerInterviewerPayoutSentEmail(id, 'ar').catch(() => {});
+    triggerInterviewerPayoutSentEmail(id, 'en').catch(() => {});
+  }
 
-  return NextResponse.json(payout);
+  return NextResponse.json(updated);
 }

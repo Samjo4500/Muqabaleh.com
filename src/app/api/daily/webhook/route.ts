@@ -39,10 +39,13 @@ export async function POST(req: NextRequest) {
             const participantCount: number = payload.participant_count ?? 0;
 
             if (participantCount === 0) {
-              // All participants have left — mark as completed
+              // All participants have left — mark as completed + set earnings
               await db.humanBooking.update({
                 where: { id: booking.id },
-                data: { status: 'COMPLETED' },
+                data: {
+                  status: 'COMPLETED',
+                  earnings: booking.interviewerPayout,
+                },
               });
 
               // Increment interviewer stats if interviewer exists

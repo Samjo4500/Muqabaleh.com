@@ -365,6 +365,27 @@ function InterviewerCardComponent({
   );
 }
 
+function mapApiToCard(raw: Record<string, unknown>, locale: string): InterviewerCard {
+  const fullName = (locale === 'ar' ? (raw.fullNameAr as string) : (raw.fullName as string)) || (raw.fullName as string) || '';
+  const specialties = (raw.specialties as string[]) || [];
+  const industries = (raw.industries as string[]) || [];
+  return {
+    id: raw.id as string,
+    name: fullName,
+    initials: (raw.initials as string) || fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+    rating: (raw.rating as number) || 0,
+    reviewCount: (raw.totalInterviews as number) || 0,
+    title: formatSpecialty(specialties[0] || ''),
+    specialty: formatSpecialty(specialties[0] || ''),
+    region: (industries[0] || '').charAt(0) + (industries[0] || '').slice(1).toLowerCase(),
+    price: Math.round(((raw.hourlyRate as number) || 2900) / 100),
+  };
+}
+
+function formatSpecialty(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /* ------------------------------------------------------------------ */
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
@@ -431,13 +452,16 @@ export default function HumanInterviewsPage() {
         const res = await fetch(`/api/interviewers?${qs}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data: FetchResponse = await res.json();
+        const rawInterviewers = data.interviewers || [];
+        const mapped = rawInterviewers.map((raw: Record<string, unknown>) => mapApiToCard(raw, locale));
+        const totalPages = data.totalPages || 1;
         if (append) {
-          setInterviewers((prev) => [...prev, ...data.interviewers]);
+          setInterviewers((prev) => [...prev, ...mapped]);
         } else {
-          setInterviewers(data.interviewers);
+          setInterviewers(mapped);
         }
-        setTotal(data.total);
-        setHasMore(data.hasMore);
+        setTotal(data.total || mapped.length);
+        setHasMore(page < totalPages);
         pageRef.current = page;
       } catch {
         // silently fail — shows empty state

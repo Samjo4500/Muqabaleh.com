@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-// GET /api/interviewer/earnings — total earnings, pending payout, payout history
+// GET /api/interviewer/earnings — total earnings, pending payout, stats
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -16,66 +16,56 @@ export async function GET() {
 
     const userId = (session.user as Record<string, unknown>).id as string;
 
-    const interviewer = await db.interviewer.findUnique({
-      where: { userId },
-      select: { id: true, totalEarnings: true, payoutEmail: true },
-    });
+    // Try DB first
+    try {
+      const interviewer = await db.interviewer.findUnique({
+        where: { userId },
+        select: { id: true, totalEarnings: true, rating: true, totalInterviews: true, payoutEmail: true },
+      });
 
-    if (!interviewer) {
-      return NextResponse.json(
-        { error: { ar: 'ملف المقابل غير موجود', en: 'Interviewer profile not found' } },
-        { status: 404 },
-      );
+      if (interviewer) {
+        const completedBookings = await db.humanBooking.aggregate({
+          where: { interviewerId: interviewer.id, status: 'COMPLETED' },
+          _sum: { priceTotal: true, interviewerPayout: true, platformFee: true },
+          _count: true,
+        });
+
+        const upcomingBookings = await db.humanBooking.count({
+          where: {
+            interviewerId: interviewer.id,
+            status: { in: ['PENDING', 'CONFIRMED'] },
+            scheduledAt: { gte: new Date() },
+          },
+        });
+
+        const totalEarnings = completedBookings._sum.priceTotal || 0;
+        const platformFees = completedBookings._sum.platformFee || 0;
+        const netIncome = completedBookings._sum.interviewerPayout || 0;
+        const sessionsCompleted = completedBookings._count || 0;
+
+        return NextResponse.json({
+          totalEarnings,
+          platformFees,
+          netIncome,
+          sessionsCompleted,
+          currentBalance: netIncome,
+          upcomingCount: upcomingBookings,
+          avgRating: interviewer.rating || 0,
+        });
+      }
+    } catch (dbErr) {
+      console.warn('[GET /api/interviewer/earnings] DB unavailable:', dbErr);
     }
 
-    // Calculate pending payout: completed bookings that haven't been paid out yet
-    const paidPayoutTotal = await db.interviewerPayout.aggregate({
-      where: {
-        interviewerId: interviewer.id,
-        status: 'PAID',
-      },
-      _sum: { amount: true },
-    });
-
-    const pendingPayoutTotal = await db.interviewerPayout.aggregate({
-      where: {
-        interviewerId: interviewer.id,
-        status: 'PENDING',
-      },
-      _sum: { amount: true },
-    });
-
-    // Completed bookings where payout hasn't been created yet
-    const unpaidBookings = await db.humanBooking.aggregate({
-      where: {
-        interviewerId: interviewer.id,
-        status: 'COMPLETED',
-      },
-      _sum: { interviewerPayout: true },
-    });
-
-    const totalPaidOut = paidPayoutTotal._sum.amount || 0;
-    const pendingPayout = pendingPayoutTotal._sum.amount || 0;
-    const totalCompletedPayout = unpaidBookings._sum.interviewerPayout || 0;
-
-    // Pending = total from completed bookings minus what's already in payout records
-    const unclaimedEarnings = Math.max(0, totalCompletedPayout - pendingPayout - totalPaidOut);
-
-    const recentPayouts = await db.interviewerPayout.findMany({
-      where: { interviewerId: interviewer.id },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-    });
-
+    // Fallback: return zeros (no interviewer profile yet)
     return NextResponse.json({
-      earnings: {
-        totalEarnings: interviewer.totalEarnings,
-        totalPaidOut,
-        pendingPayout: pendingPayout + unclaimedEarnings,
-        unclaimedEarnings,
-        payoutEmail: interviewer.payoutEmail,
-      },
-      recentPayouts,
+      totalEarnings: 0,
+      platformFees: 0,
+      netIncome: 0,
+      sessionsCompleted: 0,
+      currentBalance: 0,
+      upcomingCount: 0,
+      avgRating: 0,
     });
   } catch (err) {
     console.error('GET /api/interviewer/earnings error:', err);

@@ -38,16 +38,23 @@ interface DaySlots {
 interface InterviewerProfile {
   id: string;
   name: string;
+  nameAr: string;
   initials: string;
   title: string;
+  titleAr: string;
   location: string;
   flagEmoji: string;
   rating: number;
   reviewCount: number;
+  totalInterviews: number;
   price: number;
+  pricePerMin: number;
   languages: string[];
+  languageLabels: string[];
   specialties: string[];
+  industries: string[];
   bio: string;
+  bioAr: string;
   videoUrl: string | null;
   videoPoster: string | null;
   isOnline: boolean;
@@ -83,6 +90,123 @@ function generateTimeSlots(): string[] {
 }
 
 const ALL_TIME_SLOTS = generateTimeSlots();
+
+const DAY_NAMES_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const DAY_NAMES_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function formatSpecialty(key: string): string {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatLanguage(code: string): string {
+  if (code === 'AR') return 'العربية';
+  if (code === 'EN') return 'English';
+  return code;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Map API response to profile format                                  */
+/* ------------------------------------------------------------------ */
+
+function mapApiToProfile(apiData: Record<string, unknown>, locale: string): InterviewerProfile {
+  const fullName = (apiData.fullName as string) || '';
+  const fullNameAr = (apiData.fullNameAr as string) || fullName;
+  const bio = (apiData.bio as string) || '';
+  const bioAr = (apiData.bioAr as string) || bio;
+  const reviews = (apiData.reviews as Record<string, unknown>[]) || [];
+  const rawAvailability = (apiData.availability as Record<string, unknown>[]) || [];
+
+  // Build availability calendar for the current week
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+
+  const availability: DaySlots[] = [];
+
+  // If API returned availability data, use it to build the weekly calendar
+  const availabilityByDay = new Map<number, string[]>();
+  for (const a of rawAvailability) {
+    const dow = a.weekday as number;
+    const startTime = a.startTime as string;
+    if (a.isAvailable && startTime) {
+      if (!availabilityByDay.has(dow)) availabilityByDay.set(dow, []);
+      availabilityByDay.get(dow)!.push(startTime);
+    }
+  }
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const dow = d.getDay();
+    const dayName = locale === 'ar' ? DAY_NAMES_AR[dow] : DAY_NAMES_EN[dow];
+    const availableTimes = availabilityByDay.get(dow) || [];
+
+    const slots: Slot[] = ALL_TIME_SLOTS.map((time) => {
+      const isAvailable = availableTimes.some((t) => time.startsWith(t.split(':')[0]));
+      return { time, available: isAvailable };
+    });
+
+    availability.push({ date: dateStr, dayLabel: dayName, slots });
+  }
+
+  const mappedReviews: Review[] = reviews.map((r) => ({
+    initials: (r.candidateName as string || 'AN').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+    name: (r.candidateName as string) || 'Anonymous',
+    role: '',
+    date: r.date
+      ? new Date(r.date as string).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      : '',
+    rating: r.rating as number,
+    comment: locale === 'ar' ? ((r.commentAr as string) || (r.comment as string) || '') : ((r.comment as string) || ''),
+  }));
+
+  const languages = (apiData.languages as string[]) || ['AR'];
+  const specialties = (apiData.specialties as string[]) || [];
+
+  return {
+    id: apiData.id as string,
+    name: locale === 'ar' ? fullNameAr : fullName,
+    nameAr: fullNameAr,
+    initials: (apiData.initials as string) || getInitials(fullName),
+    title: `${formatSpecialty(specialties[0] || '')} · ${apiData.yearsExperience || '?'} yr`,
+    titleAr: `${formatSpecialty(specialties[0] || '')} · ${apiData.yearsExperience || '?'} سنة`,
+    location: 'Saudi Arabia',
+    flagEmoji: '🇸🇦',
+    rating: (apiData.rating as number) || 0,
+    reviewCount: mappedReviews.length || (apiData.totalInterviews as number) || 0,
+    totalInterviews: (apiData.totalInterviews as number) || 0,
+    price: Math.round(((apiData.hourlyRate as number) || 2900) / 100),
+    pricePerMin: Math.round(((apiData.hourlyRate as number) || 2900) / 60 / 100),
+    languages,
+    languageLabels: languages.map(formatLanguage),
+    specialties: specialties.map(formatSpecialty),
+    industries: (apiData.industries as string[]) || [],
+    bio: locale === 'ar' ? bioAr : bio,
+    bioAr,
+    videoUrl: (apiData.videoIntroUrl as string) || null,
+    videoPoster: null,
+    isOnline: true,
+    timezone: locale === 'ar' ? 'الرياض (GMT+3)' : 'Riyadh (GMT+3)',
+    reviews: mappedReviews,
+    availability,
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Loading Skeleton                                                   */
@@ -183,17 +307,22 @@ export default function InterviewerProfilePage() {
       try {
         const res = await fetch(`/api/interviewers/${id}`);
         if (!res.ok) throw new Error('Failed to fetch');
-        const data: InterviewerProfile = await res.json();
-        if (!cancelled) setProfile(data);
+        const json = await res.json();
+        if (json.interviewer) {
+          const mapped = mapApiToProfile(json.interviewer, locale);
+          if (!cancelled) setProfile(mapped);
+        } else {
+          throw new Error('No interviewer data');
+        }
       } catch {
-        if (!cancelled) setProfile(getMockProfile(id));
+        if (!cancelled) setProfile(getMockProfile(id, locale));
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, locale]);
 
   /* ── Derived ── */
   const bioTruncated = profile?.bio
@@ -226,38 +355,25 @@ export default function InterviewerProfilePage() {
     }
 
     // Parse the selectedSlot key: "YYYY-MM-DD-HH:mm"
-    const [datePart, timePart] = selectedSlot.includes('-')
-      ? (() => {
-          // date is YYYY-MM-DD, time is HH:mm
-          const lastDash = selectedSlot.lastIndexOf('-');
-          // The time part contains a colon, so split on the last '-' that precedes the colon
-          const colonIdx = selectedSlot.indexOf(':');
-          // Find the dash right before the colon
-          const dashBeforeColon = selectedSlot.lastIndexOf('-', colonIdx);
-          return [
-            selectedSlot.substring(0, dashBeforeColon),
-            selectedSlot.substring(dashBeforeColon + 1),
-          ];
-        })()
-      : [selectedSlot, ''];
-
+    const colonIdx = selectedSlot.indexOf(':');
+    const dashBeforeColon = selectedSlot.lastIndexOf('-', colonIdx);
+    const datePart = selectedSlot.substring(0, dashBeforeColon);
+    const timePart = selectedSlot.substring(dashBeforeColon + 1);
     const [startTime] = timePart.split('-');
-    // Default duration: 30 minutes
     const duration = 30;
-    // Calculate end time
     const [startH, startM] = startTime.split(':').map(Number);
     const endMinutes = startH * 60 + startM + duration;
     const endH = String(Math.floor(endMinutes / 60)).padStart(2, '0');
     const endM = String(endMinutes % 60).padStart(2, '0');
     const endTime = `${endH}:${endM}`;
 
-    const params = new URLSearchParams({
+    const qsParams = new URLSearchParams({
       date: datePart,
       startTime,
       endTime,
       duration: String(duration),
     });
-    router.push(`/${locale}/book/${id}?${params.toString()}`);
+    router.push(`/${locale}/book/${id}?${qsParams.toString()}`);
   }, [selectedSlot, id, locale, router, authStatus]);
 
   /* ── Render ── */
@@ -286,7 +402,6 @@ export default function InterviewerProfilePage() {
                       {profile.initials}
                     </span>
                   </div>
-                  {/* Online indicator */}
                   {profile.isOnline && (
                     <span className="absolute bottom-2 right-2 flex h-5 w-5">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
@@ -333,7 +448,7 @@ export default function InterviewerProfilePage() {
 
                 {/* Languages */}
                 <p className="mt-3 text-sm text-gray-300">
-                  {profile.languages.join(' · ')}
+                  {profile.languageLabels.join(' · ')}
                 </p>
 
                 {/* Specialties */}
@@ -364,7 +479,7 @@ export default function InterviewerProfilePage() {
             </motion.div>
 
             <div className="md:col-span-3">
-              {/* -- Video Section  -- */}
+              {/* Video Section */}
               <motion.div
                 initial="hidden"
                 animate="visible"
@@ -372,26 +487,29 @@ export default function InterviewerProfilePage() {
                 variants={fadeInUp}
               >
                 <div className="relative aspect-video overflow-hidden rounded-xl bg-[#0B0F17]">
-                  {/* Poster placeholder */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#0B0F17] to-[#1a1f2e]">
-                    {/* Subtle pattern */}
                     <div className="absolute inset-0 opacity-5" style={{
                       backgroundImage: 'radial-gradient(circle at 25% 25%, var(--gold) 1px, transparent 1px)',
                       backgroundSize: '32px 32px',
                     }} />
                   </div>
-
-                  {/* Play button overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--gold)]/80 text-white opacity-80 transition-all duration-200 hover:scale-110 hover:opacity-100"
-                      aria-label="Play video"
-                    >
-                      <Play size={28} className="ml-1" fill="white" />
-                    </button>
-                  </div>
-
-                  {/* Intro video label */}
+                  {profile.videoUrl ? (
+                    <video
+                      src={profile.videoUrl}
+                      controls
+                      className="relative z-10 h-full w-full object-contain"
+                      poster={profile.videoPoster || undefined}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button
+                        className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--gold)]/80 text-white opacity-80 transition-all duration-200 hover:scale-110 hover:opacity-100"
+                        aria-label="Play video"
+                      >
+                        <Play size={28} className="ml-1" fill="white" />
+                      </button>
+                    </div>
+                  )}
                   <div className="absolute top-3 start-3">
                     <span className="rounded-full bg-[var(--gold)]/10 px-3 py-1 text-xs font-medium text-[var(--gold)]">
                       {t('introVideo')}
@@ -400,7 +518,7 @@ export default function InterviewerProfilePage() {
                 </div>
               </motion.div>
 
-              {/* -- Bio Section  -- */}
+              {/* Bio Section */}
               <motion.div
                 className="mt-8"
                 initial="hidden"
@@ -427,7 +545,7 @@ export default function InterviewerProfilePage() {
                 )}
               </motion.div>
 
-              {/* -- Reviews Section  -- */}
+              {/* Reviews Section */}
               <motion.div
                 className="mt-10"
                 initial="hidden"
@@ -445,43 +563,43 @@ export default function InterviewerProfilePage() {
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-4">
-                  {profile.reviews.map((review, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-xl border border-white/5 bg-[#0B0F17] p-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        {/* Small avatar */}
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
-                          <span className="text-xs font-bold text-[var(--gold)]">
-                            {review.initials}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-white">
-                              {review.name}
-                            </p>
-                            <span className="text-xs text-gray-500">{review.date}</span>
+                {profile.reviews.length > 0 ? (
+                  <div className="mt-4 space-y-4">
+                    {profile.reviews.map((review, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-xl border border-white/5 bg-[#0B0F17] p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
+                            <span className="text-xs font-bold text-[var(--gold)]">
+                              {review.initials}
+                            </span>
                           </div>
-                          <StarRating rating={review.rating} size={12} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold text-white">
+                                {review.name}
+                              </p>
+                              <span className="text-xs text-gray-500">{review.date}</span>
+                            </div>
+                            <StarRating rating={review.rating} size={12} />
+                          </div>
                         </div>
+                        <p className="mt-3 text-sm leading-relaxed text-gray-400">
+                          {review.comment}
+                        </p>
                       </div>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                        {review.comment}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* View all link */}
-                <button className="mt-4 text-sm font-medium text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80">
-                  {t('viewAllReviews')} ({profile.reviewCount})
-                </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-gray-500">
+                    {locale === 'ar' ? 'لا توجد تقييمات بعد' : 'No reviews yet'}
+                  </p>
+                )}
               </motion.div>
 
-              {/* -- Availability Calendar Section  -- */}
+              {/* Availability Calendar Section */}
               <motion.div
                 className="mt-10"
                 initial="hidden"
@@ -502,7 +620,6 @@ export default function InterviewerProfilePage() {
                   </div>
                 ) : (
                   <div className="mt-4 overflow-x-auto rounded-xl border border-white/5 bg-[#0B0F17] p-4">
-                    {/* Calendar header - days */}
                     <div className="grid grid-cols-7 gap-2 min-w-[700px]">
                       {profile.availability.map((day) => (
                         <div
@@ -513,7 +630,6 @@ export default function InterviewerProfilePage() {
                         </div>
                       ))}
 
-                      {/* Time slot rows */}
                       <div className="col-span-7 grid grid-cols-7 gap-2">
                         {profile.availability.map((day) => (
                           <div key={day.date} className="flex flex-col gap-1.5">
@@ -576,20 +692,19 @@ export default function InterviewerProfilePage() {
 /*  Mock Data (used when API is unavailable)                            */
 /* ------------------------------------------------------------------ */
 
-function getMockProfile(id: string): InterviewerProfile {
-  const locale = 'ar'; // Mock defaults to Arabic
+function getMockProfile(id: string, locale: string): InterviewerProfile {
   const today = new Date();
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Monday
+  startOfWeek.setDate(today.getDate() - today.getDay());
 
   const days: DaySlots[] = [];
-  const dayNamesAr = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
-
   for (let i = 0; i < 7; i++) {
     const d = new Date(startOfWeek);
     d.setDate(startOfWeek.getDate() + i);
     const dateStr = d.toISOString().split('T')[0];
-    const isWeekend = i >= 4; // Fri, Sat, Sun
+    const dow = d.getDay();
+    const isWeekend = dow === 5 || dow === 6; // Fri, Sat
+    const dayName = locale === 'ar' ? DAY_NAMES_AR[dow] : DAY_NAMES_EN[dow];
 
     const slots: Slot[] = ALL_TIME_SLOTS.map((time) => {
       const hour = parseInt(time.split(':')[0], 10);
@@ -600,54 +715,112 @@ function getMockProfile(id: string): InterviewerProfile {
       };
     });
 
-    days.push({
-      date: dateStr,
-      dayLabel: dayNamesAr[i],
-      slots,
-    });
+    days.push({ date: dateStr, dayLabel: dayName, slots });
+  }
+
+  if (locale === 'ar') {
+    return {
+      id,
+      name: 'د. سارة المنصوري',
+      nameAr: 'د. سارة المنصوري',
+      initials: 'سم',
+      title: 'مديرة موارد بشرية — ١٢ سنة',
+      titleAr: 'مديرة موارد بشرية — ١٢ سنة',
+      location: 'الرياض',
+      flagEmoji: '🇸🇦',
+      rating: 4.8,
+      reviewCount: 127,
+      totalInterviews: 127,
+      price: 29,
+      pricePerMin: 1,
+      languages: ['AR', 'EN'],
+      languageLabels: ['العربية', 'English'],
+      specialties: ['موارد بشرية', 'تطوير تنظيمي', 'توظيف'],
+      industries: ['TECH', 'RETAIL'],
+      bio: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب. عملت مع كبرى الشركات في المنطقة العربية وأساعدت في بناء فرق عمل عالية الأداء. أسعى دائماً لتقديم تجربة مقابلة واقعية ومفيدة للمرشحين، مع التركيز على نقاط القوة والتحسين. مؤهلة من معهد CIPD البريطاني وعضو في جمعية إدارة الموارد البشرية السعودية.',
+      bioAr: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب. عملت مع كبرى الشركات في المنطقة العربية وأساعدت في بناء فرق عمل عالية الأداء. أسعى دائماً لتقديم تجربة مقابلة واقعية ومفيدة للمرشحين، مع التركيز على نقاط القوة والتحسين. مؤهلة من معهد CIPD البريطاني وعضو في جمعية إدارة الموارد البشرية السعودية.',
+      videoUrl: null,
+      videoPoster: null,
+      isOnline: true,
+      timezone: 'الرياض (GMT+3)',
+      reviews: [
+        {
+          initials: 'عأ',
+          name: 'مرشح · مبيعات',
+          role: 'Sales',
+          date: '١٥ يناير ٢٠٢٥',
+          rating: 5,
+          comment: 'مقابلة ممتازة وساعدتني كثيراً في التحضير. الأسئلة كانت واقعية والتغذية الراجعة مفصلة جداً. أنصح بها بشدة لكل من يستعد لمقابلة عمل.',
+        },
+        {
+          initials: 'نم',
+          name: 'مرشح · تقنية',
+          role: 'Tech',
+          date: '١٠ يناير ٢٠٢٥',
+          rating: 5,
+          comment: 'تجربة رائعة! د. سارة تسأل أسئلة ذكية وتعطي ملاحظات بنّاءة. أشعر بثقة أكبر الآن بعد المقابلة. سأحجز مرة أخرى بالتأكيد.',
+        },
+        {
+          initials: 'خش',
+          name: 'مرشح · مالية',
+          role: 'Finance',
+          date: '٥ يناير ٢٠٢٥',
+          rating: 4,
+          comment: 'مقابلة جيدة عامة لكن أتمنى لو كان هناك تركيز أكثر على الأسئلة التقنية المتخصصة. التغذية الراجعة كانت مفيدة.',
+        },
+      ],
+      availability: days,
+    };
   }
 
   return {
     id,
-    name: 'د. سارة المنصوري',
-    initials: 'سم',
-    title: 'مديرة موارد بشرية — ١٢ سنة',
-    location: 'الرياض',
+    name: 'Dr. Sarah Al-Mansouri',
+    nameAr: 'د. سارة المنصوري',
+    initials: 'SM',
+    title: 'HR Director — 12 years',
+    titleAr: 'مديرة موارد بشرية — ١٢ سنة',
+    location: 'Riyadh',
     flagEmoji: '🇸🇦',
     rating: 4.8,
     reviewCount: 127,
+    totalInterviews: 127,
     price: 29,
-    languages: ['العربية', 'الإنجليزية'],
-    specialties: ['موارد بشرية', 'تطوير تنظيمي', 'توظيف'],
-    bio: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب. عملت مع كبرى الشركات في المنطقة العربية وأساعدت في بناء فرق عمل عالية الأداء. أسعى دائماً لتقديم تجربة مقابلة واقعية ومفيدة للمرشحين، مع التركيز على نقاط القوة والتحسين. مؤهلة من معهد CIPD البريطاني وعضو في جمعية إدارة الموارد البشرية السعودية.',
+    pricePerMin: 1,
+    languages: ['AR', 'EN'],
+    languageLabels: ['العربية', 'English'],
+    specialties: ['Human Resources', 'Org Development', 'Talent Acquisition'],
+    industries: ['TECH', 'RETAIL'],
+    bio: 'HR expert with 12+ years across tech and government sectors. Specialized in talent acquisition, organizational development, and performance management. I\'ve worked with leading organizations in the MENA region and helped build high-performing teams. My goal is to provide a realistic, insightful mock interview experience that helps candidates identify their strengths and areas for improvement. CIPD-qualified and member of the Saudi HR Management Association.',
+    bioAr: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب.',
     videoUrl: null,
     videoPoster: null,
     isOnline: true,
-    timezone: 'الرياض (GMT+3)',
+    timezone: 'Riyadh (GMT+3)',
     reviews: [
       {
-        initials: 'عأ',
-        name: 'مرشح · مبيعات',
+        initials: 'OA',
+        name: 'Candidate · Sales',
         role: 'Sales',
-        date: '١٥ يناير ٢٠٢٥',
+        date: 'Jan 15, 2025',
         rating: 5,
-        comment: 'مقابلة ممتازة وساعدتني كثيراً في التحضير. الأسئلة كانت واقعية والتغذية الراجعة مفصلة جداً. أنصح بها بشدة لكل من يستعد لمقابلة عمل.',
+        comment: 'Incredible interviewer! Asked very relevant behavioral questions and gave detailed, actionable feedback. Highly recommended.',
       },
       {
-        initials: 'نم',
-        name: 'مرشح · تقنية',
+        initials: 'NM',
+        name: 'Candidate · Tech',
         role: 'Tech',
-        date: '١٠ يناير ٢٠٢٥',
+        date: 'Jan 10, 2025',
         rating: 5,
-        comment: 'تجربة رائعة! د. سارة تسأل أسئلة ذكية وتعطي ملاحظات بنّاءة. أشعر بثقة أكبر الآن بعد المقابلة. سأحجز مرة أخرى بالتأكيد.',
+        comment: 'Amazing experience! Dr. Sarah asks smart questions and provides constructive notes. I feel much more confident now. Will definitely book again.',
       },
       {
-        initials: 'خش',
-        name: 'مرشح · مالية',
+        initials: 'KS',
+        name: 'Candidate · Finance',
         role: 'Finance',
-        date: '٥ يناير ٢٠٢٥',
+        date: 'Jan 5, 2025',
         rating: 4,
-        comment: 'مقابلة جيدة عامة لكن أتمنى لو كان هناك تركيز أكثر على الأسئلة التقنية المتخصصة. التغذية الراجعة كانت مفيدة.',
+        comment: 'Good session overall. Would have liked more technical depth but the feedback was useful.',
       },
     ],
     availability: days,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import {
   DollarSign,
@@ -8,8 +9,10 @@ import {
   Star,
   Calendar,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { SkeletonBlock } from '@/components/brand';
 import {
   Table,
   TableBody,
@@ -20,39 +23,31 @@ import {
 } from '@/components/ui/table';
 
 /* ------------------------------------------------------------------ */
-/*  Mock data                                                          */
+/*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type BookingStatus = 'confirmed' | 'completed' | 'cancelled' | 'no-show';
+type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 
-type MockBooking = {
-  candidate: string;
-  specialty: string;
-  date: string;
+interface DashboardBooking {
+  id: string;
+  candidateName: string;
+  candidateEmail: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  priceTotal: number;
+  interviewerPayout: number;
   status: BookingStatus;
-};
+  meetingLink: string | null;
+}
 
-const mockBookings: MockBooking[] = [
-  { candidate: 'سارة المحمدي', specialty: 'هندسة برمجيات', date: '2025-08-02 10:00', status: 'confirmed' },
-  { candidate: 'أحمد العتيبي', specialty: 'تطوير واجهات أمامية', date: '2025-08-01 14:00', status: 'completed' },
-  { candidate: 'نورة القحطاني', specialty: 'علوم البيانات', date: '2025-07-30 09:00', status: 'completed' },
-  { candidate: 'فهد العنزي', specialty: 'إدارة مشاريع', date: '2025-07-28 11:00', status: 'cancelled' },
-  { candidate: 'خالد الشمري', specialty: 'تطوير Flutter', date: '2025-07-25 16:00', status: 'no-show' },
-];
-
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  confirmed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  completed: 'bg-gold/10 text-gold border-gold/30',
-  cancelled: 'bg-red-500/10 text-red-400 border-red-500/30',
-  'no-show': 'bg-gray-500/10 text-gray-400 border-gray-500/30',
-};
-
-const STATUS_KEYS: Record<BookingStatus, string> = {
-  confirmed: 'statusConfirmed',
-  completed: 'statusCompleted',
-  cancelled: 'statusCancelled',
-  'no-show': 'statusNoShow',
-};
+interface DashboardStats {
+  totalEarnings: number;
+  platformFees: number;
+  netIncome: number;
+  sessionsCompleted: number;
+  upcomingCount: number;
+  avgRating: number;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Animation variants                                                 */
@@ -77,15 +72,37 @@ const tableVariants = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Stats cards data                                                   */
+/*  Status helpers                                                     */
 /* ------------------------------------------------------------------ */
 
-const stats = [
-  { value: '$487', labelKey: 'thisMonth', icon: DollarSign, color: 'text-gold' },
-  { value: '23', labelKey: 'completed', icon: CheckCircle2, color: 'text-emerald-400' },
-  { value: '4.8 ⭐', labelKey: 'avgRating', icon: Star, color: 'text-gold' },
-  { value: '5', labelKey: 'upcomingCount', icon: Calendar, color: 'text-blue-400' },
-] as const;
+const STATUS_COLORS: Record<BookingStatus, string> = {
+  PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  CONFIRMED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  COMPLETED: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  CANCELLED: 'bg-red-500/10 text-red-400 border-red-500/30',
+};
+
+const STATUS_KEYS: Record<BookingStatus, string> = {
+  PENDING: 'statusPending',
+  CONFIRMED: 'statusConfirmed',
+  COMPLETED: 'statusCompleted',
+  CANCELLED: 'statusCancelled',
+};
+
+function formatCents(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+function formatDateTime(iso: string, locale: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+  });
+  const time = d.toLocaleTimeString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+  return { date, time };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -93,7 +110,67 @@ const stats = [
 
 export default function InterviewerDashboardPage() {
   const t = useTranslations('interviewerDash');
+  const tBookings = useTranslations('app.bookings');
+  const locale = useLocale();
 
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [bookings, setBookings] = useState<DashboardBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  /* ── Fetch data ── */
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [bookingsRes, earningsRes] = await Promise.all([
+        fetch('/api/interviewer/bookings'),
+        fetch('/api/interviewer/earnings'),
+      ]);
+
+      if (bookingsRes.ok) {
+        const data = await bookingsRes.json();
+        setBookings((data.bookings || []).slice(0, 10));
+      }
+
+      if (earningsRes.ok) {
+        const data = await earningsRes.json();
+        setStats({
+          totalEarnings: data.totalEarnings || 0,
+          platformFees: data.platformFees || 0,
+          netIncome: data.netIncome || 0,
+          sessionsCompleted: data.sessionsCompleted || 0,
+          upcomingCount: data.upcomingCount || 0,
+          avgRating: data.avgRating || 0,
+        });
+      }
+    } catch (err) {
+      console.warn('[Dashboard] API unavailable, using defaults');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  /* ── Derived stats ── */
+  const displayStats = stats || {
+    totalEarnings: 0,
+    platformFees: 0,
+    netIncome: 0,
+    sessionsCompleted: 0,
+    upcomingCount: 0,
+    avgRating: 0,
+  };
+
+  const statCards = [
+    { value: formatCents(displayStats.netIncome), labelKey: 'netIncome' as const, icon: DollarSign, color: 'text-gold' },
+    { value: String(displayStats.sessionsCompleted), labelKey: 'sessionsCompleted' as const, icon: CheckCircle2, color: 'text-emerald-400' },
+    { value: displayStats.avgRating > 0 ? `${displayStats.avgRating.toFixed(1)} ⭐` : '—', labelKey: 'avgRating' as const, icon: Star, color: 'text-gold' },
+    { value: String(displayStats.upcomingCount), labelKey: 'upcomingCount' as const, icon: Calendar, color: 'text-blue-400' },
+  ];
+
+  /* ── Render ── */
   return (
     <div className="space-y-6">
       {/* Page title */}
@@ -102,87 +179,128 @@ export default function InterviewerDashboardPage() {
       </h1>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.labelKey}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              className="bg-[#0B0F17] border border-[rgba(212,175,55,0.1)] rounded-xl p-5"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/10">
-                  <Icon size={24} strokeWidth={1.75} className="text-gold" />
+      {loading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonBlock key={i} lines={2} className="h-24 rounded-xl" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {statCards.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.labelKey}
+                custom={i}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                className="bg-[#0B0F17] border border-[rgba(212,175,55,0.1)] rounded-xl p-5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/10">
+                    <Icon size={24} strokeWidth={1.75} className="text-gold" />
+                  </div>
+                  <div>
+                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className="text-sm text-[var(--text-muted)]">{t(stat.labelKey)}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                  <p className="text-sm text-[var(--text-muted)]">{t(stat.labelKey)}</p>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Recent bookings table */}
-      <motion.div
-        variants={tableVariants}
-        initial="hidden"
-        animate="visible"
-        className="bg-[#0B0F17] rounded-xl overflow-hidden"
-      >
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/[0.06] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)]">المرشح</TableHead>
-                <TableHead className="text-[var(--text-muted)]">التخصص</TableHead>
-                <TableHead className="text-[var(--text-muted)]">التاريخ</TableHead>
-                <TableHead className="text-[var(--text-muted)]">الحالة</TableHead>
-                <TableHead className="text-[var(--text-muted)]">الإجراء</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockBookings.map((b, i) => (
-                <TableRow
-                  key={i}
-                  className="border-white/[0.06] hover:bg-white/[0.02]"
-                >
-                  <TableCell className="font-medium text-[var(--text-primary)]">
-                    {b.candidate}
-                  </TableCell>
-                  <TableCell className="text-[var(--text-muted)]">
-                    {b.specialty}
-                  </TableCell>
-                  <TableCell className="text-[var(--text-muted)] font-mono text-sm">
-                    {b.date}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={STATUS_COLORS[b.status]}>
-                      {t(STATUS_KEYS[b.status])}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {(b.status === 'confirmed') && (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 cursor-pointer"
+      {loading ? (
+        <SkeletonBlock lines={6} className="h-64 rounded-xl" />
+      ) : (
+        <motion.div
+          variants={tableVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-[#0B0F17] rounded-xl overflow-hidden"
+        >
+          {bookings.length > 0 ? (
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/[0.06] hover:bg-transparent">
+                    <TableHead className="text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'المرشح' : 'Candidate'}
+                    </TableHead>
+                    <TableHead className="text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'التاريخ' : 'Date'}
+                    </TableHead>
+                    <TableHead className="text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'المبلغ' : 'Amount'}
+                    </TableHead>
+                    <TableHead className="text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'الحالة' : 'Status'}
+                    </TableHead>
+                    <TableHead className="text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'الإجراء' : 'Action'}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bookings.map((b) => {
+                    const { date, time } = formatDateTime(b.scheduledAt, locale);
+                    const statusKey = b.status as BookingStatus;
+                    return (
+                      <TableRow
+                        key={b.id}
+                        className="border-white/[0.06] hover:bg-white/[0.02]"
                       >
-                        <ExternalLink size={14} strokeWidth={1.75} />
-                        {t('startInterview')}
-                      </button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </motion.div>
+                        <TableCell className="font-medium text-[var(--text-primary)]">
+                          {b.candidateName}
+                        </TableCell>
+                        <TableCell className="text-[var(--text-muted)] text-sm">
+                          {date} · {time}
+                        </TableCell>
+                        <TableCell className="text-[var(--text-muted)] font-mono text-sm">
+                          {formatCents(b.interviewerPayout)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={STATUS_COLORS[statusKey] || ''}>
+                            {tBookings(STATUS_KEYS[statusKey] || 'statusPending')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {(b.status === 'CONFIRMED') && b.meetingLink && (
+                            <a
+                              href={b.meetingLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 cursor-pointer"
+                              >
+                                <ExternalLink size={14} strokeWidth={1.75} />
+                                {t('startInterview')}
+                              </button>
+                            </a>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Calendar size={40} strokeWidth={1.75} className="text-[var(--text-faint)] mb-4" />
+              <p className="text-[var(--text-muted)]">
+                {locale === 'ar' ? 'لا توجد حجوزات بعد' : 'No bookings yet'}
+              </p>
+            </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }

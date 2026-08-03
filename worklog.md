@@ -2011,3 +2011,29 @@ Stage Summary:
 - Lint passes with 0 errors
 - No Prisma schema or API route changes
 - Review flow: Leave Review → star rating + text → POST /api/reviews → toast + refresh
+
+---
+Task ID: 2-phase2-marketplace-fix
+Agent: main
+Task: Complete Phase 2 Human Marketplace - fix browse/profile/dashboard to use real APIs
+
+Work Log:
+- Assessed full Phase 2 state: ~70% scaffolded but browse page used hardcoded data, profile page had API mapping mismatch, dashboard was 100% mock, duplicate routes existed
+- Rewrote /interviewers page: replaced hardcoded INTERVIEWERS array with API fetch from /api/interviewers, fixed link from /interviewers/[slug] to /interviewer/[id]
+- Rewrote /interviewer/[id]/profile page: added mapApiToProfile() to transform API response (fullName→name, hourlyRate→price, etc.) to page's expected types, locale-aware mock fallback
+- Fixed /interviewers/[slug]/page.tsx: converted from dead slug-based page to redirect to /interviewer/[id]
+- Rewrote /interviewer/layout.tsx: made sidebar conditional - only shows for dashboard sub-paths, public profile pages render without sidebar
+- Rewrote interviewer dashboard overview (/interviewer/dashboard/page.tsx): replaced mock data with API calls to /api/interviewer/bookings and /api/interviewer/earnings
+- Rewrote interviewer earnings page (/interviewer/dashboard/earnings/page.tsx): fetches from /api/interviewer/earnings, shows real stats
+- Fixed /api/interviewer/earnings/route.ts: changed response format to flat fields (totalEarnings, platformFees, netIncome, etc.) matching what dashboard expects
+- Fixed /api/interviewer/bookings/route.ts: added try/catch around DB calls with empty fallback for sandbox
+- Fixed /human-interviews/page.tsx: added mapApiToCard() to transform API response to InterviewerCard format
+- Fixed middleware.ts: allowed public access to /interviewer/[id] (was blocking unauthenticated users from viewing interviewer profiles)
+
+Stage Summary:
+- All Phase 2 pages now fetch from real APIs (with mock fallback for sandbox)
+- Consistent routing: /interviewers (browse) → /interviewer/[id] (profile) → /book/[id] (booking)
+- Interviewer dashboard connected to real APIs
+- 20% platform commission logic already existed in /api/bookings
+- ESLint: 0 errors across all changed files
+- Browser verification limited by 4GB RAM OOM in sandbox - dev server crashes

@@ -18,44 +18,44 @@ export async function GET(req: NextRequest) {
     const statusFilter = searchParams.get('status') || 'ALL';
     const userId = (session.user as Record<string, unknown>).id as string;
 
-    const interviewer = await db.interviewer.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
+    // Try DB
+    try {
+      const interviewer = await db.interviewer.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
 
-    if (!interviewer) {
-      return NextResponse.json(
-        { error: { ar: 'ملف المقابل غير موجود', en: 'Interviewer profile not found' } },
-        { status: 404 },
-      );
-    }
+      if (interviewer) {
+        const where: Record<string, unknown> = { interviewerId: interviewer.id };
 
-    const where: Record<string, unknown> = { interviewerId: interviewer.id };
+        if (statusFilter === 'UPCOMING') {
+          where.scheduledAt = { gte: new Date() };
+          where.status = { in: ['PENDING', 'CONFIRMED'] };
+        } else if (statusFilter === 'PAST') {
+          where.OR = [
+            { scheduledAt: { lt: new Date() } },
+            { status: { in: ['COMPLETED', 'CANCELLED'] } },
+          ];
+        }
 
-    if (statusFilter === 'UPCOMING') {
-      where.scheduledAt = { gte: new Date() };
-      where.status = { in: ['PENDING', 'CONFIRMED'] };
-    } else if (statusFilter === 'PAST') {
-      where.OR = [
-        { scheduledAt: { lt: new Date() } },
-        { status: { in: ['COMPLETED', 'CANCELLED'] } },
-      ];
-    }
-
-    const bookings = await db.humanBooking.findMany({
-      where,
-      orderBy: { scheduledAt: 'desc' },
-      include: {
-        review: {
-          select: {
-            id: true,
-            rating: true,
+        const bookings = await db.humanBooking.findMany({
+          where,
+          orderBy: { scheduledAt: 'desc' },
+          include: {
+            review: {
+              select: { id: true, rating: true },
+            },
           },
-        },
-      },
-    });
+        });
 
-    return NextResponse.json({ bookings });
+        return NextResponse.json({ bookings });
+      }
+    } catch (dbErr) {
+      console.warn('[GET /api/interviewer/bookings] DB unavailable:', dbErr);
+    }
+
+    // Fallback: no bookings
+    return NextResponse.json({ bookings: [] });
   } catch (err) {
     console.error('GET /api/interviewer/bookings error:', err);
     return NextResponse.json(

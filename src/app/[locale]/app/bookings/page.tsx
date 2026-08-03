@@ -2,7 +2,8 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
-import { ExternalLink, Loader2, Clock, CheckCircle2, XCircle, CalendarX } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ExternalLink, Loader2, Clock, CheckCircle2, XCircle, CalendarX, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -36,6 +37,7 @@ interface Booking {
   priceTotal: number;
   status: string;
   meetingLink: string | null;
+  dailyRoomUrl: string | null;
   review: { id: string; rating: number } | null;
 }
 
@@ -66,6 +68,51 @@ function formatDateTime(iso: string, locale: string) {
     hour12: true,
   });
   return { date, time };
+}
+
+// ─── Join Call Button (disabled until 15 min before session) ───
+function JoinCallButton({ bookingId, scheduledAt }: { bookingId: string; scheduledAt: string }) {
+  const tc = useTranslations('call');
+  const router = useRouter();
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const msUntil = new Date(scheduledAt).getTime() - now;
+  const isJoinable = msUntil <= 15 * 60 * 1000;
+
+  const countdown = (() => {
+    if (isJoinable || msUntil <= 0) return '';
+    const totalSec = Math.floor(msUntil / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  })();
+
+  const label = isJoinable
+    ? tc('joinCall')
+    : tc('startsIn', { time: countdown });
+
+  return (
+    <Button
+      size="sm"
+      disabled={!isJoinable}
+      onClick={() => router.push(`/call/${bookingId}`)}
+      className={
+        isJoinable
+          ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer text-xs'
+          : 'cursor-not-allowed text-xs text-[var(--text-muted)] border border-white/10'
+      }
+    >
+      <Video size={14} strokeWidth={1.75} className="me-1.5" />
+      {label}
+    </Button>
+  );
 }
 
 export default function BookingsPage() {
@@ -173,8 +220,8 @@ export default function BookingsPage() {
 
   const getInterviewerName = (interviewer: BookingInterviewer) => {
     return locale === 'ar'
-      ? (interviewer.fullNameAr || interviewer.fullName || '—')
-      : (interviewer.fullName || interviewer.fullNameAr || '—');
+      ? (interviewer.fullNameAr || interviewer.fullName || ' - ')
+      : (interviewer.fullName || interviewer.fullNameAr || ' - ');
   };
 
   const BookingCard = ({ booking }: { booking: Booking }) => {
@@ -212,18 +259,9 @@ export default function BookingsPage() {
           {statusBadge(booking.status)}
 
           <div className="flex items-center gap-2">
-            {/* Join Meeting for CONFIRMED/UPCOMING */}
-            {isUpcoming && booking.meetingLink && (
-              <a
-                href={booking.meetingLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="sm" className="btn-gold cursor-pointer text-xs">
-                  <ExternalLink size={14} strokeWidth={1.75} className="me-1.5" />
-                  {t('joinMeeting')}
-                </Button>
-              </a>
+            {/* Join Call for CONFIRMED/UPCOMING */}
+            {isUpcoming && (
+              <JoinCallButton bookingId={booking.id} scheduledAt={booking.scheduledAt} />
             )}
 
             {/* Cancel for UPCOMING/PENDING */}

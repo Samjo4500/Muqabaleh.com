@@ -2045,5 +2045,27 @@
       "pendingPayoutsLabel": "⏳ المدفوعات المعلقة",
       "openDashboardButton": "فتح لوحة الإدارة"
     }
+  },
+  "call": {
+    "videoSession": "جلسة فيديو",
+    "interviewer": "المحاور",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "duration": "المدة",
+    "minutes": "دقيقة",
+    "startsIn": "يبدأ خلال",
+    "joinAvailable": "الانضمام متاح خلال",
+    "joinCall": "انضم للمكالمة",
+    "endCall": "إنهاء المكالمة",
+    "cancelled": "تم إلغاء هذه الجلسة",
+    "cancelledDescription": "تم إلغاء هذا الحجز. إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع الدعم.",
+    "sessionEnded": "انتهت الجلسة",
+    "sessionDuration": "مدة الجلسة",
+    "leaveReview": "اترك تقييم",
+    "redirecting": "سيتم تحويلك إلى حجوزاتك…",
+    "connectionIssues": "تواجه مشاكل في الاتصال؟",
+    "errorFetching": "فشل في تحميل تفاصيل الحجز",
+    "errorCreatingRoom": "فشل في إنشاء غرفة الفيديو. يرجى المحاولة مرة أخرى.",
+    "goHome": "العودة للرئيسية"
   }
 }

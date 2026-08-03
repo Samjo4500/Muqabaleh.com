@@ -125,6 +125,15 @@ export async function POST(req: NextRequest) {
     // Send booking confirmation + schedule delayed emails (fire and forget)
     scheduleBookingEmails(bookingId);
 
+    // Create Daily.co room (fire and forget, non-blocking)
+    if (process.env.DAILY_API_KEY) {
+      fetch('/api/daily/create-room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId }),
+      }).catch((e) => console.warn('[Booking] Daily.co room creation skipped:', e.message));
+    }
+
     return NextResponse.json({
       success: true,
       booking: updated,

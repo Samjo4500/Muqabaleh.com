@@ -2045,5 +2045,27 @@
       "pendingPayoutsLabel": "⏳ Pending Payouts",
       "openDashboardButton": "Open Admin Dashboard"
     }
+  },
+  "call": {
+    "videoSession": "Video Session",
+    "interviewer": "Interviewer",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "minutes": "min",
+    "startsIn": "Starts in",
+    "joinAvailable": "Join available in",
+    "joinCall": "Join Call",
+    "endCall": "End Call",
+    "cancelled": "This session was cancelled",
+    "cancelledDescription": "This booking has been cancelled. If you believe this is an error, please contact support.",
+    "sessionEnded": "Session Ended",
+    "sessionDuration": "Session duration",
+    "leaveReview": "Leave a Review",
+    "redirecting": "Redirecting you to your bookings…",
+    "connectionIssues": "Having connection issues?",
+    "errorFetching": "Failed to load booking details",
+    "errorCreatingRoom": "Failed to create video room. Please try again.",
+    "goHome": "Go Home"
   }
 }

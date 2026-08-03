@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Clock, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Clock, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Loader2, Video } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,50 @@ interface Booking {
   review: { id: string; rating: number } | null;
 }
 
+function InterviewerJoinCall({ bookingId, scheduledAt }: { bookingId: string; scheduledAt: string }) {
+  const tc = useTranslations('call');
+  const router = useRouter();
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const msUntil = new Date(scheduledAt).getTime() - now;
+  const isJoinable = msUntil <= 15 * 60 * 1000;
+
+  const countdown = (() => {
+    if (isJoinable || msUntil <= 0) return '';
+    const totalSec = Math.floor(msUntil / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  })();
+
+  const label = isJoinable
+    ? tc('joinCall')
+    : tc('startsIn', { time: countdown });
+
+  return (
+    <Button
+      size="sm"
+      disabled={!isJoinable}
+      onClick={() => router.push(`/call/${bookingId}`)}
+      className={
+        isJoinable
+          ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
+          : 'cursor-not-allowed text-[var(--text-muted)] border border-white/10'
+      }
+    >
+      <Video size={14} strokeWidth={1.75} className="me-1.5" />
+      {label}
+    </Button>
+  );
+}
+
 interface BookingCardProps {
   booking: Booking;
   onUpdate: (id: string) => void;
@@ -35,8 +80,6 @@ interface BookingCardProps {
 function BookingCard({ booking, onUpdate }: BookingCardProps) {
   const t = useTranslations('interviewerPanel');
   const tc = useTranslations('common');
-  const [url, setUrl] = useState(booking.meetingLink || '');
-  const [savingUrl, setSavingUrl] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
   const isUpcoming = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
@@ -51,28 +94,6 @@ function BookingCard({ booking, onUpdate }: BookingCardProps) {
   };
 
   const { date, time } = formatDateTime(booking.scheduledAt);
-
-  const handleSaveUrl = async () => {
-    if (!url.trim()) return;
-    setSavingUrl(true);
-    try {
-      const res = await fetch(`/api/bookings/${booking.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meetingLink: url.trim() }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        toast.error(errData?.error?.en || tc('error'));
-        return;
-      }
-      toast.success(t('saveUrl'));
-    } catch {
-      toast.error(tc('error'));
-    } finally {
-      setSavingUrl(false);
-    }
-  };
 
   const handleMarkCompleted = async () => {
     setActionLoading(true);
@@ -169,75 +190,42 @@ function BookingCard({ booking, onUpdate }: BookingCardProps) {
           <span>{time}</span>
         </div>
 
-        {/* Meeting link (upcoming only) */}
+        {/* Join Call button for upcoming bookings */}
         {isUpcoming && (
-          <>
-            {booking.meetingLink ? (
-              <div className="flex items-center gap-2 text-sm text-emerald-400">
-                <ExternalLink size={14} strokeWidth={1.75} />
-                <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">
-                  {booking.meetingLink}
-                </a>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Input
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder={t('meetingUrlPlaceholder')}
-                  className="glass-input border-white/10"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-white/10 hover:border-gold hover:text-gold"
-                  onClick={handleSaveUrl}
-                  disabled={savingUrl}
-                >
-                  {savingUrl && <Loader2 size={14} className="me-1 animate-spin" />}
-                  {t('saveUrl')}
-                </Button>
-              </div>
-            )}
-            {!booking.meetingLink && isPastDue && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
-                <AlertTriangle size={16} strokeWidth={1.75} />
-                <span>{t('urlWarning')}</span>
-              </div>
-            )}
-            {/* Evaluate link */}
-            <Link
-              href={`/interviewer/bookings/${booking.id}/evaluate`}
-              className="inline-flex items-center gap-1.5 text-sm text-gold transition-colors hover:text-gold/80"
-            >
-              <ExternalLink size={14} strokeWidth={1.75} />
-              {t('evalTitle')}
-            </Link>
+          <InterviewerJoinCall bookingId={booking.id} scheduledAt={booking.scheduledAt} />
+        )}
 
-            {/* Action buttons for confirmed bookings */}
-            {booking.status === 'CONFIRMED' && (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700"
-                  onClick={handleMarkCompleted}
-                  disabled={actionLoading}
-                >
-                  {actionLoading && <Loader2 size={14} className="me-1 animate-spin" />}
-                  {t('markCompleted')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
-                  onClick={handleCancel}
-                  disabled={actionLoading}
-                >
-                  {tc('cancel')}
-                </Button>
-              </div>
-            )}
-          </>
+        {/* Evaluate link */}
+        <Link
+          href={`/interviewer/bookings/${booking.id}/evaluate`}
+          className="inline-flex items-center gap-1.5 text-sm text-gold transition-colors hover:text-gold/80"
+        >
+          <ExternalLink size={14} strokeWidth={1.75} />
+          {t('evalTitle')}
+        </Link>
+
+        {/* Action buttons for confirmed bookings */}
+        {booking.status === 'CONFIRMED' && (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700"
+              onClick={handleMarkCompleted}
+              disabled={actionLoading}
+            >
+              {actionLoading && <Loader2 size={14} className="me-1 animate-spin" />}
+              {t('markCompleted')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
+              onClick={handleCancel}
+              disabled={actionLoading}
+            >
+              {tc('cancel')}
+            </Button>
+          </div>
         )}
       </div>
     </GlowCard>
@@ -293,7 +281,6 @@ export default function BookingsPage() {
       }
       return past;
     });
-    // Re-fetch to get fresh data
     fetchBookings();
   }, [fetchBookings]);
 

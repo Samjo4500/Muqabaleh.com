@@ -6,11 +6,12 @@ import { z } from 'zod';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['COMPLETED', 'CANCELLED'],
+  CONFIRMED: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+  IN_PROGRESS: ['COMPLETED'],
 };
 
 const updateBookingSchema = z.object({
-  status: z.enum(['CONFIRMED', 'COMPLETED', 'CANCELLED']).optional(),
+  status: z.enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
   cancelledBy: z.string().max(50).optional(),
   meetingLink: z.string().url().max(500).optional(),
 });

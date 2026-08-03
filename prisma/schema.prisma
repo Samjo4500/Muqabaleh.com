@@ -319,6 +319,9 @@ model HumanBooking {
   platformFee       Int
   interviewerPayout Int
   provider          String   @default("JITSI")
+  dailyRoomUrl     String?
+  dailyRoomName    String?
+  recordingUrl     String?
   meetingLink       String?
   candidateNote     String?  @db.Text
   interviewerNotes  String?  @db.Text

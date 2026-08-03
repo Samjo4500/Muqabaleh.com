@@ -371,6 +371,20 @@ model InterviewerPayout {
   @@index([status])
 }
 
+// ─── Admin Log ───
+model AdminLog {
+  id          String   @id @default(cuid())
+  action      String
+  adminEmail  String
+  targetType  String?
+  targetId    String?
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  @@index([adminEmail])
+  @@index([action])
+}
+
 // ─── Candidate Pool (Opt-In) ───
 model CandidatePool {
   id              String    @id @default(uuid())

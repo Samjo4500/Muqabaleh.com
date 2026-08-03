@@ -1,20 +1,19 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { Search, Plus } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Search, RefreshCw, Eye, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { GlowCard } from '@/components/brand';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,94 +22,86 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 
-type Role = 'USER' | 'ADMIN' | 'COMPANY_ADMIN' | 'COMPANY_MEMBER' | 'INTERVIEWER';
+function formatCents(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
 
-type MockUser = {
-  name: string;
-  email: string;
-  role: Role;
-  accountType: 'personal' | 'b2b';
-  sessionsLeft: number;
-  active: boolean;
-  created: string;
-};
-
-const mockUsers: MockUser[] = [
-  { name: 'سارة المحمدي', email: 'sara@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 3, active: true, created: '2026-06-15' },
-  { name: 'أحمد العتيبي', email: 'ahmed@example.com', role: 'COMPANY_ADMIN', accountType: 'b2b', sessionsLeft: 47, active: true, created: '2026-05-20' },
-  { name: 'نورة القحطاني', email: 'noura@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 0, active: false, created: '2026-04-10' },
-  { name: 'فهد العنزي', email: 'fahad@example.com', role: 'INTERVIEWER', accountType: 'personal', sessionsLeft: 12, active: true, created: '2026-03-22' },
-  { name: 'خالد الشمري', email: 'khalid@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 8, active: true, created: '2026-06-01' },
-  { name: 'ليلى الدوسري', email: 'layla@example.com', role: 'USER', accountType: 'personal', sessionsLeft: 1, active: true, created: '2026-07-05' },
-  { name: 'سلطان الحربي', email: 'sultan@example.com', role: 'ADMIN', accountType: 'personal', sessionsLeft: 0, active: true, created: '2026-01-01' },
-  { name: 'هند السالم', email: 'hind@example.com', role: 'COMPANY_MEMBER', accountType: 'b2b', sessionsLeft: 5, active: false, created: '2026-05-18' },
-];
-
-const ROLE_BADGE_KEYS: Record<Role, string> = {
-  USER: 'roleUser',
-  ADMIN: 'roleAdmin',
-  COMPANY_ADMIN: 'roleCompanyAdmin',
-  COMPANY_MEMBER: 'roleCompanyMember',
-  INTERVIEWER: 'roleInterviewer',
-};
-
-const ROLE_COLORS: Record<Role, string> = {
-  USER: 'bg-[var(--bg-card)] text-[var(--text-muted)] border-white/10',
-  ADMIN: 'bg-red-500/10 text-red-400 border-red-500/30',
-  COMPANY_ADMIN: 'bg-gold/10 text-gold border-gold/30',
-  COMPANY_MEMBER: 'bg-cyan/10 text-cyan border-cyan/30',
-  INTERVIEWER: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-};
-
-export default function UsersPage() {
-  const t = useTranslations('adminPanel.users');
-  const [roleFilter, setRoleFilter] = useState('ALL');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [sessionCount, setSessionCount] = useState('');
-  const [users, setUsers] = useState(mockUsers);
-
-  const filtered = users.filter((u) => {
-    if (roleFilter !== 'ALL' && u.role !== roleFilter) return false;
-    if (statusFilter === 'active' && !u.active) return false;
-    if (statusFilter === 'inactive' && u.active) return false;
-    if (search && !u.name.includes(search) && !u.email.includes(search)) return false;
-    return true;
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
+}
 
-  function toggleActive(idx: number) {
-    setUsers((prev) => {
-      const copy = [...prev];
-      const user = filtered[idx];
-      const realIdx = prev.indexOf(user);
-      copy[realIdx] = { ...copy[realIdx], active: !copy[realIdx].active };
-      return copy;
-    });
-  }
+function TierBadge({ tier }: { tier: string }) {
+  const map: Record<string, string> = {
+    FREE: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+    PRO: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+    UNLIMITED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  };
+  return (
+    <Badge variant="outline" className={map[tier] ?? 'bg-white/5 text-[var(--text-muted)] border-white/10'}>
+      {tier}
+    </Badge>
+  );
+}
 
-  function addSessions(idx: number) {
-    const count = parseInt(sessionCount, 10);
-    if (isNaN(count) || count <= 0) return;
-    setUsers((prev) => {
-      const copy = [...prev];
-      const user = filtered[idx];
-      const realIdx = prev.indexOf(user);
-      copy[realIdx] = { ...copy[realIdx], sessionsLeft: copy[realIdx].sessionsLeft + count };
-      return copy;
-    });
-    setDialogOpen(false);
-    setSessionCount('');
-  }
+interface UserRow {
+  id: string;
+  email: string;
+  name: string | null;
+  country: string | null;
+  subscriptionTier: string;
+  sessionsLeft: number;
+  role: string;
+  accountType: string;
+  isActive: boolean;
+  createdAt: string;
+  _count: { interviews: number; payments: number };
+}
+
+export default function AdminUsersPage() {
+  const t = useTranslations('adminPanel.users');
+  const tc = useTranslations('adminPanel.common');
+
+  const [data, setData] = useState<UserRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [tierFilter, setTierFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const limit = 20;
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+      if (tierFilter) params.set('tier', tierFilter);
+      if (search) params.set('search', search);
+      const res = await fetch(`/api/admin/users?${params}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      setData(json.data ?? []);
+      setTotal(json.total ?? 0);
+    } catch {
+      setError(t('error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [page, tierFilter, search, t]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const totalPages = Math.ceil(total / limit);
+  const expanded = data.find((u) => u.id === expandedId);
 
   return (
     <div className="space-y-6">
@@ -121,124 +112,129 @@ export default function UsersPage() {
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search size={18} strokeWidth={1.75} className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
+          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
           <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="ps-10 glass-input"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="border-white/10 bg-white/5 ps-9 text-[var(--text-primary)]"
           />
         </div>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-full glass-input sm:w-[180px]">
-            <SelectValue />
+        <Select value={tierFilter} onValueChange={(v) => { setTierFilter(v === 'ALL' ? '' : v); setPage(1); }}>
+          <SelectTrigger className="w-full border-white/10 bg-white/5 sm:w-40 text-[var(--text-primary)]">
+            <SelectValue placeholder={t('tierFilter')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">{t('roleAll')}</SelectItem>
-            <SelectItem value="USER">{t('roleUser')}</SelectItem>
-            <SelectItem value="ADMIN">{t('roleAdmin')}</SelectItem>
-            <SelectItem value="COMPANY_ADMIN">{t('roleCompanyAdmin')}</SelectItem>
-            <SelectItem value="COMPANY_MEMBER">{t('roleCompanyMember')}</SelectItem>
-            <SelectItem value="INTERVIEWER">{t('roleInterviewer')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full glass-input sm:w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{t('statusAll')}</SelectItem>
-            <SelectItem value="active">{t('statusActive')}</SelectItem>
-            <SelectItem value="inactive">{t('statusInactive')}</SelectItem>
+            <SelectItem value="ALL">{t('tierAll')}</SelectItem>
+            <SelectItem value="FREE">{t('tierFree')}</SelectItem>
+            <SelectItem value="PRO">{t('tierPro')}</SelectItem>
+            <SelectItem value="UNLIMITED">{t('tierUnlimited')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Table */}
-      <GlowCard className="overflow-hidden !p-0">
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/[0.06] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)]">{t('colName')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colEmail')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colRole')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colAccountType')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colSessionsLeft')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colStatus')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colCreated')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colActions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((u, i) => (
-                <TableRow key={i} className="border-white/[0.06] hover:bg-white/[0.02]">
-                  <TableCell className="font-medium text-[var(--text-primary)]">{u.name}</TableCell>
-                  <TableCell className="text-[var(--text-muted)]">{u.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={ROLE_COLORS[u.role]}>
-                      {t(ROLE_BADGE_KEYS[u.role])}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-[var(--text-muted)]">{u.accountType === 'b2b' ? t('typeB2B') : t('typePersonal')}</TableCell>
-                  <TableCell className="text-[var(--text-primary)] font-mono">{u.sessionsLeft}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={u.active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}>
-                      {u.active ? t('statusActive') : t('statusInactive')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-[var(--text-muted)]">{u.created}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={u.active}
-                        onCheckedChange={() => toggleActive(i)}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1 border-gold/30 text-gold hover:bg-gold/10"
-                        onClick={() => setDialogOpen(true)}
-                      >
-                        <Plus size={14} strokeWidth={1.75} />
-                        {t('addSessions')}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {error && (
+        <div className="flex items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+          <p className="text-sm text-red-400">{error}</p>
+          <Button variant="outline" size="sm" onClick={fetchData}>
+            <RefreshCw size={14} className="me-2" />{tc('retry')}
+          </Button>
         </div>
-      </GlowCard>
+      )}
 
-      {/* Add Sessions Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="glass-card !bg-[var(--bg-panel)] border-white/10">
-          <DialogHeader>
-            <DialogTitle className="text-[var(--text-primary)]">{t('addSessionsTitle')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <Label className="text-[var(--text-muted)]">{t('sessionsCount')}</Label>
-            <Input
-              type="number"
-              min={1}
-              value={sessionCount}
-              onChange={(e) => setSessionCount(e.target.value)}
-              placeholder={t('sessionsPlaceholder')}
-              className="glass-input"
-            />
+      {/* Table */}
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
           </div>
-          <DialogFooter>
-            <Button
-              onClick={() => addSessions(0)}
-              className="bg-gold text-void hover:bg-gold-hover font-bold"
-            >
-              {t('addSessions')}
+        ) : data.length === 0 ? (
+          <p className="py-12 text-center text-sm text-[var(--text-faint)]">{t('noData')}</p>
+        ) : (
+          <>
+            <div className="max-h-96 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/[0.06] hover:bg-transparent">
+                    <TableHead className="text-[var(--text-muted)]">{t('colEmail')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colTier')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colSessionsUsed')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colTotalSpent')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colSignupDate')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colActions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((item) => (
+                    <TableRow key={item.id} className="border-white/[0.04]">
+                      <TableCell className="text-sm font-medium text-[var(--text-primary)]">{item.email}</TableCell>
+                      <TableCell><TierBadge tier={item.subscriptionTier} /></TableCell>
+                      <TableCell className="text-sm text-[var(--text-primary)]">{item._count.interviews}</TableCell>
+                      <TableCell className="text-sm text-[var(--text-primary)]">—</TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">{formatDate(item.createdAt)}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm" variant="ghost"
+                          className="h-7 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                          onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                        >
+                          <Eye size={14} className="me-1" />{t('view')}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3">
+                <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage(page - 1)} className="border-white/10 text-[var(--text-muted)]">
+                  {tc('prev')}
+                </Button>
+                <span className="text-xs text-[var(--text-faint)]">{tc('page')} {page} {tc('of')} {totalPages}</span>
+                <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="border-white/10 text-[var(--text-muted)]">
+                  {tc('next')}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Detail Panel */}
+      {expanded && (
+        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">{t('detail')}</h2>
+            <Button size="sm" variant="ghost" onClick={() => setExpandedId(null)} className="text-[var(--text-muted)]">
+              <X size={16} />
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailRow label={t('colEmail')} value={expanded.email} />
+            <DetailRow label={t('colName')} value={expanded.name ?? '—'} />
+            <DetailRow label={t('colTier')} value={expanded.subscriptionTier} />
+            <DetailRow label={t('colRole')} value={expanded.role} />
+            <DetailRow label={t('colCountry')} value={expanded.country ?? '—'} />
+            <DetailRow label={t('colSessionsUsed')} value={String(expanded._count.interviews)} />
+            <DetailRow label={t('colSignupDate')} value={formatDate(expanded.createdAt)} />
+            <DetailRow label={t('colTotalSpent')} value={`${expanded._count.payments} payments`} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-[var(--text-faint)]">{label}</p>
+      <p className="text-sm text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

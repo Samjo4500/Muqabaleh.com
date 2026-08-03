@@ -1,17 +1,19 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Search, RefreshCw, Eye, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { GlowCard } from '@/components/brand';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -20,177 +22,312 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Repeat } from 'lucide-react';
 
-type BookingStatus = 'COMPLETED' | 'IN_PROGRESS' | 'UPCOMING' | 'NO_SHOW';
-type PayoutStatus = 'PAID' | 'PENDING';
+function formatCents(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
 
-type MockBooking = {
-  candidate: string;
-  interviewer: string;
-  company: string | null;
-  date: string;
-  status: BookingStatus;
-  payout: PayoutStatus;
-  slaOverdue: boolean;
-};
-
-const mockBookings: MockBooking[] = [
-  { candidate: 'سارة المحمدي', interviewer: 'أ. ريم العتيبي', company: null, date: '2026-07-28', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
-  { candidate: 'أحمد العتيبي', interviewer: 'م. سلطان الحربي', company: 'نيوم', date: '2026-07-27', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
-  { candidate: 'نورة القحطاني', interviewer: 'د. طارق النعيمي', company: 'أرامكو', date: '2026-07-25', status: 'IN_PROGRESS', payout: 'PENDING', slaOverdue: true },
-  { candidate: 'فهد العنزي', interviewer: 'د. منى الراشد', company: null, date: '2026-07-24', status: 'UPCOMING', payout: 'PENDING', slaOverdue: false },
-  { candidate: 'خالد الشمري', interviewer: 'م. فيصل العمري', company: 'STC', date: '2026-07-20', status: 'NO_SHOW', payout: 'PENDING', slaOverdue: true },
-  { candidate: 'ليلى الدوسري', interviewer: 'أ. ريم العتيبي', company: null, date: '2026-07-18', status: 'COMPLETED', payout: 'PAID', slaOverdue: false },
-];
-
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  IN_PROGRESS: 'bg-cyan/10 text-cyan border-cyan/30',
-  UPCOMING: 'bg-gold/10 text-gold border-gold/30',
-  NO_SHOW: 'bg-red-500/10 text-red-400 border-red-500/30',
-};
-
-const STATUS_KEYS: Record<BookingStatus, string> = {
-  COMPLETED: 'statusCompleted',
-  IN_PROGRESS: 'statusInProgress',
-  UPCOMING: 'statusUpcoming',
-  NO_SHOW: 'statusNoShow',
-};
-
-const PAYOUT_COLORS: Record<PayoutStatus, string> = {
-  PAID: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  PENDING: 'bg-[var(--status-amber)]/10 text-[var(--status-amber)] border-[var(--status-amber)]/30',
-};
-
-const PAYOUT_KEYS: Record<PayoutStatus, string> = {
-  PAID: 'payoutPaid',
-  PENDING: 'payoutPending',
-};
-
-export default function BookingsPage() {
-  const t = useTranslations('adminPanel.bookings');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [reassignOpen, setReassignOpen] = useState(false);
-  const [selectedInterviewer, setSelectedInterviewer] = useState('');
-
-  const filtered = mockBookings.filter((b) => {
-    if (statusFilter === 'SLA_OVERDUE' && !b.slaOverdue) return false;
-    return true;
+function formatDateTime(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }) + ' ' + d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
   });
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    PENDING: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+    CONFIRMED: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    CANCELLED: 'bg-red-500/10 text-red-400 border-red-500/30',
+    REFUNDED: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  };
+  return (
+    <Badge variant="outline" className={map[status] ?? 'bg-white/5 text-[var(--text-muted)] border-white/10'}>
+      {status}
+    </Badge>
+  );
+}
+
+interface Booking {
+  id: string;
+  candidateName: string;
+  candidateEmail: string;
+  status: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  priceTotal: number;
+  platformFee: number;
+  interviewerPayout: number;
+  meetingLink: string | null;
+  candidateNote: string | null;
+  interviewerNotes: string | null;
+  cancelledBy: string | null;
+  cancelledAt: string | null;
+  createdAt: string;
+  interviewer: {
+    id: string;
+    fullName: string;
+    fullNameAr: string | null;
+    payoutEmail: string | null;
+  };
+}
+
+interface InterviewerOption {
+  id: string;
+  fullName: string;
+}
+
+export default function AdminBookingsPage() {
+  const t = useTranslations('adminPanel.bookings');
+  const tc = useTranslations('adminPanel.common');
+
+  const [data, setData] = useState<Booking[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [interviewerFilter, setInterviewerFilter] = useState('');
+  const [interviewerOptions, setInterviewerOptions] = useState<InterviewerOption[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const limit = 20;
+
+  const fetchInterviewers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/interviewers?limit=100');
+      if (res.ok) {
+        const json = await res.json();
+        setInterviewerOptions((json.data ?? []).map((i: { id: string; fullName: string }) => ({ id: i.id, fullName: i.fullName })));
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+      if (statusFilter) params.set('status', statusFilter);
+      if (dateFrom) params.set('from', dateFrom);
+      if (dateTo) params.set('to', dateTo);
+      if (interviewerFilter) params.set('interviewerId', interviewerFilter);
+      const res = await fetch(`/api/admin/bookings?${params}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      setData(json.data ?? []);
+      setTotal(json.total ?? 0);
+    } catch {
+      setError(t('error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [page, statusFilter, dateFrom, dateTo, interviewerFilter, t]);
+
+  useEffect(() => {
+    fetchInterviewers();
+  }, [fetchInterviewers]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleAction = async (id: string, status: string) => {
+    await fetch(`/api/admin/bookings/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    fetchData();
+  };
+
+  const totalPages = Math.ceil(total / limit);
+  const expanded = data.find((b) => b.id === expandedId);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">
-          {t('title')}
-        </h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full glass-input sm:w-[200px]">
-            <SelectValue />
+      <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">
+        {t('title')}
+      </h1>
+
+      {/* Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v === 'ALL' ? '' : v); setPage(1); }}>
+          <SelectTrigger className="w-full border-white/10 bg-white/5 sm:w-40 text-[var(--text-primary)]">
+            <SelectValue placeholder={t('statusFilter')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">{t('statusAll')}</SelectItem>
-            <SelectItem value="SLA_OVERDUE">{t('statusSlaOverdue')}</SelectItem>
+            <SelectItem value="PENDING">{t('statusPending')}</SelectItem>
+            <SelectItem value="CONFIRMED">{t('statusConfirmed')}</SelectItem>
+            <SelectItem value="COMPLETED">{t('statusCompleted')}</SelectItem>
+            <SelectItem value="CANCELLED">{t('statusCancelled')}</SelectItem>
+            <SelectItem value="REFUNDED">{t('statusRefunded')}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="flex items-center gap-2">
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+            className="w-full border-white/10 bg-white/5 text-[var(--text-primary)] sm:w-40"
+          />
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+            className="w-full border-white/10 bg-white/5 text-[var(--text-primary)] sm:w-40"
+          />
+        </div>
+
+        <Select value={interviewerFilter} onValueChange={(v) => { setInterviewerFilter(v === 'ALL' ? '' : v); setPage(1); }}>
+          <SelectTrigger className="w-full border-white/10 bg-white/5 sm:w-48 text-[var(--text-primary)]">
+            <SelectValue placeholder={t('interviewerFilter')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t('allInterviewers')}</SelectItem>
+            {interviewerOptions.map((i) => (
+              <SelectItem key={i.id} value={i.id}>{i.fullName}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      <GlowCard className="overflow-hidden !p-0">
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/[0.06] hover:bg-transparent">
-                <TableHead className="text-[var(--text-muted)]">{t('colCandidate')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colInterviewer')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colCompany')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colDate')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colStatus')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colPayout')}</TableHead>
-                <TableHead className="text-[var(--text-muted)]">{t('colActions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((b, i) => (
-                <TableRow
-                  key={i}
-                  className={`border-white/[0.06] hover:bg-white/[0.02] ${b.slaOverdue ? 'bg-red-500/[0.04]' : ''}`}
-                >
-                  <TableCell className="font-medium text-[var(--text-primary)]">{b.candidate}</TableCell>
-                  <TableCell className="text-[var(--text-muted)]">{b.interviewer}</TableCell>
-                  <TableCell>
-                    {b.company ? (
-                      <Badge variant="outline" className="bg-gold/10 text-gold border-gold/30">
-                        {b.company}
-                      </Badge>
-                    ) : (
-                      <span className="text-[var(--text-faint)]">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-[var(--text-muted)] font-mono">{b.date}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={STATUS_COLORS[b.status]}>
-                      {t(STATUS_KEYS[b.status])}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={PAYOUT_COLORS[b.payout]}>
-                      {t(PAYOUT_KEYS[b.payout])}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 gap-1.5 border-cyan/30 text-cyan hover:bg-cyan/10"
-                      onClick={() => setReassignOpen(true)}
-                    >
-                      <Repeat size={14} strokeWidth={1.75} />
-                      {t('reassign')}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {error && (
+        <div className="flex items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+          <p className="text-sm text-red-400">{error}</p>
+          <Button variant="outline" size="sm" onClick={fetchData}>
+            <RefreshCw size={14} className="me-2" />{tc('retry')}
+          </Button>
         </div>
-      </GlowCard>
+      )}
 
-      {/* Reassign Dialog */}
-      <Dialog open={reassignOpen} onOpenChange={setReassignOpen}>
-        <DialogContent className="glass-card !bg-[var(--bg-panel)] border-white/10">
-          <DialogHeader>
-            <DialogTitle className="text-[var(--text-primary)]">{t('reassignTitle')}</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-[var(--text-muted)]">{t('reassignDesc')}</p>
-          <Select value={selectedInterviewer} onValueChange={setSelectedInterviewer}>
-            <SelectTrigger className="glass-input">
-              <SelectValue placeholder={t('selectInterviewer')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">أ. ريم العتيبي</SelectItem>
-              <SelectItem value="2">د. طارق النعيمي</SelectItem>
-              <SelectItem value="3">د. منى الراشد</SelectItem>
-              <SelectItem value="4">م. فيصل العمري</SelectItem>
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button
-              className="bg-cyan text-void hover:bg-cyan/80 font-bold"
-              onClick={() => setReassignOpen(false)}
-            >
-              {t('reassign')}
+      {/* Table */}
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : data.length === 0 ? (
+          <p className="py-12 text-center text-sm text-[var(--text-faint)]">{t('noData')}</p>
+        ) : (
+          <>
+            <div className="max-h-96 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/[0.06] hover:bg-transparent">
+                    <TableHead className="text-[var(--text-muted)]">{t('colUser')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colInterviewer')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colDateTime')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colStatus')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colAmount')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colCommission')}</TableHead>
+                    <TableHead className="text-[var(--text-muted)]">{t('colActions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((item) => (
+                    <TableRow key={item.id} className="border-white/[0.04]">
+                      <TableCell className="text-sm text-[var(--text-primary)]">{item.candidateName}</TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">{item.interviewer?.fullName ?? '—'}</TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">{formatDateTime(item.scheduledAt)}</TableCell>
+                      <TableCell><StatusBadge status={item.status} /></TableCell>
+                      <TableCell className="text-sm font-medium text-[var(--text-primary)]">{formatCents(item.priceTotal)}</TableCell>
+                      <TableCell className="text-sm text-[var(--text-muted)]">{formatCents(item.platformFee)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm" variant="ghost"
+                            className="h-7 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                            onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                          >
+                            <Eye size={14} />
+                          </Button>
+                          {(item.status === 'PENDING' || item.status === 'CONFIRMED') && (
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:text-red-300" onClick={() => handleAction(item.id, 'CANCELLED')}>
+                              {t('cancel')}
+                            </Button>
+                          )}
+                          {(item.status === 'PENDING' || item.status === 'CONFIRMED' || item.status === 'COMPLETED') && (
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-orange-400 hover:text-orange-300" onClick={() => handleAction(item.id, 'REFUNDED')}>
+                              {t('refund')}
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3">
+                <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage(page - 1)} className="border-white/10 text-[var(--text-muted)]">
+                  {tc('prev')}
+                </Button>
+                <span className="text-xs text-[var(--text-faint)]">{tc('page')} {page} {tc('of')} {totalPages}</span>
+                <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="border-white/10 text-[var(--text-muted)]">
+                  {tc('next')}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Detail Panel */}
+      {expanded && (
+        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">{t('detail')}</h2>
+            <Button size="sm" variant="ghost" onClick={() => setExpandedId(null)} className="text-[var(--text-muted)]">
+              <X size={16} />
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailRow label={t('colCandidateName')} value={expanded.candidateName} />
+            <DetailRow label={t('colCandidateEmail')} value={expanded.candidateEmail} />
+            <DetailRow label={t('colInterviewer')} value={expanded.interviewer?.fullName ?? '—'} />
+            <DetailRow label={t('colDateTime')} value={formatDateTime(expanded.scheduledAt)} />
+            <DetailRow label={t('colDuration')} value={`${expanded.durationMinutes} min`} />
+            <DetailRow label={t('colStatus')} value={expanded.status} />
+            <DetailRow label={t('colAmount')} value={formatCents(expanded.priceTotal)} />
+            <DetailRow label={t('colCommission')} value={formatCents(expanded.platformFee)} />
+            <DetailRow label="Interviewer Payout" value={formatCents(expanded.interviewerPayout)} />
+          </div>
+          {expanded.meetingLink && (
+            <DetailRow label={t('colMeetingLink')} value={expanded.meetingLink} />
+          )}
+          {expanded.candidateNote && (
+            <DetailRow label={t('colNote')} value={expanded.candidateNote} />
+          )}
+          {expanded.cancelledAt && (
+            <DetailRow label="Cancelled By" value={`${expanded.cancelledBy ?? 'Unknown'} at ${formatDateTime(expanded.cancelledAt)}`} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-[var(--text-faint)]">{label}</p>
+      <p className="text-sm text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

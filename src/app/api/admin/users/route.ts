@@ -7,34 +7,43 @@ export async function GET(req: NextRequest) {
   if (!auth.authorized) return auth.response;
 
   const { searchParams } = req.nextUrl;
-  const status = searchParams.get('status') ?? undefined;
+  const tier = searchParams.get('tier') ?? undefined;
   const search = searchParams.get('search') ?? undefined;
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') ?? '20', 10)));
   const skip = (page - 1) * limit;
 
   const where: Record<string, unknown> = {};
-  if (status) where.status = status;
+  if (tier) where.subscriptionTier = tier;
   if (search) {
     where.OR = [
-      { fullName: { contains: search, mode: 'insensitive' } },
-      { fullNameAr: { contains: search } },
-      { payoutEmail: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+      { name: { contains: search, mode: 'insensitive' } },
     ];
   }
 
   const [data, total] = await Promise.all([
-    db.interviewer.findMany({
+    db.user.findMany({
       where,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        country: true,
+        subscriptionTier: true,
+        sessionsLeft: true,
+        role: true,
+        accountType: true,
+        isActive: true,
+        createdAt: true,
+        _count: { select: { interviews: true, payments: true } },
+      },
     }),
-    db.interviewer.count({ where }),
+    db.user.count({ where }),
   ]);
 
-  return NextResponse.json({
-    data,
-    total,
-  });
+  return NextResponse.json({ data, total });
 }

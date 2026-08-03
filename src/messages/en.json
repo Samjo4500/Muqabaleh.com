@@ -1968,7 +1968,7 @@
       "heading": "Thank You, {userName}! 🎉",
       "body": "You've completed your interview with {interviewerName}. We'd love to hear your feedback to help us improve your experience.",
       "ratingTitle": "How would you rate your experience?",
-      "ratingScale": "1 — Poor \u00a0\u00a0\u00a0 5 — Excellent",
+      "ratingScale": "1 — Poor     5 — Excellent",
       "ctaText": "Help us improve — share your rating and comments!",
       "reviewButton": "Leave a Review",
       "thankYouNote": "The Muqabaleh team wishes you the best in your upcoming interviews!"
@@ -2053,7 +2053,7 @@
     "time": "Time",
     "duration": "Duration",
     "minutes": "min",
-    "startsIn": "Starts in",
+    "startsIn": "Starts in {time}",
     "joinAvailable": "Join available in",
     "joinCall": "Join Call",
     "endCall": "End Call",

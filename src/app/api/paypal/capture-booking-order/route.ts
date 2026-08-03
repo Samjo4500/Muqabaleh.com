@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { z } from 'zod';
 import { scheduleBookingEmails } from '@/lib/email-triggers';
+import { createDailyRoom } from '@/lib/daily';
 
 const schema = z.object({
   bookingId: z.string().uuid(),
@@ -127,11 +128,9 @@ export async function POST(req: NextRequest) {
 
     // Create Daily.co room (fire and forget, non-blocking)
     if (process.env.DAILY_API_KEY) {
-      fetch('/api/daily/create-room', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId }),
-      }).catch((e) => console.warn('[Booking] Daily.co room creation skipped:', e.message));
+      createDailyRoom(bookingId).catch((e) =>
+        console.warn('[Booking] Daily.co room creation skipped:', e.message),
+      );
     }
 
     return NextResponse.json({

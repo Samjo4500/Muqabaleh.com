@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { createDailyRoom } from '@/lib/daily';
 
 const createRoomSchema = z.object({
   bookingId: z.string().uuid(),
@@ -40,10 +41,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch the booking with interviewer relation
+    // Fetch the booking with interviewer relation for authorization check
     const booking = await db.humanBooking.findUnique({
       where: { id: bookingId },
-      include: { interviewer: { select: { userId: true, fullName: true } } },
+      include: { interviewer: { select: { userId: true } } },
     });
 
     if (!booking) {
@@ -68,79 +69,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If room already exists, return it
-    if (booking.dailyRoomUrl) {
-      return NextResponse.json({
-        roomUrl: booking.dailyRoomUrl,
-        roomName: booking.dailyRoomName,
-      });
-    }
+    // Delegate to shared utility
+    const result = await createDailyRoom(bookingId);
 
-    // Calculate timestamps
-    const sessionStart = new Date(booking.scheduledAt).getTime();
-    const now = Date.now();
-
-    // nbf: 15 minutes before scheduled start, but at least now
-    const nbfRaw = sessionStart - 15 * 60 * 1000;
-    const nbf =
-      nbfRaw > now ? Math.floor(nbfRaw / 1000) : Math.floor(now / 1000);
-
-    // exp: 2 hours after scheduled start
-    const exp = Math.floor((sessionStart + 2 * 60 * 60 * 1000) / 1000);
-
-    const roomName = 'muqabaleh-' + bookingId.slice(0, 8);
-
-    // Call Daily.co API
-    const dailyResponse = await fetch('https://api.daily.co/v1/rooms/', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.DAILY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: roomName,
-        privacy: 'private',
-        max_participants: 2,
-        nbf,
-        exp,
-        enable_screenshare: false,
-        enable_chat: true,
-        start_audio_off: false,
-        start_video_off: false,
-        enable_recording: 'cloud',
-      }),
-    });
-
-    if (!dailyResponse.ok) {
-      const errorBody = await dailyResponse.text();
-      console.error('Daily.co API error:', dailyResponse.status, errorBody);
-      return NextResponse.json(
-        { error: 'Failed to create video room' },
-        { status: 502 }
-      );
-    }
-
-    const roomData = await dailyResponse.json();
-
-    // Store the room info in the booking
-    await db.humanBooking.update({
-      where: { id: bookingId },
-      data: {
-        dailyRoomUrl: roomData.url,
-        dailyRoomName: roomData.name,
-        provider: 'DAILY',
-      },
-    });
-
-    return NextResponse.json({
-      roomUrl: roomData.url,
-      roomName: roomData.name,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error creating Daily.co room:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    const status = message === 'Booking not found' ? 404
+      : message === 'Failed to create video room' ? 502
+      : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

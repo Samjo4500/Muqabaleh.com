@@ -2146,3 +2146,27 @@ Stage Summary:
 - IN_PROGRESS booking status support
 - Env vars needed on Vercel: DAILY_API_KEY
 - prisma db push needed for new columns
+
+---
+Task ID: 3c-fix
+Agent: Main Agent
+Task: Verify Phase 3C implementation and fix bugs
+
+Work Log:
+- Verified all Phase 3C files exist: create-room route, webhook route, call page, i18n keys
+- Confirmed schema has dailyRoomUrl, dailyRoomName, recordingUrl in HumanBooking
+- Confirmed @daily-co/daily-js is in package.json
+- Found bug: PayPal capture route calls /api/daily/create-room server-to-server without session (would 401)
+- Found bug: startsIn i18n key lacks {time} placeholder so countdown never displays in JoinCallButton
+- Created src/lib/daily.ts with shared createDailyRoom() utility (no auth, just business logic)
+- Refactored create-room route to use shared utility (auth still in route handler)
+- Updated PayPal capture route to call createDailyRoom() directly instead of server-to-server fetch
+- Fixed startsIn in en.json: "Starts in {time}" and ar.json: "يبدأ خلال {time}"
+- All changes pass ESLint with zero errors
+
+Stage Summary:
+- Phase 3C was already fully implemented in previous session (commit 9ff05f6)
+- Fixed 2 bugs: server-to-server auth failure and missing i18n placeholder
+- New file: src/lib/daily.ts
+- Modified: create-room/route.ts, capture-booking-order/route.ts, en.json, ar.json
+- Commit: 7547648 fix(phase-3c): extract shared Daily.co utility, fix auth and i18n bugs

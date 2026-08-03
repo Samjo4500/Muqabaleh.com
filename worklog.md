@@ -2116,3 +2116,33 @@ Stage Summary:
 - EmailQueue model for delayed/scheduled emails via cron
 - Env vars needed on Vercel: RESEND_API_KEY, ADMIN_EMAIL=samjo4500@gmail.com, EMAIL_INTERNAL_SECRET
 - `bun run db:push` needed on production to create EmailQueue table
+
+---
+Task ID: 3c
+Agent: Main Agent
+Task: Phase 3C - Video Calls with Daily.co
+
+Work Log:
+- Created branch feat/phase-3c from main
+- Installed @daily-co/daily-js SDK
+- Added dailyRoomUrl, dailyRoomName, recordingUrl to HumanBooking Prisma schema
+- Generated Prisma client
+- Created POST /api/daily/create-room (auth, room creation, time-gated access)
+- Created POST /api/daily/webhook (participant-left, recording events)
+- Built /call/[bookingId] video call page (loading, countdown, cancelled, in-call, ended states)
+- Added JoinCallButton to user bookings dashboard (live countdown, 15min gate)
+- Added InterviewerJoinCallButton to interviewer bookings dashboard
+- Updated booking status machine to support IN_PROGRESS state
+- Integrated auto room creation into capture-booking-order
+- Fixed em-dash parser bug in bookings pages
+- Added 20 i18n keys (call namespace) to en.json and ar.json
+- ESLint: 0 errors, TypeScript: 0 errors
+
+Stage Summary:
+- Complete video call system with Daily.co integration
+- 12 files changed, +924 lines
+- Room auto-created on booking payment
+- 15-min join gate with live countdown
+- IN_PROGRESS booking status support
+- Env vars needed on Vercel: DAILY_API_KEY
+- prisma db push needed for new columns

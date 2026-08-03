@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { triggerAdminNewApplicationEmail } from '@/lib/email-triggers';
 
 // POST /api/interviewers/apply — submit interviewer application (multipart form)
 export async function POST(req: NextRequest) {
@@ -155,6 +156,10 @@ export async function POST(req: NextRequest) {
       });
 
       console.log('[Interviewer Apply] Saved to DB:', application.id);
+
+      // Notify admin of new application (fire and forget)
+      triggerAdminNewApplicationEmail(application.id).catch(() => {});
+
       return NextResponse.json({
         success: true,
         message: {

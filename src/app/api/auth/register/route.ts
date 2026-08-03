@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp, sanitizeObject, auditLog } from '@/lib/security';
+import { triggerWelcomeEmail } from '@/lib/email-triggers';
 
 const registerSchema = z.object({
   accountType: z.enum(['INDIVIDUAL', 'B2B']),
@@ -98,6 +99,10 @@ export async function POST(req: NextRequest) {
         sessionsLeft: 1, // Free trial session
       },
     });
+
+    // Send welcome email (fire and forget)
+    triggerWelcomeEmail(user.id, 'ar').catch(() => {});
+    triggerWelcomeEmail(user.id, 'en').catch(() => {});
 
     return NextResponse.json({
       id: user.id,

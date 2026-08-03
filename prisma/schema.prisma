@@ -385,6 +385,22 @@ model AdminLog {
   @@index([action])
 }
 
+// ─── Email Queue (Scheduled Emails) ───
+model EmailQueue {
+  id        String    @id @default(cuid())
+  to        String
+  subject   String
+  html      String    @db.Text
+  from      String?
+  sendAt    DateTime
+  sent      Boolean   @default(false)
+  sentAt    DateTime?
+  error     String?   @db.Text
+  createdAt DateTime  @default(now())
+
+  @@index([sent, sendAt])
+}
+
 // ─── Candidate Pool (Opt-In) ───
 model CandidatePool {
   id              String    @id @default(uuid())

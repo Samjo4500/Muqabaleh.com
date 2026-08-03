@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { scheduleBookingEmails } from '@/lib/email-triggers';
 
 const schema = z.object({
   bookingId: z.string().uuid(),
@@ -120,6 +121,9 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // Send booking confirmation + schedule delayed emails (fire and forget)
+    scheduleBookingEmails(bookingId);
 
     return NextResponse.json({
       success: true,

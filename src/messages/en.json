@@ -1900,5 +1900,150 @@
     "lowScoreMsg": "We'll review your profile and activate it soon.",
     "savedMsg": "Your profile is now visible to employers!",
     "title": "Join the Talent Database"
+  },
+  "emails": {
+    "shared": {
+      "goToDashboard": "Go to Dashboard",
+      "joinCall": "Join Call",
+      "footerRights": "All rights reserved.",
+      "viewPlans": "View Plans"
+    },
+    "welcome": {
+      "subject": "Welcome to Muqabaleh — Your Interview Journey Starts Now",
+      "greeting": "Welcome {userName}! 👋",
+      "body": "Welcome to Muqabaleh. We're here to help you ace your upcoming interviews and land your dream job.",
+      "featuresTitle": "What you can do:",
+      "feature1Title": "🤖 Free AI Interview",
+      "feature1Desc": "Start an instant mock interview with a smart AI interviewer",
+      "feature2Title": "⚡ Upgrade to Pro",
+      "feature2Desc": "Get unlimited interviews and advanced analytics",
+      "feature3Title": "👤 Book a Human Interviewer",
+      "feature3Desc": "Practice with real industry experts in your field",
+      "ctaText": "Get started now and prepare to succeed!"
+    },
+    "paymentReceipt": {
+      "subject": "Receipt for Your Muqabaleh Purchase",
+      "heading": "Thank you, {userName}! 🎉",
+      "body": "Your purchase has been processed successfully. Here is your receipt:",
+      "planLabel": "Plan",
+      "amountLabel": "Amount",
+      "dateLabel": "Date",
+      "transactionIdLabel": "Transaction ID",
+      "thankYou": "Thank you for choosing Muqabaleh. We wish you the best in your upcoming interviews!"
+    },
+    "bookingConfirmation": {
+      "subject": "Interview Confirmed — {interviewerName} on {date}",
+      "heading": "Your Booking is Confirmed! ✅",
+      "body": "{userName}, your interview has been confirmed. Here are the details:",
+      "interviewerRole": "Interviewer",
+      "dateLabel": "📅 Date",
+      "timeLabel": "🕐 Time",
+      "durationLabel": "⏱ Duration",
+      "amountLabel": "💰 Amount",
+      "cancelPolicy": "Cancel up to 24h before for full refund"
+    },
+    "sessionReminder": {
+      "subject": "Reminder: Your Interview is Tomorrow at {time}",
+      "heading": "Interview Reminder ⏰",
+      "body": "{userName}, your interview with {interviewerName} is tomorrow.",
+      "interviewerLabel": "👤 Interviewer",
+      "dateLabel": "📅 Date",
+      "timeLabel": "🕐 Time",
+      "tipsTitle": "💡 Quick tips to prepare:",
+      "tip1": "Test your camera/microphone",
+      "tip2": "Review your resume",
+      "tip3": "Prepare 2-3 questions for the interviewer"
+    },
+    "sessionStartingSoon": {
+      "subject": "Your Interview Starts in 15 Minutes — Join Now",
+      "heading": "{userName}, Your Interview is About to Start! 🚨",
+      "body": "Your interview begins in 15 minutes. Make sure you're ready and join now.",
+      "urgentBadge": "Starting Soon!",
+      "interviewerLabel": "👤 Interviewer",
+      "timeLabel": "🕐 Time",
+      "tip": "💡 Make sure your internet is stable and test your camera & mic before joining"
+    },
+    "reviewRequest": {
+      "subject": "How Was Your Interview with {interviewerName}?",
+      "heading": "Thank You, {userName}! 🎉",
+      "body": "You've completed your interview with {interviewerName}. We'd love to hear your feedback to help us improve your experience.",
+      "ratingTitle": "How would you rate your experience?",
+      "ratingScale": "1 — Poor \u00a0\u00a0\u00a0 5 — Excellent",
+      "ctaText": "Help us improve — share your rating and comments!",
+      "reviewButton": "Leave a Review",
+      "thankYouNote": "The Muqabaleh team wishes you the best in your upcoming interviews!"
+    },
+    "passwordReset": {
+      "subject": "Reset Your Muqabaleh Password",
+      "heading": "{userName}, Reset Your Password 🔐",
+      "body": "We received a request to reset your password for your account. Click the button below to set a new password.",
+      "resetButton": "Reset Password",
+      "fallbackLink": "If the button doesn't work, copy this link:",
+      "securityTitle": "Security Notice",
+      "securityBody": "This link expires in 1 hour. If you didn't request this, ignore this email.",
+      "footerNote": "Didn't reset your password? You can safely ignore this email — your password won't change."
+    },
+    "interviewerApplicationReceived": {
+      "subject": "We Received Your Interviewer Application",
+      "heading": "Thank you for applying 🙏",
+      "body": "{interviewerName}, we've received your application to join Muqabaleh as an interviewer.",
+      "reviewNote": "Our team will review your application within 24-48 hours. We verify the experience and certifications you listed to maintain platform quality.",
+      "nextStep": "We'll email you once your application is approved, with instructions to activate your account and start accepting bookings.",
+      "supportNote": "If you have any questions, contact our support team"
+    },
+    "interviewerApproved": {
+      "subject": "You're Approved! Start Earning on Muqabaleh",
+      "heading": "Congratulations! 🎉",
+      "body": "{interviewerName}, your interviewer profile is now live on Muqabaleh.",
+      "stepsIntro": "To start accepting bookings and earning, follow these steps:",
+      "step1": "Set your availability and pricing from the dashboard",
+      "step2": "Add your payment details (PayPal) to receive earnings",
+      "step3": "Start accepting bookings and conducting interviews",
+      "earningsNote": "You earn 80% of every session fee — we handle the rest."
+    },
+    "interviewerNewBooking": {
+      "subject": "New Session Booked — {date} with {userName}",
+      "heading": "New Session Booked! 📅",
+      "body": "{interviewerName}, a new interview session has been booked with you.",
+      "candidateLabel": "👤 Candidate",
+      "dateLabel": "📅 Date",
+      "timeLabel": "🕐 Time",
+      "durationLabel": "⏱ Duration",
+      "earningsLabel": "💰 Your Earnings (80%)",
+      "reminder": "Please join at least 5 minutes before the session. The meeting link remains valid until the session ends."
+    },
+    "interviewerPayoutSent": {
+      "subject": "Your Payout of {amount} Has Been Sent",
+      "heading": "Payout Sent ✅",
+      "body": "{interviewerName}, your payout has been successfully transferred to your PayPal account.",
+      "amountSentLabel": "Amount Sent",
+      "onDate": "on",
+      "amountLabel": "💰 Amount",
+      "transferDateLabel": "📅 Transfer Date",
+      "earningsPeriodLabel": "📅 Earnings Period",
+      "paypalRefLabel": "🔢 PayPal Reference",
+      "deliveryNote": "The funds may take 1-3 business days to appear in your PayPal account."
+    },
+    "adminNewApplication": {
+      "subject": "Action Required: New Interviewer Application from {interviewerName}",
+      "heading": "New Interviewer Application 🔔",
+      "body": "A new interviewer application has been submitted and requires your review.",
+      "nameLabel": "👤 Name",
+      "emailLabel": "✉️ Email",
+      "experienceLabel": "📅 Years of Experience",
+      "proposedPriceLabel": "💰 Proposed Price",
+      "reviewButton": "Review in Admin Panel"
+    },
+    "adminDailySummary": {
+      "subject": "Muqabaleh Daily Summary — {date}",
+      "heading": "Daily Summary 📊",
+      "body": "Here's an overview of platform activity for {date}.",
+      "totalRevenueLabel": "💰 Total Revenue",
+      "newSignupsLabel": "🆕 New Signups",
+      "newBookingsLabel": "📅 New Bookings",
+      "pendingApplicationsLabel": "📋 Pending Applications",
+      "pendingPayoutsLabel": "⏳ Pending Payouts",
+      "openDashboardButton": "Open Admin Dashboard"
+    }
   }
 }

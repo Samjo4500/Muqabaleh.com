@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
+import { triggerPasswordResetEmail } from '@/lib/email-triggers';
+import { APP_URL } from '@/lib/email';
 
 const forgotSchema = z.object({
   email: z.string().email(),
@@ -43,8 +45,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // TODO: Send email with reset link (Phase G)
-    // For now, the token is stored and can be used via a future reset endpoint
+    // Send password reset email
+    const resetLink = `${APP_URL}/auth/reset-password?token=${token}`;
+    triggerPasswordResetEmail(user.email, user.name || 'User', resetLink, 'ar').catch(() => {});
+    triggerPasswordResetEmail(user.email, user.name || 'User', resetLink, 'en').catch(() => {});
 
     return NextResponse.json({ message: 'تم إرسال رابط إعادة التعيين إن وُجد الحساب' });
   } catch (e) {

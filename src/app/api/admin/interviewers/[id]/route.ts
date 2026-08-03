@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdmin } from '../../_lib';
+import { triggerInterviewerApprovedEmail } from '@/lib/email-triggers';
 
 export async function PATCH(
   req: NextRequest,
@@ -31,6 +32,12 @@ export async function PATCH(
       metadata: JSON.stringify({ from: 'PENDING', to: status }),
     },
   });
+
+  // Send approval email if status changed to ACTIVE
+  if (status === 'ACTIVE') {
+    triggerInterviewerApprovedEmail(id, 'ar').catch(() => {});
+    triggerInterviewerApprovedEmail(id, 'en').catch(() => {});
+  }
 
   return NextResponse.json(interviewer);
 }

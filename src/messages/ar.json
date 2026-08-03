@@ -1900,5 +1900,150 @@
     "lowScoreMsg": "سنراجع ملفك ونفعّله قريباً.",
     "savedMsg": "ملفك الآن مرئي لأصحاب العمل!",
     "title": "انضم لقاعدة المواهب"
+  },
+  "emails": {
+    "shared": {
+      "goToDashboard": "الانتقال إلى لوحة التحكم",
+      "joinCall": "انضمام إلى المكالمة",
+      "footerRights": "جميع الحقوق محفوظة.",
+      "viewPlans": "عرض الخطط"
+    },
+    "welcome": {
+      "subject": "مرحباً بك في مقابلة — رحلتك تبدأ الآن",
+      "greeting": "مرحباً {userName}! 👋",
+      "body": "أهلاً بك في مقابلة. نحن هنا لمساعدتك في الاستعداد لمقابلاتك القادمة والحصول على وظيفة أحلامك.",
+      "featuresTitle": "ما يمكنك فعله:",
+      "feature1Title": "🤖 مقابلة مجانية مع الذكاء الاصطناعي",
+      "feature1Desc": "ابدأ بمقابلة تجريبية فورية مع محاور ذكي",
+      "feature2Title": "⚡ الترقية إلى Pro",
+      "feature2Desc": "احصل على مقابلات غير محدودة وتحليلات متقدمة",
+      "feature3Title": "👤 احجز محاور بشري",
+      "feature3Desc": "تدرب مع خبراء حقيقيين في مجالك",
+      "ctaText": "ابدأ الآن واستعد للنجاح!"
+    },
+    "paymentReceipt": {
+      "subject": "إيصال شرائك من مقابلة",
+      "heading": "شكراً لك، {userName}! 🎉",
+      "body": "تمت معالجة عملية الشراء بنجاح. إليك إيصالك:",
+      "planLabel": "الخطة",
+      "amountLabel": "المبلغ",
+      "dateLabel": "التاريخ",
+      "transactionIdLabel": "رقم العملية",
+      "thankYou": "شكراً لاختيارك مقابلة. نتمنى لك التوفيق في مقابلاتك القادمة!"
+    },
+    "bookingConfirmation": {
+      "subject": "تم تأكيد المقابلة — {interviewerName} بتاريخ {date}",
+      "heading": "تم تأكيد حجزك! ✅",
+      "body": "{userName}، تم تأكيد مقابلتك بنجاح. إليك التفاصيل:",
+      "interviewerRole": "المحاور",
+      "dateLabel": "📅 التاريخ",
+      "timeLabel": "🕐 الوقت",
+      "durationLabel": "⏱ المدة",
+      "amountLabel": "💰 المبلغ",
+      "cancelPolicy": "يمكنك الإلغاء قبل 24 ساعة لاسترداد المبلغ كاملاً"
+    },
+    "sessionReminder": {
+      "subject": "تذكير: مقابلتك غداً في {time}",
+      "heading": "تذكير بمقابلتك ⏰",
+      "body": "{userName}، مقابلتك مع {interviewerName} غداً.",
+      "interviewerLabel": "👤 المحاور",
+      "dateLabel": "📅 التاريخ",
+      "timeLabel": "🕐 الوقت",
+      "tipsTitle": "💡 نصائح سريعة للتحضير:",
+      "tip1": "اختبر كاميرا وميكروفونك",
+      "tip2": "راجع سيرتك الذاتية",
+      "tip3": "جهّز 2-3 أسئلة للمحاور"
+    },
+    "sessionStartingSoon": {
+      "subject": "مقابلتك تبدأ خلال 15 دقيقة — انضم الآن",
+      "heading": "{userName}، مقابلتك على وشك البدء! 🚨",
+      "body": "تبدأ مقابلتك خلال 15 دقيقة. تأكد من جاهزيتك وانضم الآن.",
+      "urgentBadge": "يبدأ قريباً!",
+      "interviewerLabel": "👤 المحاور",
+      "timeLabel": "🕐 الوقت",
+      "tip": "💡 تأكد من اتصالك بالإنترنت واختبار كاميرا وميكروفونك قبل الانضمام"
+    },
+    "reviewRequest": {
+      "subject": "كيف كانت مقابلتك مع {interviewerName}؟",
+      "heading": "شكراً لك، {userName}! 🎉",
+      "body": "لقد أكملت مقابلتك مع {interviewerName}. يسعدنا أن نعرف رأيك لمساعدتنا في تحسين تجربتك.",
+      "ratingTitle": "كيف تقيم تجربتك؟",
+      "ratingScale": "1 — ضعيف \u00a0\u00a0\u00a0 5 — ممتاز",
+      "ctaText": "ساعدنا في التحسن — شاركنا تقييمك وتعليقاتك!",
+      "reviewButton": "اترك تقييم",
+      "thankYouNote": "فريق مقابلة يتمنى لك التوفيق في مقابلاتك القادمة!"
+    },
+    "passwordReset": {
+      "subject": "إعادة تعيين كلمة المرور",
+      "heading": "{userName}، إعادة تعيين كلمة المرور 🔐",
+      "body": "استلمنا طلباً لإعادة تعيين كلمة المرور لحسابك. اضغط على الزر أدناه لتعيين كلمة مرور جديدة.",
+      "resetButton": "إعادة تعيين كلمة المرور",
+      "fallbackLink": "إذا لم يعمل الزر، انسخ الرابط التالي:",
+      "securityTitle": "تنبيه أمني",
+      "securityBody": "هذا الرابط ينتهي خلال ساعة واحدة. إذا لم تطلب هذا، تجاهل هذا البريد.",
+      "footerNote": "لم تقم بإعادة تعيين كلمة المرور؟ يمكنك تجاهل هذا البريد بأمان — كلمة مرورك لن تتغير."
+    },
+    "interviewerApplicationReceived": {
+      "subject": "استلمنا طلبك للانضمام كمحاور",
+      "heading": "شكراً لتقديمك 🙏",
+      "body": "{interviewerName}، استلمنا طلبك للانضمام كمقابل على منصة مقابلة.",
+      "reviewNote": "سيقوم فريقنا بمراجعة طلبك خلال 24-48 ساعة. نتحقق من الخبرات والشهادات المذكورة لضمان جودة المنصة.",
+      "nextStep": "سنتواصل معك عبر البريد الإلكتروني فور الموافقة على طلبك، مع تعليمات لتفعيل حسابك والبدء بقبول الحجوزات.",
+      "supportNote": "إذا كان لديك أي أسئلة، تواصل مع فريق الدعم"
+    },
+    "interviewerApproved": {
+      "subject": "تمت الموافقة! ابدأ بالربح من مقابلة",
+      "heading": "مبروك! 🎉",
+      "body": "{interviewerName}، ملفك كمقابل أصبح متاحاً الآن على منصة مقابلة.",
+      "stepsIntro": "للبدء بقبول الحجوزات والربح، اتبع هذه الخطوات:",
+      "step1": "حدد أوقات توافرك وأسعارك من لوحة التحكم",
+      "step2": "أضف معلومات الدفع (PayPal) لاستلام أرباحك",
+      "step3": "ابدأ بقبول الحجوزات وإجراء المقابلات",
+      "earningsNote": "تحصل على 80% من رسوم كل جلسة — نحن نتكفل بالباقي."
+    },
+    "interviewerNewBooking": {
+      "subject": "حجز جديد — {date} مع {userName}",
+      "heading": "حجز جديد! 📅",
+      "body": "{interviewerName}، تم حجز جلسة مقابلة جديدة معك.",
+      "candidateLabel": "👤 المرشح",
+      "dateLabel": "📅 التاريخ",
+      "timeLabel": "🕐 الوقت",
+      "durationLabel": "⏱ المدة",
+      "earningsLabel": "💰 أرباحك (80%)",
+      "reminder": "تأكد من الانضمام قبل موعد الجلسة بـ 5 دقائق على الأقل. رابط الاجتماع صالح حتى انتهاء الجلسة."
+    },
+    "interviewerPayoutSent": {
+      "subject": "تم إرسال مستحقاتك بقيمة {amount}",
+      "heading": "تم إرسال الدفعة ✅",
+      "body": "{interviewerName}، تم تحويل مستحقاتك بنجاح إلى حساب PayPal الخاص بك.",
+      "amountSentLabel": "المبلغ المُرسل",
+      "onDate": "في",
+      "amountLabel": "💰 المبلغ",
+      "transferDateLabel": "📅 تاريخ التحويل",
+      "earningsPeriodLabel": "📅 فترة الأرباح",
+      "paypalRefLabel": "🔢 رقم العملية (PayPal)",
+      "deliveryNote": "قد يستغرق وصول المبلغ إلى حسابك من 1 إلى 3 أيام عمل حسب PayPal."
+    },
+    "adminNewApplication": {
+      "subject": "مطلوب إجراء: طلب انضمام محاور جديد من {interviewerName}",
+      "heading": "طلب انضمام محاور جديد 🔔",
+      "body": "تم تقديم طلب انضمام محاور جديد ويتطلب مراجعتك.",
+      "nameLabel": "👤 الاسم",
+      "emailLabel": "✉️ البريد الإلكتروني",
+      "experienceLabel": "📅 سنوات الخبرة",
+      "proposedPriceLabel": "💰 السعر المقترح",
+      "reviewButton": "مراجعة في لوحة الإدارة"
+    },
+    "adminDailySummary": {
+      "subject": "ملخص مقابلة اليومي — {date}",
+      "heading": "الملخص اليومي 📊",
+      "body": "إليك نظرة عامة على نشاط المنصة ليوم {date}.",
+      "totalRevenueLabel": "💰 إجمالي الإيرادات",
+      "newSignupsLabel": "🆕 التسجيلات الجديدة",
+      "newBookingsLabel": "📅 الحجوزات الجديدة",
+      "pendingApplicationsLabel": "📋 الطلبات المعلقة",
+      "pendingPayoutsLabel": "⏳ المدفوعات المعلقة",
+      "openDashboardButton": "فتح لوحة الإدارة"
+    }
   }
 }

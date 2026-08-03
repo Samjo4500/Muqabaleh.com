@@ -30,19 +30,19 @@ export async function POST(req: NextRequest) {
 
     const { industry, experience, type, interviewerGender, language } = parsed.data;
 
-    // Check sessions left — PREMIUM users always have access
+    // Check sessions left — PRO and UNLIMITED users have access
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.json({ error: { ar: 'المستخدم غير موجود', en: 'User not found' } }, { status: 404 });
     }
 
-    const isPremium = user.subscriptionTier === 'PREMIUM';
-    if (!isPremium && user.sessionsLeft < 1) {
+    const hasAccess = user.subscriptionTier === 'PRO' || user.subscriptionTier === 'UNLIMITED';
+    if (!hasAccess && user.sessionsLeft < 1) {
       return NextResponse.json(
         {
           error: {
-            ar: 'لقد استخدمت مقابلتك المجانية. اشترك بـ $19/شهر للحصول على جلسات غير محدودة.',
-            en: 'You\'ve used your free interview. Subscribe for $19/month for unlimited sessions.',
+            ar: 'لقد استخدمت مقابلتك المجانية. اشترك في خطة Pro أو Unlimited.',
+            en: "You've used your free interview. Subscribe to Pro or Unlimited plan.",
           },
           code: 'FREE_LIMIT_REACHED',
         },

@@ -508,14 +508,16 @@ function InterviewersSection({ t, isRTL }: { t: ReturnType<typeof useTranslation
 /*  9. PRICING                                                          */
 /* ================================================================== */
 
-const PRICING_PLANS = [  {
+const PRICING_PLANS = [
+  {
     titleKey: 'freeTitle',
     priceKey: 'freePrice',
     badge: null,
     subKey: 'freeSub',
     features: ['freeFeature', 'freeCriteria', 'feature10Questions', 'featureNoCertificate'] as const,
     popular: false,
-    planSlug: 'free',
+    link: '/demo',
+    linkLabel: 'startFreeTrial' as const,
   },
   {
     titleKey: 'proTitle',
@@ -524,7 +526,8 @@ const PRICING_PLANS = [  {
     subKey: 'proSub',
     features: ['proFeature', 'proCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin'] as const,
     popular: true,
-    planSlug: 'pro',
+    link: '/app/packages?checkout=pro',
+    linkLabel: 'choosePlan' as const,
   },
   {
     titleKey: 'unlimitedTitle',
@@ -533,11 +536,14 @@ const PRICING_PLANS = [  {
     subKey: 'unlimitedSub',
     features: ['unlimitedFeature', 'unlimitedCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin', 'featurePrioritySupport'] as const,
     popular: false,
-    planSlug: 'unlimited',
+    link: '/app/packages?checkout=unlimited',
+    linkLabel: 'choosePlan' as const,
   },
 ] as const;
 
 function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
+  const locale = useLocale();
+
   return (
     <section id="pricing" className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -577,8 +583,8 @@ function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
                 ))}
               </ul>
 
-              <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">
-                {t('choosePlan')}
+              <Link href={`/${locale}${plan.link}`} className="btn-gold w-full text-center text-sm">
+                {t(plan.linkLabel)}
               </Link>
             </GlowCard>
           ))}

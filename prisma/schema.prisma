@@ -307,9 +307,11 @@ model InterviewerAvailability {
 
 model HumanBooking {
   id                String   @id @default(uuid())
+  userId            String?
   candidateName     String
   candidateEmail    String
   interviewerId     String
+  paypalOrderId     String?  @unique
   status            String   @default("PENDING")
   scheduledAt       DateTime
   durationMinutes   Int      @default(30)
@@ -332,6 +334,7 @@ model HumanBooking {
   interviewer   Interviewer @relation("InterviewerBookings", fields: [interviewerId], references: [id])
   review        InterviewerReview?
 
+  @@index([userId])
   @@index([interviewerId])
   @@index([status])
 }

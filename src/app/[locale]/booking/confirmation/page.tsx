@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -20,16 +20,55 @@ import { Footer } from '@/components/layout/footer';
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-interface InterviewerData {
+interface BookingRealData {
   id: string;
-  fullName: string;
-  fullNameAr: string;
-  initials: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  meetingLink: string | null;
+  priceTotal: number;
+  status: string;
+  interviewer: {
+    id: string;
+    fullName: string;
+    fullNameAr: string;
+    priceTier: string;
+    hourlyRate: number;
+    rating: number;
+    totalInterviews: number;
+    languages: string | null;
+    specialties: string | null;
+  };
 }
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
+
+function formatDateFull(isoStr: string, locale: string): string {
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return isoStr;
+  }
+}
+
+function formatTimeFromISO(isoStr: string, locale: string): string {
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoStr;
+  }
+}
 
 function formatDate(dateStr: string, locale: string): string {
   try {
@@ -59,14 +98,24 @@ function formatTime(time: string, locale: string): string {
   }
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 function generateICS(
   title: string,
   dateStr: string,
   timeStr: string,
   meetingUrl: string,
+  durationMinutes: number,
 ): string {
   const start = parseToUTC(dateStr, timeStr);
-  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
   const fmt = (d: Date) =>
     d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
@@ -91,6 +140,10 @@ function generateICS(
 }
 
 function parseToUTC(dateStr: string, timeStr: string): Date {
+  // If dateStr is ISO format (from real booking), parse directly
+  if (dateStr.includes('T')) {
+    return new Date(dateStr);
+  }
   const [y, mo, d] = dateStr.split('-').map(Number);
   const [h, m] = timeStr.split(':').map(Number);
   return new Date(Date.UTC(y, mo - 1, d, h, m, 0));
@@ -117,45 +170,79 @@ function BookingConfirmationContent() {
   const locale = useLocale();
   const searchParams = useSearchParams();
 
+  const bookingId = searchParams.get('bookingId') || '';
+  // Legacy URL params for fallback
   const interviewerId = searchParams.get('interviewerId') || '';
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
-  const meetingId = searchParams.get('meetingId') || Math.random().toString(36).substring(2, 10);
+  const meetingId = searchParams.get('meetingId') || '';
 
   /* ── State ── */
-  const [interviewer, setInterviewer] = useState<InterviewerData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState<BookingRealData | null>(null);
+  const [loading, setLoading] = useState(!!bookingId);
+  const [fetchError, setFetchError] = useState(false);
 
-  /* ── Fetch interviewer ── */
+  /* ── Fetch booking from API if bookingId exists ── */
   useEffect(() => {
-    if (!interviewerId) {
+    if (!bookingId) {
       setLoading(false);
       return;
     }
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setFetchError(false);
       try {
-        const res = await fetch(`/api/interviewers/${interviewerId}`);
+        const res = await fetch(`/api/bookings/${bookingId}`);
         if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        if (!cancelled) setInterviewer(data.interviewer);
+        const data = (await res.json()) as { booking?: BookingRealData };
+        if (!cancelled && data.booking) {
+          setBooking(data.booking);
+        }
       } catch {
-        if (!cancelled) setInterviewer(null);
+        if (!cancelled) setFetchError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [interviewerId]);
+  }, [bookingId]);
 
-  /* ── Derived ── */
-  const interviewerName = locale === 'ar' && interviewer?.fullNameAr
-    ? interviewer.fullNameAr
-    : interviewer?.fullName || '';
+  /* ── Derived from real booking or URL params ── */
+  const hasRealData = !!booking;
 
-  const meetingUrl = `https://meet.jit.si/muqabaleh-${meetingId}`;
+  const interviewerName = hasRealData
+    ? (locale === 'ar' && booking.interviewer.fullNameAr
+        ? booking.interviewer.fullNameAr
+        : booking.interviewer.fullName)
+    : interviewerId;
+
+  const initials = hasRealData
+    ? getInitials(locale === 'ar' && booking.interviewer.fullNameAr
+        ? booking.interviewer.fullNameAr
+        : booking.interviewer.fullName)
+    : '??';
+
+  // For real booking, meeting link comes from the booking record
+  const meetingUrl = hasRealData
+    ? (booking.meetingLink || `https://meet.jit.si/muqabaleh-${booking.id.slice(0, 8)}`)
+    : (meetingId ? `https://meet.jit.si/muqabaleh-${meetingId}` : '');
+
+  // For real booking, format date/time from ISO scheduledAt
+  const displayDate = hasRealData
+    ? formatDateFull(booking.scheduledAt, locale)
+    : formatDate(date, locale);
+
+  const displayTime = hasRealData
+    ? formatTimeFromISO(booking.scheduledAt, locale)
+    : formatTime(time, locale);
+
+  const durationMinutes = hasRealData ? booking.durationMinutes : 30;
+
+  // For ICS generation
+  const icsDateStr = hasRealData ? booking.scheduledAt : date;
+  const icsTimeStr = hasRealData ? booking.scheduledAt : time;
 
   /* ── Handlers ── */
   const handleCopyLink = async () => {
@@ -174,15 +261,17 @@ function BookingConfirmationContent() {
     }
   };
 
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = useCallback(() => {
     const icsContent = generateICS(
       `Muqabaleh Interview with ${interviewerName || 'Interviewer'}`,
-      date,
-      time,
+      icsDateStr,
+      icsTimeStr,
       meetingUrl,
+      durationMinutes,
     );
-    downloadICS(icsContent, `muqabaleh-${meetingId}.ics`);
-  };
+    const id = bookingId || meetingId || 'booking';
+    downloadICS(icsContent, `muqabaleh-${id.slice(0, 8)}.ics`);
+  }, [interviewerName, icsDateStr, icsTimeStr, meetingUrl, durationMinutes, bookingId, meetingId]);
 
   /* ── Render ── */
   return (
@@ -212,18 +301,35 @@ function BookingConfirmationContent() {
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-[var(--gold)]" />
               </div>
+            ) : fetchError ? (
+              <div className="py-8 text-center">
+                <p className="text-gray-400">
+                  {locale === 'ar'
+                    ? 'لم يتم العثور على بيانات الحجز'
+                    : 'Booking data not found'}
+                </p>
+              </div>
             ) : (
               <div className="space-y-5">
                 {/* Interviewer row */}
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
                     <span className="text-xs font-bold text-[var(--gold)]">
-                      {interviewer?.initials || '??'}
+                      {initials}
                     </span>
                   </div>
-                  <p className="font-semibold text-white">
-                    {interviewerName || interviewerId}
-                  </p>
+                  <div>
+                    <p className="font-semibold text-white">
+                      {interviewerName ||
+                        (locale === 'ar' ? 'محاور' : 'Interviewer')}
+                    </p>
+                    {hasRealData && booking.interviewer.rating > 0 && (
+                      <p className="text-xs text-gray-400">
+                        {locale === 'ar' ? 'تقييم' : 'Rating'}:{' '}
+                        {booking.interviewer.rating.toFixed(1)} / 5.0
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="border-t border-white/5" />
@@ -232,9 +338,27 @@ function BookingConfirmationContent() {
                 <div>
                   <p className="text-sm text-gray-400">{t('selectedSlot')}</p>
                   <p className="mt-1 text-white">
-                    {formatDate(date, locale)} · {formatTime(time, locale)}
+                    {displayDate} · {displayTime}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {durationMinutes} {t('minutes')}
                   </p>
                 </div>
+
+                {/* Price - only show for real booking data */}
+                {hasRealData && (
+                  <>
+                    <div className="border-t border-white/5" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-400">
+                        {locale === 'ar' ? 'السعر المدفوع' : 'Amount Paid'}
+                      </span>
+                      <span className="text-lg font-bold text-[var(--gold)]">
+                        ${(booking.priceTotal / 100).toFixed(2)} USD
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <div className="border-t border-white/5" />
 

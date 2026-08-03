@@ -1827,3 +1827,187 @@ Stage Summary:
 - Prisma client was stale (schema had Interviewer model but generated client was outdated)
 - book/[interviewerId]/page.tsx needed Suspense wrapper for useSearchParams()
 - Build passes cleanly with 0 TypeScript errors
+---
+Task ID: 3-a
+Agent: api-builder
+Task: Build all marketplace API routes
+
+Work Log:
+- Created 10 API route files for the Human Interview Marketplace
+- `/api/bookings` (POST + GET): Create bookings with price calculation (20% platform fee), list user bookings with UPCOMING/PAST/ALL filtering
+- `/api/bookings/[id]` (GET + PATCH): Single booking with interviewer info, status transitions (PENDING→CONFIRMED, CONFIRMED→COMPLETED/CANCELLED, PENDING→CANCELLED), 24h cancellation rule, auto-increment interviewer stats on completion
+- `/api/reviews` (POST): Create review for completed bookings with duplicate prevention, auto-recalculate interviewer average rating
+- `/api/interviewer/me` (GET): Interviewer own profile with availability and computed stats
+- `/api/interviewer/availability` (GET + PUT): Read/replace availability slots using DB transaction (delete all + createMany)
+- `/api/interviewer/bookings` (GET): List interviewer's bookings with UPCOMING/PAST/ALL filtering
+- `/api/interviewer/earnings` (GET): Total earnings, pending payout calculation (completed bookings minus paid/pending payout records), recent payout history
+- `/api/interviewer/profile` (PUT): Update own profile fields (bio, specialties, industries, languages, hourlyRate ≥ $19.99, payoutEmail) with JSON serialization for array fields
+- `/api/paypal/create-booking-order` (POST): Create PayPal order for pending booking, price in dollars (cents/100), same SDK pattern as existing create-order
+- `/api/paypal/capture-booking-order` (POST): Capture PayPal payment, verify amount matches booking, update status→CONFIRMED, save paypalOrderId, generate Jitsi meeting link
+- All routes use `getServerSession(authOptions)` for auth, `db` from `@/lib/db`, zod for input validation
+- All error responses use bilingual format `{ error: { ar, en } }`
+- Lint passes with 0 errors
+
+Stage Summary:
+- All 10 API routes created and linting clean
+- Full CRUD coverage for bookings, reviews, interviewer self-service
+- PayPal integration for booking payments (create + capture)
+- Price calculations: platformFee=20%, interviewerPayout=80%, minimum hourlyRate=$19.99 (1999 cents)
+---
+Task ID: 3-b
+Agent: booking-flow
+Task: Wire booking flow end-to-end
+
+Work Log:
+- Read worklog.md and all relevant source files (interviewer profile, booking page, confirmation page, PayPalSubscriptionButton, all 4 API routes)
+- **Task 1: Wired Book Slot button on interviewer profile page** (`src/app/[locale]/interviewer/[id]/page.tsx`)
+  - Added `useRouter`, `useSession` imports
+  - Created `handleBookSlot` callback that parses selectedSlot key (format `YYYY-MM-DD-HH:mm`) into date, startTime, endTime, duration
+  - If not authenticated, redirects to `/${locale}/auth/signin?callbackUrl=...` 
+  - If authenticated, navigates to `/${locale}/book/${id}?date=...&startTime=...&endTime=...&duration=...`
+  - Added `onClick={handleBookSlot}` to the existing Book Slot button
+- **Task 4: Created BookingPayPalButton component** (`src/components/BookingPayPalButton.tsx`)
+  - Props: `{ bookingId, amount, onSuccess, onError }`
+  - Uses `intent: 'capture'` (one-time payment, not subscription)
+  - `createOrder` calls `/api/paypal/create-booking-order` with `{ bookingId }`
+  - `onApprove` calls `/api/paypal/capture-booking-order` with `{ bookingId, orderId }`
+  - Shows loading, capturing, error, and unavailable states
+  - Displays price as `$XX.XX USD` below the button
+  - Follows existing design system (gold accent, dark theme, same pattern as PayPalSubscriptionButton)
+- **Task 2: Wired real PayPal payment in booking page** (`src/app/[locale]/book/[interviewerId]/page.tsx`)
+  - Changed URL params to read `date`, `startTime`, `endTime`, `duration` (with `time` fallback for backwards compat)
+  - Added booking creation flow: `handleCreateBooking` POSTs to `/api/bookings` with `{ interviewerId, scheduledAt, durationMinutes, candidateNote }`
+  - Gets back booking with `id` and `priceTotal`
+  - Displays actual price from booking (`priceTotal / 100`) formatted as USD
+  - Shows note/textarea and terms checkbox only before booking is created
+  - After booking creation, hides form and renders `BookingPayPalButton` with the booking ID and amount
+  - On PayPal success, redirects to `/booking/confirmation?bookingId=${booking.id}`
+- **Task 3: Wired booking confirmation page** (`src/app/[locale]/booking/confirmation/page.tsx`)
+  - If `bookingId` URL param exists, fetches real booking from `/api/bookings/[id]`
+  - Shows real interviewer name (with Arabic fallback), initials, rating, price paid, meeting link from booking record
+  - Falls back to legacy URL params (`interviewerId`, `date`, `time`, `meetingId`) when no `bookingId`
+  - Uses `booking.meetingLink` (set by capture-booking-order API) for the Jitsi URL
+  - ICS calendar generation uses real `durationMinutes` from booking
+  - Added error state for failed fetch
+  - Removed old interviewer-only fetch, now fetches complete booking with interviewer included
+
+Stage Summary:
+- Full booking flow wired: slot selection → auth check → booking creation → PayPal payment → confirmation
+- 1 new component: `BookingPayPalButton.tsx`
+- 3 existing files modified: interviewer profile page, booking page, confirmation page
+- All pages use `useSearchParams` wrapped in Suspense
+- Lint passes with 0 errors
+- No Prisma schema or API route changes (those were handled by agent 3-a)
+---
+Task ID: 3-c
+Agent: interviewer-dashboard
+Task: Wire interviewer dashboard pages to real APIs
+
+Work Log:
+- Read worklog.md to understand prior context (agents 3-a API builder, 3-b booking flow)
+- Read all 5 interviewer dashboard page files and all 6 API route files
+- Read Prisma schema to understand data model shapes (HumanBooking, Interviewer, InterviewerAvailability, InterviewerPayout)
+- Read all interviewerPanel translation keys in en.json/ar.json
+
+**Task 1: Overview page** (`src/app/[locale]/interviewer/page.tsx`)
+- Replaced hardcoded KPIs with real data from `/api/interviewer/me` (rating, upcomingBookings, totalEarnings, idVerified)
+- Replaced mock upcoming bookings with real data from `/api/interviewer/bookings?status=UPCOMING`
+- Added loading skeletons (animate-pulse for KPI cards and booking cards)
+- Added error state with retry button
+- Used `formatCents()` to convert stored cents to dollar display
+- Show near-session warning when meetingLink is missing and session < 2h away
+
+**Task 2: Availability page** (`src/app/[locale]/interviewer/availability/page.tsx`)
+- On mount, GET `/api/interviewer/availability` to load existing slots
+- Map API slots (dayOfWeek: number) back to i18n day keys based on locale (AR_DAYS vs EN_DAYS)
+- On save, PUT `/api/interviewer/availability` with slots array (convert day keys back to dayOfWeek numbers)
+- Show success toast on save, error toast on failure
+- Added loading state (skeletons) and saving spinner on button
+- Removed timezone column (API slots don't have timezone — matches DB schema)
+
+**Task 3: Bookings page** (`src/app/[locale]/interviewer/bookings/page.tsx`)
+- Fetch from `/api/interviewer/bookings?status=UPCOMING` and `?status=PAST`
+- Replaced mock Booking interface with real API shape (id, candidateName, scheduledAt, status, meetingLink, etc.)
+- BookingCard now shows real candidate name, formatted date/time, and status badges (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+- Wired meeting link input → PATCH `/api/bookings/[id]` with `{ meetingLink }`
+- Wired "Completed" button → PATCH with `{ status: 'COMPLETED' }`
+- Wired "Cancel" button → PATCH with `{ status: 'CANCELLED', cancelledBy: 'INTERVIEWER' }`
+- Added loading states, error handling, empty state for each tab
+- Added `statusCancelled` and `statusConfirmed` translation keys to both en.json and ar.json
+
+**Task 4: Earnings page** (`src/app/[locale]/interviewer/earnings/page.tsx`)
+- Fetch from `/api/interviewer/earnings`
+- Show real totalEarnings, pendingPayout, totalPaidOut from API
+- Replaced mock earnings table with real payout history from API
+- Each row shows: date, amount, status (PAID/PENDING), method (PayPal/Bank based on paypalTransactionId)
+- Added loading skeletons and error state with retry
+- Added `noPayouts` translation key to both locale files
+- Removed mock candidate name column (payout records don't have candidate info)
+
+**Task 5: Profile page** (`src/app/[locale]/interviewer/profile/page.tsx`)
+- On mount, GET `/api/interviewer/me` to populate form fields (bio, bioAr, specialties, languages, currentTitle, hourlyRate)
+- Created language mapping (AR↔langArabic, EN↔langEnglish, etc.) to convert between i18n keys and API codes
+- On save, PUT `/api/interviewer/profile` with bio, bioAr, specialties, languages, hourlyRate (converted to cents)
+- Show success/error toast via sonner
+- Added loading state with skeletons and saving spinner on button
+- Removed hardcoded initial values — all fields now empty until loaded from API
+- Removed yearsExperience field (not in PUT API schema)
+
+Stage Summary:
+- All 5 interviewer dashboard pages wired to real APIs
+- 5 files modified: overview, availability, bookings, earnings, profile pages
+- 2 translation keys added to both en.json and ar.json (statusCancelled, statusConfirmed, noPayouts)
+- Consistent patterns: loading skeletons, error states with retry, toast notifications
+- Lint passes with 0 errors
+- No Prisma schema, API route, or other page changes
+---
+Task ID: 3-d
+Agent: user-sessions
+Task: Build user My Sessions page + review flow
+
+Work Log:
+- Read worklog.md to understand prior context (agents 3-a API builder, 3-b booking flow, 3-c interviewer dashboard)
+- Read existing bookings page (mock data with InterviewAvatar, fake bookings array), app layout, i18n files, design system components
+- Read API routes (/api/bookings GET, /api/reviews POST, /api/bookings/[id] PATCH) to understand data shapes
+
+**Task 1: Replaced mock bookings page with real API-backed page** (`src/app/[locale]/app/bookings/page.tsx`)
+- Fetches from `/api/bookings?status=UPCOMING` and `/api/bookings?status=PAST` on mount
+- Two tabs: "Upcoming" and "Past" (replaces old 3-tab Upcoming/Completed/Cancelled)
+- Booking cards show: interviewer name + initials avatar, formatted date/time (locale-aware), duration, price (cents→dollars), status badge
+- Status badges: PENDING=amber, CONFIRMED=green, COMPLETED=blue, CANCELLED=red using Badge component
+- CONFIRMED/UPCOMING with meetingLink: "Join Meeting" gold button (external link)
+- UPCOMING/PENDING: "Cancel" button with AlertDialog confirmation → PATCH `/api/bookings/[id]` { status: 'CANCELLED', cancelledBy: 'CANDIDATE' }
+- COMPLETED without review: "Leave Review" outline button (gold) → opens ReviewDialog
+- Loading skeletons using SkeletonBlock, error state with retry button
+- Empty states using EmptyState component with appropriate icons
+- Uses `useLocale()` for date formatting and interviewer name (Arabic vs English)
+
+**Task 2: Created ReviewDialog component** (`src/components/ReviewDialog.tsx`)
+- Props: `{ bookingId, interviewerId, interviewerName, open, onClose, onSubmit }`
+- 5-star clickable rating with hover state, gold fill, scale animation
+- Optional textarea (max 500 chars) with character counter
+- Submit → POST `/api/reviews` { bookingId, rating, comment }
+- On success: toast success + call onSubmit + onClose + reset state
+- On error: toast with API error message (bilingual fallback)
+- Cancel button uses `common.cancel` i18n
+- Uses shadcn Dialog, Textarea, Button components
+- Styled with design system (bg-panel, white/10 borders, gold accents)
+
+**Task 3: Wired review dialog into bookings page**
+- ReviewDialog imported and rendered conditionally when `reviewBooking` state is set
+- Clicking "Leave Review" sets reviewBooking state (bookingId, interviewerId, interviewerName)
+- On submit, `fetchBookings()` is called to refresh both tabs
+- After reviewing, the "Leave Review" button disappears (checks `!booking.review`)
+
+**Task 4: Updated i18n keys** (both `en.json` and `ar.json`)
+- Replaced old mock data keys (b1-b6Interviewer, b1-b6Date, etc.) with real API-ready keys
+- Added: title, upcoming, past, noUpcoming, noPast, joinMeeting, cancelSession, cancelConfirm, leaveReview, reviewTitle, reviewSubtitle, reviewSubmit, reviewPlaceholder, reviewCharLimit, reviewSuccess, reviewError, duration, price, status, statusPending, statusConfirmed, statusCompleted, statusCancelled, meetingLink
+- All keys mirrored in ar.json with proper Arabic translations
+- Removed unused keys: completedTab, cancelled, cancel, cancelTitle, cancelWarning, emptyTitle, emptySub, interviewer, date, time, type, viewReport, b1-b6 mock data
+
+Stage Summary:
+- 3 files modified: bookings page (full rewrite), en.json, ar.json
+- 1 file created: ReviewDialog.tsx
+- Lint passes with 0 errors
+- No Prisma schema or API route changes
+- Review flow: Leave Review → star rating + text → POST /api/reviews → toast + refresh

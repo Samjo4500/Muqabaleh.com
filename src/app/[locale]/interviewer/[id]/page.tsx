@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Star, Play, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { useSession } from 'next-auth/react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -163,6 +164,8 @@ export default function InterviewerProfilePage() {
   const tHI = useTranslations('humanInterviews');
   const locale = useLocale();
   const params = useParams();
+  const router = useRouter();
+  const { data: session, status: authStatus } = useSession();
   const id = params.id as string;
 
   /* ── State ── */
@@ -210,6 +213,52 @@ export default function InterviewerProfilePage() {
     },
     [],
   );
+
+  /* ── Book slot handler ── */
+  const handleBookSlot = useCallback(() => {
+    if (!selectedSlot || !id) return;
+
+    // If not logged in, redirect to signin with callback
+    if (authStatus !== 'authenticated') {
+      const currentPath = window.location.pathname;
+      router.push(`/${locale}/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
+    // Parse the selectedSlot key: "YYYY-MM-DD-HH:mm"
+    const [datePart, timePart] = selectedSlot.includes('-')
+      ? (() => {
+          // date is YYYY-MM-DD, time is HH:mm
+          const lastDash = selectedSlot.lastIndexOf('-');
+          // The time part contains a colon, so split on the last '-' that precedes the colon
+          const colonIdx = selectedSlot.indexOf(':');
+          // Find the dash right before the colon
+          const dashBeforeColon = selectedSlot.lastIndexOf('-', colonIdx);
+          return [
+            selectedSlot.substring(0, dashBeforeColon),
+            selectedSlot.substring(dashBeforeColon + 1),
+          ];
+        })()
+      : [selectedSlot, ''];
+
+    const [startTime] = timePart.split('-');
+    // Default duration: 30 minutes
+    const duration = 30;
+    // Calculate end time
+    const [startH, startM] = startTime.split(':').map(Number);
+    const endMinutes = startH * 60 + startM + duration;
+    const endH = String(Math.floor(endMinutes / 60)).padStart(2, '0');
+    const endM = String(endMinutes % 60).padStart(2, '0');
+    const endTime = `${endH}:${endM}`;
+
+    const params = new URLSearchParams({
+      date: datePart,
+      startTime,
+      endTime,
+      duration: String(duration),
+    });
+    router.push(`/${locale}/book/${id}?${params.toString()}`);
+  }, [selectedSlot, id, locale, router, authStatus]);
 
   /* ── Render ── */
   return (
@@ -301,6 +350,7 @@ export default function InterviewerProfilePage() {
 
                 {/* Book button */}
                 <button
+                  onClick={handleBookSlot}
                   disabled={!selectedSlot}
                   className={`mt-6 w-full rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
                     selectedSlot

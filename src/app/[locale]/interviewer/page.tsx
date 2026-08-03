@@ -1,35 +1,140 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEffect, useState, useCallback } from 'react';
 import { Calendar, DollarSign, Star, ShieldCheck, AlertTriangle, Building2, Clock } from 'lucide-react';
 import { GlowCard } from '@/components/brand';
 import { Badge } from '@/components/ui/badge';
 
-const upcomingBookings = [
-  { candidateKey: 'cand1Name', date: '2026-08-05', time: '10:00 AM', isB2B: true, companyKey: 'companyAramco', requiredQ: 3, nearSession: true },
-  { candidateKey: 'cand2Name', date: '2026-08-06', time: '02:00 PM', isB2B: false, companyKey: '', requiredQ: 0, nearSession: false },
-  { candidateKey: 'cand3Name', date: '2026-08-07', time: '11:30 AM', isB2B: true, companyKey: 'companyNeom', requiredQ: 5, nearSession: false },
-] as const;
+interface InterviewerStats {
+  completedInterviews: number;
+  upcomingBookings: number;
+  totalEarnings: number;
+}
+
+interface InterviewerData {
+  rating: number;
+  idVerified: boolean;
+  status: string;
+  stats: InterviewerStats;
+}
+
+interface BookingItem {
+  id: string;
+  candidateName: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  status: string;
+  meetingLink: string | null;
+}
 
 export default function InterviewerDashboard() {
   const t = useTranslations('interviewerPanel');
+  const tc = useTranslations('common');
+
+  const [interviewer, setInterviewer] = useState<InterviewerData | null>(null);
+  const [upcomingBookings, setUpcomingBookings] = useState<BookingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [meRes, bookingsRes] = await Promise.all([
+        fetch('/api/interviewer/me'),
+        fetch('/api/interviewer/bookings?status=UPCOMING'),
+      ]);
+
+      if (!meRes.ok || !bookingsRes.ok) {
+        const errData = await (meRes.ok ? bookingsRes : meRes).json().catch(() => ({}));
+        const msg = errData?.error?.en || tc('error');
+        setError(msg);
+        return;
+      }
+
+      const meJson = await meRes.json();
+      const bookingsJson = await bookingsRes.json();
+
+      setInterviewer(meJson.interviewer);
+      setUpcomingBookings(bookingsJson.bookings || []);
+    } catch {
+      setError(tc('error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [tc]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const formatCents = (cents: number) =>
+    `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+  const formatDateTime = (iso: string) => {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return { date, time };
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-white/10" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/[0.04] border border-white/[0.06]" />
+          ))}
+        </div>
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-white/10" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/[0.04] border border-white/[0.06]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+          {t('dashTitle')}
+        </h1>
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center">
+          <p className="text-red-400">{error}</p>
+          <button
+            onClick={fetchData}
+            className="mt-3 text-sm text-gold hover:underline"
+          >
+            {tc('retry')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!interviewer) return null;
 
   const kpis = [
     {
       label: t('kpiUpcoming'),
-      value: '5',
+      value: String(interviewer.stats.upcomingBookings),
       icon: Calendar,
       color: 'text-cyan-400',
     },
     {
       label: t('kpiEarnings'),
-      value: '$487',
+      value: formatCents(interviewer.stats.totalEarnings),
       icon: DollarSign,
       color: 'text-gold',
     },
     {
       label: t('kpiRating'),
-      value: '4.8',
+      value: interviewer.rating > 0 ? interviewer.rating.toFixed(1) : '—',
       icon: Star,
       color: 'text-gold',
     },
@@ -37,7 +142,7 @@ export default function InterviewerDashboard() {
       label: t('kpiAccreditation'),
       value: t('accredited'),
       icon: ShieldCheck,
-      color: 'text-emerald-400',
+      color: interviewer.idVerified ? 'text-emerald-400' : 'text-amber-400',
     },
   ];
 
@@ -70,45 +175,46 @@ export default function InterviewerDashboard() {
         <h2 className="mb-4 text-lg font-bold text-[var(--text-primary)]">
           {t('upcomingBookings')}
         </h2>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {upcomingBookings.map((booking, i) => (
-            <GlowCard key={i}>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-bold text-[var(--text-primary)]">
-                    {t(booking.candidateKey)}
-                  </p>
-                  {booking.isB2B && (
-                    <Badge className="border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-                      {t('b2bBadge')}
-                    </Badge>
-                  )}
-                </div>
-                {booking.isB2B && (
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                    <Building2 size={16} strokeWidth={1.75} />
-                    <span>{t(booking.companyKey)}</span>
-                    <span className="ms-1 text-xs text-[var(--text-faint)]">
-                      ({booking.requiredQ} {t('requiredQuestions')})
-                    </span>
+        {upcomingBookings.length === 0 ? (
+          <GlowCard>
+            <p className="text-center text-sm text-[var(--text-muted)]">
+              {t('upcomingBookings')}
+            </p>
+          </GlowCard>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {upcomingBookings.map((booking) => {
+              const { date, time } = formatDateTime(booking.scheduledAt);
+              const isNearSession = new Date(booking.scheduledAt).getTime() - Date.now() < 2 * 60 * 60 * 1000;
+              return (
+                <GlowCard key={booking.id}>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-base font-bold text-[var(--text-primary)]">
+                        {booking.candidateName}
+                      </p>
+                      <Badge className="border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+                        {t('statusUpcoming')}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                      <Clock size={16} strokeWidth={1.75} />
+                      <span>{date}</span>
+                      <span className="text-[var(--text-faint)]">|</span>
+                      <span>{time}</span>
+                    </div>
+                    {!booking.meetingLink && isNearSession && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+                        <AlertTriangle size={16} strokeWidth={1.75} />
+                        <span>{t('addMeetingUrlWarning')}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                  <Clock size={16} strokeWidth={1.75} />
-                  <span>{booking.date}</span>
-                  <span className="text-[var(--text-faint)]">|</span>
-                  <span>{booking.time}</span>
-                </div>
-                {booking.nearSession && (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
-                    <AlertTriangle size={16} strokeWidth={1.75} />
-                    <span>{t('addMeetingUrlWarning')}</span>
-                  </div>
-                )}
-              </div>
-            </GlowCard>
-          ))}
-        </div>
+                </GlowCard>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

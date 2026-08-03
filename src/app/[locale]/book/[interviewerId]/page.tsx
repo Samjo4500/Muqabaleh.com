@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useParams, useSearchParams } from 'next/navigation';
 import { ArrowRight, ArrowLeft, Video, Loader2 } from 'lucide-react';
@@ -70,7 +70,7 @@ function formatTime(time: string, locale: string): string {
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
 
-export default function BookPage() {
+function BookPageContent() {
   const t = useTranslations('booking');
   const tc = useTranslations('common');
   const locale = useLocale();
@@ -264,5 +264,13 @@ export default function BookPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function BookPage() {
+  return (
+    <Suspense>
+      <BookPageContent />
+    </Suspense>
   );
 }

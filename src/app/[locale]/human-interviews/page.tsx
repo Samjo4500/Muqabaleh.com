@@ -36,9 +36,10 @@ interface InterviewerCard {
 }
 
 interface FetchResponse {
-  interviewers: InterviewerCard[];
+  interviewers: Record<string, unknown>[];
   total: number;
   hasMore: boolean;
+  totalPages?: number;
 }
 
 /* ------------------------------------------------------------------ */
@@ -453,7 +454,7 @@ export default function HumanInterviewsPage() {
         if (!res.ok) throw new Error('Failed to fetch');
         const data: FetchResponse = await res.json();
         const rawInterviewers = data.interviewers || [];
-        const mapped = rawInterviewers.map((raw: Record<string, unknown>) => mapApiToCard(raw, locale));
+        const mapped = rawInterviewers.map((raw) => mapApiToCard(raw, locale));
         const totalPages = data.totalPages || 1;
         if (append) {
           setInterviewers((prev) => [...prev, ...mapped]);

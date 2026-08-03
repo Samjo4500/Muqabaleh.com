@@ -2065,3 +2065,54 @@ Stage Summary:
 - Access restricted to samjo4500@gmail.com via NextAuth
 - All pages use real database data via API routes
 - AdminLog table added for audit trail
+
+---
+Task ID: 3b
+Agent: Main Agent
+Task: Phase 3B — Complete Email System with Resend
+
+Work Log:
+- Created branch `feat/phase-3b` from main
+- Installed `resend` SDK (v6.18.1)
+- Added `EmailQueue` model to Prisma schema (id, to, subject, html, from, sendAt, sent, sentAt, error)
+- Generated Prisma client
+- Created `src/lib/email.ts` — Resend wrapper with sendEmail(), queueEmail(), processEmailQueue(), emailBaseHtml(), buttonHtml(), dividerHtml()
+- Created 13 email templates in `src/emails/`:
+  1. welcome.ts — Post-registration welcome
+  2. payment-receipt.ts — Invoice-style purchase receipt
+  3. booking-confirmation.ts — Interview confirmed with details
+  4. session-reminder.ts — 24h before session with tips
+  5. session-starting-soon.ts — 15min urgent join-now alert
+  6. review-request.ts — 1h post-session review request
+  7. password-reset.ts — Password reset with security notice
+  8. interviewer-application-received.ts — Application confirmation
+  9. interviewer-approved.ts — Approval with onboarding steps
+  10. interviewer-new-booking.ts — New booking with earnings
+  11. interviewer-payout-sent.ts — Payout confirmation
+  12. admin-new-application.ts — Admin action required alert
+  13. admin-daily-summary.ts — Daily KPI digest
+- Created API routes:
+  - POST /api/email/send — Low-level send with x-email-secret auth
+  - POST /api/email/cron — Process due queued emails (every 5 min via Vercel Cron)
+  - POST /api/email/daily-summary — Generate + send daily KPI digest (9 AM Asia/Amman)
+- Created `src/lib/email-triggers.ts` with 12 trigger functions
+- Integrated triggers into existing routes:
+  - /api/auth/register → triggerWelcomeEmail (ar + en)
+  - /api/auth/forgot-password → triggerPasswordResetEmail (ar + en)
+  - /api/paypal/capture-booking-order → scheduleBookingEmails (immediate + queued)
+  - /api/paypal/activate → triggerPaymentReceiptEmail
+  - /api/interviewers/apply → triggerAdminNewApplicationEmail
+  - /api/admin/interviewers/[id] PATCH → triggerInterviewerApprovedEmail
+  - /api/admin/payouts/[id] PATCH → triggerInterviewerPayoutSentEmail
+- Added vercel.json with cron jobs config
+- Added 115 i18n keys (emails namespace) to en.json and ar.json
+- ESLint: 0 errors
+- TypeScript: 0 errors
+
+Stage Summary:
+- Complete email system with Resend provider
+- 13 bilingual templates (EN/AR) with RTL support
+- 7 trigger points integrated into existing API routes
+- EmailQueue model for delayed/scheduled emails via cron
+- Env vars needed on Vercel: RESEND_API_KEY, ADMIN_EMAIL=samjo4500@gmail.com, EMAIL_INTERNAL_SECRET
+- `bun run db:push` needed on production to create EmailQueue table

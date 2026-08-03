@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Check, X, Crown } from 'lucide-react';
+import { Check, X, Crown, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { GlowCard, SectionHeading } from '@/components/brand';
@@ -123,11 +124,7 @@ export default function PricingContent() {
                   <FeatureCheck text={t('proBadge')} />
                 </ul>
 
-                <Link href="/api/paypal/create-order?plan=PRO" className="mt-8 w-full">
-                  <Button className="btn-gold w-full">
-                    {t('proCta')}
-                  </Button>
-                </Link>
+                <PayPalPlanButton plan="PRO" className="mt-8 w-full" label={t('proCta')} isGold />
               </GlowCard>
 
               {/* ── Unlimited Card ── */}
@@ -151,11 +148,7 @@ export default function PricingContent() {
                   <FeatureCheck text={t('unlimitedHuman')} />
                 </ul>
 
-                <Link href="/api/paypal/create-order?plan=UNLIMITED" className="mt-8 w-full">
-                  <Button variant="outline" className="w-full border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10">
-                    {t('unlimitedCta')}
-                  </Button>
-                </Link>
+                <PayPalPlanButton plan="UNLIMITED" className="mt-8 w-full" label={t('unlimitedCta')} />
               </GlowCard>
             </div>
           </div>
@@ -222,6 +215,84 @@ export default function PricingContent() {
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ */
+/*  PayPal Plan Button — calls API via fetch, redirects to approval     */
+/* ------------------------------------------------------------------ */
+
+function PayPalPlanButton({
+  plan,
+  className,
+  label,
+  isGold = false,
+}: {
+  plan: string;
+  className?: string;
+  label: string;
+  isGold?: boolean;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const locale = useLocale();
+  const t = useTranslations('paypal');
+
+  const handleClick = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/paypal/create-order?plan=${plan}`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(data.error || t('createError'));
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to PayPal approval page
+      const baseUrl =
+        process.env.PAYPAL_MODE === 'live'
+          ? 'https://www.paypal.com'
+          : 'https://www.sandbox.paypal.com';
+      const approvalUrl = `${baseUrl}/checkoutnow?token=${data.orderId}`;
+      window.location.href = approvalUrl;
+    } catch {
+      setError(t('generalError'));
+      setLoading(false);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className={className}>
+        <p className="mb-2 text-center text-xs text-red-400">{error}</p>
+        <Button
+          variant={isGold ? 'default' : 'outline'}
+          className={`w-full cursor-pointer ${isGold ? 'btn-gold' : 'border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10'}`}
+          onClick={handleClick}
+        >
+          {t('retry')}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <Button
+        variant={isGold ? 'default' : 'outline'}
+        className={`w-full cursor-pointer ${isGold ? 'btn-gold' : 'border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10'} ${loading ? 'pointer-events-none opacity-80' : ''}`}
+        onClick={handleClick}
+        disabled={loading}
+      >
+        {loading && <Loader2 size={16} className="me-2 animate-spin" />}
+        {label}
+      </Button>
+    </div>
+  );
+}
 
 function FeatureCheck({ text }: { text: string }) {
   return (

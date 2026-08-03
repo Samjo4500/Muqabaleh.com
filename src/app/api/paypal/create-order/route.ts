@@ -8,6 +8,13 @@ const PLAN_CONFIG: Record<string, { amount: string; currency: string; descriptio
     tier: 'PRO',
     sessions: 3,
   },
+  UNLIMITED: {
+    amount: '29.99',
+    currency: 'USD',
+    description: 'Muqabaleh Unlimited — Unlimited AI Interviews + All Features',
+    tier: 'UNLIMITED',
+    sessions: 999,
+  },
   HUMAN_STD: {
     amount: '29.00',
     currency: 'USD',

@@ -1298,3 +1298,29 @@ Stage Summary:
 - How It Works: Step 2 now correctly says 10 questions in both AR and EN
 - Country Marquee: Tripled array + -33.333% animation prevents visible seam/duplicates
 - All changes are i18n-compatible (AR + EN)
+
+---
+Task ID: pp1
+Agent: main
+Task: Build complete PayPal checkout money path for Pro ($9.99 one-time) and Unlimited ($29.99/mo subscription)
+
+Work Log:
+- Created /api/paypal/create-order/route.ts — PayPal Orders v2 API, creates $9.99 one-time order
+- Created /api/paypal/capture-order/route.ts — captures payment, verifies amount=9.99, records Payment, upgrades user to PRO tier
+- Rewrote PayPalSubscriptionButton.tsx → PayPalCheckoutButton.tsx with unified PlanType ('pro'|'unlimited')
+  - pro: uses createOrder/onApprove (one-time via Orders API)
+  - unlimited: uses createSubscription/onApprove (recurring via Subscriptions API)
+- Fixed /api/paypal/activate/route.ts: changed subscription tier from PREMIUM to UNLIMITED
+- Fixed /api/interviews/route.ts: changed access check from PREMIUM to PRO||UNLIMITED, updated error messages
+- Rewrote app/packages/page.tsx: 3-tier cards (Pro + Unlimited) with live PayPalCheckoutButton components
+- Updated landing page + pricing page buttons: Free→/demo, Pro→/app/packages?checkout=pro, Unlimited→/app/packages?checkout=unlimited
+- Updated i18n: priceNotePro, priceNoteUnlimited, planActive, planActiveDesc, startFreeTrial in both AR+EN
+- Removed old priceNote ($19/month), added Pro/Unlimited specific price notes
+- All ESLint clean
+
+Stage Summary:
+- Pro $9.99: UI → /app/packages → PayPal JS SDK → /api/paypal/create-order ($9.99 hardcoded) → PayPal popup → /api/paypal/capture-order → verify amount → Payment record → user.subscriptionTier=PRO
+- Unlimited $29.99: UI → /app/packages → PayPal JS SDK → /api/paypal/create-subscription (uses PAYPAL_PLAN_ID env) → PayPal popup → /api/paypal/activate → user.subscriptionTier=UNLIMITED
+- Free: UI → /demo (no payment needed)
+- Database tiers: FREE, PRO, UNLIMITED (PREMIUM removed from active code)
+- PayPalCheckoutButton is now importable and ready to use (old PayPalSubscriptionButton preserved for backwards compat)

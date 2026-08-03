@@ -62,11 +62,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Upgrade user to PREMIUM
+    // Upgrade user to UNLIMITED
     await db.user.update({
       where: { id: userId },
       data: {
-        subscriptionTier: 'PREMIUM',
+        subscriptionTier: 'UNLIMITED',
         sessionsLeft: 999,
       },
     });

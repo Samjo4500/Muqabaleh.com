@@ -20,7 +20,8 @@ const PRICING_PLANS = [
     subKey: 'freeSub' as const,
     features: ['freeFeature', 'freeCriteria', 'feature10Questions', 'featureNoCertificate'] as const,
     popular: false,
-    planSlug: 'free',
+    link: '/demo',
+    linkLabel: 'startFreeTrial' as const,
   },
   {
     titleKey: 'proTitle' as const,
@@ -29,7 +30,8 @@ const PRICING_PLANS = [
     subKey: 'proSub' as const,
     features: ['proFeature', 'proCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin'] as const,
     popular: true,
-    planSlug: 'pro',
+    link: '/app/packages?checkout=pro',
+    linkLabel: 'choosePlan' as const,
   },
   {
     titleKey: 'unlimitedTitle' as const,
@@ -38,7 +40,8 @@ const PRICING_PLANS = [
     subKey: 'unlimitedSub' as const,
     features: ['unlimitedFeature', 'unlimitedCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin', 'featurePrioritySupport'] as const,
     popular: false,
-    planSlug: 'unlimited',
+    link: '/app/packages?checkout=unlimited',
+    linkLabel: 'choosePlan' as const,
   },
 ] as const;
 
@@ -107,8 +110,8 @@ export default function PricingContent() {
                     ))}
                   </ul>
 
-                  <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">
-                    {t('choosePlan')}
+                  <Link href={`/${locale}${plan.link}`} className="btn-gold w-full text-center text-sm">
+                    {t(plan.linkLabel)}
                   </Link>
                 </GlowCard>
               ))}

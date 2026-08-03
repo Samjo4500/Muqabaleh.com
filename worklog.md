@@ -1811,3 +1811,19 @@ Stage Summary:
 - Translation keys (`statInterviews`, `statRating`, `statPartners`, `trustedByHeadline`, `muqabalehScore`, `optIn.*`) already existed in both en.json and ar.json — no translation changes needed
 - `src/lib/scoring.ts` already existed with all required functions (`toMuqabalehScore`, `toCriterionScore`, `getScoreColor`)
 - No build run per instructions
+---
+Task ID: 1
+Agent: main
+Task: Fix Vercel build errors
+
+Work Log:
+- Ran `next build` to reproduce Vercel build failure
+- Found 5 build errors in the codebase
+- Fixed all errors and verified clean build + lint
+- Pushed to origin/main
+
+Stage Summary:
+- Build errors fixed and pushed as commit 7ebd674
+- Prisma client was stale (schema had Interviewer model but generated client was outdated)
+- book/[interviewerId]/page.tsx needed Suspense wrapper for useSearchParams()
+- Build passes cleanly with 0 TypeScript errors

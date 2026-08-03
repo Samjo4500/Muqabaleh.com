@@ -120,12 +120,12 @@ function TrustChip({ icon, label }: { icon: React.ReactNode; label: string }) {
 
 function CountryMarquee({ t, isRTL }: { t: ReturnType<typeof useTranslations>; isRTL: boolean }) {
   const countries = t.raw('marqueeCountries') as string[];
-  const doubled = [...countries, ...countries];
+  const tripled = [...countries, ...countries, ...countries];
 
   return (
     <section id="countries" className="overflow-hidden border-y border-white/5 py-4">
       <div className={isRTL ? 'animate-marquee-rtl flex w-max gap-8' : 'animate-marquee flex w-max gap-8'}>
-        {doubled.map((c, i) => (
+        {tripled.map((c, i) => (
           <span key={i} className="whitespace-nowrap text-sm text-[var(--text-faint)]">
             {c}
           </span>
@@ -508,50 +508,32 @@ function InterviewersSection({ t, isRTL }: { t: ReturnType<typeof useTranslation
 /*  9. PRICING                                                          */
 /* ================================================================== */
 
-const PRICING_PLANS = [
-  {
-    titleKey: 'session1Title',
-    priceKey: 'session1Price',
+const PRICING_PLANS = [  {
+    titleKey: 'freeTitle',
+    priceKey: 'freePrice',
     badge: null,
-    subKey: null,
-    featureKey: 'feature1Session',
-    criteriaKey: 'feature4Criteria',
-    sar: '71', aed: '70', egp: '912', jod: '13',
+    subKey: 'freeSub',
+    features: ['freeFeature', 'freeCriteria', 'feature10Questions', 'featureNoCertificate'] as const,
     popular: false,
-    planSlug: '1-session',
+    planSlug: 'free',
   },
   {
-    titleKey: 'session3Title',
-    priceKey: 'session3Price',
-    badge: 'session3Badge',
-    subKey: null,
-    featureKey: 'feature3Sessions',
-    criteriaKey: 'feature4Criteria',
-    sar: '183', aed: '180', egp: '2352', jod: '35',
+    titleKey: 'proTitle',
+    priceKey: 'proPrice',
+    badge: 'proBadge',
+    subKey: 'proSub',
+    features: ['proFeature', 'proCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin'] as const,
     popular: true,
-    planSlug: '3-sessions',
+    planSlug: 'pro',
   },
   {
-    titleKey: 'session5Title',
-    priceKey: 'session5Price',
+    titleKey: 'unlimitedTitle',
+    priceKey: 'unlimitedPrice',
     badge: null,
-    subKey: null,
-    featureKey: 'feature5Sessions',
-    criteriaKey: 'feature4Criteria',
-    sar: '258', aed: '253', egp: '3312', jod: '49',
+    subKey: 'unlimitedSub',
+    features: ['unlimitedFeature', 'unlimitedCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin', 'featurePrioritySupport'] as const,
     popular: false,
-    planSlug: '5-sessions',
-  },
-  {
-    titleKey: 'vipTitle',
-    priceKey: 'vipPrice',
-    badge: null,
-    subKey: 'vipSub',
-    featureKey: 'featureVipSession',
-    criteriaKey: 'feature6CriteriaHuman',
-    sar: '108', aed: '106', egp: '1392', jod: '21',
-    popular: false,
-    planSlug: 'vip',
+    planSlug: 'unlimited',
   },
 ] as const;
 
@@ -566,7 +548,7 @@ function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
           sub={t('pricingSub')}
         />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {PRICING_PLANS.map((plan, idx) => (
             <GlowCard
               key={idx}
@@ -585,23 +567,14 @@ function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
                 <p className="mt-1 text-xs text-[var(--text-faint)]">{t(plan.subKey)}</p>
               )}
 
-              <PriceTag
-                usd={t(plan.priceKey)}
-                localApprox={t('localApprox', {
-                  sar: plan.sar,
-                  aed: plan.aed,
-                  egp: plan.egp,
-                  jod: plan.jod,
-                })}
-                className="my-5"
-              />
+              <div className="my-5 text-3xl font-extrabold text-gold">
+                {t(plan.priceKey)}
+              </div>
 
               <ul className="mb-6 flex w-full flex-col gap-3">
-                <PricingCheck text={t(plan.featureKey)} />
-                <PricingCheck text={t(plan.criteriaKey)} />
-                <PricingCheck text={t('featureCertificate')} />
-                <PricingCheck text={t('featurePdf')} />
-                <PricingCheck text={t('featureLinkedin')} />
+                {plan.features.map((fk) => (
+                  <PricingCheck key={fk} text={t(fk)} />
+                ))}
               </ul>
 
               <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">

@@ -1275,3 +1275,26 @@ Stage Summary:
 - Interview room completely redesigned with split-screen, speech bubbles, score ring, waveform, status indicators
 - Landing page updated: 4-step how-it-works, pro avatars, improved marketing copy in AR+EN
 - All changes pass ESLint clean, JSON valid, browser renders correctly
+---
+Task ID: 1
+Agent: main
+Task: Fix 3 critical issues on live site - pricing, how-it-works, country marquee
+
+Work Log:
+- FAILURE 1 (PRICING): Replaced entire 4-tier pricing model ($19/$49/$69/$29 VIP) with new 3-tier model (Free $0 / Pro $9.99 / Unlimited $29.99/mo)
+  - Updated PRICING_PLANS constant in both page.tsx and pricing-content.tsx
+  - Added new i18n keys: freeTitle, freePrice, freeSub, freeFeature, freeCriteria, proTitle, proPrice, proBadge, proSub, proFeature, proCriteria, unlimitedTitle, unlimitedPrice, unlimitedSub, unlimitedFeature, unlimitedCriteria
+  - Added new feature keys: feature10Questions, featureBasicScoring, featureNoCertificate, featurePrioritySupport
+  - Updated pricing namespace comparison table columns: colFree, colPro, colUnlimited
+  - Changed grid from 4-col to 3-col layout
+  - Replaced PriceTag component with simple gold text div for prices
+- FAILURE 2 (HOW IT WORKS): Changed '5 أسئلة' to '10 أسئلة' in ar.json and '5 realistic questions' to '10 realistic questions' in en.json
+- FAILURE 3 (COUNTRY MARQUEE): Changed array doubling to tripling, updated animation keyframes from translateX(-50%) to translateX(-33.333%)
+- Fixed Caddyfile to use 127.0.0.1:3000 instead of localhost:3000
+- ESLint passes clean with zero errors
+
+Stage Summary:
+- Pricing: Old 4-tier model completely removed from both homepage and pricing page, replaced with Free/Pro $9.99/Unlimited $29.99
+- How It Works: Step 2 now correctly says 10 questions in both AR and EN
+- Country Marquee: Tripled array + -33.333% animation prevents visible seam/duplicates
+- All changes are i18n-compatible (AR + EN)

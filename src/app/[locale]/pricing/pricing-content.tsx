@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { GlowCard, SectionHeading, PriceTag } from '@/components/brand';
+import { GlowCard, SectionHeading } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
@@ -14,64 +14,45 @@ import { Footer } from '@/components/layout/footer';
 
 const PRICING_PLANS = [
   {
-    titleKey: 'session1Title' as const,
-    priceKey: 'session1Price' as const,
+    titleKey: 'freeTitle' as const,
+    priceKey: 'freePrice' as const,
     badge: null,
-    subKey: null,
-    featureKey: 'feature1Session' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '71', aed: '70', egp: '912', jod: '13',
+    subKey: 'freeSub' as const,
+    features: ['freeFeature', 'freeCriteria', 'feature10Questions', 'featureNoCertificate'] as const,
     popular: false,
-    planSlug: '1-session',
+    planSlug: 'free',
   },
   {
-    titleKey: 'session3Title' as const,
-    priceKey: 'session3Price' as const,
-    badge: 'session3Badge' as const,
-    subKey: null,
-    featureKey: 'feature3Sessions' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '183', aed: '180', egp: '2352', jod: '35',
+    titleKey: 'proTitle' as const,
+    priceKey: 'proPrice' as const,
+    badge: 'proBadge' as const,
+    subKey: 'proSub' as const,
+    features: ['proFeature', 'proCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin'] as const,
     popular: true,
-    planSlug: '3-sessions',
+    planSlug: 'pro',
   },
   {
-    titleKey: 'session5Title' as const,
-    priceKey: 'session5Price' as const,
+    titleKey: 'unlimitedTitle' as const,
+    priceKey: 'unlimitedPrice' as const,
     badge: null,
-    subKey: null,
-    featureKey: 'feature5Sessions' as const,
-    criteriaKey: 'feature4Criteria' as const,
-    sar: '258', aed: '253', egp: '3312', jod: '49',
+    subKey: 'unlimitedSub' as const,
+    features: ['unlimitedFeature', 'unlimitedCriteria', 'featureCertificate', 'featurePdf', 'featureLinkedin', 'featurePrioritySupport'] as const,
     popular: false,
-    planSlug: '5-sessions',
-  },
-  {
-    titleKey: 'vipTitle' as const,
-    priceKey: 'vipPrice' as const,
-    badge: null,
-    subKey: 'vipSub' as const,
-    featureKey: 'featureVipSession' as const,
-    criteriaKey: 'feature6CriteriaHuman' as const,
-    sar: '108', aed: '106', egp: '1392', jod: '21',
-    popular: false,
-    planSlug: 'vip',
+    planSlug: 'unlimited',
   },
 ] as const;
 
-/* Comparison table rows: rowKey, then values for [1 Session, 3 Sessions, 5 Sessions, VIP] */
-type CellValue = 'val' | 'text';
-
-const COMPARISON_ROWS: { rowKey: string; cells: ('val1' | 'val3' | 'val5' | 'val1Vip' | 'val4' | 'val6' | 'included' | 'notIncluded')[] }[] = [
-  { rowKey: 'rowSessionCount', cells: ['val1', 'val3', 'val5', 'val1Vip'] },
-  { rowKey: 'rowCriteria', cells: ['val4', 'val4', 'val4', 'val6'] },
-  { rowKey: 'rowCertificate', cells: ['included', 'included', 'included', 'included'] },
-  { rowKey: 'rowHumanReview', cells: ['notIncluded', 'notIncluded', 'notIncluded', 'included'] },
-  { rowKey: 'rowPdf', cells: ['included', 'included', 'included', 'included'] },
-  { rowKey: 'rowLinkedin', cells: ['included', 'included', 'included', 'included'] },
+/* Comparison table rows */
+const COMPARISON_ROWS: { rowKey: string; cells: ('included' | 'notIncluded')[] }[] = [
+  { rowKey: 'rowSessionCount', cells: ['included', 'included', 'included'] },
+  { rowKey: 'rowCriteria', cells: ['included', 'included', 'included'] },
+  { rowKey: 'rowCertificate', cells: ['notIncluded', 'included', 'included'] },
+  { rowKey: 'rowPdf', cells: ['notIncluded', 'included', 'included'] },
+  { rowKey: 'rowLinkedin', cells: ['notIncluded', 'included', 'included'] },
+  { rowKey: 'rowHumanReview', cells: ['notIncluded', 'notIncluded', 'notIncluded'] },
 ];
 
-const COLUMN_KEYS = ['colSession', 'col3Session', 'col5Session', 'colVip'] as const;
+const COLUMN_KEYS = ['colFree', 'colPro', 'colUnlimited'] as const;
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -97,7 +78,7 @@ export default function PricingContent() {
               sub={t('pricingSub')}
             />
 
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-6 sm:grid-cols-3">
               {PRICING_PLANS.map((plan, idx) => (
                 <GlowCard
                   key={idx}
@@ -116,23 +97,14 @@ export default function PricingContent() {
                     <p className="mt-1 text-xs text-[var(--text-faint)]">{t(plan.subKey)}</p>
                   )}
 
-                  <PriceTag
-                    usd={t(plan.priceKey)}
-                    localApprox={t('localApprox', {
-                      sar: plan.sar,
-                      aed: plan.aed,
-                      egp: plan.egp,
-                      jod: plan.jod,
-                    })}
-                    className="my-5"
-                  />
+                  <div className="my-5 text-3xl font-extrabold text-gold">
+                    {t(plan.priceKey)}
+                  </div>
 
                   <ul className="mb-6 flex w-full flex-col gap-3">
-                    <PricingCheck text={t(plan.featureKey)} />
-                    <PricingCheck text={t(plan.criteriaKey)} />
-                    <PricingCheck text={t('featureCertificate')} />
-                    <PricingCheck text={t('featurePdf')} />
-                    <PricingCheck text={t('featureLinkedin')} />
+                    {plan.features.map((fk) => (
+                      <PricingCheck key={fk} text={t(fk)} />
+                    ))}
                   </ul>
 
                   <Link href={`/auth/register?plan=${plan.planSlug}`} className="btn-gold w-full text-center text-sm">

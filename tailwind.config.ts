@@ -74,10 +74,10 @@ const config: Config = {
         },
         marquee: {
           "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(-33.333%)" },
         },
         "marquee-rtl": {
-          "0%": { transform: "translateX(-50%)" },
+          "0%": { transform: "translateX(-33.333%)" },
           "100%": { transform: "translateX(0)" },
         },
         "progress-fill": {

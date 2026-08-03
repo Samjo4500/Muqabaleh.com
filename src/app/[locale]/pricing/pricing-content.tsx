@@ -20,7 +20,7 @@ const PRICING_PLANS = [
     subKey: 'freeSub' as const,
     features: ['freeFeature', 'freeCriteria', 'feature10Questions', 'featureNoCertificate'] as const,
     popular: false,
-    link: '/demo',
+    link: '/auth/register',
     linkLabel: 'startFreeTrial' as const,
   },
   {

@@ -123,7 +123,7 @@
     "unlimitedSub": "Monthly — cancel anytime",
     "unlimitedFeature": "Unlimited interviews",
     "unlimitedCriteria": "4 criteria + certificate + priority",
-    "localApprox": "≈ {sar} SAR · {aed} AED · {egp} EGP · {jod} JOD", 
+    "localApprox": "≈ {sar} SAR · {aed} AED · {egp} EGP · {jod} JOD",
     "trustSSL": "256-bit SSL Encryption",
     "trustBuyer": "PayPal Buyer Protection",
     "trustRefund": "Full Refund Within 24 Hours for Incomplete Sessions",
@@ -719,7 +719,9 @@
       "premiumLabel": "Premium Plan",
       "freeLabel": "Free plan — one session",
       "oneTimeTitle": "One-Time Session Packs",
-      "comingSoon": "Coming Soon"
+      "comingSoon": "Coming Soon",
+      "proLabel": "Pro plan — 1 session access",
+      "unlimitedLabel": "Unlimited plan — unlimited sessions"
     },
     "payments": {
       "title": "Payments",

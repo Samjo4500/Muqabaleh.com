@@ -1,13 +1,13 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default function PaymentSuccessPage() {
   const t = useTranslations('paypal');
-  const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-void px-4">
@@ -22,7 +22,7 @@ export default function PaymentSuccessPage() {
         {t('successDesc')}
       </p>
 
-      <Link href="/app">
+      <Link href={`/${locale}/app`}>
         <Button className="btn-gold mt-2 cursor-pointer gap-2">
           {t('goToDashboard')}
           <ArrowRight size={16} />

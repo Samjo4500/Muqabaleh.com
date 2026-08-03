@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Mail, Lock, User, Building2, Globe, ArrowLeft, ArrowRight } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { Mail, Lock, User, Building2, Globe, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AuthShell } from "@/components/brand";
@@ -56,6 +58,7 @@ export default function RegisterPage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const router = useRouter();
 
   // Shared fields
   const [name, setName] = useState("");
@@ -71,6 +74,7 @@ export default function RegisterPage() {
 
   const [tab, setTab] = useState("individual");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -91,12 +95,55 @@ export default function RegisterPage() {
     return errs;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
     setTouched({ name: true, email: true, password: true, confirmPassword: true, companyName: true });
     if (Object.keys(errs).length > 0) return;
-    toast.info(t("comingSoon"));
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountType: tab === 'company' ? 'B2B' : 'INDIVIDUAL',
+          email,
+          password,
+          name,
+          country: country || undefined,
+          companyName: tab === 'company' ? companyName : undefined,
+          companySize: tab === 'company' ? companySize.toUpperCase() : undefined,
+          companyIndustry: tab === 'company' ? companySector.toUpperCase() : undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || tCommon('error'));
+        return;
+      }
+
+      // Auto sign in after successful registration
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        const redirectTo = data.redirectTo || '/app';
+        router.push(`/${locale}${redirectTo}`);
+      } else {
+        // If auto-signin fails, redirect to signin page
+        router.push(`/${locale}/auth/signin`);
+      }
+    } catch {
+      toast.error(tCommon('error'));
+    } finally {
+      setLoading(false);
+    }
   }
 
   function fieldError(field: string): string {
@@ -271,14 +318,13 @@ export default function RegisterPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* ─── Individual Tab ─── */}
+          {/* Individual Tab */}
           <TabsContent value="individual" className="flex flex-col gap-5 mt-5">
             {sharedFields}
           </TabsContent>
 
-          {/* ─── Company Tab ─── */}
+          {/* Company Tab */}
           <TabsContent value="company" className="flex flex-col gap-5 mt-5">
-            {/* Company Name */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="reg-company" className="text-[var(--text-muted)]">
                 {t("companyName")}
@@ -308,7 +354,6 @@ export default function RegisterPage() {
 
             {sharedFields}
 
-            {/* Company Size */}
             <div className="flex flex-col gap-2">
               <Label className="text-[var(--text-muted)]">{t("companySize")}</Label>
               <Select value={companySize} onValueChange={setCompanySize}>
@@ -316,14 +361,13 @@ export default function RegisterPage() {
                   <SelectValue placeholder={t("companySizePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent className="bg-[var(--bg-panel)] border-white/10">
-                  <SelectItem value="small">{t("sizeSmall")}</SelectItem>
-                  <SelectItem value="medium">{t("sizeMedium")}</SelectItem>
-                  <SelectItem value="large">{t("sizeLarge")}</SelectItem>
+                  <SelectItem value="SMALL">{t("sizeSmall")}</SelectItem>
+                  <SelectItem value="MEDIUM">{t("sizeMedium")}</SelectItem>
+                  <SelectItem value="LARGE">{t("sizeLarge")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Company Sector */}
             <div className="flex flex-col gap-2">
               <Label className="text-[var(--text-muted)]">{t("companySector")}</Label>
               <Select value={companySector} onValueChange={setCompanySector}>
@@ -331,14 +375,14 @@ export default function RegisterPage() {
                   <SelectValue placeholder={t("companySectorPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent className="bg-[var(--bg-panel)] border-white/10">
-                  <SelectItem value="tech">{t("sectorTech")}</SelectItem>
-                  <SelectItem value="finance">{t("sectorFinance")}</SelectItem>
-                  <SelectItem value="healthcare">{t("sectorHealthcare")}</SelectItem>
-                  <SelectItem value="education">{t("sectorEducation")}</SelectItem>
-                  <SelectItem value="engineering">{t("sectorEngineering")}</SelectItem>
-                  <SelectItem value="marketing">{t("sectorMarketing")}</SelectItem>
-                  <SelectItem value="hr">{t("sectorHr")}</SelectItem>
-                  <SelectItem value="other">{t("sectorOther")}</SelectItem>
+                  <SelectItem value="TECH">{t("sectorTech")}</SelectItem>
+                  <SelectItem value="FINANCE">{t("sectorFinance")}</SelectItem>
+                  <SelectItem value="HEALTHCARE">{t("sectorHealthcare")}</SelectItem>
+                  <SelectItem value="EDUCATION">{t("sectorEducation")}</SelectItem>
+                  <SelectItem value="ENGINEERING">{t("sectorEngineering")}</SelectItem>
+                  <SelectItem value="MARKETING">{t("sectorMarketing")}</SelectItem>
+                  <SelectItem value="HR">{t("sectorHr")}</SelectItem>
+                  <SelectItem value="OTHER">{t("sectorOther")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -348,14 +392,16 @@ export default function RegisterPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="btn-gold w-full cursor-pointer text-sm"
+          disabled={loading}
+          className="btn-gold w-full cursor-pointer text-sm flex items-center justify-center gap-2"
         >
+          {loading && <Loader2 size={16} className="animate-spin" />}
           {tCommon("submit")}
         </button>
 
         {/* Sign in link */}
         <p className="text-center text-sm text-[var(--text-muted)]">
-          {t("hasAccount")}{" "}
+            {t("hasAccount")}{" "}
           <Link
             href={`/${locale}/auth/signin`}
             className="font-semibold text-[var(--gold)] hover:text-[var(--gold-hover)] transition-colors"

@@ -72,6 +72,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Debit one session for FREE tier users
+    if (!hasAccess) {
+      await db.user.update({
+        where: { id: userId },
+        data: { sessionsLeft: { decrement: 1 } },
+      });
+    }
+
     return NextResponse.json({ interviewId: interview.id }, { status: 201 });
   } catch (err) {
     console.error('POST /api/interviews error:', err);

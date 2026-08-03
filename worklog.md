@@ -2037,3 +2037,31 @@ Stage Summary:
 - 20% platform commission logic already existed in /api/bookings
 - ESLint: 0 errors across all changed files
 - Browser verification limited by 4GB RAM OOM in sandbox - dev server crashes
+
+---
+Task ID: 3a
+Agent: Main Orchestrator + full-stack-developer subagent
+Task: Phase 3A — Admin Panel with real data
+
+Work Log:
+- Fixed pricing page crash: replaced <Link href="/api/paypal/..."> with PayPalPlanButton component (fetch + redirect)
+- Added UNLIMITED plan ($29.99) to create-order API
+- Set 5 PayPal env vars on Vercel (CLIENT_ID, SECRET, PLAN_ID, MODE, NEXT_PUBLIC_CLIENT_ID)
+- Fixed create-order API: hardcoded live PayPal URL → respects PAYPAL_MODE sandbox
+- Fixed create-order API: error serialization (PayPal error is string not object)
+- Verified PayPal flow end-to-end with agent-browser: click → API → PayPal sandbox redirect
+- Created feat/phase-3a branch
+- Added AdminLog table to Prisma schema
+- Replaced password-based admin guard with NextAuth email check (samjo4500@gmail.com)
+- Built 9 API routes: stats, transactions, interviewers, bookings, users, payouts (GET + PATCH)
+- Rebuilt 5 admin pages with real data: Dashboard, Interviewers, Bookings, Users, Payouts
+- Simplified admin nav: 5 items (removed Questions, Interviews, Logs, Settings)
+- Added i18n translations for admin panel (EN + AR)
+- All lint and TypeScript checks pass
+- Deployed to production, verified guard redirects unauthenticated users to sign-in
+
+Stage Summary:
+- Phase 3A Admin Panel deployed to production
+- Access restricted to samjo4500@gmail.com via NextAuth
+- All pages use real database data via API routes
+- AdminLog table added for audit trail

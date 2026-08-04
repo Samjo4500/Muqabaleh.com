@@ -112,7 +112,7 @@ export default function SettingsSecurityPage() {
           </p>
           <BiLabel className="mt-6" ar="مدة صلاحية الجلسة" en="Session Timeout" />
           <p className="mt-2">
-            <BiInline ar="ساعتان لمسؤول مقابلة العام" en="2 hours for Muqabaleh Super Admin" />
+            <BiInline ar="ساعتان للمسؤول العام في مقابلة" en="2 hours for Muqabaleh Super Admin" />
           </p>
           <BiLabel className="mt-6" ar="عدد المحاولات المسموح بها" en="Login Attempt Limit" />
           <p className="mt-2">

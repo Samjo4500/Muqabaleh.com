@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { BookingStatus } from '@/lib/enums';
+import { BookingStatus, UserRole } from '@/lib/enums';
 import { z } from 'zod';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -85,7 +85,7 @@ export async function GET(
     const interviewer = await resolveInterviewerForUser(userId);
     const isOwner = booking.userId === userId;
     const isAssignedInterviewer = !!interviewer && booking.interviewerId === interviewer.id;
-    const isAdmin = userRole === 'SUPER_ADMIN';
+    const isAdmin = userRole === UserRole.SUPER_ADMIN;
 
     if (!isOwner && !isAssignedInterviewer && !isAdmin) {
       return NextResponse.json(
@@ -144,7 +144,7 @@ export async function PATCH(
     const interviewer = await resolveInterviewerForUser(userId);
     const isOwner = booking.userId === userId;
     const isAssignedInterviewer = !!interviewer && booking.interviewerId === interviewer.id;
-    const isAdmin = userRole === 'SUPER_ADMIN';
+    const isAdmin = userRole === UserRole.SUPER_ADMIN;
 
     if (!isOwner && !isAssignedInterviewer && !isAdmin) {
       return NextResponse.json(

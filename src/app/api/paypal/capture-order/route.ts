@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { UserTier } from '@prisma/client';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { PaymentStatus, PaymentType, UserTier } from '@/lib/enums';
 import {
   findPlanByAmount,
   getPayPalAccessToken,
@@ -21,7 +21,11 @@ type CaptureUnit = {
   };
 };
 
-const USER_TIERS = new Set<string>(Object.values(UserTier));
+function asUserTier(value: string): UserTier | null {
+  return (Object.values(UserTier) as string[]).includes(value)
+    ? (value as UserTier)
+    : null;
+}
 
 /**
  * POST /api/paypal/capture-order
@@ -132,12 +136,12 @@ export async function POST(req: NextRequest) {
       await db.payment.create({
         data: {
           userId,
-          type: 'AI_PACKAGE',
+          type: PaymentType.AI_PACKAGE,
           amount: Number.parseFloat(config.amount),
           currency: 'USD',
           packageType: config.tier,
           paypalOrderId: orderId,
-          status: 'COMPLETED',
+          status: PaymentStatus.COMPLETED,
           sessionsCredited: config.sessions,
           idempotencyKey: `${userId}-${orderId}`,
           capturedAt: new Date(),
@@ -146,19 +150,20 @@ export async function POST(req: NextRequest) {
 
       // Upgrade user tier / credit sessions for AI packages
       if (config.sessions > 0) {
+        const tier = asUserTier(config.tier);
         const updateData: {
           sessionsLeft: number | { increment: number };
           tier?: UserTier;
         } = {
           sessionsLeft:
-            config.tier === 'UNLIMITED'
+            tier === UserTier.UNLIMITED
               ? 999
               : { increment: config.sessions },
         };
 
         // Only set user.tier when config.tier is a UserTier (not STANDARD_HUMAN/PRO_HUMAN)
-        if (USER_TIERS.has(config.tier)) {
-          updateData.tier = config.tier as UserTier;
+        if (tier) {
+          updateData.tier = tier;
         }
 
         await db.user.update({

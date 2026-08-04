@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { UserTier } from '@/lib/enums';
 import {
   getAllowedPayPalPlanIds,
   getPayPalAccessToken,
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
     await db.user.update({
       where: { id: userId },
       data: {
-        tier: 'UNLIMITED',
+        tier: UserTier.UNLIMITED,
         sessionsLeft: 999,
       },
     });

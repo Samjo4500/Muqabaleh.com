@@ -1,16 +1,17 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { UserRole } from '@/lib/enums';
 import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
 // ─── Route → allowed roles ─────────────────────────────────────
 const ROUTE_ROLES: Record<string, string[]> = {
-  '/app': ['USER', 'SUPER_ADMIN'],
-  '/interviewer': ['INTERVIEWER', 'SUPER_ADMIN'],
-  '/b2b': ['COMPANY_ADMIN', 'SUPER_ADMIN'],
-  '/admin': ['SUPER_ADMIN'],
+  '/app': [UserRole.USER, UserRole.SUPER_ADMIN],
+  '/interviewer': [UserRole.INTERVIEWER, UserRole.SUPER_ADMIN],
+  '/b2b': [UserRole.COMPANY_ADMIN, UserRole.SUPER_ADMIN],
+  '/admin': [UserRole.SUPER_ADMIN],
 };
 
 /** Public interviewer paths that do not require INTERVIEWER role */
@@ -67,10 +68,10 @@ async function getRoleFromRequest(request: NextRequest): Promise<string | null> 
         cookieName: 'next-auth.session-token',
       });
       if (!fallback) return null;
-      return (fallback.role as string) || 'USER';
+      return (fallback.role as string) || UserRole.USER;
     }
 
-    return (token.role as string) || 'USER';
+    return (token.role as string) || UserRole.USER;
   } catch {
     return null;
   }
@@ -85,7 +86,7 @@ export default async function middleware(request: NextRequest) {
     if (!role) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (role !== 'SUPER_ADMIN') {
+    if (role !== UserRole.SUPER_ADMIN) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     return NextResponse.next();

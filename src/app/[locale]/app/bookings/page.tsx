@@ -384,7 +384,7 @@ export default function BookingsPage() {
 
           <TabsContent value="upcoming">
             {upcoming.length === 0 ? (
-              <EmptyState icon={CalendarX} title={t('noUpcoming')} />
+              <EmptyState icon={<CalendarX size={40} strokeWidth={1.75} />} title={t('noUpcoming')} />
             ) : (
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {upcoming.map((b) => (
@@ -396,7 +396,7 @@ export default function BookingsPage() {
 
           <TabsContent value="past">
             {past.length === 0 ? (
-              <EmptyState icon={Clock} title={t('noPast')} />
+              <EmptyState icon={<Clock size={40} strokeWidth={1.75} />} title={t('noPast')} />
             ) : (
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {past.map((b) => (

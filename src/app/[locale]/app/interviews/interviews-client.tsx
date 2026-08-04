@@ -75,7 +75,7 @@ export function InterviewsClient({ interviews, locale }: { interviews: Interview
       {/* Results */}
       {filtered.length === 0 ? (
         <EmptyState
-          icon={MessageSquare}
+          icon={<MessageSquare size={40} strokeWidth={1.75} />}
           title={t('emptyTitle')}
           sub={t('emptySub')}
           cta={t('startNew')}

@@ -89,7 +89,7 @@ export default function LandingPage() {
         <PricingSection t={t} isRTL={isRTL} />
         <ReportPreviewSection t={t} isRTL={isRTL} />
         <TestimonialsSection t={t} />
-        <TrustedBySection t={t} />
+        <IndustriesSection t={t} />
         <FaqSection t={t} />
         <FaqJsonLd />
         <NewsletterSection t={t} />
@@ -804,7 +804,7 @@ const INDUSTRY_ICONS: Record<string, string> = {
   Consulting: '📊',
 };
 
-function TrustedBySection({ t }: { t: ReturnType<typeof useTranslations> }) {
+function IndustriesSection({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <section className="border-y border-white/[0.04] py-16">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">

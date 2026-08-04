@@ -46,16 +46,16 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
         const isSubscription = plan === 'unlimited';
 
         const paypal = await loadScript({
-          'client-id': process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
           vault: isSubscription,
           intent: isSubscription ? 'subscription' : 'capture',
           locale: locale === 'ar' ? 'ar_SA' : 'en_US',
           currency: 'USD',
-        } as Parameters<typeof loadScript>[0]);
+        });
 
         if (!mounted || !paypal || !paypal.Buttons || !containerRef.current) return;
 
-        const callbacks: Record<string, (...args: any[]) => Promise<string>> = {};
+        const callbacks: Record<string, (...args: any[]) => Promise<void> | Promise<string>> = {};
 
         if (isSubscription) {
           // ── UNLIMITED: Subscription flow ──

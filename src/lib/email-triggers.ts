@@ -420,15 +420,15 @@ export async function triggerInterviewerPayoutSentEmail(
       month: 'long',
       day: 'numeric',
     });
-    const periodStart = new Date(payout.periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const periodEnd = new Date(payout.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const periodStart = payout.periodStart ? new Date(payout.periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+    const periodEnd = payout.periodEnd ? new Date(payout.periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
 
     const { subject, html } = await interviewerPayoutSentEmail({
       interviewerName: payout.interviewer.fullName,
       locale,
       amount,
       date,
-      paypalTransactionId: payout.paypalTransactionId || undefined,
+      paypalTransactionId: (payout as Record<string, unknown>).paypalTransactionId as string | undefined,
       periodStart,
       periodEnd,
     });

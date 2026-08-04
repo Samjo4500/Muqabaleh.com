@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { verifyAdmin } from '../admin/_lib';
+import { verifyAdmin } from '@/app/api/admin/_lib';
 import { z } from 'zod';
 
 const schema = z.object({ payoutId: z.string().uuid() });

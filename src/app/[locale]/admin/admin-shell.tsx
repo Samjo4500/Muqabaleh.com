@@ -75,6 +75,31 @@ function SidebarNav({
       {ADMIN_NAV.map((group) => {
         const open = openGroups[group.id] ?? group.id === activeGroup;
         const label = L[group.label];
+        const single = group.items.length === 1;
+
+        // Top-level single links (Dashboard, Notifications, Audit, Applicants)
+        if (single) {
+          const item = group.items[0];
+          const href = localePath(item.href, locale);
+          const isActive = pathname === href || pathname.endsWith(item.href);
+          return (
+            <Link
+              key={group.id}
+              href={href}
+              onClick={onNavigate}
+              className={cn(
+                'mb-1 block rounded-lg px-2 py-2 transition',
+                collapsed && 'text-center',
+                isActive
+                  ? 'bg-cyan-500/15 text-cyan-200'
+                  : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]',
+              )}
+            >
+              {!collapsed ? <BiLabel ar={label.ar} en={label.en} size="sm" /> : <span className="text-xs">•</span>}
+            </Link>
+          );
+        }
+
         return (
           <div key={group.id} className="mb-1">
             <button

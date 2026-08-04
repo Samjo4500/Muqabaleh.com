@@ -1,18 +1,87 @@
 'use client';
 
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { BiInline } from '@/components/admin/BiLabel';
+import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
 
 export default function Page() {
   return (
-    <div>
-      <AdminPageHeader
-        title={{ ar: "باقات الفوترة", en: "Billing Plans" }}
-        description={{ ar: "إدارة باقات الاشتراك في مقابلة.", en: "Manage Muqabaleh subscription plans." }}
+    <div className="space-y-10">
+      <AdminDataTable
+        title={{ ar: 'خطط الاشتراك', en: 'Subscription Plans' }}
+        description={{
+          ar: 'الاسم عربي/إنجليزي، السعر، العملة، الفترة، الميزات، رصيد المقابلات، ظهور الخطة، والتجربة المجانية.',
+          en: 'Name EN/AR, price, currency, interval, features, interview credits, visibility, trial.',
+        }}
+        resource="subscriptions"
+        creatable={false}
+        columns={[
+          { key: 'plan', label: { ar: 'الخطة', en: 'Plan' }, render: (row) => String(row.plan ?? row.planId ?? '—') },
+          { key: 'status', label: { ar: 'الحالة', en: 'Status' } },
+          {
+            key: 'user',
+            label: { ar: 'مستخدم نموذجي', en: 'Sample user' },
+            render: (row) => {
+              const u = row.user as { email?: string } | undefined;
+              return u?.email ?? '—';
+            },
+          },
+        ]}
+        demoRows={[
+          { id: 'plan-free', plan: 'Free / مجاني', status: 'Public', user: { email: '—' } },
+          { id: 'plan-pro', plan: 'Pro / احترافي — $9.99/mo', status: 'Public', user: { email: '—' } },
+          { id: 'plan-unl', plan: 'Unlimited / بلا حدود — $29.99/mo', status: 'Public', user: { email: '—' } },
+          { id: 'plan-partner', plan: 'Partner-only / للشركاء فقط', status: 'Partner-only', user: { email: '—' } },
+        ]}
       />
-      <div className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-6 text-sm text-[var(--text-secondary)]">
-        <BiInline ar="هذه الصفحة جاهزة للإعدادات التشغيلية في مقابلة." en="This page is ready for Muqabaleh operational configuration." />
-      </div>
+      <AdminConfigPanel
+        title={{ ar: 'محرر الخطة', en: 'Plan editor' }}
+        sections={[
+          {
+            title: { ar: 'تفاصيل الخطة', en: 'Plan details' },
+            fields: [
+              { key: 'nameAr', label: { ar: 'الاسم (عربي)', en: 'Name AR' }, type: 'text', value: 'احترافي' },
+              { key: 'nameEn', label: { ar: 'الاسم (إنجليزي)', en: 'Name EN' }, type: 'text', value: 'Pro' },
+              { key: 'price', label: { ar: 'السعر', en: 'Price' }, type: 'number', value: '9.99' },
+              {
+                key: 'currency',
+                label: { ar: 'العملة', en: 'Currency' },
+                type: 'select',
+                value: 'USD',
+                options: [
+                  { value: 'USD', label: 'USD' },
+                  { value: 'SAR', label: 'SAR' },
+                  { value: 'AED', label: 'AED' },
+                ],
+              },
+              {
+                key: 'interval',
+                label: { ar: 'الفترة', en: 'Interval' },
+                type: 'select',
+                value: 'MONTHLY',
+                options: [
+                  { value: 'MONTHLY', label: 'Monthly' },
+                  { value: 'YEARLY', label: 'Yearly' },
+                ],
+              },
+              { key: 'credits', label: { ar: 'رصيد المقابلات', en: 'Interview credits' }, type: 'number', value: '10' },
+              { key: 'features', label: { ar: 'قائمة الميزات', en: 'Features list' }, type: 'textarea', value: 'AI interviews\nDetailed scoring\nPDF report' },
+              {
+                key: 'visibility',
+                label: { ar: 'الظهور', en: 'Visibility' },
+                type: 'select',
+                value: 'PUBLIC',
+                options: [
+                  { value: 'PUBLIC', label: 'Public' },
+                  { value: 'HIDDEN', label: 'Hidden' },
+                  { value: 'PARTNER', label: 'Partner-only' },
+                ],
+              },
+              { key: 'trialDays', label: { ar: 'أيام التجربة', en: 'Trial days' }, type: 'number', value: '7' },
+              { key: 'aiAvatar', label: { ar: 'وصول الأفاتار الذكي', en: 'AI avatar access' }, type: 'toggle', value: true },
+            ],
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -1,38 +1,61 @@
 'use client';
 
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { BiInline, BiLabel } from '@/components/admin/BiLabel';
-import { L } from '@/lib/admin/labels';
+import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 
-export default function SettingsGeneralPage() {
+export default function Page() {
   return (
-    <div>
-      <AdminPageHeader
-        title={{ ar: L.general.ar, en: L.general.en }}
-        description={{
-          ar: 'الإعدادات العامة لمنصة مقابلة.',
-          en: 'General settings for the Muqabaleh platform.',
-        }}
-      />
-      <div className="space-y-4 rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-6 text-sm">
-        <div>
-          <BiLabel ar="اسم المنصة" en="Platform Name" />
-          <p className="mt-1 text-[var(--text-secondary)]">Muqabaleh / مقابلة</p>
-        </div>
-        <div>
-          <BiLabel ar="اللغة الافتراضية" en="Default Locale" />
-          <p className="mt-1 text-[var(--text-secondary)]">ar</p>
-        </div>
-        <div>
-          <BiLabel ar="نطاق المنتج" en="Product Scope" />
-          <p className="mt-1 text-[var(--text-secondary)]">
-            <BiInline
-              ar="مقابلات وظيفية بالذكاء الاصطناعي فقط — بدون اختبارات لغة."
-              en="AI job-interview practice only — no language proficiency exams."
-            />
-          </p>
-        </div>
-      </div>
-    </div>
+    <AdminConfigPanel
+      title={{ ar: 'الإعدادات العامة', en: 'General Settings' }}
+      description={{
+        ar: 'اسم الموقع، الشعار، اللغة الافتراضية، المنطقة الزمنية، العملة، ووضع الصيانة.',
+        en: 'Site name, logo & favicon, default language, timezone, currency, maintenance mode.',
+      }}
+      sections={[
+        {
+          title: { ar: 'هوية الموقع', en: 'Site identity' },
+          fields: [
+            { key: 'siteNameAr', label: { ar: 'اسم الموقع (عربي)', en: 'Site name AR' }, type: 'text', value: 'مقابلة' },
+            { key: 'siteNameEn', label: { ar: 'اسم الموقع (إنجليزي)', en: 'Site name EN' }, type: 'text', value: 'Muqabaleh' },
+            { key: 'logoUrl', label: { ar: 'الشعار', en: 'Site logo URL' }, type: 'text' },
+            { key: 'faviconUrl', label: { ar: 'أيقونة الموقع', en: 'Favicon URL' }, type: 'text' },
+            {
+              key: 'defaultLang',
+              label: { ar: 'اللغة الافتراضية', en: 'Default language' },
+              type: 'select',
+              value: 'ar',
+              options: [
+                { value: 'ar', label: 'Arabic' },
+                { value: 'en', label: 'English' },
+              ],
+            },
+            {
+              key: 'timezone',
+              label: { ar: 'المنطقة الزمنية', en: 'Timezone' },
+              type: 'select',
+              value: 'Asia/Riyadh',
+              options: [
+                { value: 'Asia/Riyadh', label: 'Asia/Riyadh' },
+                { value: 'Asia/Dubai', label: 'Asia/Dubai' },
+                { value: 'Africa/Cairo', label: 'Africa/Cairo' },
+                { value: 'UTC', label: 'UTC' },
+              ],
+            },
+            {
+              key: 'currency',
+              label: { ar: 'العملة الافتراضية', en: 'Default currency' },
+              type: 'select',
+              value: 'USD',
+              options: [
+                { value: 'USD', label: 'USD' },
+                { value: 'SAR', label: 'SAR' },
+                { value: 'AED', label: 'AED' },
+              ],
+            },
+            { key: 'maintenance', label: { ar: 'وضع الصيانة', en: 'Maintenance mode' }, type: 'toggle', value: false },
+            { key: 'maintenanceMsg', label: { ar: 'رسالة الصيانة', en: 'Maintenance message' }, type: 'textarea', value: 'We will be back shortly. / سنعود قريباً.' },
+          ],
+        },
+      ]}
+    />
   );
 }

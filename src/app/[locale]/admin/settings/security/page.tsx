@@ -99,7 +99,17 @@ export default function SettingsSecurityPage() {
             <li>
               <BiInline ar="حرف + رقم + رمز خاص" en="Letter + number + special character" />
             </li>
+            <li>
+              <BiInline ar="انتهاء صلاحية اختياري كل ٩٠ يوماً" en="Optional expiry every 90 days" />
+            </li>
           </ul>
+          <BiLabel className="mt-6" ar="فرض التحقق الثنائي للمشرفين" en="2FA enforcement for admins" />
+          <p className="mt-2">
+            <BiInline
+              ar="يُنصح بتفعيل TOTP لكل حساب SUPER_ADMIN قبل الوصول الكامل."
+              en="TOTP recommended for every SUPER_ADMIN before full access."
+            />
+          </p>
           <BiLabel className="mt-6" ar="مهلة الجلسة" en="Session Timeout" />
           <p className="mt-2">
             <BiInline ar="ساعتان لمشرف مقابلة الأعلى" en="2 hours for Muqabaleh Super Admin" />
@@ -107,6 +117,20 @@ export default function SettingsSecurityPage() {
           <BiLabel className="mt-6" ar="حد محاولات الدخول" en="Login Attempt Limit" />
           <p className="mt-2">
             <BiInline ar="٥ محاولات فاشلة ثم قفل ١٥ دقيقة" en="5 failed attempts then 15-minute lockout" />
+          </p>
+          <BiLabel className="mt-6" ar="القائمة البيضاء للـ IP" en="IP whitelist for admin panel" />
+          <p className="mt-2">
+            <BiInline
+              ar="اتركها فارغة للسماح للجميع، أو أضف عناوين مفصولة بفواصل في متغيرات البيئة."
+              en="Leave empty to allow all, or set comma-separated IPs via environment variables."
+            />
+          </p>
+          <BiLabel className="mt-6" ar="فرض إعادة تعيين كلمات المرور" en="Force password reset all users" />
+          <p className="mt-2">
+            <BiInline
+              ar="إجراء حساس — يُنفَّذ عبر واجهة الوصول أو API محمي."
+              en="Sensitive action — run via Access settings or a protected API."
+            />
           </p>
         </section>
       </div>

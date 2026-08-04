@@ -1,93 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { BiInline, BiLabel } from '@/components/admin/BiLabel';
-import { L } from '@/lib/admin/labels';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
+import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 
-const DEFAULT_PROMPTS = [
-  {
-    key: 'interview_system',
-    ar: 'أنت محاور ذكي لمنصة مقابلة. قيّم المرشح للمقابلات الوظيفية فقط.',
-    en: 'You are an AI interviewer for Muqabaleh. Assess candidates for job interviews only.',
-  },
-  {
-    key: 'scoring',
-    ar: 'قيّم الإجابة على معايير المحتوى والوضوح والثقة والملاءمة الثقافية.',
-    en: 'Score the answer on content, clarity, confidence, and cultural fit.',
-  },
-];
-
-export default function AiPromptsPage() {
-  const [prompts, setPrompts] = useState(DEFAULT_PROMPTS);
-
-  const save = async () => {
-    const res = await fetch('/api/admin/resources?resource=email_templates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: `prompt_snapshot_${Date.now()}`,
-        subjectAr: 'لقطة أوامر الذكاء الاصطناعي',
-        subjectEn: 'AI prompt snapshot',
-        bodyAr: JSON.stringify(prompts, null, 2),
-        bodyEn: JSON.stringify(prompts, null, 2),
-      }),
-    });
-    if (res.ok) toast.success(`${L.success.ar} / ${L.success.en}`);
-    else toast.error(`${L.error.ar} / ${L.error.en}`);
-  };
-
+export default function Page() {
   return (
-    <div>
-      <AdminPageHeader
-        title={{ ar: L.prompts.ar, en: L.prompts.en }}
-        description={{
-          ar: 'إدارة أوامر Gemini لمقابلات مقابلة (بدون اختبارات لغة).',
-          en: 'Manage Gemini prompts for Muqabaleh interviews (no language-exam content).',
-        }}
-        actions={
-          <Button type="button" size="sm" onClick={() => void save()}>
-            <BiInline ar={L.save.ar} en={L.save.en} />
-          </Button>
-        }
-      />
-
-      <div className="space-y-4">
-        {prompts.map((p, idx) => (
-          <div key={p.key} className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-4">
-            <BiLabel ar={`مفتاح: ${p.key}`} en={`Key: ${p.key}`} />
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <div>
-                <p className="mb-1 text-xs text-[var(--text-muted)]">العربية / Arabic</p>
-                <Textarea
-                  value={p.ar}
-                  onChange={(e) => {
-                    const next = [...prompts];
-                    next[idx] = { ...p, ar: e.target.value };
-                    setPrompts(next);
-                  }}
-                  rows={5}
-                />
-              </div>
-              <div>
-                <p className="mb-1 text-xs text-[var(--text-muted)]">English</p>
-                <Textarea
-                  value={p.en}
-                  onChange={(e) => {
-                    const next = [...prompts];
-                    next[idx] = { ...p, en: e.target.value };
-                    setPrompts(next);
-                  }}
-                  rows={5}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <AdminConfigPanel
+      title={{ ar: 'إدارة الأوامر (Prompts)', en: 'Prompt Management' }}
+      description={{
+        ar: 'أوامر النظام لتوليد المقابلات، التقييم، الملاحظات، وحوار الأفاتار — مع A/B وسجل الإصدارات.',
+        en: 'System prompts for interview generation, scoring, feedback, avatar dialogue — A/B tests & version history.',
+      }}
+      sections={[
+        {
+          title: { ar: 'توليد المقابلة', en: 'Interview generation' },
+          fields: [
+            {
+              key: 'interviewPrompt',
+              label: { ar: 'أمر النظام', en: 'System prompt' },
+              type: 'textarea',
+              value:
+                'You are Muqabaleh, an Arabic/English AI interview coach. Ask adaptive follow-ups.',
+            },
+          ],
+        },
+        {
+          title: { ar: 'التقييم', en: 'Scoring' },
+          fields: [
+            {
+              key: 'scoringPrompt',
+              label: { ar: 'أمر التقييم', en: 'Scoring prompt' },
+              type: 'textarea',
+              value: 'Score content, clarity, confidence, cultural fit from 0-100 with rationale.',
+            },
+          ],
+        },
+        {
+          title: { ar: 'توليد الملاحظات', en: 'Feedback generation' },
+          fields: [
+            {
+              key: 'feedbackPrompt',
+              label: { ar: 'أمر الملاحظات', en: 'Feedback prompt' },
+              type: 'textarea',
+              value: 'Provide actionable bilingual feedback with strengths and improvements.',
+            },
+          ],
+        },
+        {
+          title: { ar: 'حوار الأفاتار', en: 'Avatar dialogue' },
+          fields: [
+            {
+              key: 'avatarPrompt',
+              label: { ar: 'أمر الحوار', en: 'Dialogue prompt' },
+              type: 'textarea',
+              value: 'Speak naturally as Fahd or Noora. Keep questions concise.',
+            },
+            { key: 'abTest', label: { ar: 'تفعيل اختبار A/B', en: 'Enable A/B test' }, type: 'toggle', value: false },
+            { key: 'version', label: { ar: 'الإصدار الحالي', en: 'Current version' }, type: 'text', value: 'v1.0.0' },
+          ],
+        },
+      ]}
+    />
   );
 }

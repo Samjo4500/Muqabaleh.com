@@ -164,7 +164,14 @@ async function listResource(resource: ResourceKey, q: string) {
     case 'backup_logs':
       return db.backupLog.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
     case 'support_tickets':
-      return db.supportTicket.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+      return db.supportTicket.findMany({
+        include: {
+          createdBy: { select: { email: true, name: true } },
+          assignee: { select: { email: true, name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
     case 'admin_roles':
       return db.adminRole.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
     case 'ai_usage':
@@ -184,20 +191,53 @@ async function listResource(resource: ResourceKey, q: string) {
           name: true,
           role: true,
           tier: true,
+          accountType: true,
+          companyId: true,
           isActive: true,
           createdAt: true,
           sessionsLeft: true,
+          lastLoginAt: true,
         },
         orderBy: { createdAt: 'desc' },
         take: 100,
       });
-    case 'candidates':
-      return db.user.findMany({
-        where: { role: 'USER', ...(q ? { email: { contains: q, mode: 'insensitive' } } : {}) },
-        select: { id: true, email: true, name: true, tier: true, sessionsLeft: true, createdAt: true },
+    case 'candidates': {
+      const candidates = await db.user.findMany({
+        where: {
+          role: 'USER',
+          ...(q
+            ? {
+                OR: [
+                  { email: { contains: q, mode: 'insensitive' } },
+                  { name: { contains: q, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          tier: true,
+          sessionsLeft: true,
+          industry: true,
+          lastLoginAt: true,
+          createdAt: true,
+          interviews: { select: { overallScore: true }, take: 50 },
+          _count: { select: { interviews: true } },
+        },
         orderBy: { createdAt: 'desc' },
         take: 100,
       });
+      return candidates.map((c) => {
+        const scores = c.interviews.map((i) => i.overallScore).filter((s): s is number => s != null);
+        const avgScore = scores.length
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : null;
+        const { interviews: _i, ...rest } = c;
+        return { ...rest, avgScore, interviewCount: c._count.interviews };
+      });
+    }
     case 'admins':
       return db.user.findMany({
         where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
@@ -208,6 +248,7 @@ async function listResource(resource: ResourceKey, q: string) {
     case 'companies':
       return db.company.findMany({
         where: q ? { name: { contains: q, mode: 'insensitive' } } : undefined,
+        include: { _count: { select: { users: true } } },
         orderBy: { createdAt: 'desc' },
         take: 100,
       });

@@ -1,18 +1,38 @@
 'use client';
 
-import { AdminResourceClient } from '@/components/admin/AdminResourceClient';
+import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 
 export default function Page() {
   return (
-    <AdminResourceClient
-      title={{ ar: "سجلات الإشعارات", en: "Notification Logs" }}
-      resource="notification_logs"
-      creatable={true}
-      columns={[
-    { key: 'channel', label: { ar: 'القناة', en: 'Channel' } },
-    { key: 'recipient', label: { ar: 'المستلم', en: 'Recipient' } },
-    { key: 'subject', label: { ar: 'الموضوع', en: 'Subject' } },
-    { key: 'status', label: { ar: 'الحالة', en: 'Status' } }
+    <AdminConfigPanel
+      title={{ ar: 'رسائل الإشعارات', en: 'Notification Messages' }}
+      description={{
+        ar: 'قوالب إشعارات داخل التطبيق، الدفع، والرسائل النصية إن وُجدت.',
+        en: 'In-app, push, and SMS notification templates.',
+      }}
+      sections={[
+        {
+          title: { ar: 'داخل التطبيق', en: 'In-app templates' },
+          fields: [
+            { key: 'inAppAr', label: { ar: 'نص عربي', en: 'Arabic text' }, type: 'textarea', value: 'جلستك جاهزة للمراجعة.' },
+            { key: 'inAppEn', label: { ar: 'نص إنجليزي', en: 'English text' }, type: 'textarea', value: 'Your session is ready to review.' },
+          ],
+        },
+        {
+          title: { ar: 'إشعارات الدفع', en: 'Push templates' },
+          fields: [
+            { key: 'pushAr', label: { ar: 'نص عربي', en: 'Arabic text' }, type: 'textarea' },
+            { key: 'pushEn', label: { ar: 'نص إنجليزي', en: 'English text' }, type: 'textarea' },
+          ],
+        },
+        {
+          title: { ar: 'SMS', en: 'SMS templates' },
+          note: { ar: 'اختياري', en: 'If applicable' },
+          fields: [
+            { key: 'smsEnabled', label: { ar: 'تفعيل SMS', en: 'Enable SMS' }, type: 'toggle', value: false },
+            { key: 'smsBody', label: { ar: 'نص الرسالة', en: 'SMS body' }, type: 'textarea' },
+          ],
+        },
       ]}
     />
   );

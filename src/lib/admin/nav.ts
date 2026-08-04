@@ -11,11 +11,14 @@ export type AdminNavGroup = {
   items: AdminNavItem[];
 };
 
-/** Exact Super Admin routes under /admin */
+/**
+ * Exact Super Admin sidebar structure from product spec.
+ * Paths are under /admin (locale-aware via localePath).
+ */
 export const ADMIN_NAV: AdminNavGroup[] = [
   {
-    id: 'main',
-    label: 'overview',
+    id: 'dashboard',
+    label: 'dashboard',
     items: [{ href: '/admin/dashboard', label: 'dashboard' }],
   },
   {
@@ -44,7 +47,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: '/admin/partners/whitelabel', label: 'whitelabel' },
       { href: '/admin/partners/applications', label: 'applications' },
-      { href: '/admin/partners/revenue', label: 'revenue' },
+      { href: '/admin/partners/revenue', label: 'revenueShare' },
     ],
   },
   {
@@ -60,9 +63,9 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: 'payments',
     label: 'payments',
     items: [
-      { href: '/admin/payments/overview', label: 'overview' },
       { href: '/admin/payments/transactions', label: 'transactions' },
       { href: '/admin/payments/payouts', label: 'payouts' },
+      { href: '/admin/payments/overview', label: 'financialOverview' },
     ],
   },
   {
@@ -112,27 +115,23 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     ],
   },
   {
-    id: 'misc',
+    id: 'notifications',
     label: 'notifications',
-    items: [
-      { href: '/admin/notifications', label: 'notifications' },
-      { href: '/admin/audit', label: 'audit' },
-      { href: '/admin/applicants', label: 'applicants' },
-    ],
+    items: [{ href: '/admin/notifications', label: 'notifications' }],
   },
   {
-    id: 'legacy',
-    label: 'legacyOps',
-    items: [
-      { href: '/admin/interviewers', label: 'interviewers' },
-      { href: '/admin/bookings', label: 'bookings' },
-      { href: '/admin/payouts', label: 'payouts' },
-    ],
+    id: 'audit',
+    label: 'audit',
+    items: [{ href: '/admin/audit', label: 'audit' }],
+  },
+  {
+    id: 'applicants',
+    label: 'applicants',
+    items: [{ href: '/admin/applicants', label: 'applicants' }],
   },
 ];
 
 export function parentAdminPath(pathname: string): string {
-  // Strip locale prefix if present
   let path = pathname;
   for (const loc of ['ar', 'en']) {
     if (path === `/${loc}`) path = '/';
@@ -141,7 +140,6 @@ export function parentAdminPath(pathname: string): string {
   if (!path.startsWith('/admin')) return '/admin/dashboard';
   if (path === '/admin' || path === '/admin/dashboard') return '/admin/dashboard';
   const parts = path.split('/').filter(Boolean);
-  // /admin/users/all → /admin/dashboard (section root) or /admin/users parent
   if (parts.length <= 2) return '/admin/dashboard';
   if (parts.length === 3) return '/admin/dashboard';
   return `/${parts.slice(0, -1).join('/')}`;

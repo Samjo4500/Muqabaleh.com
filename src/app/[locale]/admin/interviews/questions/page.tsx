@@ -1,18 +1,32 @@
 'use client';
 
-import { AdminResourceClient } from '@/components/admin/AdminResourceClient';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
 
 export default function Page() {
   return (
-    <AdminResourceClient
-      title={{ ar: "بنك الأسئلة", en: "Question Bank" }}
+    <AdminDataTable
+      title={{ ar: 'بنك الأسئلة', en: 'Question Bank' }}
+      description={{
+        ar: 'إضافة/تعديل/حذف الأسئلة، استيراد CSV، واقتراحات بالذكاء الاصطناعي (Gemini).',
+        en: 'Add/edit/delete questions, CSV import, AI suggestions via Gemini.',
+      }}
       resource="questions"
-      creatable={true}
       columns={[
-    { key: 'textAr', label: { ar: 'السؤال', en: 'Question AR' } },
-    { key: 'textEn', label: { ar: 'Question', en: 'Question EN' } },
-    { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
-    { key: 'difficulty', label: { ar: 'الصعوبة', en: 'Difficulty' } }
+        { key: 'textAr', label: { ar: 'نص السؤال (عربي)', en: 'Question AR' } },
+        { key: 'textEn', label: { ar: 'نص السؤال (إنجليزي)', en: 'Question EN' } },
+        { key: 'category', label: { ar: 'الفئة', en: 'Category' } },
+        { key: 'industry', label: { ar: 'المجال', en: 'Industry' } },
+        { key: 'difficulty', label: { ar: 'الصعوبة', en: 'Difficulty' } },
+        {
+          key: 'expectedPoints',
+          label: { ar: 'نقاط الإجابة المتوقعة', en: 'Expected answer points' },
+          render: (row) => String(row.expectedPoints ?? '—'),
+        },
+        {
+          key: 'rubric',
+          label: { ar: 'معيار التقييم', en: 'Scoring rubric' },
+          render: (row) => String(row.rubric ?? 'Default'),
+        },
       ]}
     />
   );

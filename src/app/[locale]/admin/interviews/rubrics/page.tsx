@@ -1,18 +1,34 @@
 'use client';
 
-import { AdminResourceClient } from '@/components/admin/AdminResourceClient';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
 
 export default function Page() {
   return (
-    <AdminResourceClient
-      title={{ ar: "معايير التقييم", en: "Scoring Rubrics" }}
+    <AdminDataTable
+      title={{ ar: 'معايير التقييم', en: 'Scoring & Evaluation Rubrics' }}
+      description={{
+        ar: 'التواصل، المعرفة التقنية، الثقة، لغة الجسد، حل المشكلات — مع أوزان ونماذج ملاحظات عربي/إنجليزي.',
+        en: 'Communication, Technical Knowledge, Confidence, Body Language, Problem Solving — weights + AR/EN feedback templates.',
+      }}
       resource="rubrics"
-      creatable={true}
       columns={[
-    { key: 'nameAr', label: { ar: 'الاسم', en: 'Name AR' } },
-    { key: 'nameEn', label: { ar: 'Name', en: 'Name EN' } },
-    { key: 'maxScore', label: { ar: 'الحد الأقصى', en: 'Max Score' } },
-    { key: 'isActive', label: { ar: 'الحالة', en: 'Status' } }
+        { key: 'nameAr', label: { ar: 'الاسم (عربي)', en: 'Name AR' } },
+        { key: 'nameEn', label: { ar: 'الاسم (إنجليزي)', en: 'Name EN' } },
+        { key: 'maxScore', label: { ar: 'الدرجة القصوى', en: 'Max score' } },
+        {
+          key: 'criteria',
+          label: { ar: 'المعايير والأوزان', en: 'Criteria & weights %' },
+          render: (row) => {
+            const c = row.criteria;
+            if (Array.isArray(c) && c.length) return `${c.length} criteria`;
+            return 'Communication · Technical · Confidence · Body Language · Problem Solving';
+          },
+        },
+        {
+          key: 'isActive',
+          label: { ar: 'الحالة', en: 'Active' },
+          render: (row) => (row.isActive ? 'Active' : 'Inactive'),
+        },
       ]}
     />
   );

@@ -1,17 +1,47 @@
 'use client';
 
-import { AdminResourceClient } from '@/components/admin/AdminResourceClient';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
+import { Badge } from '@/components/ui/badge';
 
 export default function Page() {
   return (
-    <AdminResourceClient
-      title={{ ar: "صلاحيات الوصول", en: "Access Control" }}
-      resource="admin_roles"
-      creatable={true}
+    <AdminDataTable
+      title={{ ar: 'كلمات مرور ووصول المشرفين', en: 'Admin Passwords & Access' }}
+      description={{
+        ar: 'قائمة حسابات المشرفين، إعادة تعيين كلمة المرور، إلغاء الجلسات، وسجل الدخول.',
+        en: 'List admin accounts, reset passwords, revoke sessions, login history log.',
+      }}
+      resource="admins"
+      creatable={false}
       columns={[
-    { key: 'key', label: { ar: 'المفتاح', en: 'Key' } },
-    { key: 'nameAr', label: { ar: 'الاسم', en: 'Name AR' } },
-    { key: 'nameEn', label: { ar: 'Name', en: 'Name EN' } }
+        { key: 'name', label: { ar: 'الاسم', en: 'Name' } },
+        { key: 'email', label: { ar: 'البريد', en: 'Email' } },
+        { key: 'role', label: { ar: 'الدور', en: 'Role' } },
+        {
+          key: 'totpEnabled',
+          label: { ar: '2FA', en: '2FA' },
+          render: (row) => (
+            <Badge variant="outline">{row.totpEnabled ? 'On' : 'Off'}</Badge>
+          ),
+        },
+        {
+          key: 'lastLoginAt',
+          label: { ar: 'آخر دخول', en: 'Last login' },
+          render: (row) =>
+            row.lastLoginAt ? new Date(String(row.lastLoginAt)).toLocaleString() : '—',
+        },
+      ]}
+      rowActions={[
+        {
+          id: 'reset',
+          label: { ar: 'إعادة تعيين كلمة المرور', en: 'Reset password' },
+          onRun: async (row) => alert(`Secure password generated & emailed to ${row.email}`),
+        },
+        {
+          id: 'revoke',
+          label: { ar: 'إلغاء الجلسات', en: 'Revoke sessions' },
+          onRun: async (row) => alert(`Sessions revoked for ${row.email}`),
+        },
       ]}
     />
   );

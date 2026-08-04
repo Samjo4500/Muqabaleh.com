@@ -1,18 +1,54 @@
 'use client';
 
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { BiInline } from '@/components/admin/BiLabel';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
+import { Badge } from '@/components/ui/badge';
 
 export default function Page() {
   return (
-    <div>
-      <AdminPageHeader
-        title={{ ar: "إيرادات الشركاء", en: "Partner Revenue" }}
-        description={{ ar: "ملخص إيرادات الشركاء وحصة المنصة.", en: "Partner revenue share overview for Muqabaleh." }}
-      />
-      <div className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-6 text-sm text-[var(--text-secondary)]">
-        <BiInline ar="هذه الصفحة جاهزة للإعدادات التشغيلية في مقابلة." en="This page is ready for Muqabaleh operational configuration." />
-      </div>
-    </div>
+    <AdminDataTable
+      title={{ ar: 'تقاسم الإيرادات', en: 'Partner Revenue Share' }}
+      description={{
+        ar: 'نسبة العمولة، تقرير الأرباح الشهري، حالة الدفع، وتكامل PayPal.',
+        en: 'Commission %, monthly earnings, payout status, PayPal payout integration.',
+      }}
+      resource="partner_applications"
+      creatable={false}
+      columns={[
+        { key: 'companyName', label: { ar: 'الشريك', en: 'Partner' } },
+        {
+          key: 'commission',
+          label: { ar: 'نسبة العمولة', en: 'Commission %' },
+          render: (row) => String(row.commission ?? '15%'),
+        },
+        {
+          key: 'monthlyEarnings',
+          label: { ar: 'أرباح الشهر', en: 'Monthly earnings' },
+          render: (row) => String(row.monthlyEarnings ?? '$0.00'),
+        },
+        {
+          key: 'payoutStatus',
+          label: { ar: 'حالة الدفع', en: 'Payout status' },
+          render: (row) => (
+            <Badge variant="outline">{String(row.payoutStatus ?? 'Pending')}</Badge>
+          ),
+        },
+      ]}
+      demoRows={[
+        {
+          id: 'rev-1',
+          companyName: 'Gulf Hire',
+          commission: '18%',
+          monthlyEarnings: '$1,240.00',
+          payoutStatus: 'Paid',
+        },
+        {
+          id: 'rev-2',
+          companyName: 'Cairo Talent',
+          commission: '12%',
+          monthlyEarnings: '$420.00',
+          payoutStatus: 'Pending',
+        },
+      ]}
+    />
   );
 }

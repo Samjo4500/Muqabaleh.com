@@ -9,6 +9,7 @@ const LOCKOUT_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 const SUPER_ADMIN_SESSION_SECONDS = 2 * 60 * 60; // 2 hours
 const DEFAULT_SESSION_SECONDS = 24 * 60 * 60;
+const REMEMBER_ME_SESSION_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,6 +19,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
         totpCode: { label: '2FA Code', type: 'text' },
+        rememberMe: { label: 'Remember Me', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -83,6 +85,9 @@ export const authOptions: NextAuthOptions = {
             await auditLoginSuccess(user.id, user.email);
           }
 
+          const rememberMe =
+            String((credentials as { rememberMe?: string }).rememberMe || '') === 'true';
+
           return {
             id: user.id,
             email: user.email,
@@ -93,6 +98,7 @@ export const authOptions: NextAuthOptions = {
             sessionsLeft: user.sessionsLeft,
             language: user.language,
             tier: user.tier,
+            rememberMe,
           };
         } catch {
           await auditLoginFailed(credentials.email);
@@ -103,7 +109,8 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: DEFAULT_SESSION_SECONDS,
+    // Upper bound; actual expiry set per-login in jwt callback
+    maxAge: REMEMBER_ME_SESSION_SECONDS,
   },
   cookies: {
     sessionToken: {
@@ -125,9 +132,16 @@ export const authOptions: NextAuthOptions = {
         token.companyId = user.companyId;
         token.sessionsLeft = user.sessionsLeft;
         token.tier = user.tier;
+        const rememberMe = Boolean((user as { rememberMe?: boolean }).rememberMe);
+        token.rememberMe = rememberMe;
+
         // Shorter session timeout for Super Admin
         if (user.role === UserRole.SUPER_ADMIN) {
           token.exp = Math.floor(Date.now() / 1000) + SUPER_ADMIN_SESSION_SECONDS;
+        } else if (rememberMe) {
+          token.exp = Math.floor(Date.now() / 1000) + REMEMBER_ME_SESSION_SECONDS;
+        } else {
+          token.exp = Math.floor(Date.now() / 1000) + DEFAULT_SESSION_SECONDS;
         }
       }
       return token;
@@ -173,6 +187,7 @@ declare module 'next-auth' {
     sessionsLeft: number;
     language: string;
     tier: string;
+    rememberMe?: boolean;
   }
 }
 
@@ -185,5 +200,6 @@ declare module 'next-auth/jwt' {
     sessionsLeft: number;
     language: string;
     tier: string;
+    rememberMe?: boolean;
   }
 }

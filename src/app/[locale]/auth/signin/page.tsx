@@ -1,26 +1,29 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
-import { Mail, Lock, Loader2, AlertTriangle, Zap } from "lucide-react";
-import { toast } from "sonner";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { Mail, Loader2, AlertTriangle, Zap } from 'lucide-react';
+import { toast } from 'sonner';
+import { signIn } from 'next-auth/react';
 
-import { AuthShell } from "@/components/brand";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { AuthShell } from '@/components/brand';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
+import { PasswordField } from '@/components/auth/PasswordField';
 
 export default function SignInPage() {
-  const t = useTranslations("auth");
+  const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [totpCode, setTotpCode] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [totpCode, setTotpCode] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [demoMode, setDemoMode] = useState(false);
@@ -31,11 +34,9 @@ export default function SignInPage() {
       .then((r) => r.json())
       .then((data) => {
         setDemoMode(data.demoMode === true);
-        // In demo mode, database is not available
         setDbAvailable(!data.demoMode);
       })
       .catch(() => {
-        // If config fails, assume demo mode
         setDemoMode(true);
         setDbAvailable(false);
       });
@@ -43,49 +44,45 @@ export default function SignInPage() {
 
   const emailError =
     touched.email && !email
-      ? t("errorEmailRequired")
+      ? t('errorEmailRequired')
       : touched.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        ? t("errorEmailInvalid")
-        : "";
+        ? t('errorEmailInvalid')
+        : '';
 
-  const passwordError = touched.password && !password ? t("errorPasswordRequired") : "";
+  const passwordError = touched.password && !password ? t('errorPasswordRequired') : '';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ email: true, password: true });
     if (emailError || passwordError || !email || !password) return;
 
-    // Demo mode: still use NextAuth credentials flow
-    // (the backend will accept any creds when DATABASE_URL is not set)
-    // No client-side cookie tricks — all auth goes through NextAuth JWT.
-
     setLoading(true);
     try {
-      const result = await signIn("credentials", {
-        email,
+      const result = await signIn('credentials', {
+        email: email.trim().toLowerCase(),
         password,
         totpCode: totpCode || undefined,
+        rememberMe: rememberMe ? 'true' : 'false',
         redirect: false,
       });
 
       if (result?.error) {
-        toast.error(t("loginFailed") || "البريد أو كلمة المرور غير صحيحة");
+        toast.error(t('loginFailed') || 'البريد أو كلمة المرور غير صحيحة');
       } else {
         router.push(`/${locale}/app`);
         router.refresh();
       }
     } catch {
-      toast.error(t("loginFailed") || "حدث خطأ");
+      toast.error(t('loginFailed') || 'حدث خطأ');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthShell title={t("signinTitle")} showBack>
-      {/* Service status banner */}
+    <AuthShell title={t('signinTitle')} showBack>
       {!dbAvailable && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-xs text-amber-400">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-400">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>
             {locale === 'ar'
@@ -95,7 +92,7 @@ export default function SignInPage() {
         </div>
       )}
       {demoMode && dbAvailable && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2.5 text-xs text-amber-400">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-400">
           <Zap size={14} className="mt-0.5 shrink-0" />
           <span>
             {locale === 'ar'
@@ -106,10 +103,9 @@ export default function SignInPage() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-        {/* Email */}
         <div className="flex flex-col gap-2">
           <Label htmlFor="signin-email" className="text-[var(--text-muted)]">
-            {t("email")}
+            {t('email')}
           </Label>
           <div className="relative">
             <Mail
@@ -120,98 +116,95 @@ export default function SignInPage() {
             <Input
               id="signin-email"
               type="email"
-              placeholder={t("emailPlaceholder")}
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => setTouched((p) => ({ ...p, email: true }))}
               aria-invalid={!!emailError}
               className={
-                "glass-input ps-10 h-11" + (emailError ? " !border-red-500 focus-visible:!border-red-500" : "")
+                'glass-input h-11 ps-10' +
+                (emailError ? ' !border-red-500 focus-visible:!border-red-500' : '')
               }
               autoComplete="email"
             />
           </div>
-          {emailError && (
+          {emailError ? (
             <p className="text-xs text-red-400" role="alert">
               {emailError}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Password */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="signin-password" className="text-[var(--text-muted)]">
-            {t("password")}
-          </Label>
-          <div className="relative">
-            <Lock
-              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
-              size={18}
-              strokeWidth={1.75}
+        <PasswordField
+          id="signin-password"
+          label={t('password')}
+          value={password}
+          onChange={setPassword}
+          onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+          placeholder={t('passwordPlaceholder')}
+          autoComplete="current-password"
+          error={passwordError}
+          showLabel={t('showPassword')}
+          hideLabel={t('hidePassword')}
+        />
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)]">
+            <Checkbox
+              checked={rememberMe}
+              onCheckedChange={(v) => setRememberMe(v === true)}
+              id="remember-me"
             />
+            <span>{t('rememberMe')}</span>
+          </label>
+          <Link
+            href={`/${locale}/auth/forgot-password`}
+            className="text-sm text-[var(--gold)] transition hover:text-[var(--gold-hover)]"
+          >
+            {t('forgotLink')}
+          </Link>
+        </div>
+
+        <details className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+          <summary className="cursor-pointer text-xs text-[var(--text-muted)]">
+            {locale === 'ar' ? 'رمز التحقق الثنائي (اختياري للمشرف)' : '2FA code (optional for admin)'}
+          </summary>
+          <div className="mt-2">
             <Input
-              id="signin-password"
-              type="password"
-              placeholder={t("passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => setTouched((p) => ({ ...p, password: true }))}
-              aria-invalid={!!passwordError}
-              className={
-                "glass-input ps-10 h-11" + (passwordError ? " !border-red-500 focus-visible:!border-red-500" : "")
-              }
-              autoComplete="current-password"
+              id="signin-totp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="000000"
+              value={totpCode}
+              onChange={(e) => setTotpCode(e.target.value)}
+              className="glass-input h-11"
             />
           </div>
-          {passwordError && (
-            <p className="text-xs text-red-400" role="alert">
-              {passwordError}
-            </p>
-          )}
-        </div>
+        </details>
 
-        {/* Optional Super Admin 2FA */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="signin-totp" className="text-[var(--text-muted)]">
-            {locale === 'ar' ? 'رمز التحقق الثنائي (إن وُجد)' : '2FA code (if enabled)'}
-          </Label>
-          <Input
-            id="signin-totp"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="000000"
-            value={totpCode}
-            onChange={(e) => setTotpCode(e.target.value)}
-            className="glass-input h-11"
-          />
-        </div>
-
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
           className="btn-gold flex w-full cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : null}
-          {t("login")}
+          {t('login')}
         </button>
 
-        {/* Divider */}
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
-          <span className="text-xs text-[var(--text-faint)]">{t("or")}</span>
+          <span className="text-xs text-[var(--text-faint)]">{t('or')}</span>
           <Separator className="flex-1" />
         </div>
 
-        {/* Register link */}
         <p className="text-center text-sm text-[var(--text-muted)]">
-            {t("noAccount")}{" "}
+          {t('noAccount')}{' '}
           <Link
             href={`/${locale}/auth/register`}
-            className="font-semibold text-[var(--gold)] hover:text-[var(--gold-hover)] transition-colors"
+            className="font-semibold text-[var(--gold)] transition-colors hover:text-[var(--gold-hover)]"
           >
-            {t("createAccount")}
+            {t('createAccount')}
           </Link>
         </p>
       </form>

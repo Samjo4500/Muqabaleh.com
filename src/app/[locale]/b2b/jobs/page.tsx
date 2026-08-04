@@ -14,7 +14,7 @@ const JOBS = [
 
 function statusColor(status: string) {
   if (status === 'statusActive') return 'border-emerald/30 bg-emerald/10 text-emerald';
-  if (status === 'statusCompleted') return 'border-gold/30 bg-gold/10 text-gold';
+  if (status === 'statusCompleted') return 'border-indigo-400/30 bg-indigo-500/10 text-[var(--aurora-2)]';
   return 'border-white/20 bg-white/5 text-[var(--text-muted)]';
 }
 
@@ -26,7 +26,7 @@ export default function JobsListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
         <Link href="/b2b/jobs/new">
-          <Button className="btn-gold flex items-center gap-2 cursor-pointer">
+          <Button className="glass-button flex items-center gap-2 cursor-pointer">
             <Plus size={18} strokeWidth={1.75} />
             {t('createJob')}
           </Button>
@@ -53,7 +53,7 @@ export default function JobsListPage() {
                 className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.02]"
               >
                 <td className="px-4 py-3">
-                  <Link href={`/b2b/jobs/${i + 1}`} className="font-medium text-[var(--text-primary)] hover:text-gold transition-colors">
+                  <Link href={`/b2b/jobs/${i + 1}`} className="font-medium text-[var(--text-primary)] hover:text-[var(--aurora-2)] transition-colors">
                     {t(job.title)}
                   </Link>
                 </td>

@@ -75,7 +75,7 @@ export default function OnboardingPage() {
       <div className="relative z-10 w-full max-w-lg">
         {/* Logo */}
         <div className="mb-6 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
               <path d="M14 2L26 8v12l-12 6-12-6V8l12-6z" stroke="#D4A843" strokeWidth="1.5" fill="none" />
               <path d="M14 8l6 3v6l-6 3-6-3v-6l6-3z" fill="#D4A843" opacity="0.2" />
@@ -91,13 +91,13 @@ export default function OnboardingPage() {
               <div className="flex w-full items-center gap-2">
                 <div
                   className={`h-2 flex-1 rounded-full transition-colors ${
-                    i + 1 <= step ? 'bg-gold' : 'bg-white/10'
+                    i + 1 <= step ? 'bg-indigo-500' : 'bg-white/10'
                   }`}
                 />
               </div>
               <span
                 className={`text-xs font-medium transition-colors ${
-                  i + 1 === step ? 'text-gold' : 'text-[var(--text-faint)]'
+                  i + 1 === step ? 'text-[var(--aurora-2)]' : 'text-[var(--text-faint)]'
                 }`}
               >
                 {t(s)}
@@ -198,7 +198,7 @@ export default function OnboardingPage() {
                     onClick={() => updateForm('plan', plan.key)}
                     className={`w-full rounded-xl border p-4 text-start transition-all cursor-pointer ${
                       form.plan === plan.key
-                        ? 'border-gold bg-gold/10'
+                        ? 'border-indigo-400/50 bg-indigo-500/10'
                         : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20'
                     }`}
                   >
@@ -206,18 +206,18 @@ export default function OnboardingPage() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
-                            form.plan === plan.key ? 'border-gold' : 'border-white/20'
+                            form.plan === plan.key ? 'border-indigo-400/50' : 'border-white/20'
                           }`}
                         >
                           {form.plan === plan.key && (
-                            <div className="h-2.5 w-2.5 rounded-full bg-gold" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
                           )}
                         </div>
                         <span className="font-bold text-[var(--text-primary)]">
                           {t(plan.key)}
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-gold">{t(plan.price)}</span>
+                      <span className="text-sm font-bold text-[var(--aurora-2)]">{t(plan.price)}</span>
                     </div>
                     <p className="mt-2 text-sm text-[var(--text-muted)]">{t(plan.desc)}</p>
                     <div className="mt-3 flex items-center gap-2">
@@ -265,7 +265,7 @@ export default function OnboardingPage() {
                   <button
                     type="button"
                     onClick={addEmail}
-                    className="flex items-center gap-2 text-sm text-gold transition-colors hover:text-gold-hover"
+                    className="flex items-center gap-2 text-sm text-[var(--aurora-2)] transition-colors hover:text-cyan-300"
                   >
                     <Plus size={16} strokeWidth={1.75} />
                     {t('addMember')}
@@ -282,7 +282,7 @@ export default function OnboardingPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setStep(step - 1)}
-                className="text-[var(--text-muted)] hover:text-gold cursor-pointer"
+                className="text-[var(--text-muted)] hover:text-[var(--aurora-2)] cursor-pointer"
               >
                 {t('back')}
               </Button>
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
                   type="button"
                   variant="ghost"
                   onClick={handleFinish}
-                  className="text-[var(--text-muted)] hover:text-gold cursor-pointer"
+                  className="text-[var(--text-muted)] hover:text-[var(--aurora-2)] cursor-pointer"
                 >
                   {t('skip')}
                 </Button>
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   onClick={() => setStep(step + 1)}
-                  className="btn-gold cursor-pointer"
+                  className="glass-button cursor-pointer"
                 >
                   {t('next')}
                 </Button>
@@ -313,7 +313,7 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   onClick={handleFinish}
-                  className="btn-gold flex items-center gap-2 cursor-pointer"
+                  className="glass-button flex items-center gap-2 cursor-pointer"
                 >
                   <CheckCircle2 size={18} strokeWidth={1.75} />
                   {t('finish')}

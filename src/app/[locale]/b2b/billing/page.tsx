@@ -29,18 +29,18 @@ export default function BillingPage() {
           <div>
             <p className="text-sm text-[var(--text-muted)]">{t('balance')}</p>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-gold">15</span>
+              <span className="text-4xl font-bold text-[var(--aurora-2)]">15</span>
               <span className="text-sm text-[var(--text-muted)]">{t('interviews')}</span>
             </div>
           </div>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10">
-            <CreditCard size={28} strokeWidth={1.75} className="text-gold" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10">
+            <CreditCard size={28} strokeWidth={1.75} className="text-[var(--aurora-2)]" />
           </div>
         </div>
         <div className="mt-6">
           <Button
             onClick={() => toast.info(tCommon('comingSoon'))}
-            className="btn-gold cursor-pointer"
+            className="glass-button cursor-pointer"
           >
             {t('buyMore')}
           </Button>

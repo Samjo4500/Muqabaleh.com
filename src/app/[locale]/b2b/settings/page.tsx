@@ -158,7 +158,7 @@ export default function SettingsPage() {
 
       {/* Save */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="btn-gold cursor-pointer">
+        <Button onClick={handleSave} className="glass-button cursor-pointer">
           {t('save')}
         </Button>
       </div>

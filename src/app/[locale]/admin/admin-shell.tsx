@@ -222,14 +222,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] border-s border-white/[0.08] bg-[var(--bg-panel)] p-0">
               <SheetTitle className="sr-only">Admin Menu</SheetTitle>
-              <div className="flex items-center gap-3 p-4">
+              <Link
+                href={localePath('/', locale)}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 p-4 transition hover:bg-white/[0.04]"
+                aria-label={`${L.home.ar} / ${L.home.en}`}
+              >
                 <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={32} height={32} className="h-8 w-8" />
                 <BiLabel ar={L.brand.ar} en={L.brand.en} />
-              </div>
+              </Link>
               <SidebarNav pathname={pathname} locale={locale} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <BiLabel ar={L.brand.ar} en={L.brand.en} size="sm" />
+          <Link
+            href={localePath('/', locale)}
+            className="flex min-w-0 items-center gap-2"
+            aria-label={`${L.home.ar} / ${L.home.en}`}
+          >
+            <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={28} height={28} className="h-7 w-7 shrink-0" />
+            <BiLabel ar={L.brand.ar} en={L.brand.en} size="sm" />
+          </Link>
           <button type="button" onClick={toggle} className="ms-auto rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5">
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>

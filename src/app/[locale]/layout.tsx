@@ -74,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: ['/og-image.png'],
     },
     other: {
-      'theme-color': '#0a0a0f',
+      'theme-color': '#D4A853',
     },
   };
 }

@@ -25,10 +25,13 @@ type Row = Record<string, unknown>;
 
 async function tableExists(name: string): Promise<boolean> {
   const rows = await db.$queryRawUnsafe<Row[]>(
-    `SELECT to_regclass($1) AS reg`,
-    `public."${name}"`,
+    `SELECT EXISTS (
+       SELECT 1 FROM information_schema.tables
+       WHERE table_schema = 'public' AND table_name = $1
+     ) AS ok`,
+    name,
   );
-  return Boolean(rows[0]?.reg);
+  return Boolean(rows[0]?.ok);
 }
 
 async function columnExists(table: string, column: string): Promise<boolean> {

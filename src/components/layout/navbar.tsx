@@ -3,26 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Menu, Globe } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
 
 const NAV_LINKS = [
-  { key: 'why', href: '#why' },
-  { key: 'how', href: '#how' },
-  { key: 'interviewers', href: '#interviewers' },
+  { key: 'why', href: '#learners' },
+  { key: 'how', href: '#how-it-works' },
+  { key: 'interviewers', href: '#companies' },
   { key: 'pricing', href: '#pricing' },
-  { key: 'business', href: '/business' },
   { key: 'blog', href: '/blog' },
-  { key: 'faq', href: '#faq' },
 ] as const;
 
 export function Navbar() {
   const t = useTranslations('nav');
   const tc = useTranslations('common');
+  const tCrystal = useTranslations('crystal');
   const locale = useLocale();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -41,35 +39,42 @@ export function Navbar() {
   };
 
   const localeLabel = locale === 'ar' ? 'EN' : 'AR';
+  const isHome =
+    pathname === '/' ||
+    pathname === `/${locale}` ||
+    pathname === `/${locale}/` ||
+    pathname === '/en' ||
+    pathname === '/en/';
+
+  const resolveHref = (href: string) => {
+    if (href.startsWith('#') && !isHome) {
+      return locale === 'ar' ? `/${href}` : `/${locale}${href}`;
+    }
+    return href;
+  };
 
   return (
     <header
       className={cn(
         'fixed inset-x-0 top-0 z-50 transition-all duration-300',
         scrolled
-          ? 'border-b border-white/5 bg-[var(--bg-panel)]/80 backdrop-blur-lg'
+          ? 'border-b border-white/10 bg-[var(--bg-deep)]/60 backdrop-blur-xl'
           : 'bg-transparent'
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo — RTL: right, LTR: left */}
-        <Link href="/" className="shrink-0">
-          <Image
-            src="/images/logos/v2-balanced-a-T.webp"
-            alt="مقابلة | Muqabaleh"
-            width={200}
-            height={56}
-            className="h-14 w-auto"
-            priority
-          />
+      <nav className="content-wrap flex h-[72px] items-center justify-between">
+        <Link
+          href="/"
+          className="font-display shrink-0 text-lg font-bold tracking-[-0.02em] text-[var(--text-primary)]"
+        >
+          {tCrystal('brand')}
         </Link>
 
-        {/* Desktop nav links — center */}
         <div className="hidden items-center gap-6 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.key}
-              href={link.href}
+              href={resolveHref(link.href)}
               className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
               {t(link.key)}
@@ -77,82 +82,86 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Right side — RTL: left, LTR: right */}
         <div className="hidden items-center gap-3 lg:flex">
           <button
             onClick={switchLocale}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-sm text-[var(--text-muted)] transition-colors hover:border-white/20 hover:text-[var(--text-primary)]"
+            className="glass rounded-full px-3 py-1.5 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:border-white/20 hover:text-[var(--text-primary)]"
             aria-label={localeLabel}
           >
-            <Globe size={16} strokeWidth={1.75} />
             {localeLabel}
           </button>
-          <Link href="/auth/signin" className="btn-ghost text-sm">
+          <Link
+            href="/auth/signin"
+            className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+          >
             {tc('login')}
           </Link>
-          <Link href="/auth/register" className="btn-gold text-sm">
+          <Link href="/assessment" className="glass-button gradient-text text-sm !px-4 !py-2">
             {tc('startFree')}
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <button
-              className="flex items-center justify-center rounded-lg p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] lg:hidden"
-              aria-label="Menu"
+        <div className="flex items-center gap-2 lg:hidden">
+          <Link href="/assessment" className="glass-button gradient-text text-xs !px-3 !py-1.5">
+            {tc('startFree')}
+          </Link>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="flex items-center justify-center rounded-lg p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                aria-label={tCrystal('menu')}
+              >
+                <Menu size={20} strokeWidth={1.75} />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side={locale === 'ar' ? 'left' : 'right'}
+              className="w-72 border-white/10 bg-[var(--bg-deep)]/95 backdrop-blur-xl"
             >
-              <Menu size={20} strokeWidth={1.75} />
-            </button>
-          </SheetTrigger>
-          <SheetContent
-            side={locale === 'ar' ? 'left' : 'right'}
-            className="w-72 border-white/10 bg-[var(--bg-panel)]"
-          >
-            <SheetHeader>
-              <SheetTitle className="ms-2 text-left text-[var(--text-primary)]">
-                مقابلة | Muqabaleh
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-1 px-2">
-              {NAV_LINKS.map((link) => (
+              <SheetHeader>
+                <SheetTitle className="font-display ms-2 text-start text-[var(--text-primary)]">
+                  {tCrystal('brand')}
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-1 px-2">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.key}
+                    href={resolveHref(link.href)}
+                    onClick={() => setOpen(false)}
+                    className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+                  >
+                    {t(link.key)}
+                  </Link>
+                ))}
+                <hr className="my-2 border-white/10" />
+                <button
+                  onClick={() => {
+                    switchLocale();
+                    setOpen(false);
+                  }}
+                  className="glass min-h-[44px] rounded-full px-3 py-2.5 text-sm font-semibold text-[var(--text-secondary)]"
+                >
+                  {localeLabel}
+                </button>
                 <Link
-                  key={link.key}
-                  href={link.href}
+                  href="/auth/signin"
                   onClick={() => setOpen(false)}
                   className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
                 >
-                  {t(link.key)}
+                  {tc('login')}
                 </Link>
-              ))}
-              <hr className="my-2 border-white/10" />
-              <button
-                onClick={() => {
-                  switchLocale();
-                  setOpen(false);
-                }}
-                className="min-h-[44px] flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
-              >
-                <Globe size={16} strokeWidth={1.75} />
-                {localeLabel}
-              </button>
-              <Link
-                href="/auth/signin"
-                onClick={() => setOpen(false)}
-                className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
-              >
-                {tc('login')}
-              </Link>
-              <Link
-                href="/auth/register"
-                onClick={() => setOpen(false)}
-                className="btn-gold mt-2 min-h-[44px] text-center text-sm"
-              >
-                {tc('startFree')}
-              </Link>
-            </div>
-          </SheetContent>
-        </Sheet>
+                <Link
+                  href="/assessment"
+                  onClick={() => setOpen(false)}
+                  className="glass-button gradient-text mt-2 min-h-[44px] text-center text-sm"
+                >
+                  {tc('startFree')}
+                </Link>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </nav>
     </header>
   );

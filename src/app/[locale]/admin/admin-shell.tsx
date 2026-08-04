@@ -161,7 +161,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           collapsed ? 'w-[72px]' : 'w-[280px]',
         )}
       >
-        <div className="flex items-center gap-3 p-4">
+        <Link
+          href={localePath('/', locale)}
+          className="flex items-center gap-3 p-4 transition hover:bg-white/[0.04]"
+          aria-label={`${L.home.ar} / ${L.home.en}`}
+          title={`${L.home.ar} / ${L.home.en}`}
+        >
           <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={36} height={36} className="h-9 w-9" />
           {!collapsed ? (
             <div>
@@ -171,7 +176,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </p>
             </div>
           ) : null}
-        </div>
+        </Link>
         <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
         <div className="mt-auto space-y-2 border-t border-white/[0.08] p-3">
           <div className="flex justify-center">

@@ -163,7 +163,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       >
         <div className="flex items-center gap-3 p-4">
           <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={36} height={36} className="h-9 w-9" />
-          {!collapsed ? <BiLabel ar={L.brand.ar} en={L.brand.en} /> : null}
+          {!collapsed ? (
+            <div>
+              <BiLabel ar={L.brand.ar} en={L.brand.en} />
+              <p className="mt-1 text-[10px] font-semibold tracking-wide text-cyan-300/90">
+                Control Panel · Spec v2
+              </p>
+            </div>
+          ) : null}
         </div>
         <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
         <div className="mt-auto space-y-2 border-t border-white/[0.08] p-3">

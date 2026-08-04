@@ -1,36 +1,41 @@
-const CACHE_NAME = 'muqabaleh-v1';
+const CACHE_NAME = 'muqabaleh-v3-admin';
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
 ];
 
-// Install: cache static shell
+// Install: cache static shell only (not HTML pages)
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)),
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: wipe every previous cache so deploys show immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+    ),
   );
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  // Never cache admin panel or auth — always network
+  if (
+    url.pathname.startsWith('/admin') ||
+    url.pathname.includes('/admin/') ||
+    url.pathname.includes('/auth/') ||
+    url.pathname.startsWith('/api/admin')
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   // API calls: network-first
   if (url.pathname.startsWith('/api/')) {
@@ -41,15 +46,27 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request)),
     );
     return;
   }
 
-  // Static assets: stale-while-revalidate
+  // Next.js hashed assets: network-first (avoid stale admin JS after deploy)
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request)),
+    );
+    return;
+  }
+
+  // Other static images: stale-while-revalidate
   if (
-    url.pathname.endsWith('.js') ||
-    url.pathname.endsWith('.css') ||
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.webp') ||
     url.pathname.endsWith('.woff2') ||
@@ -65,27 +82,20 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => cached);
         return cached || fetchPromise;
-      })
+      }),
     );
     return;
   }
 
-  // Navigation: network-first with offline fallback
+  // Navigation: network-first, do not cache HTML documents
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match('/') || new Response('Offline', { status: 503 }))
+      fetch(event.request).catch(
+        () => caches.match('/') || new Response('Offline', { status: 503 }),
+      ),
     );
     return;
   }
 
-  // Default: network-first
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
-  );
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });

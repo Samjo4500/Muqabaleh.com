@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config";
 
@@ -13,17 +13,37 @@
 
 @layer base {
   :root {
-    --bg-void: #070A0F;
-    --bg-panel: #0B0F17;
+    /* Crystalline Intelligence */
+    --bg-deep: #0a0a0f;
+    --bg-surface: #12121a;
+    --bg-elevated: #12121a;
+    --aurora-1: #6366f1;
+    --aurora-2: #06b6d4;
+    --aurora-3: #8b5cf6;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-strong: rgba(255, 255, 255, 0.07);
+    --glass-hover: rgba(255, 255, 255, 0.10);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --border-glass-strong: rgba(255, 255, 255, 0.12);
+    --border-bright: rgba(255, 255, 255, 0.15);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --ease-crystal: cubic-bezier(0.16, 1, 0.3, 1);
+    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #8b5cf6 100%);
+    --shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.1);
+    --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    --bg-void: #0a0a0f;
+    --bg-panel: #12121a;
     --bg-card: rgba(255,255,255,0.04);
     --border-card: rgba(255,255,255,0.08);
     --gold: #D4A843;
     --gold-hover: #D4A843;
     --gold-dim: #D4A843;
     --emerald: #10B981;
-    --cyan: #22D3EE;
+    --cyan: #06b6d4;
     --text-primary: #FFFFFF;
-    --text-muted: rgba(255,255,255,0.55);
+    --text-muted: rgba(255,255,255,0.5);
     --text-faint: rgba(255,255,255,0.35);
     --status-red: rgba(212,168,67,0.8);
     --status-amber: rgba(212,168,67,0.6);
@@ -70,25 +90,32 @@
   }
 
   body {
-    background-color: var(--bg-void);
+    background-color: var(--bg-deep);
     color: var(--text-primary);
-    font-family: 'Cairo', 'Tajawal', sans-serif;
+    font-family: 'Inter', 'Noto Sans Arabic', 'Cairo', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  [dir="ltr"] body,
+  [dir="ltr"] body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
   [dir="ltr"] .font-display {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
   }
 
   [dir="rtl"] body,
   [dir="rtl"] .font-body {
-    font-family: 'Tajawal', 'Cairo', sans-serif;
+    font-family: 'Noto Sans Arabic', 'Tajawal', 'Cairo', sans-serif;
+  }
+
+  [dir="rtl"] .font-display {
+    font-family: 'Tajawal', 'Noto Sans Arabic', 'Cairo', sans-serif;
   }
 
   ::selection {
-    background: rgba(212,168,67,0.3);
+    background: rgba(99, 102, 241, 0.35);
     color: #FFFFFF;
   }
 
@@ -111,6 +138,158 @@
 
 /* ─── Glass Card Utility ─── */
 @layer components {
+
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-card), var(--inset-shine);
+    border-radius: 1rem;
+  }
+
+  .glass-strong {
+    position: relative;
+    background: var(--glass-strong);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid var(--border-glass-strong);
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    overflow: hidden;
+  }
+
+  .glass-strong::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      rgba(99, 102, 241, 0.15),
+      transparent 55%
+    );
+    opacity: 0.15;
+  }
+
+  .gradient-text {
+    background: linear-gradient(90deg, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-button,
+  .btn-crystal {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    transition: transform 0.2s var(--ease-crystal), border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .glass-button:hover,
+  .btn-crystal:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 0 36px rgba(6, 182, 212, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+  .glass-button::after,
+  .btn-crystal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 60%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.7s var(--ease-crystal);
+  }
+  [dir="rtl"] .glass-button::after,
+  [dir="rtl"] .btn-crystal::after {
+    transform: translateX(120%);
+  }
+  .glass-button:hover::after,
+  .btn-crystal:hover::after {
+    transform: translateX(120%);
+  }
+  [dir="rtl"] .glass-button:hover::after,
+  [dir="rtl"] .btn-crystal:hover::after {
+    transform: translateX(-120%);
+  }
+
+  .btn-ghost-crystal {
+    border-radius: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: transparent;
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  }
+  .btn-ghost-crystal:hover {
+    border-color: rgba(99, 102, 241, 0.55);
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.25);
+    color: var(--text-primary);
+  }
+
+  @keyframes crystal-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .crystal-marquee {
+    animation: crystal-marquee 40s linear infinite;
+    will-change: transform;
+  }
+  .crystal-marquee:hover {
+    animation-play-state: paused;
+  }
+  [dir="rtl"] .crystal-marquee {
+    animation-name: crystal-marquee-rtl;
+  }
+  @keyframes crystal-marquee-rtl {
+    from { transform: translateX(0); }
+    to { transform: translateX(50%); }
+  }
+
+  .section-pad {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+  @media (min-width: 768px) {
+    .section-pad {
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section-pad {
+      padding-top: 120px;
+      padding-bottom: 120px;
+    }
+  }
+
+  .content-wrap {
+    margin-inline: auto;
+    max-width: 1280px;
+    padding-inline: 24px;
+  }
+  @media (min-width: 768px) {
+    .content-wrap { padding-inline: 32px; }
+  }
+  @media (min-width: 1024px) {
+    .content-wrap { padding-inline: 48px; }
+  }
+
   .glass-card {
     background: var(--bg-card);
     border: 1px solid var(--border-card);

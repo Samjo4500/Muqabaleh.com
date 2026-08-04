@@ -15,9 +15,15 @@ export function usePWAInstall() {
   );
 
   useEffect(() => {
-    // Register service worker
+    // Register service worker and force activate updates after deploy
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((reg) => {
+          reg.update().catch(() => {});
+          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        })
+        .catch(() => {});
     }
 
     // Skip event listeners if already installed

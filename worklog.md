@@ -1324,3 +1324,15 @@ Stage Summary:
 - Free: UI → /demo (no payment needed)
 - Database tiers: FREE, PRO, UNLIMITED (PREMIUM removed from active code)
 - PayPalCheckoutButton is now importable and ready to use (old PayPalSubscriptionButton preserved for backwards compat)
+
+---
+Task ID: 3e-en-articles
+Agent: Content Writer EN
+Task: Write 5 English blog articles
+
+Work Log:
+- Created 5 SEO-optimized blog articles (1200+ words each)
+- Created en/index.ts with all exports
+
+Stage Summary:
+- 5 EN articles with full HTML content, meta tags, internal links

@@ -86,8 +86,10 @@ export default function LandingPage() {
         <PricingSection t={t} isRTL={isRTL} />
         <ReportPreviewSection t={t} isRTL={isRTL} />
         <TestimonialsSection t={t} />
+        <TrustedBySection t={t} />
         <FaqSection t={t} />
         <FaqJsonLd />
+        <NewsletterSection t={t} />
         <FinalCtaSection t={t} tc={tc} />
       </main>
       <Footer />
@@ -742,7 +744,7 @@ function FaqSection({ t }: { t: ReturnType<typeof useTranslations> }) {
         />
 
         <Accordion type="single" collapsible className="mt-12">
-          {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+          {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const).map((n) => (
             <AccordionItem key={n} value={`faq-${n}`} className="border-white/5">
               <AccordionTrigger className="text-start text-sm font-medium text-[var(--text-primary)] hover:no-underline">
                 {t(`faqQ${n}`)}
@@ -753,6 +755,72 @@ function FaqSection({ t }: { t: ReturnType<typeof useTranslations> }) {
             </AccordionItem>
           ))}
         </Accordion>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================== */
+/*  14. TRUSTED BY INDUSTRIES                                        */
+/* ================================================================== */
+
+const INDUSTRIES = ['Tech', 'Healthcare', 'Finance', 'Education', 'Aviation', 'Consulting'];
+const INDUSTRY_ICONS: Record<string, string> = {
+  Tech: '💻',
+  Healthcare: '🏥',
+  Finance: '📊',
+  Education: '🎓',
+  Aviation: '✈️',
+  Consulting: '📊',
+};
+
+function TrustedBySection({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <section className="border-y border-white/[0.04] py-16">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+        <p className="text-sm font-medium text-[var(--text-muted)]">{t('trustedBySubtitle')}</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+          {INDUSTRIES.map((ind) => (
+            <div key={ind} className="flex flex-col items-center gap-2 opacity-40">
+              <span className="text-3xl">{INDUSTRY_ICONS[ind]}</span>
+              <span className="text-xs font-medium text-[var(--text-faint)]">{ind}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================== */
+/*  15. NEWSLETTER                                                    */
+/* ================================================================== */
+
+function NewsletterSection({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <section className="py-16">
+      <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('newsletterTitle')}</h2>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">{t('newsletterSubtitle')}</p>
+        <form
+          className="mt-6 flex gap-2"
+          onSubmit={(e) => { e.preventDefault(); }}
+          action="/api/newsletter"
+          method="POST"
+        >
+          <input
+            type="email"
+            required
+            placeholder={t('newsletterPlaceholder')}
+            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-faint)] focus:border-[var(--gold)]/50 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="btn-gold cursor-pointer rounded-xl px-6 py-3 text-sm font-bold"
+          >
+            {t('newsletterButton')}
+          </button>
+        </form>
       </div>
     </section>
   );

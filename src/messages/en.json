@@ -123,7 +123,7 @@
     "unlimitedSub": "Monthly — cancel anytime",
     "unlimitedFeature": "Unlimited interviews",
     "unlimitedCriteria": "4 criteria + certificate + priority",
-    "localApprox": "≈ {sar} SAR · {aed} AED · {egp} EGP · {jod} JOD", 
+    "localApprox": "≈ {sar} SAR · {aed} AED · {egp} EGP · {jod} JOD",
     "trustSSL": "256-bit SSL Encryption",
     "trustBuyer": "PayPal Buyer Protection",
     "trustRefund": "Full Refund Within 24 Hours for Incomplete Sessions",
@@ -245,7 +245,24 @@
     "simStep5": "Next question: What's the biggest challenge you faced?",
     "simCtaHeadline": "Try the Real Interview Now",
     "simCtaButton": "Start Your Free Interview",
-    "simCtaSub": "1 free session — no credit card"
+    "simCtaSub": "1 free session — no credit card",
+    "trustedByTitle": "Trusted by Professionals Across Industries",
+    "trustedBySubtitle": "Professionals from 20+ countries practice on Muqabaleh",
+    "newsletterTitle": "Get Interview Tips Weekly",
+    "newsletterSubtitle": "Expert advice delivered to your inbox. No spam, unsubscribe anytime.",
+    "newsletterPlaceholder": "your@email.com",
+    "newsletterButton": "Subscribe",
+    "newsletterSuccess": "Subscribed! Check your inbox.",
+    "faqQ7": "Can I practice in Arabic?",
+    "faqA7": "Yes! Muqabaleh offers full Arabic support with right-to-left (RTL) interface, Arabic AI interviewers, and Arabic-language feedback reports. Simply switch to Arabic from the language selector.",
+    "faqQ8": "How are human interviewers verified?",
+    "faqA8": "All human interviewers go through a rigorous application process including identity verification, experience validation, and a test interview. Only candidates who pass admin review and maintain a 4.0+ rating remain active on the platform.",
+    "faqQ9": "What industries do you cover?",
+    "faqA9": "We cover tech, healthcare, finance, consulting, academic, aviation, legal, IT, marketing, and more. Our question bank includes 500+ industry-specific questions, and human interviewers specialize in their respective fields.",
+    "faqQ10": "Can I get a refund?",
+    "faqA10": "Yes. For human interview sessions, you can cancel up to 24 hours before the scheduled time for a full refund. AI interview credits are non-refundable but never expire.",
+    "faqQ11": "Is my data secure?",
+    "faqA11": "Absolutely. All data is encrypted at rest and in transit. We are GDPR-compliant, never sell user data, and interview recordings are stored securely with access controls. You can request data deletion at any time."
   },
   "about": {
     "eyebrow": "About Muqabaleh",
@@ -1821,5 +1838,19 @@
     "cancelDesc": "Your subscription was not created. You can try again anytime.",
     "tryAgain": "Try Again",
     "goHome": "Go Home"
+  },
+  "blog": {
+    "eyebrow": "Blog",
+    "title": "Interview Tips & Guides",
+    "titleHighlight": "Blog",
+    "subtitle": "Expert advice on job interviews, communication skills, and career growth.",
+    "readMore": "Read more",
+    "minRead": "min read",
+    "author": "Muqabaleh Team",
+    "backToBlog": "Back to Blog",
+    "relatedArticles": "Related Articles",
+    "ctaTitle": "Ready to Practice?",
+    "ctaSubtitle": "Start with a free AI mock interview and get instant feedback.",
+    "ctaButton": "Start Free Interview"
   }
 }

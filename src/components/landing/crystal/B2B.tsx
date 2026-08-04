@@ -153,7 +153,7 @@ export function CrystalB2B() {
             ))}
           </motion.div>
           <motion.div variants={fadeUp} className="mt-8">
-            <Link href="/business" className="glass-button gradient-text inline-flex">
+            <Link href="/business" className="glass-button inline-flex">
               {t('b2bCta')}
             </Link>
           </motion.div>

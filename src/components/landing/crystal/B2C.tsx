@@ -134,7 +134,7 @@ export function CrystalB2C() {
             ))}
           </motion.div>
           <motion.div variants={fadeUp} className="mt-8">
-            <Link href="/demo" className="glass-button gradient-text inline-flex">
+            <Link href="/demo" className="glass-button inline-flex">
               {t('b2cCta')}
             </Link>
           </motion.div>

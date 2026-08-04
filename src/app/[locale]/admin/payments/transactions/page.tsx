@@ -71,7 +71,7 @@ export default function AdminPaymentTransactionsPage() {
       <AdminPageHeader
         title={{ ar: L.transactions.ar, en: L.transactions.en }}
         description={{
-          ar: 'معاملات PayPal مع إمكانية الاسترداد.',
+          ar: 'عمليات PayPal المالية مع إمكانية استرداد المبلغ.',
           en: 'PayPal transactions with refund capability.',
         }}
         actions={

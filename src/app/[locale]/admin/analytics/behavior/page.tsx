@@ -15,14 +15,14 @@ export default function Page() {
   return (
     <div>
       <AdminPageHeader
-        title={{ ar: 'سلوك المستخدم', en: 'User Behavior' }}
+        title={{ ar: 'تحليلات سلوك المستخدمين', en: 'User Behavior' }}
         description={{
           ar: 'مسار التحويل، نقاط التسرب، ومساحة لخرائط الحرارة.',
           en: 'Funnel Visit→Signup→Interview→Complete→Subscribe, drop-offs, heatmap placeholder.',
         }}
       />
       <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
-        <BiLabel ar="قمع التحويل" en="Conversion funnel" />
+        <BiLabel ar="مسار التحويل" en="Conversion funnel" />
         <div className="mt-6 space-y-3">
           {FUNNEL.map((f) => (
             <div key={f.step}>

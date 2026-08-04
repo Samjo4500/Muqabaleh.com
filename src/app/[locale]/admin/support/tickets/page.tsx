@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'جميع التذاكر', en: 'All Tickets' }}
+      title={{ ar: 'طلبات الدعم الفني', en: 'All Tickets' }}
       description={{
         ar: 'المعرّف، المستخدم، الموضوع، الأولوية، الحالة، آخر تحديث، والمُعيَّن — مع ملاحظات داخلية ورد بالبريد.',
         en: 'Ticket ID, user, subject, priority, status, last update, assigned to — internal notes & email reply.',
@@ -41,7 +41,7 @@ export default function Page() {
         },
         {
           key: 'assigneeId',
-          label: { ar: 'مُعيَّن إلى', en: 'Assigned to' },
+          label: { ar: 'مسؤول الطلب', en: 'Assigned to' },
           render: (row) => String(row.assigneeId ?? 'Unassigned'),
         },
       ]}

@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'تقاسم الإيرادات', en: 'Partner Revenue Share' }}
+      title={{ ar: 'مشاركة الأرباح', en: 'Partner Revenue Share' }}
       description={{
-        ar: 'نسبة العمولة، تقرير الأرباح الشهري، حالة الدفع، وتكامل PayPal.',
+        ar: 'نسبة العمولة، تقرير الأرباح الشهري، حالة التحويل، وتكامل PayPal.',
         en: 'Commission %, monthly earnings, payout status, PayPal payout integration.',
       }}
       resource="partner_applications"
@@ -27,7 +27,7 @@ export default function Page() {
         },
         {
           key: 'payoutStatus',
-          label: { ar: 'حالة الدفع', en: 'Payout status' },
+          label: { ar: 'حالة التحويل', en: 'Payout status' },
           render: (row) => (
             <Badge variant="outline">{String(row.payoutStatus ?? 'Pending')}</Badge>
           ),

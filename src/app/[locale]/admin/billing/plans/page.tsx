@@ -7,9 +7,9 @@ export default function Page() {
   return (
     <div className="space-y-10">
       <AdminDataTable
-        title={{ ar: 'خطط الاشتراك', en: 'Subscription Plans' }}
+        title={{ ar: 'باقات الاشتراك', en: 'Subscription Plans' }}
         description={{
-          ar: 'الاسم عربي/إنجليزي، السعر، العملة، الفترة، الميزات، رصيد المقابلات، ظهور الخطة، والتجربة المجانية.',
+          ar: 'الاسم عربي/إنجليزي، السعر، العملة، الفترة، الميزات، رصيد المقابلات، ظهور الباقة الخطة، والتجربة المجانية.',
           en: 'Name EN/AR, price, currency, interval, features, interview credits, visibility, trial.',
         }}
         resource="subscriptions"
@@ -34,10 +34,10 @@ export default function Page() {
         ]}
       />
       <AdminConfigPanel
-        title={{ ar: 'محرر الخطة', en: 'Plan editor' }}
+        title={{ ar: 'محرر الباقة', en: 'Plan editor' }}
         sections={[
           {
-            title: { ar: 'تفاصيل الخطة', en: 'Plan details' },
+            title: { ar: 'تفاصيل الباقة', en: 'Plan details' },
             fields: [
               { key: 'nameAr', label: { ar: 'الاسم (عربي)', en: 'Name AR' }, type: 'text', value: 'احترافي' },
               { key: 'nameEn', label: { ar: 'الاسم (إنجليزي)', en: 'Name EN' }, type: 'text', value: 'Pro' },
@@ -67,7 +67,7 @@ export default function Page() {
               { key: 'features', label: { ar: 'قائمة الميزات', en: 'Features list' }, type: 'textarea', value: 'AI interviews\nDetailed scoring\nPDF report' },
               {
                 key: 'visibility',
-                label: { ar: 'الظهور', en: 'Visibility' },
+                label: { ar: 'الظهور الباقة', en: 'Visibility' },
                 type: 'select',
                 value: 'PUBLIC',
                 options: [
@@ -76,7 +76,7 @@ export default function Page() {
                   { value: 'PARTNER', label: 'Partner-only' },
                 ],
               },
-              { key: 'trialDays', label: { ar: 'أيام التجربة', en: 'Trial days' }, type: 'number', value: '7' },
+              { key: 'trialDays', label: { ar: 'أيام التجربة المجانية', en: 'Trial days' }, type: 'number', value: '7' },
               { key: 'aiAvatar', label: { ar: 'وصول الأفاتار الذكي', en: 'AI avatar access' }, type: 'toggle', value: true },
             ],
           },

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'طلبات الشراكة', en: 'Partner Applications' }}
+      title={{ ar: 'طلبات الانضمام للشراكة', en: 'Partner Applications' }}
       description={{
         ar: 'مراجعة الطلبات، موافقة/رفض مع سبب، تواصل بالبريد، وتتبع الحالة.',
         en: 'Review requests, approve/reject with reason, email applicant, status tracker.',

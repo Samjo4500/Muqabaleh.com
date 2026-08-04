@@ -6,19 +6,19 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'قوالب المقابلات', en: 'Interview Templates' }}
+      title={{ ar: 'نماذج المقابلات', en: 'Interview Templates' }}
       description={{
-        ar: 'إنشاء/تعديل/حذف القوالب: الاسم (عربي/إنجليزي)، المجال، الوظيفة، الصعوبة، المدة، عدد الأسئلة.',
-        en: 'Create/edit/delete templates: name EN/AR, industry, job role, difficulty, duration, question count.',
+        ar: 'إنشاء/تعديل/حذف النماذج: الاسم (عربي/إنجليزي)، القطاع، المسمى الوظيفي، مستوى الصعوبة، المدة، عدد الأسئلة.',
+        en: 'Create/edit/delete templates: name EN/AR, industry, job role, difficulty level, duration, question count.',
       }}
       resource="templates"
       columns={[
         { key: 'titleAr', label: { ar: 'الاسم (عربي)', en: 'Name AR' } },
         { key: 'titleEn', label: { ar: 'الاسم (إنجليزي)', en: 'Name EN' } },
-        { key: 'industry', label: { ar: 'المجال', en: 'Industry' } },
+        { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
         {
           key: 'level',
-          label: { ar: 'الصعوبة', en: 'Difficulty' },
+          label: { ar: 'مستوى الصعوبة', en: 'Difficulty' },
           render: (row) => {
             const m: Record<string, string> = {
               EASY: 'سهل / Easy',

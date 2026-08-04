@@ -5,25 +5,25 @@ import { AdminDataTable } from '@/components/admin/AdminDataTable';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'سجلات التدقيق', en: 'Audit Logs' }}
+      title={{ ar: 'سجلات النشاط', en: 'Audit Logs' }}
       description={{
-        ar: 'سجل غير قابل للحذف لكل إجراء مشرف. تصفية حسب المشرف، نوع الإجراء، التاريخ، والكيان. التصدير فقط — لا حذف.',
-        en: 'Immutable log of every admin action. Filter by admin, action, date, entity. Export only — cannot be deleted.',
+        ar: 'سجل محمي من التعديل لكل إجراء مسؤول. تصفية حسب المسؤول، نوع الإجراء، التاريخ، والعنصر. التصدير فقط — محمي من الحذف.',
+        en: 'Activity log protected from editing for every admin action. Filter by admin, action, date, entity. Export only — protected from deletion.',
       }}
       resource="audit_logs"
       creatable={false}
       columns={[
         {
           key: 'admin',
-          label: { ar: 'المشرف', en: 'Admin' },
+          label: { ar: 'المسؤول', en: 'Admin' },
           render: (row) => {
             const a = row.admin as { email?: string; name?: string } | undefined;
             return a?.email ?? a?.name ?? String(row.adminId ?? '—');
           },
         },
         { key: 'action', label: { ar: 'نوع الإجراء', en: 'Action type' } },
-        { key: 'entity', label: { ar: 'الكيان', en: 'Entity affected' } },
-        { key: 'entityId', label: { ar: 'معرف الكيان', en: 'Entity ID' } },
+        { key: 'entity', label: { ar: 'العنصر', en: 'Entity affected' } },
+        { key: 'entityId', label: { ar: 'معرف العنصر', en: 'Entity ID' } },
         {
           key: 'createdAt',
           label: { ar: 'التاريخ', en: 'Date' },

@@ -50,12 +50,12 @@ export default function Page() {
         title={{ ar: 'إعدادات الفواتير', en: 'Invoice settings' }}
         sections={[
           {
-            title: { ar: 'الترقيم والضريبة', en: 'Numbering & tax' },
+            title: { ar: 'إعدادات الضريبة وضريبة القيمة المضافة', en: 'Numbering & tax' },
             fields: [
               { key: 'prefix', label: { ar: 'بادئة الرقم', en: 'Number prefix' }, type: 'text', value: 'MQBL-INV-' },
               { key: 'nextNumber', label: { ar: 'الرقم التالي', en: 'Next number' }, type: 'number', value: '1001' },
-              { key: 'vatRate', label: { ar: 'نسبة VAT %', en: 'VAT %' }, type: 'number', value: '15' },
-              { key: 'vatEnabled', label: { ar: 'تفعيل الضريبة', en: 'Enable tax/VAT' }, type: 'toggle', value: true },
+              { key: 'vatRate', label: { ar: 'ضريبة القيمة المضافة %', en: 'VAT %' }, type: 'number', value: '15' },
+              { key: 'vatEnabled', label: { ar: 'تفعيل الضريبة وضريبة القيمة المضافة', en: 'Enable tax/VAT' }, type: 'toggle', value: true },
             ],
           },
         ]}

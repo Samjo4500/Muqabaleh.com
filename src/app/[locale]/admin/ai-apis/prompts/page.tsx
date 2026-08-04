@@ -5,9 +5,9 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
-      title={{ ar: 'إدارة الأوامر (Prompts)', en: 'Prompt Management' }}
+      title={{ ar: 'إدارة التعليمات النصية', en: 'Prompt Management' }}
       description={{
-        ar: 'أوامر النظام لتوليد المقابلات، التقييم، الملاحظات، وحوار الأفاتار — مع A/B وسجل الإصدارات.',
+        ar: 'التعليمات الأساسية للنظام لتوليد المقابلات، التقييم، الملاحظات، وحوار الأفاتار — مع اختبار A/B للتعليمات وسجل الإصدارات.',
         en: 'System prompts for interview generation, scoring, feedback, avatar dialogue — A/B tests & version history.',
       }}
       sections={[
@@ -16,7 +16,7 @@ export default function Page() {
           fields: [
             {
               key: 'interviewPrompt',
-              label: { ar: 'أمر النظام', en: 'System prompt' },
+              label: { ar: 'التعليمات الأساسية للنظام', en: 'System prompt' },
               type: 'textarea',
               value:
                 'You are Muqabaleh, an Arabic/English AI interview coach. Ask adaptive follow-ups.',
@@ -28,7 +28,7 @@ export default function Page() {
           fields: [
             {
               key: 'scoringPrompt',
-              label: { ar: 'أمر التقييم', en: 'Scoring prompt' },
+              label: { ar: 'تعليمات التقييم', en: 'Scoring prompt' },
               type: 'textarea',
               value: 'Score content, clarity, confidence, cultural fit from 0-100 with rationale.',
             },
@@ -39,7 +39,7 @@ export default function Page() {
           fields: [
             {
               key: 'feedbackPrompt',
-              label: { ar: 'أمر الملاحظات', en: 'Feedback prompt' },
+              label: { ar: 'تعليمات الملاحظات', en: 'Feedback prompt' },
               type: 'textarea',
               value: 'Provide actionable bilingual feedback with strengths and improvements.',
             },
@@ -50,7 +50,7 @@ export default function Page() {
           fields: [
             {
               key: 'avatarPrompt',
-              label: { ar: 'أمر الحوار', en: 'Dialogue prompt' },
+              label: { ar: 'تعليمات الحوار', en: 'Dialogue prompt' },
               type: 'textarea',
               value: 'Speak naturally as Fahd or Noora. Keep questions concise.',
             },

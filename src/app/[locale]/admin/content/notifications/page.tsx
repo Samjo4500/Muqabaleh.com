@@ -5,9 +5,9 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
-      title={{ ar: 'رسائل الإشعارات', en: 'Notification Messages' }}
+      title={{ ar: 'رسائل التنبيهات', en: 'Notification Messages' }}
       description={{
-        ar: 'قوالب إشعارات داخل التطبيق، الدفع، والرسائل النصية إن وُجدت.',
+        ar: 'قوالب تنبيهات داخل التطبيق، التنبيهات الفورية، والرسائل النصية إن وُجدت.',
         en: 'In-app, push, and SMS notification templates.',
       }}
       sections={[
@@ -19,7 +19,7 @@ export default function Page() {
           ],
         },
         {
-          title: { ar: 'إشعارات الدفع', en: 'Push templates' },
+          title: { ar: 'التنبيهات الفورية', en: 'Push templates' },
           fields: [
             { key: 'pushAr', label: { ar: 'نص عربي', en: 'Arabic text' }, type: 'textarea' },
             { key: 'pushEn', label: { ar: 'نص إنجليزي', en: 'English text' }, type: 'textarea' },

@@ -20,7 +20,7 @@ export default function Page() {
         </Link>
       </div>
       <AdminDataTable
-        title={{ ar: 'المبالغ المدفوعة', en: 'Payouts' }}
+        title={{ ar: 'التحويلات للشركاء', en: 'Payouts' }}
         description={{
           ar: 'مدفوعات الشركاء والشركاء بالعمولة، والتحقق من طريقة الدفع.',
           en: 'Partner payouts, affiliate payouts, payout method verification.',

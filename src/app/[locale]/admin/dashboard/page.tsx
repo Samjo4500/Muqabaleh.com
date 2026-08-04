@@ -147,7 +147,7 @@ export default function SuperAdminDashboardPage() {
       <AdminPageHeader
         title={{ ar: L.dashboard.ar, en: L.dashboard.en }}
         description={{
-          ar: 'لوحة التحكم الرئيسية — مقابلات اليوم، الإيرادات، الشركات، الدعم، وحالة APIs.',
+          ar: 'لوحة التحكم الرئيسية — مقابلات اليوم، الإيرادات، الشركات، الدعم، وحالة خدمات API.',
           en: 'Main control panel — interviews, revenue, companies, support, and API health.',
         }}
         backHref="/admin/dashboard"

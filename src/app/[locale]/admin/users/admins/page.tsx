@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'المشرفون والمحررون', en: 'Admins & Moderators' }}
+      title={{ ar: 'المسؤولون والمشرفون', en: 'Admins & Moderators' }}
       description={{
-        ar: 'إنشاء مشرف، صلاحيات تفصيلية، إعادة تعيين كلمة المرور، وسجل النشاط.',
+        ar: 'إنشاء مسؤول، صلاحيات تفصيلية، إعادة تعيين كلمة المرور، وسجل النشاط.',
         en: 'Create admins, granular permissions, password reset, activity log.',
       }}
       resource="admins"

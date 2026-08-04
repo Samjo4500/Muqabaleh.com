@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'متتبع المتقدمين والباحثين عن عمل', en: 'Applicants & Job Seekers Tracker' }}
+      title={{ ar: 'قاعدة بيانات المتقدمين', en: 'Applicants & Job Seekers Tracker' }}
       description={{
-        ar: 'تتبع من أكمل مقابلات لشركات محددة، بطاقات الدرجات، تصدير المجموعة، والحالة من جديد إلى توظيف.',
+        ar: 'قاعدة بيانات من أكمل مقابلات لشركات محددة، تقارير التقييم، تصدير قائمة المرشحين المتاحين، والحالة من جديد إلى تم التم التوظيف.',
         en: 'Track users who completed interviews for companies, score cards, export pool, status New→Hired.',
       }}
       resource="candidates"
@@ -23,7 +23,7 @@ export default function Page() {
         },
         {
           key: 'score',
-          label: { ar: 'بطاقة الدرجة', en: 'Score card' },
+          label: { ar: 'تقرير التقييم', en: 'Score card' },
           render: (row) => String(row.avgScore ?? '—'),
         },
         {
@@ -43,7 +43,7 @@ export default function Page() {
       rowActions={[
         {
           id: 'shortlist',
-          label: { ar: 'ترشيح', en: 'Shortlist' },
+          label: { ar: 'اختيار للمقابلة', en: 'Shortlist' },
           onRun: async (row) => alert(`Shortlisted ${row.email}`),
         },
         {
@@ -53,7 +53,7 @@ export default function Page() {
         },
         {
           id: 'hired',
-          label: { ar: 'توظيف', en: 'Hired' },
+          label: { ar: 'تم التوظيف', en: 'Hired' },
           onRun: async (row) => alert(`Marked hired ${row.email}`),
         },
       ]}

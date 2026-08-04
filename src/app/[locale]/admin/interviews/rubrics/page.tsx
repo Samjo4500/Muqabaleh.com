@@ -5,7 +5,7 @@ import { AdminDataTable } from '@/components/admin/AdminDataTable';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'معايير التقييم', en: 'Scoring & Evaluation Rubrics' }}
+      title={{ ar: 'معايير التقييم وقوائم الدرجات', en: 'Scoring & Evaluation Rubrics' }}
       description={{
         ar: 'التواصل، المعرفة التقنية، الثقة، لغة الجسد، حل المشكلات — مع أوزان ونماذج ملاحظات عربي/إنجليزي.',
         en: 'Communication, Technical Knowledge, Confidence, Body Language, Problem Solving — weights + AR/EN feedback templates.',

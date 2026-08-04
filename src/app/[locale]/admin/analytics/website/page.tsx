@@ -9,16 +9,16 @@ export default function Page() {
   return (
     <div>
       <AdminPageHeader
-        title={{ ar: 'تحليلات الموقع', en: 'Website Analytics' }}
+        title={{ ar: 'تحليلات أداء الموقع', en: 'Website Analytics' }}
         description={{
-          ar: 'المشاهدات، الزوار الفريدون، معدل الارتداد، مصادر الزيارات، الأجهزة، والدول — GA4: KM7T1T22WW.',
+          ar: 'المشاهدات، الزوار الفريدون، نسبة الارتداد، مصادر الزيارات، الأجهزة، والدول — GA4: KM7T1T22WW.',
           en: 'Page views, unique visitors, bounce rate, traffic sources, devices, countries — GA4 ID: KM7T1T22WW.',
         }}
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label={{ ar: 'مشاهدات الصفحات', en: 'Page views' }} value="12,480" icon={Eye} />
-        <AdminStatCard label={{ ar: 'زوار فريدون', en: 'Unique visitors' }} value="4,210" icon={Users} />
-        <AdminStatCard label={{ ar: 'معدل الارتداد', en: 'Bounce rate' }} value="38%" icon={MousePointerClick} />
+        <AdminStatCard label={{ ar: 'عدد مشاهدات الصفحات', en: 'Page views' }} value="12,480" icon={Eye} />
+        <AdminStatCard label={{ ar: 'الزيارات الفريدة', en: 'Unique visitors' }} value="4,210" icon={Users} />
+        <AdminStatCard label={{ ar: 'نسبة الارتداد', en: 'Bounce rate' }} value="38%" icon={MousePointerClick} />
         <AdminStatCard label={{ ar: 'الجوال', en: 'Mobile share' }} value="64%" icon={Smartphone} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">

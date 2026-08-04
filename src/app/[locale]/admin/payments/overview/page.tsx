@@ -38,15 +38,15 @@ export default function Page() {
       <AdminPageHeader
         title={{ ar: L.financialOverview.ar, en: L.financialOverview.en }}
         description={{
-          ar: 'إجمالي الإيرادات (MTD/YTD)، معدل الاسترداد، فشل الدفع، الإيراد حسب الخطة والمنطقة.',
+          ar: 'إجمالي الإيرادات (MTD/YTD)، نسبة الاسترداد المبلغ، فشل الدفع، الإيراد حسب الخطة والمنطقة.',
           en: 'Total revenue (MTD/YTD), refund rate, failed payment rate, revenue by plan and region.',
         }}
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label={{ ar: 'إيرادات الشهر (MTD)', en: 'Revenue MTD' }} value={`$${(mtd / 100).toFixed(2)}`} icon={DollarSign} />
         <AdminStatCard label={{ ar: 'إيرادات اليوم', en: 'Revenue today' }} value={`$${(today / 100).toFixed(2)}`} icon={DollarSign} />
-        <AdminStatCard label={{ ar: 'معدل الاسترداد', en: 'Refund rate' }} value="2.1%" icon={Percent} accent="yellow" />
-        <AdminStatCard label={{ ar: 'فشل المدفوعات', en: 'Failed payment rate' }} value="1.4%" icon={AlertTriangle} accent="red" />
+        <AdminStatCard label={{ ar: 'نسبة الاسترداد المبلغ', en: 'Refund rate' }} value="2.1%" icon={Percent} accent="yellow" />
+        <AdminStatCard label={{ ar: 'نسبة فشل الدفع', en: 'Failed payment rate' }} value="1.4%" icon={AlertTriangle} accent="red" />
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
@@ -73,7 +73,7 @@ export default function Page() {
         <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
           <div className="mb-3 flex items-center gap-2">
             <Globe2 size={16} className="text-cyan-300" />
-            <BiLabel ar="الإيراد حسب الدولة/المنطقة" en="Revenue by country/region" />
+            <BiLabel ar="الإيراد حسب المنطقة" en="Revenue by country/region" />
           </div>
           <ul className="space-y-3 text-sm">
             {[

@@ -27,9 +27,9 @@ export default function Page() {
   return (
     <div>
       <AdminPageHeader
-        title={{ ar: 'تحليلات المقابلات', en: 'Interview Analytics' }}
+        title={{ ar: 'أداء المقابلات', en: 'Interview Analytics' }}
         description={{
-          ar: 'إجمالي المقابلات، متوسط الإكمال، الدرجات حسب المجال، أشهر القوالب، وأوقات الذروة.',
+          ar: 'إجمالي المقابلات، متوسط الإكمال، الدرجات حسب القطاع، أشهر النماذج، وأوقات الذروة.',
           en: 'Total interviews, avg completion, scores by industry, popular templates, peak hours/days.',
         }}
       />
@@ -40,7 +40,7 @@ export default function Page() {
         <AdminStatCard label={{ ar: 'ذروة الاستخدام', en: 'Peak usage' }} value="Sun 20:00" icon={Clock} />
       </div>
       <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
-        <BiLabel ar="أشهر المجالات / القوالب" en="Most popular industries / templates" />
+        <BiLabel ar="أشهر القطاعات / النماذج" en="Most popular industries / templates" />
         <ul className="mt-4 space-y-2 text-sm">
           {industries.length
             ? industries.map((i) => (

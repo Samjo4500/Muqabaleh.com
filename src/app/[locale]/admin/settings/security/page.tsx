@@ -52,8 +52,8 @@ export default function SettingsSecurityPage() {
       <AdminPageHeader
         title={{ ar: L.security.ar, en: L.security.en }}
         description={{
-          ar: 'تحقق ثنائي، سياسة كلمات المرور، مهلة الجلسة، وحد محاولات الدخول.',
-          en: '2FA, password policy, session timeout, and login attempt limiting.',
+          ar: 'المصادقة الثنائية، معايير كلمة المرور، مدة صلاحية الجلسة، وعدد المحاولات المسموح بها.',
+          en: '2FA, password standards, session validity, and allowed login attempts.',
         }}
       />
 
@@ -91,10 +91,10 @@ export default function SettingsSecurityPage() {
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-6 text-sm text-[var(--text-secondary)]">
-          <BiLabel ar="سياسة كلمة المرور" en="Password Policy" />
+          <BiLabel ar="معايير كلمة المرور" en="Password Policy" />
           <ul className="mt-3 list-disc space-y-1 ps-5">
             <li>
-              <BiInline ar="١٢ حرفاً على الأقل للمشرفين" en="Min 12 characters for admins" />
+              <BiInline ar="١٢ حرفاً على الأقل للمسؤولين" en="Min 12 characters for admins" />
             </li>
             <li>
               <BiInline ar="حرف + رقم + رمز خاص" en="Letter + number + special character" />
@@ -103,22 +103,22 @@ export default function SettingsSecurityPage() {
               <BiInline ar="انتهاء صلاحية اختياري كل ٩٠ يوماً" en="Optional expiry every 90 days" />
             </li>
           </ul>
-          <BiLabel className="mt-6" ar="فرض التحقق الثنائي للمشرفين" en="2FA enforcement for admins" />
+          <BiLabel className="mt-6" ar="تفعيل المصادقة الثنائية إجبارياً للمسؤولين" en="2FA enforcement for admins" />
           <p className="mt-2">
             <BiInline
               ar="يُنصح بتفعيل TOTP لكل حساب SUPER_ADMIN قبل الوصول الكامل."
               en="TOTP recommended for every SUPER_ADMIN before full access."
             />
           </p>
-          <BiLabel className="mt-6" ar="مهلة الجلسة" en="Session Timeout" />
+          <BiLabel className="mt-6" ar="مدة صلاحية الجلسة" en="Session Timeout" />
           <p className="mt-2">
-            <BiInline ar="ساعتان لمشرف مقابلة الأعلى" en="2 hours for Muqabaleh Super Admin" />
+            <BiInline ar="ساعتان لمسؤول مقابلة العام" en="2 hours for Muqabaleh Super Admin" />
           </p>
-          <BiLabel className="mt-6" ar="حد محاولات الدخول" en="Login Attempt Limit" />
+          <BiLabel className="mt-6" ar="عدد المحاولات المسموح بها" en="Login Attempt Limit" />
           <p className="mt-2">
             <BiInline ar="٥ محاولات فاشلة ثم قفل ١٥ دقيقة" en="5 failed attempts then 15-minute lockout" />
           </p>
-          <BiLabel className="mt-6" ar="القائمة البيضاء للـ IP" en="IP whitelist for admin panel" />
+          <BiLabel className="mt-6" ar="العناوين المسموح بها (IP Whitelist)" en="IP whitelist for admin panel" />
           <p className="mt-2">
             <BiInline
               ar="اتركها فارغة للسماح للجميع، أو أضف عناوين مفصولة بفواصل في متغيرات البيئة."

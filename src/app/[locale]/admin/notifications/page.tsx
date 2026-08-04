@@ -7,9 +7,9 @@ export default function Page() {
   return (
     <div className="space-y-10">
       <AdminConfigPanel
-        title={{ ar: 'مركز الإشعارات', en: 'Notification Center' }}
+        title={{ ar: 'مركز التنبيهات', en: 'Notification Center' }}
         description={{
-          ar: 'بث عام أو لشريحة أو لمستخدم محدد، جدولة، وسجل الإشعارات، واختبار الدفع.',
+          ar: 'بث عام أو لشريحة أو لمستخدم محدد، جدولة، وسجل التنبيهات، واختبار الدفع.',
           en: 'Broadcast to all/segment/user, scheduled notifications, history, push test sender.',
         }}
         sections={[
@@ -18,7 +18,7 @@ export default function Page() {
             fields: [
               {
                 key: 'audience',
-                label: { ar: 'الجمهور', en: 'Audience' },
+                label: { ar: 'الفئة المستهدفة', en: 'Audience' },
                 type: 'select',
                 value: 'ALL',
                 options: [
@@ -33,14 +33,14 @@ export default function Page() {
               { key: 'titleEn', label: { ar: 'العنوان (إنجليزي)', en: 'Title EN' }, type: 'text' },
               { key: 'bodyAr', label: { ar: 'النص (عربي)', en: 'Body AR' }, type: 'textarea' },
               { key: 'bodyEn', label: { ar: 'النص (إنجليزي)', en: 'Body EN' }, type: 'textarea' },
-              { key: 'scheduleAt', label: { ar: 'جدولة الإرسال', en: 'Schedule at (ISO)' }, type: 'text' },
-              { key: 'pushTest', label: { ar: 'إرسال اختبار دفع', en: 'Push notification test' }, type: 'toggle', value: false },
+              { key: 'scheduleAt', label: { ar: 'جدولة التنبيه', en: 'Schedule at (ISO)' }, type: 'text' },
+              { key: 'pushTest', label: { ar: 'اختبار التنبيهات الفورية', en: 'Push notification test' }, type: 'toggle', value: false },
             ],
           },
         ]}
       />
       <AdminDataTable
-        title={{ ar: 'سجل الإشعارات', en: 'Notification history' }}
+        title={{ ar: 'سجل التنبيهات', en: 'Notification history' }}
         resource="notification_logs"
         creatable={false}
         columns={[

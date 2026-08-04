@@ -16,14 +16,14 @@ export default function Page() {
           {
             title: { ar: 'عمليات النظام', en: 'System operations' },
             fields: [
-              { key: 'schedule', label: { ar: 'جدولة النسخ', en: 'Scheduled backup' }, type: 'select', value: 'DAILY', options: [
+              { key: 'schedule', label: { ar: 'جدولة النسخ الاحتياطي', en: 'Scheduled backup' }, type: 'select', value: 'DAILY', options: [
                 { value: 'MANUAL', label: 'Manual only' },
                 { value: 'DAILY', label: 'Daily' },
                 { value: 'WEEKLY', label: 'Weekly' },
               ]},
               { key: 'health', label: { ar: 'فحص صحة النظام', en: 'System health check' }, type: 'toggle', value: true },
-              { key: 'clearCache', label: { ar: 'مسح الكاش عند الحفظ', en: 'Clear cache on save' }, type: 'toggle', value: false },
-              { key: 'errorLog', label: { ar: 'عارض سجل الأخطاء', en: 'Error log viewer' }, type: 'textarea', value: 'No recent errors.' },
+              { key: 'clearCache', label: { ar: 'مسح الذاكرة المؤقتة عند الحفظ', en: 'Clear cache on save' }, type: 'toggle', value: false },
+              { key: 'errorLog', label: { ar: 'سجل الأخطاء', en: 'Error log viewer' }, type: 'textarea', value: 'No recent errors.' },
             ],
           },
         ]}

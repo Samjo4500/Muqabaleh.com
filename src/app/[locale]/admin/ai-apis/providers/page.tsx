@@ -5,9 +5,9 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
-      title={{ ar: 'إعدادات مزودي الذكاء الاصطناعي', en: 'AI Provider Settings' }}
+      title={{ ar: 'إعدادات خدمات الذكاء الاصطناعي', en: 'AI Provider Settings' }}
       description={{
-        ar: 'Google Gemini ومزوّد الصوت/الأفاتار — مفاتيح، نماذج، استخدام الرموز، وتقدير التكلفة.',
+        ar: 'Google Gemini ومزوّد الصوت/الأفاتار — مفاتيح، نماذج، استخدام الوحدات (Token)، وتقدير التكلفة.',
         en: 'Google Gemini and Avatar/TTS providers — keys, models, token usage, cost estimator.',
       }}
       sections={[
@@ -26,7 +26,7 @@ export default function Page() {
                 { value: 'gemini-1.5-flash', label: 'gemini-1.5-flash' },
               ],
             },
-            { key: 'tokenTracker', label: { ar: 'تتبع الرموز (شهري)', en: 'Token usage tracker (monthly)' }, type: 'text', value: 'Auto from AiApiUsage' },
+            { key: 'tokenTracker', label: { ar: 'تتبع الوحدات Token (شهري)', en: 'Token usage tracker (monthly)' }, type: 'text', value: 'Auto from AiApiUsage' },
             { key: 'costEstimate', label: { ar: 'تقدير التكلفة', en: 'Cost estimator' }, type: 'text', value: '$0.00' },
             { key: 'geminiOn', label: { ar: 'تفعيل Gemini', en: 'Gemini ON/OFF' }, type: 'toggle', value: true },
           ],

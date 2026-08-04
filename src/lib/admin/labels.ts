@@ -1,10 +1,10 @@
-/** Bilingual admin UI labels — Arabic + English shown simultaneously. Muqabaleh only. */
+/** Bilingual admin UI labels — professional Arabic meaning (not literal). Muqabaleh only. */
 
 export type Bi = { ar: string; en: string };
 
 export const L = {
-  brand: { ar: 'لوحة تحكم مقابلة', en: 'Muqabaleh Admin' },
-  systemAdmin: { ar: 'مشرف أعلى', en: 'Super Admin' },
+  brand: { ar: 'لوحة تحكم المسؤول العام — مقابلة', en: 'Muqabaleh Super Admin Control' },
+  systemAdmin: { ar: 'المسؤول العام', en: 'Super Admin' },
   signOut: { ar: 'تسجيل الخروج', en: 'Sign Out' },
   back: { ar: 'رجوع', en: 'Back' },
   dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
@@ -36,77 +36,77 @@ export const L = {
   bulkActions: { ar: 'إجراءات جماعية', en: 'Bulk actions' },
   filter: { ar: 'تصفية', en: 'Filter' },
   sort: { ar: 'فرز', en: 'Sort' },
-  // Users
-  users: { ar: 'المستخدمين', en: 'Users' },
+  // Users — المستخدمون
+  users: { ar: 'المستخدمون', en: 'Users' },
   allUsers: { ar: 'الجميع', en: 'All Users' },
   candidates: { ar: 'المرشحون', en: 'Candidates' },
-  admins: { ar: 'المشرفون', en: 'Admins' },
+  admins: { ar: 'المسؤولون', en: 'Admins' },
   companies: { ar: 'الشركات', en: 'Companies' },
-  // Interviews
+  // Interviews — المقابلات
   interviews: { ar: 'المقابلات', en: 'Interviews' },
-  templates: { ar: 'القوالب', en: 'Templates' },
+  templates: { ar: 'نماذج المقابلات', en: 'Templates' },
   questions: { ar: 'بنك الأسئلة', en: 'Question Bank' },
-  sessions: { ar: 'الجلسات الحية', en: 'Live Sessions' },
+  sessions: { ar: 'الجلسات المباشرة', en: 'Live Sessions' },
   rubrics: { ar: 'معايير التقييم', en: 'Scoring Rubrics' },
-  // Partners
+  // Partners — الشركاء
   partners: { ar: 'الشركاء', en: 'Partners' },
-  whitelabel: { ar: 'العلامة البيضاء', en: 'Whitelabel' },
-  applications: { ar: 'الطلبات', en: 'Applications' },
-  revenueShare: { ar: 'تقاسم الإيرادات', en: 'Revenue Share' },
-  revenue: { ar: 'تقاسم الإيرادات', en: 'Revenue Share' },
-  // Billing
+  whitelabel: { ar: 'العلامة التجارية الخاصة', en: 'Whitelabel' },
+  applications: { ar: 'طلبات الانضمام للشراكة', en: 'Applications' },
+  revenueShare: { ar: 'مشاركة الأرباح', en: 'Revenue Share' },
+  revenue: { ar: 'مشاركة الأرباح', en: 'Revenue Share' },
+  // Billing — الفوترة
   billing: { ar: 'الفوترة', en: 'Billing' },
-  plans: { ar: 'الخطط', en: 'Plans' },
-  subscriptions: { ar: 'الاشتراكات', en: 'Subscriptions' },
+  plans: { ar: 'باقات الاشتراك', en: 'Plans' },
+  subscriptions: { ar: 'الاشتراكات النشطة', en: 'Active Subscriptions' },
   invoices: { ar: 'الفواتير', en: 'Invoices' },
-  // Payments
+  // Payments — المدفوعات
   payments: { ar: 'المدفوعات', en: 'Payments' },
-  transactions: { ar: 'المعاملات', en: 'Transactions' },
-  payouts: { ar: 'المبالغ المدفوعة', en: 'Payouts' },
-  financialOverview: { ar: 'النظرة المالية الشاملة', en: 'Financial Overview' },
-  // AI
+  transactions: { ar: 'سجل العمليات المالية', en: 'Transactions' },
+  payouts: { ar: 'التحويلات للشركاء', en: 'Payouts' },
+  financialOverview: { ar: 'الملخص المالي', en: 'Financial Overview' },
+  // AI — الذكاء الاصطناعي
   aiApis: { ar: 'الذكاء الاصطناعي', en: 'AI & APIs' },
-  providers: { ar: 'المزودون', en: 'Providers' },
+  providers: { ar: 'خدمات الذكاء الاصطناعي', en: 'Providers' },
   keys: { ar: 'مفاتيح API', en: 'API Keys' },
-  prompts: { ar: 'الأوامر', en: 'Prompts' },
-  usage: { ar: 'الاستهلاك', en: 'Usage' },
-  // Content
+  prompts: { ar: 'التعليمات النصية', en: 'Prompts' },
+  usage: { ar: 'الاستهلاك والتكلفة', en: 'Usage' },
+  // Content — المحتوى
   content: { ar: 'المحتوى', en: 'Content' },
-  landing: { ar: 'الصفحة الرئيسية', en: 'Landing Page' },
-  emails: { ar: 'البريد', en: 'Emails' },
-  // Analytics
+  landing: { ar: 'الصفحة الهبوط', en: 'Landing Page' },
+  emails: { ar: 'قوالب البريد الإلكتروني', en: 'Emails' },
+  // Analytics — التحليلات
   analytics: { ar: 'التحليلات', en: 'Analytics' },
-  website: { ar: 'الموقع', en: 'Website' },
-  behavior: { ar: 'السلوك', en: 'Behavior' },
-  // Settings
+  website: { ar: 'أداء الموقع', en: 'Website' },
+  behavior: { ar: 'تحليلات سلوك المستخدمين', en: 'Behavior' },
+  // Settings — الإعدادات
   settings: { ar: 'الإعدادات', en: 'Settings' },
-  general: { ar: 'عام', en: 'General' },
-  security: { ar: 'الأمان', en: 'Security' },
-  access: { ar: 'الوصول', en: 'Access' },
-  backup: { ar: 'النسخ الاحتياطي', en: 'Backup' },
-  // Support
-  support: { ar: 'الدعم', en: 'Support' },
-  tickets: { ar: 'التذاكر', en: 'Tickets' },
-  chat: { ar: 'الدردشة', en: 'Chat' },
+  general: { ar: 'الإعدادات العامة', en: 'General' },
+  security: { ar: 'إعدادات الحماية', en: 'Security' },
+  access: { ar: 'إدارة صلاحيات الوصول', en: 'Access' },
+  backup: { ar: 'النسخ الاحتياطي والصيانة', en: 'Backup' },
+  // Support — الدعم الفني
+  support: { ar: 'الدعم الفني', en: 'Support' },
+  tickets: { ar: 'طلبات الدعم الفني', en: 'Tickets' },
+  chat: { ar: 'الدردشة المباشرة', en: 'Chat' },
   // Top-level
-  notifications: { ar: 'الإشعارات', en: 'Notifications' },
-  audit: { ar: 'سجلات التدقيق', en: 'Audit Logs' },
-  applicants: { ar: 'المتقدمون', en: 'Applicants' },
-  refund: { ar: 'استرداد', en: 'Refund' },
-  enable2fa: { ar: 'تفعيل التحقق الثنائي', en: 'Enable 2FA' },
-  verify2fa: { ar: 'رمز التحقق', en: 'Verification code' },
+  notifications: { ar: 'مركز التنبيهات', en: 'Notification Center' },
+  audit: { ar: 'سجلات النشاط', en: 'Audit Logs' },
+  applicants: { ar: 'قاعدة بيانات المتقدمين', en: 'Applicants' },
+  refund: { ar: 'استرداد المبلغ', en: 'Refund' },
+  enable2fa: { ar: 'تفعيل المصادقة الثنائية', en: 'Enable 2FA' },
+  verify2fa: { ar: 'رمز المصادقة', en: 'Verification code' },
   // Dashboard widgets
   todaysInterviews: { ar: 'مقابلات اليوم', en: "Today's Interviews" },
-  newSignups: { ar: 'تسجيلات جديدة', en: 'New Signups' },
-  revenueToday: { ar: 'الإيرادات اليوم', en: 'Revenue Today' },
+  newSignups: { ar: 'مستخدمون جدد', en: 'New Signups' },
+  revenueToday: { ar: 'الإيرادات اليومية', en: 'Revenue Today' },
   activeCompanies: { ar: 'الشركات النشطة', en: 'Active Companies' },
-  pendingTickets: { ar: 'تذاكر الدعم المعلقة', en: 'Pending Support Tickets' },
-  apiHealth: { ar: 'حالة APIs', en: 'API Health Status' },
-  visitors24h: { ar: 'عدد الزوار (٢٤ ساعة)', en: 'Visitor Count (24h)' },
+  pendingTickets: { ar: 'طلبات الدعم المعلقة', en: 'Pending Support Tickets' },
+  apiHealth: { ar: 'حالة خدمات API', en: 'API Health Status' },
+  visitors24h: { ar: 'عدد الزيارات (٢٤ ساعة)', en: 'Visitor Count (24h)' },
   revenueTrend: { ar: 'اتجاه الإيرادات', en: 'Revenue trend' },
-  completionRate: { ar: 'معدل إكمال المقابلات', en: 'Interview completion rate' },
+  completionRate: { ar: 'نسبة إكمال المقابلات', en: 'Interview completion rate' },
   userGrowth: { ar: 'نمو المستخدمين حسب النوع', en: 'User growth by type (B2C vs B2B)' },
-  topIndustries: { ar: 'أكثر المجالات مقابلات', en: 'Top industries interviewed for' },
+  topIndustries: { ar: 'أكثر القطاعات مقابلات', en: 'Top industries interviewed for' },
   // Misc ops kept for legacy routes
   legacyOps: { ar: 'عمليات إضافية', en: 'Extra Ops' },
   interviewers: { ar: 'المحاورون', en: 'Interviewers' },

@@ -25,11 +25,11 @@ export default function Page() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <AdminStatCard label={{ ar: 'حجم الاستدعاءات', en: 'API call volume' }} value={String(rows.length)} icon={Activity} />
-        <AdminStatCard label={{ ar: 'الرموز', en: 'Tokens' }} value={String(tokens)} icon={Zap} />
+        <AdminStatCard label={{ ar: 'الوحدات (Token)', en: 'Tokens' }} value={String(tokens)} icon={Zap} />
         <AdminStatCard label={{ ar: 'التكلفة التقديرية', en: 'Cost per provider' }} value={`$${cost.toFixed(4)}`} icon={DollarSign} />
       </div>
       <AdminDataTable
-        title={{ ar: 'الاستهلاك والتكاليف', en: 'Usage & Costs' }}
+        title={{ ar: 'الاستهلاك والتكلفة', en: 'Usage & Costs' }}
         description={{
           ar: 'الاستهلاك اليومي/الشهري، التكلفة لكل مزوّد، وتنبيهات عند وصول ٨٠٪ من الميزانية.',
           en: 'Daily/monthly volume, cost per provider, alerts at 80% budget threshold.',
@@ -37,11 +37,11 @@ export default function Page() {
         resource="ai_usage"
         creatable={false}
         columns={[
-          { key: 'provider', label: { ar: 'المزوّد', en: 'Provider' } },
+          { key: 'provider', label: { ar: 'الخدمة', en: 'Provider' } },
           { key: 'model', label: { ar: 'النموذج', en: 'Model' } },
           { key: 'operation', label: { ar: 'العملية', en: 'Operation' } },
-          { key: 'inputTokens', label: { ar: 'رموز الإدخال', en: 'Input tokens' } },
-          { key: 'outputTokens', label: { ar: 'رموز الإخراج', en: 'Output tokens' } },
+          { key: 'inputTokens', label: { ar: 'وحدات الإدخال (Token)', en: 'Input tokens' } },
+          { key: 'outputTokens', label: { ar: 'وحدات الإخراج (Token)', en: 'Output tokens' } },
           {
             key: 'estimatedCostUsd',
             label: { ar: 'التكلفة', en: 'Cost USD' },

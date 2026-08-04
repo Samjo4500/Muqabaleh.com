@@ -15,8 +15,8 @@ export default function Page() {
         { key: 'textAr', label: { ar: 'نص السؤال (عربي)', en: 'Question AR' } },
         { key: 'textEn', label: { ar: 'نص السؤال (إنجليزي)', en: 'Question EN' } },
         { key: 'category', label: { ar: 'الفئة', en: 'Category' } },
-        { key: 'industry', label: { ar: 'المجال', en: 'Industry' } },
-        { key: 'difficulty', label: { ar: 'الصعوبة', en: 'Difficulty' } },
+        { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
+        { key: 'difficulty', label: { ar: 'مستوى الصعوبة', en: 'Difficulty' } },
         {
           key: 'expectedPoints',
           label: { ar: 'نقاط الإجابة المتوقعة', en: 'Expected answer points' },

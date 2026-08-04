@@ -14,8 +14,8 @@ export default function Page() {
         {
           title: { ar: 'هوية الموقع', en: 'Site identity' },
           fields: [
-            { key: 'siteNameAr', label: { ar: 'اسم الموقع (عربي)', en: 'Site name AR' }, type: 'text', value: 'مقابلة' },
-            { key: 'siteNameEn', label: { ar: 'اسم الموقع (إنجليزي)', en: 'Site name EN' }, type: 'text', value: 'Muqabaleh' },
+            { key: 'siteNameAr', label: { ar: 'اسم المنصة (عربي)', en: 'Site name AR' }, type: 'text', value: 'مقابلة' },
+            { key: 'siteNameEn', label: { ar: 'اسم المنصة (إنجليزي)', en: 'Site name EN' }, type: 'text', value: 'Muqabaleh' },
             { key: 'logoUrl', label: { ar: 'الشعار', en: 'Site logo URL' }, type: 'text' },
             { key: 'faviconUrl', label: { ar: 'أيقونة الموقع', en: 'Favicon URL' }, type: 'text' },
             {

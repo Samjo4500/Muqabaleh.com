@@ -8,14 +8,14 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'حسابات الشركات', en: 'Company Accounts' }}
       description={{
-        ar: 'ملف الشركة، عدد المرشحين، باقة الاشتراك، وحالة العلامة البيضاء.',
+        ar: 'ملف الشركة، عدد المرشحين، باقة الاشتراك، وحالة العلامة التجارية الخاصة.',
         en: 'Company profile, candidates count, subscription tier, whitelabel status.',
       }}
       resource="companies"
       creatable={false}
       columns={[
         { key: 'name', label: { ar: 'اسم الشركة', en: 'Company name' } },
-        { key: 'industry', label: { ar: 'المجال', en: 'Industry' } },
+        { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
         { key: 'country', label: { ar: 'الدولة', en: 'Country' } },
         { key: 'plan', label: { ar: 'الباقة', en: 'Subscription tier' } },
         {
@@ -25,7 +25,7 @@ export default function Page() {
         },
         {
           key: 'whitelabel',
-          label: { ar: 'العلامة البيضاء', en: 'Whitelabel' },
+          label: { ar: 'العلامة التجارية الخاصة', en: 'Whitelabel' },
           render: (row) => (
             <Badge variant="outline">{String(row.whitelabelStatus ?? 'Pending')}</Badge>
           ),

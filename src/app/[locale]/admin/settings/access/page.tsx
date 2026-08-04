@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'كلمات مرور ووصول المشرفين', en: 'Admin Passwords & Access' }}
+      title={{ ar: 'إدارة صلاحيات الوصول', en: 'Admin Passwords & Access' }}
       description={{
-        ar: 'قائمة حسابات المشرفين، إعادة تعيين كلمة المرور، إلغاء الجلسات، وسجل الدخول.',
+        ar: 'قائمة حسابات المسؤولين، إعادة تعيين كلمة المرور، إنهاء الجلسات النشطة، وسجل الدخول.',
         en: 'List admin accounts, reset passwords, revoke sessions, login history log.',
       }}
       resource="admins"
@@ -39,7 +39,7 @@ export default function Page() {
         },
         {
           id: 'revoke',
-          label: { ar: 'إلغاء الجلسات', en: 'Revoke sessions' },
+          label: { ar: 'إنهاء الجلسات النشطة', en: 'Revoke sessions' },
           onRun: async (row) => alert(`Sessions revoked for ${row.email}`),
         },
       ]}

@@ -14,7 +14,7 @@ export default function Page() {
       resource="api_keys"
       columns={[
         { key: 'label', label: { ar: 'التسمية', en: 'Label' } },
-        { key: 'provider', label: { ar: 'المزوّد', en: 'Provider' } },
+        { key: 'provider', label: { ar: 'الخدمة', en: 'Provider' } },
         { key: 'keyHint', label: { ar: 'المفتاح', en: 'Key hint' } },
         {
           key: 'rateLimit',

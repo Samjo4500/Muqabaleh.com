@@ -5,7 +5,7 @@ import { BiInline, BiLabel } from '@/components/admin/BiLabel';
 import { Badge } from '@/components/ui/badge';
 
 const SESSIONS = [
-  { id: 'chat-1', user: 'sara@example.com', status: 'Active', last: '2m ago', preview: 'هل يمكنني استرداد جلستي؟' },
+  { id: 'chat-1', user: 'sara@example.com', status: 'Active', last: '2m ago', preview: 'هل يمكنني استرداد المبلغ جلستي؟' },
   { id: 'chat-2', user: 'omar@company.sa', status: 'Active', last: '8m ago', preview: 'Need invoice for last month' },
   { id: 'chat-3', user: 'lina@mail.com', status: 'Archived', last: '1d ago', preview: 'Thanks for the help!' },
 ];
@@ -39,13 +39,13 @@ export default function Page() {
         <section className="flex min-h-[420px] flex-col rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
           <BiLabel ar="نافذة المحادثة" en="Chat window" />
           <div className="mt-4 flex-1 space-y-3 text-sm">
-            <div className="max-w-[80%] rounded-2xl bg-white/5 px-3 py-2">هل يمكنني استرداد جلستي؟</div>
+            <div className="max-w-[80%] rounded-2xl bg-white/5 px-3 py-2">هل يمكنني استرداد المبلغ جلستي؟</div>
             <div className="ms-auto max-w-[80%] rounded-2xl bg-cyan-500/20 px-3 py-2">
               بالطبع — أرسل رقم الجلسة وسنراجعها خلال دقائق.
             </div>
           </div>
           <p className="mt-4 text-xs text-[var(--text-muted)]">
-            <BiInline ar="الأرشيف متاح من القائمة الجانبية." en="Archive available from the session list." />
+            <BiInline ar="أرشيف المحادثات متاح من القائمة الجانبية." en="Chat archive available from the session list." />
           </p>
         </section>
       </div>

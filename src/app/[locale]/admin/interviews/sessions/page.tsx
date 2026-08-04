@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 export default function Page() {
   return (
     <AdminDataTable
-      title={{ ar: 'الجلسات الحية', en: 'Live Sessions' }}
+      title={{ ar: 'الجلسات المباشرة', en: 'Live Sessions' }}
       description={{
-        ar: 'عرض فوري للمقابلات الجارية، مراقبة للقراءة فقط، إيقاف قسري، وسجلات الجلسة.',
+        ar: 'عرض فوري للمقابلات الجارية، مراقبة للقراءة فقط، إنهاء إجبارياً، وسجل الجلسات.',
         en: 'Real-time ongoing interviews, read-only monitor, force-stop, session logs.',
       }}
       resource="sessions"
@@ -23,7 +23,7 @@ export default function Page() {
             return u?.email ?? '—';
           },
         },
-        { key: 'industry', label: { ar: 'المجال', en: 'Industry' } },
+        { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
         { key: 'mode', label: { ar: 'النمط', en: 'Mode' } },
         {
           key: 'status',
@@ -46,7 +46,7 @@ export default function Page() {
         },
         {
           id: 'force-stop',
-          label: { ar: 'إيقاف قسري', en: 'Force-stop' },
+          label: { ar: 'إنهاء إجبارياً', en: 'Force-stop' },
           onRun: async (row) => alert(`Force-stop queued: ${row.id}`),
         },
       ]}

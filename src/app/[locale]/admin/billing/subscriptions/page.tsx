@@ -8,7 +8,7 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'الاشتراكات النشطة', en: 'Active Subscriptions' }}
       description={{
-        ar: 'المستخدم/الشركة، الخطة، تاريخ البدء، الفوترة التالية، الحالة، وطريقة الدفع.',
+        ar: 'المستخدم/الشركة، الخطة، تاريخ البدء، تاريخ التجديد، الحالة، وطريقة الدفع.',
         en: 'User/Company, plan, start date, next billing, status, payment method.',
       }}
       resource="subscriptions"
@@ -33,7 +33,7 @@ export default function Page() {
         },
         {
           key: 'nextBilling',
-          label: { ar: 'الفوترة التالية', en: 'Next billing' },
+          label: { ar: 'تاريخ التجديد', en: 'Next billing' },
           render: (row) =>
             row.nextBillingTime
               ? new Date(String(row.nextBillingTime)).toLocaleDateString()

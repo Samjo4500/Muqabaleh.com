@@ -5,7 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
-      title={{ ar: 'شركاء العلامة البيضاء', en: 'Whitelabel Partners' }}
+      title={{ ar: 'شركاء العلامة التجارية الخاصة', en: 'Whitelabel Partners' }}
       description={{
         ar: 'نموذج الانضمام، النطاق المخصص، الشعار والألوان، ومفتاح API لكل شريك.',
         en: 'Onboarding form, custom domain, logo & branding, color scheme, API key per partner.',

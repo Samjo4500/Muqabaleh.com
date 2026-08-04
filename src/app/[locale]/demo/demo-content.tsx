@@ -4,13 +4,13 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Loader2, ArrowLeft, ArrowRight, AlertTriangle, Zap, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { easeCrystal } from '@/components/landing/crystal/motion';
 
 export default function DemoContent() {
   const t = useTranslations('demo');
-  const tLanding = useTranslations('landing');
   const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -39,6 +39,8 @@ export default function DemoContent() {
     }
     goHome();
   };
+
+  const BackIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
   const startDemo = async () => {
     setLoading(true);
@@ -73,27 +75,40 @@ export default function DemoContent() {
           animate={{ x: [0, -50, 20, 0], y: [0, -25, 35, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
+        <motion.div
+          className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-cyan-400/15 blur-[120px] will-change-transform"
+          animate={{ opacity: [0.35, 0.6, 0.35] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        />
       </div>
 
-      {/* Top bar: Home logo + Back */}
+      {/* Top bar: brand logo (Home) + Back */}
       <header className="relative z-20 px-4 pt-4 md:px-6">
-        <div className="glass mx-auto flex h-14 max-w-3xl items-center justify-between rounded-2xl px-4">
+        <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 rounded-2xl px-3 sm:px-4">
           <Link
             href="/"
-            className="font-display inline-flex items-center gap-2 text-base font-bold tracking-[-0.02em] text-[var(--text-primary)] transition hover:text-white"
+            className="group inline-flex min-w-0 items-center gap-2.5 rounded-xl py-1 pe-2 transition hover:bg-white/[0.04]"
             aria-label={t('home')}
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/15">
-              <Home size={16} className="text-[var(--aurora-2)]" />
+            <Image
+              src="/images/logos/v2-balanced-a-T.webp"
+              alt="Muqabaleh"
+              width={160}
+              height={44}
+              className="h-10 w-auto sm:h-11"
+              priority
+            />
+            <span className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] sm:inline-flex">
+              <Home size={12} className="text-[var(--aurora-2)]" />
+              {t('home')}
             </span>
-            {tLanding('brand')}
           </Link>
           <button
             type="button"
             onClick={goBack}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
+            className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3.5 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:border-white/25 hover:bg-white/[0.1]"
           >
-            {locale === 'ar' ? <ArrowRight size={16} strokeWidth={1.75} /> : <ArrowLeft size={16} strokeWidth={1.75} />}
+            <BackIcon size={16} strokeWidth={2} />
             {t('back')}
           </button>
         </div>
@@ -107,13 +122,18 @@ export default function DemoContent() {
           transition={{ duration: 0.5, ease: easeCrystal }}
         >
           <div className="mb-8 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/15">
+            <motion.div
+              className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--aurora-2)]/15 ring-1 ring-white/10"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.45, ease: easeCrystal }}
+            >
               <span className="text-lg font-bold gradient-text">AI</span>
-            </div>
+            </motion.div>
             <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-3xl">
               {t('title')}
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">{t('subtitle')}</p>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--text-secondary)]">{t('subtitle')}</p>
           </div>
 
           <div className="glass-strong rounded-3xl p-6 md:p-8">

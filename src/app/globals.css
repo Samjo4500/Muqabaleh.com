@@ -514,3 +514,15 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Blog Prose Styles */
+.prose-blog h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1rem; }
+.prose-blog h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-top: 2rem; margin-bottom: 0.75rem; }
+.prose-blog p { margin-bottom: 1.25rem; line-height: 1.8; color: var(--text-muted); }
+.prose-blog ul, .prose-blog ol { margin-bottom: 1.25rem; padding-left: 1.5rem; color: var(--text-muted); }
+.prose-blog li { margin-bottom: 0.5rem; line-height: 1.7; }
+.prose-blog li::marker { color: var(--gold); }
+.prose-blog strong { color: var(--text-primary); font-weight: 600; }
+.prose-blog a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+.prose-blog a:hover { opacity: 0.8; }
+.prose-blog blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; margin-bottom: 1.25rem; font-style: italic; color: var(--text-faint); }

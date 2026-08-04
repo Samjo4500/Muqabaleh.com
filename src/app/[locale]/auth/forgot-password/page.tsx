@@ -31,11 +31,17 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setTouched(true);
     if (emailError || !email) return;
+    // Email delivery is not wired yet — show honest unavailable state.
     setSent(true);
   }
 
   return (
     <AuthShell title={t("forgotTitle")} subtitle={t("forgotSub")} showBack>
+      <div className="mb-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-300">
+        {locale === "ar"
+          ? "إعادة التعيين عبر البريد غير مفعّلة بعد. تواصل مع مشرف المنصة لإعادة تعيين كلمة المرور."
+          : "Email password reset is not connected yet. Contact the platform admin to reset your password."}
+      </div>
       {!sent ? (
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           {/* Email */}

@@ -1,8 +1,8 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useState } from 'react';
-import { Plus, X, Clock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, X, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlowCard } from '@/components/brand';
 import {
@@ -12,8 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 
-type SlotRow = { id: number; day: string; from: string; to: string; tz: string };
+type SlotRow = { id: number; day: string; from: string; to: string };
+
+type ApiSlot = {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+};
 
 const AR_DAYS = ['daySat', 'daySun', 'dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri'];
 const EN_DAYS = ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'];
@@ -30,24 +39,59 @@ function generateTimeOptions(): string[] {
 
 const timeOptions = generateTimeOptions();
 
-const timezones = ['Asia/Riyadh', 'Asia/Dubai', 'Asia/Qatar', 'Asia/Kuwait', 'Asia/Bahrain', 'Asia/Oman', 'Africa/Cairo', 'Europe/London'];
+function dayToApiDayOfWeek(dayKey: string, locale: string): number {
+  const days = locale === 'ar' ? AR_DAYS : EN_DAYS;
+  return days.indexOf(dayKey);
+}
 
 export default function AvailabilityPage() {
   const t = useTranslations('interviewerPanel');
+  const tc = useTranslations('common');
   const locale = useLocale();
   const days = locale === 'ar' ? AR_DAYS : EN_DAYS;
 
-  const [rows, setRows] = useState<SlotRow[]>([
-    { id: 1, day: days[0], from: '09:00', to: '12:00', tz: 'Asia/Riyadh' },
-    { id: 2, day: days[1], from: '14:00', to: '17:00', tz: 'Asia/Riyadh' },
-    { id: 3, day: days[3], from: '10:00', to: '14:00', tz: 'Asia/Riyadh' },
-    { id: 4, day: days[5], from: '16:00', to: '20:00', tz: 'Asia/Riyadh' },
-  ]);
+  const [rows, setRows] = useState<SlotRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const fetchAvailability = useCallback(async () => {
+    try {
+      const res = await fetch('/api/interviewer/availability');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData?.error?.en || tc('error'));
+        return;
+      }
+      const data = await res.json();
+      const apiSlots: ApiSlot[] = data.slots || [];
+      if (apiSlots.length > 0) {
+        const mapped: SlotRow[] = apiSlots.map((s) => ({
+          id: Date.now() + Math.random(),
+          day: days[s.dayOfWeek] || days[0],
+          from: s.startTime,
+          to: s.endTime,
+        }));
+        setRows(mapped);
+      } else {
+        setRows([
+          { id: 1, day: days[0], from: '09:00', to: '12:00' },
+        ]);
+      }
+    } catch {
+      toast.error(tc('error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [days, tc]);
+
+  useEffect(() => {
+    fetchAvailability();
+  }, [fetchAvailability]);
 
   const addRow = () => {
     setRows((prev) => [
       ...prev,
-      { id: Date.now(), day: days[0], from: '09:00', to: '17:00', tz: 'Asia/Riyadh' },
+      { id: Date.now(), day: days[0], from: '09:00', to: '17:00' },
     ]);
   };
 
@@ -58,6 +102,50 @@ export default function AvailabilityPage() {
   const updateRow = (id: number, field: keyof SlotRow, value: string) => {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const slots = rows.map((r) => ({
+        dayOfWeek: dayToApiDayOfWeek(r.day, locale),
+        startTime: r.from,
+        endTime: r.to,
+        isAvailable: true,
+      }));
+
+      const res = await fetch('/api/interviewer/availability', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slots }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData?.error?.en || tc('error'));
+        return;
+      }
+
+      toast.success(t('save'));
+    } catch {
+      toast.error(tc('error'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-56 animate-pulse rounded-lg bg-white/10" />
+        <div className="h-4 w-80 animate-pulse rounded-lg bg-white/10" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-white/[0.04] border border-white/[0.06]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -71,14 +159,10 @@ export default function AvailabilityPage() {
       <GlowCard>
         <div className="space-y-4">
           {/* Header row */}
-          <div className="hidden items-center gap-4 md:grid md:grid-cols-[1fr_1fr_1fr_1fr_40px]">
+          <div className="hidden items-center gap-4 md:grid md:grid-cols-[1fr_1fr_1fr_40px]">
             <span className="text-sm font-medium text-[var(--text-muted)]"></span>
             <span className="text-sm font-medium text-[var(--text-muted)]">{t('from')}</span>
             <span className="text-sm font-medium text-[var(--text-muted)]">{t('to')}</span>
-            <span className="flex items-center gap-1.5 text-sm font-medium text-[var(--text-muted)]">
-              <Clock size={14} strokeWidth={1.75} />
-              {t('timezone')}
-            </span>
             <span></span>
           </div>
 
@@ -86,7 +170,7 @@ export default function AvailabilityPage() {
           {rows.map((row) => (
             <div
               key={row.id}
-              className="grid gap-3 rounded-xl bg-white/[0.03] p-3 md:grid-cols-[1fr_1fr_1fr_1fr_40px] md:items-center"
+              className="grid gap-3 rounded-xl bg-white/[0.03] p-3 md:grid-cols-[1fr_1fr_1fr_40px] md:items-center"
             >
               {/* Day select */}
               <Select value={row.day} onValueChange={(v) => updateRow(row.id, 'day', v)}>
@@ -130,20 +214,6 @@ export default function AvailabilityPage() {
                 </SelectContent>
               </Select>
 
-              {/* Timezone */}
-              <Select value={row.tz} onValueChange={(v) => updateRow(row.id, 'tz', v)}>
-                <SelectTrigger className="glass-input border-white/10">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-[var(--bg-panel)]">
-                  {timezones.map((tz) => (
-                    <SelectItem key={tz} value={tz}>
-                      {tz}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
               {/* Remove */}
               <button
                 type="button"
@@ -170,7 +240,16 @@ export default function AvailabilityPage() {
 
       {/* Save button */}
       <div className="flex justify-end">
-        <Button className="btn-gold min-w-[140px]">{t('save')}</Button>
+        <Button
+          className="btn-gold min-w-[140px]"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : null}
+          {t('save')}
+        </Button>
       </div>
     </div>
   );

@@ -125,24 +125,32 @@ export interface EvaluationResult {
   recommendation: 'RECOMMENDED' | 'CONSIDER' | 'NOT_RECOMMENDED';
 }
 
-const TOTAL_QUESTIONS = 5;
+const TOTAL_QUESTIONS = 10;
 const IS_DEMO = process.env.DEMO_MODE === 'true';
 
-// ─── Demo Mode: Pre-written mock responses ───
-const DEMO_QUESTIONS_AR = [
-  'أهلاً وسهلاً بك في مقابلة مقابلة. أنا فهد، المحاور اليوم. خلينا نبدأ بالسؤال الأول: أخبرني عن آخر مشروع عملت عليه وكيف ساهمت في نجاحه؟',
-  'ممتاز، إجابة واضحة. السؤال الثاني: إذا واجهتك مشكلة تقنية معقدة في العمل وزميلك يختلف معك في الحل، كيف تتعامل مع الموقف؟',
-  'رد رائع. السؤال الثالث: ما هي أكبر تحدٍ واجهته في مجالك وكيف تعاملت معه؟',
-  'إجابة ممتازة. السؤال الرابع: أين ترى نفسك خلال ثلاث سنوات من الآن في مسيرتك المهنية؟',
-  'شكراً لك على وقتك. هذا كان آخر سؤال. شكراً لمشاركتك في هذه المقابلة. [INTERVIEW_DONE]',
-];
-const DEMO_QUESTIONS_EN = [
-  'Welcome to Muqabaleh! I\'m Fahd, your interviewer today. Let\'s start with the first question: Tell me about the last project you worked on and how you contributed to its success?',
-  'Great answer. Second question: If you faced a complex technical problem at work and your colleague disagreed with your approach, how would you handle it?',
-  'Excellent response. Third question: What is the biggest challenge you\'ve faced in your field and how did you overcome it?',
-  'Outstanding answer. Fourth question: Where do you see yourself in three years in your career?',
-  'Thank you for your time. That was the final question. Thank you for participating in this interview. [INTERVIEW_DONE]',
-];
+// ─── Demo Mode: Uses question engine ───
+import { getDemoQuestions, type Role, LEVEL_MAP } from './interview-questions';
+
+function getDemoQuestionsForParams(params: InterviewParams): string[] {
+  // Map industry to role (best-effort default mapping)
+  const roleMap: Record<string, Role> = {
+    SALES: 'SALES_MANAGER', MARKETING: 'MARKETING_SPECIALIST',
+    HR: 'HR_MANAGER', IT: 'SOFTWARE_ENGINEER',
+    FINANCE: 'ACCOUNTANT', ENGINEERING: 'PROJECT_MANAGER',
+    EDUCATION: 'HR_MANAGER', MEDICINE: 'CUSTOMER_SERVICE',
+  };
+  const role = roleMap[params.industry] || 'SOFTWARE_ENGINEER';
+  const level = LEVEL_MAP[params.experience] || 'MID';
+  const language = params.language;
+  // Map industry to question engine industries
+  const industryMap: Record<string, string> = {
+    IT: 'TECH', FINANCE: 'FINTECH', MEDICINE: 'HEALTHCARE',
+    ENGINEERING: 'IT', EDUCATION: 'TECH', MARKETING: 'RETAIL',
+    SALES: 'RETAIL', HR: 'TECH',
+  };
+  const qIndustry = industryMap[params.industry];
+  return getDemoQuestions(role, level, qIndustry, language);
+}
 const DEMO_EVALUATION = {
   overallScore: 78,
   contentScore: 82,
@@ -256,7 +264,7 @@ export async function generateInterviewResponse(
 
   // Demo mode: return next mock question
   if (IS_DEMO) {
-    const questions = params.language === 'AR' ? DEMO_QUESTIONS_AR : DEMO_QUESTIONS_EN;
+    const questions = getDemoQuestionsForParams(params);
     const idx = Math.min(questionCount, questions.length - 1);
     const mockResponse = questions[idx];
     const isDone = mockResponse.includes('[INTERVIEW_DONE]');
@@ -318,9 +326,9 @@ export async function startInterview(
   interviewId: string,
   params: InterviewParams,
 ): Promise<QuestionResult> {
-  // Demo mode: return mock first question
+  // Demo mode: return mock first question from question bank
   if (IS_DEMO) {
-    const questions = params.language === 'AR' ? DEMO_QUESTIONS_AR : DEMO_QUESTIONS_EN;
+    const questions = getDemoQuestionsForParams(params);
     const cleaned = questions[0].replace(/\[INTERVIEW_DONE\]/g, '').trim();
     await db.message.create({
       data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: 1 },

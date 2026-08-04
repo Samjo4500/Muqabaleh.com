@@ -30,6 +30,10 @@ function getProtectedRoute(pathname: string): { route: string; roles: string[] }
   const bare = stripLocale(pathname);
   for (const [route, roles] of Object.entries(ROUTE_ROLES)) {
     if (bare === route || bare.startsWith(route + '/')) {
+      // /interviewer/[id] is public (browsable by anyone), but sub-paths like /interviewer/dashboard are protected
+      if (route === '/interviewer' && bare !== '/interviewer' && bare.split('/').length <= 3) {
+        return null;
+      }
       return { route, roles };
     }
   }

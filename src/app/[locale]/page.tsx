@@ -9,6 +9,8 @@ import {
   Brain,
   BarChart3,
   Mic,
+  Star,
+  Building2,
   Check,
   CircleHelp,
   Quote,
@@ -76,6 +78,7 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1 pt-16">
         <HeroSection t={t} tc={tc} isRTL={isRTL} />
+        <TrustedBySection t={t} />
         <CountryMarquee t={t} isRTL={isRTL} />
         <StatsBand t={t} />
         <WhySection t={t} />
@@ -141,22 +144,49 @@ function CountryMarquee({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
 /*  3. STATS BAND                                                       */
 /* ================================================================== */
 
-function SimpleStat({ label }: { label: string }) {
+function StatsBand({ t }: { t: ReturnType<typeof useTranslations> }) {
+  const stats = [
+    { icon: Mic, label: t('statInterviews') },
+    { icon: Star, label: t('statRating') },
+    { icon: Building2, label: t('statPartners') },
+  ] as const;
   return (
-    <div className="text-center">
-      <div className="text-sm font-semibold text-gold">{label}</div>
-    </div>
+    <section id="stats" className="border-y border-white/5 py-12">
+      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 px-4 text-center sm:grid-cols-3 sm:px-6 lg:px-8">
+        {stats.map((s) => (
+          <div key={s.label} className="flex flex-col items-center gap-2">
+            <s.icon size={24} strokeWidth={1.75} className="text-[var(--gold)]" />
+            <span className="text-2xl font-bold text-[var(--gold)]">
+              {s.label.split(' ')[0]}
+            </span>
+            <span className="text-sm text-[var(--text-muted)]">
+              {s.label.split(' ').slice(1).join(' ')}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
-function StatsBand({ t }: { t: ReturnType<typeof useTranslations> }) {
+function TrustedBySection({ t }: { t: ReturnType<typeof useTranslations> }) {
+  const companies = ['ARAMCO', 'NEOM', 'STC', 'SABIC'];
   return (
-    <section id="stats" className="py-16">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
-        <SimpleStat label={t('statsInterviews')} />
-        <SimpleStat label={t('statsUsers')} />
-        <SimpleStat label={t('statsRating')} />
-        <SimpleStat label={t('statsImprovement')} />
+    <section className="py-12 border-b border-white/5">
+      <div className="mx-auto max-w-5xl px-4 text-center">
+        <p className="mb-8 text-sm font-medium tracking-wider uppercase text-[var(--text-faint)]">
+          {t('trustedByHeadline')}
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+          {companies.map((name) => (
+            <div
+              key={name}
+              className="flex h-12 items-center rounded-lg border border-white/10 bg-white/[0.02] px-6 text-lg font-bold tracking-widest text-[var(--text-faint)]"
+            >
+              {name}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

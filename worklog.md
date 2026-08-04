@@ -1277,62 +1277,911 @@ Stage Summary:
 - All changes pass ESLint clean, JSON valid, browser renders correctly
 ---
 Task ID: 1
-Agent: main
-Task: Fix 3 critical issues on live site - pricing, how-it-works, country marquee
+Agent: fullstack-developer
+Task: Add Prisma schema for Human Interview Marketplace
 
 Work Log:
-- FAILURE 1 (PRICING): Replaced entire 4-tier pricing model ($19/$49/$69/$29 VIP) with new 3-tier model (Free $0 / Pro $9.99 / Unlimited $29.99/mo)
-  - Updated PRICING_PLANS constant in both page.tsx and pricing-content.tsx
-  - Added new i18n keys: freeTitle, freePrice, freeSub, freeFeature, freeCriteria, proTitle, proPrice, proBadge, proSub, proFeature, proCriteria, unlimitedTitle, unlimitedPrice, unlimitedSub, unlimitedFeature, unlimitedCriteria
-  - Added new feature keys: feature10Questions, featureBasicScoring, featureNoCertificate, featurePrioritySupport
-  - Updated pricing namespace comparison table columns: colFree, colPro, colUnlimited
-  - Changed grid from 4-col to 3-col layout
-  - Replaced PriceTag component with simple gold text div for prices
-- FAILURE 2 (HOW IT WORKS): Changed '5 أسئلة' to '10 أسئلة' in ar.json and '5 realistic questions' to '10 realistic questions' in en.json
-- FAILURE 3 (COUNTRY MARQUEE): Changed array doubling to tripling, updated animation keyframes from translateX(-50%) to translateX(-33.333%)
-- Fixed Caddyfile to use 127.0.0.1:3000 instead of localhost:3000
-- ESLint passes clean with zero errors
+- Added Interviewer, InterviewerAvailability, HumanBooking, InterviewerReview, InterviewerPayout models
+- Removed old HumanBooking model that conflicted with new one, cleaned up references in User, Interview, InterviewerProfile
+- Added named relations to resolve ambiguity (InterviewerSlots, InterviewerReviews, InterviewerBookings, InterviewerPayouts)
+- Added interviewerId FK to InterviewerReview to support direct relation to Interviewer
+- Ran prisma generate successfully
 
 Stage Summary:
-- Pricing: Old 4-tier model completely removed from both homepage and pricing page, replaced with Free/Pro $9.99/Unlimited $29.99
-- How It Works: Step 2 now correctly says 10 questions in both AR and EN
-- Country Marquee: Tripled array + -33.333% animation prevents visible seam/duplicates
-- All changes are i18n-compatible (AR + EN)
+- 5 new models added to schema.prisma
+- Prisma client types generated
 
 ---
-Task ID: pp1
-Agent: main
-Task: Build complete PayPal checkout money path for Pro ($9.99 one-time) and Unlimited ($29.99/mo subscription)
 
-Work Log:
-- Created /api/paypal/create-order/route.ts — PayPal Orders v2 API, creates $9.99 one-time order
-- Created /api/paypal/capture-order/route.ts — captures payment, verifies amount=9.99, records Payment, upgrades user to PRO tier
-- Rewrote PayPalSubscriptionButton.tsx → PayPalCheckoutButton.tsx with unified PlanType ('pro'|'unlimited')
-  - pro: uses createOrder/onApprove (one-time via Orders API)
-  - unlimited: uses createSubscription/onApprove (recurring via Subscriptions API)
-- Fixed /api/paypal/activate/route.ts: changed subscription tier from PREMIUM to UNLIMITED
-- Fixed /api/interviews/route.ts: changed access check from PREMIUM to PRO||UNLIMITED, updated error messages
-- Rewrote app/packages/page.tsx: 3-tier cards (Pro + Unlimited) with live PayPalCheckoutButton components
-- Updated landing page + pricing page buttons: Free→/demo, Pro→/app/packages?checkout=pro, Unlimited→/app/packages?checkout=unlimited
-- Updated i18n: priceNotePro, priceNoteUnlimited, planActive, planActiveDesc, startFreeTrial in both AR+EN
-- Removed old priceNote ($19/month), added Pro/Unlimited specific price notes
-- All ESLint clean
+## Task 2 — i18n: Add Human Interviewer Translation Keys
+
+**Agent**: fullstack-developer
+
+### What was done
+
+Added 7 new translation sections to both `src/messages/ar.json` and `src/messages/en.json`:
+
+1. **`humanInterviews`** (22 keys) — Promo section, filters, interviewer browsing, booking CTA
+2. **`interviewerProfile`** (11 keys) — Profile page, intro video, bio, reviews, availability/slots
+3. **`joinInterviewer`** (28 keys) — Recruiting landing page, how-it-works steps, requirements, earnings calculator, FAQ
+4. **`apply`** (22 keys) — Interviewer application form fields, file upload hints, success state
+5. **`booking`** (15 keys) — Booking confirmation, cancellation terms, post-booking checklist, calendar
+6. **`interviewerDash`** (25 keys) — Interviewer dashboard tabs, stats, booking statuses, payouts
+7. **`adminInterviewers`** (16 keys) — Admin management table, statuses, bulk actions, analytics
+
+All existing keys preserved unchanged. Both JSON files validated successfully.
 
 Stage Summary:
-- Pro $9.99: UI → /app/packages → PayPal JS SDK → /api/paypal/create-order ($9.99 hardcoded) → PayPal popup → /api/paypal/capture-order → verify amount → Payment record → user.subscriptionTier=PRO
-- Unlimited $29.99: UI → /app/packages → PayPal JS SDK → /api/paypal/create-subscription (uses PAYPAL_PLAN_ID env) → PayPal popup → /api/paypal/activate → user.subscriptionTier=UNLIMITED
-- Free: UI → /demo (no payment needed)
-- Database tiers: FREE, PRO, UNLIMITED (PREMIUM removed from active code)
-- PayPalCheckoutButton is now importable and ready to use (old PayPalSubscriptionButton preserved for backwards compat)
+- 139 new translation keys added per locale (278 total)
+- ar.json: 1817 → 1981 lines
+- en.json: 1817 → 1981 lines
+
+## Task 3 — Human Interviews Promo Section
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Add HumanInterviewsPromo section after hero on homepage
+
+### What was done
+
+1. **Created** `/src/components/brand/human-interviews-promo.tsx` — a `"use client"` component with:
+   - Full-width section with `bg-gradient(#0a1628 → #0f1d2e)`, `py-20`
+   - Gold headline (`text-4xl md:text-3xl`), white subtext (`max-w-[600px]`)
+   - 3-column stats row (interviewers, rating, price) with gold numbers and white labels
+   - Two CTAs: primary gold button → `/join-as-interviewer`, secondary outline → `/human-interviews`
+   - Horizontal scrollable row of 4 interviewer preview cards (`w-[280px]`, gold border, hover effects)
+   - Each card: initials avatar in gold ring, name + flag, star rating, price pill badge
+   - Framer Motion `useInView` fade-up animation on scroll
+   - Uses `useTranslations` from next-intl with `landing` namespace
+   - Named export: `HumanInterviewsPromo`
+
+2. **Updated** `/src/components/brand/index.ts` — added named export for `HumanInterviewsPromo`
+
+3. **Updated** `/src/app/[locale]/page.tsx` — imported `HumanInterviewsPromo` from `@/components/brand` and placed it immediately after `<HeroSection />` (before CountryMarquee and HowSection)
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 4 — Join-as-Interviewer Landing Page
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Create the `/join-as-interviewer` marketing landing page (public, no auth)
+
+### What was done
+
+Completely replaced `/src/app/[locale]/join-as-interviewer/page.tsx` (was a form-based page) with a marketing landing page using the `joinInterviewer` i18n namespace.
+
+**File**: `/src/app/[locale]/join-as-interviewer/page.tsx`
+
+Sections built:
+1. **Hero** — Gold headline (`text-4xl md:text-5xl font-bold`), white subtext (`text-xl mt-4`), 3-stat row (earnings/schedule/free) with DollarSign, Calendar, CreditCard icons from lucide-react
+2. **How It Works** (`mt-24`) — Centered title, 3-step cards in `md:grid-cols-3 gap-6` grid, each card: `bg-[#0B0F17]`, gold border, gold numbered circle, white title, gray desc. Framer Motion stagger animation via `containerVariants`/`itemVariants` with `whileInView`
+3. **Requirements** (`mt-24`) — Title + `ul` with `space-y-3`, each item has `CheckCircle2` icon in emerald-500 + white text
+4. **Earnings Calculator** (`mt-24`) — Interactive section with range slider (`accent-[#d4af37]`), `useState` for sessions (1–20, default 5). Card shows: sessions × $29 × 4 = gross, minus 20% platform fee = net. Gold numbers for earnings.
+5. **CTA** (`mt-16`) — Centered gold button Link to `/apply`, `bg-[#d4af37] text-black rounded-xl py-4 px-12 text-lg font-bold`
+6. **FAQ** (`mt-24`) — shadcn/ui Accordion, 5 items from `faq1q/faq1a` through `faq5q/faq5a`. Styled `bg-transparent text-white border-[rgba(212,175,55,0.2)]`
+
+Uses `Navbar` and `Footer` from `@/components/layout`, all i18n via `useTranslations('joinInterviewer')`.
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 5 — /apply Application Form Page
+
+**File:** `src/app/[locale]/apply/page.tsx`
+
+### What was built
+Public interviewer application form page with two states (form view / success view).
+
+### Layout
+- `'use client'` with `useTranslations('apply')` and `useLocale()` for RTL support.
+- Uses `Navbar` + `Footer` from `@/components/layout`, dark `bg-[var(--bg-void)]` background.
+- `max-w-2xl mx-auto`, `pt-8 pb-16`, staggered Framer Motion entrance animations.
+
+### Form fields (14 total)
+1. **fullNameAr** — text Input, `dir="rtl"`
+2. **fullNameEn** — text Input, `dir="ltr"`
+3. **email** — email Input, `dir="ltr"`
+4. **phone** — tel Input with `+966` placeholder
+5. **linkedIn** — url Input
+6. **yearsExperience** — shadcn `Select` dropdown (1-3, 4-7, 8-15, 15+)
+7. **roles** — 10-option checkbox grid (2-col mobile, 3-col desktop) with custom gold Check icon
+8. **industries** — 11-option checkbox grid, same pattern
+9. **languages** — 3 toggle pill chips (Arabic, English, French) with gold border/bg when active
+10. **priceTier** — 3 radio cards (Standard $29, Pro $49, Executive $99) with gold border + CheckCircle2
+11. **videoIntro** — drag-and-drop upload zone (MP4/MOV/WebM, 50MB note)
+12. **idVerification** — drag-and-drop upload zone (JPG/PNG/PDF, 10MB note)
+13. **terms** — shadcn Checkbox with long label
+14. **submit** — gold Button, full-width, disabled until required fields + terms are filled
+
+### File uploads
+- `useState<File | null>` for each file.
+- Reusable `FileUploadZone` component with drag/drop, click-to-browse, filename display, remove button.
+- On submit, builds `FormData` and POSTs to `/api/interviewers/apply`.
+- Loading spinner on button during submission.
+
+### Success view
+- Centered layout with 64px gold `CheckCircle2`, gold title, white subtext.
+- "Back to home" button using `btn-gold` class, with RTL-aware arrow.
+
+### RTL/LTR support
+- `isRTL` flag from `useLocale()`, used for language labels and arrow direction.
+- Text inputs have explicit `dir` attributes.
+- All layout uses logical properties / flexbox (no explicit left/right).
+
+### Components used
+shadcn/ui: `Input`, `Label`, `Checkbox`, `Button`, `Select`/`SelectContent`/`SelectItem`/`SelectTrigger`/`SelectValue`.
+Lucide: `CheckCircle2`, `Upload`, `FileVideo`, `FileText`, `Check`, `Loader2`, `ArrowRight`.
+
+### Lint
+ESLint passed with zero errors.
 
 ---
-Task ID: 3e-en-articles
-Agent: Content Writer EN
-Task: Write 5 English blog articles
+
+## Task 6 — Human Interview Marketplace API Routes
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Create API routes for the human interview marketplace with mock data fallback
+
+### What was done
+
+Created 6 API route files following the existing `next/server` + `NextRequest`/`NextResponse` pattern. All routes attempt DB access first via `import('@/lib/db')` wrapped in try/catch, falling back to rich mock data when the database is unavailable.
+
+| # | Route | Method | File | Description |
+|---|-------|--------|------|-------------|
+| 1 | `/api/interviewers/apply` | POST | `src/app/api/interviewers/apply/route.ts` | Multipart FormData application submission with full validation |
+| 2 | `/api/interviewers` | GET | `src/app/api/interviewers/route.ts` | List 12 approved interviewers with filtering (role, language, price, rating) and pagination |
+| 3 | `/api/interviewers/[id]` | GET | `src/app/api/interviewers/[id]/route.ts` | Single interviewer profile with reviews and weekly availability slots |
+| 4 | `/api/admin/interviewers` | GET | `src/app/api/admin/interviewers/route.ts` | Admin list of all interviewers with status filter (PENDING/APPROVED/REJECTED/SUSPENDED) |
+| 5 | `/api/admin/interviewers/[id]/approve` | POST | `src/app/api/admin/interviewers/[id]/approve/route.ts` | Approve interviewer application |
+| 6 | `/api/admin/interviewers/[id]/reject` | POST | `src/app/api/admin/interviewers/[id]/reject/route.ts` | Reject interviewer application with optional reason |
+
+### Mock Data
+
+- **12 diverse interviewers** with Arabic names (فهد الراشد, مريم العتيبي, سلطان الحربي, عائشة الدوسري, خالد المطيري, نورة القحطاني, عبدالله الشمري, سارة العنزي, محمد الزهراني, لينا السبيعي, أحمد الغامدي, هند المالكي)
+- Each has unique specialties spanning all 10 roles, different price tiers (STANDARD/PREMIUM/ELITE), ratings 4.2–5.0
+- **3 reviews** per interviewer with bilingual (ar/en) comments and dates
+- **Weekly availability** with day slots, some pre-booked
+- **Admin mock data** includes 3 PENDING, 2 REJECTED (with reasons), 1 SUSPENDED (with reason), plus approved ones
+
+### Error Handling
+
+- All routes return `{ error: { ar: '...', en: '...' } }` on failure
+- Validation errors return 400 with bilingual messages
+- Server errors return 500 with bilingual messages
+
+### Lint
+ESLint passed with zero errors.
+
+---
+
+## Task 8 — Human Interviews Browse Page with Filters
+
+**Date**: $(date -u +%Y-%m-%d)
+**Agent**: fullstack-developer
+**Task**: Create /human-interviews browse page with sidebar filters (public page)
+
+### What was done
+
+Created a fully-featured human interviewers browse page at `src/app/[locale]/human-interviews/page.tsx`.
+
+#### Features
+- **Layout**: Responsive flex layout with sticky sidebar (desktop) and Sheet-based filter drawer (mobile)
+- **Sidebar Filters** (5 groups, all `useState`-driven):
+  1. **Role**: 10 checkbox options (Sales, Tech, Marketing, HR, Finance, Operations, Design, CS, PM, Data)
+  2. **Experience**: 4 radio-like pill buttons (Junior, Mid, Senior, Executive)
+  3. **Language**: 3 toggle pills (Arabic, English, Bilingual)
+  4. **Price**: 3 checkbox options ($29, $49, $99)
+  5. **Rating**: 2 pill options (4.0+, 4.5+)
+- **Clear all** button appears when any filter is active
+- **Gold accent** styling on all selected states
+- **Main Grid**: `grid-cols-1 md:grid-cols-2 xl:grid-cols-3` with result count header
+- **Cards**: 120px avatar circle with gold ring, name, star rating + review count, title, 2 gold Badge tags (specialty + region), price per session, full-width CTA button
+- **API Fetching**: Fetches from `/api/interviewers` with query params; 300ms debounce on filter changes
+- **Loading**: 6 pulse skeleton cards via shadcn Skeleton
+- **Empty State**: Icon + message + clear filters CTA
+- **Load More**: Button at bottom with spinner when loading more pages
+- **Framer Motion**: Staggered card entrance animations
+- **Mobile**: Filter toggle button with active count badge; Sheet slides from RTL-aware side
+
+#### Files created
+- `src/app/[locale]/human-interviews/page.tsx` — Main page component (~380 lines)
+
+#### Files modified
+- `src/messages/ar.json` — Added 20 new keys to `humanInterviews` namespace (filter labels, role/experience/language/price/rating options, UI strings)
+- `src/messages/en.json` — Same 20 keys in English
+
+### Lint
+ESLint passed with zero errors.
+
+---
+
+## Task 9: Interviewer Public Profile Page (`/interviewer/[id]`)
+
+### Files Created
+- `src/app/[locale]/interviewer/[id]/page.tsx` — Full interviewer public profile page
+
+### Implementation Details
+
+**Layout**: Two-column grid (md:grid-cols-5) with Navbar + Footer. Left panel (md:col-span-2) is sticky, right panel (md:col-span-3) scrolls.
+
+**Left Panel** (dark card, bg-[#0B0F17]):
+- 200px circular avatar with gold gradient ring (3px border) and gold initials
+- Green pulsing online indicator dot
+- Name (white, bold, 2xl), title (gray-400), location (flag emoji + city)
+- Star rating display with review count
+- "معتمد من مقابلة" certified badge (gold border pill)
+- Price display (gold, bold, 2xl)
+- Languages (joined with middle dot)
+- Specialty Badge chips (gold/10 bg, gold text)
+- "احجز هذا الموعد" button — disabled (gray) until a time slot is selected, then gold
+
+**Right Panel**:
+- **Video section**: 16:9 aspect ratio container with dark gradient bg, subtle dot pattern, centered gold play button with hover scale animation, "فيديو تعريفي" pill label
+- **Bio section**: Gold heading, truncated text (200 chars), "اقرأ المزيد" toggle with directional chevron
+- **Reviews section**: Header with rating score + star, 3 review cards (initials avatar, anonymized name, date, star rating, comment), "عرض كل التقييمات" link
+- **Availability calendar**: Week view with 7 columns, 30-min time slots (9:00-17:00), three states: available (gold border, clickable), booked (gray, line-through, not-allowed), selected (gold bg, black text, bold)
+
+**Data flow**: Fetches `/api/interviewers/[id]` on mount. Falls back to mock data on API error. Shows loading skeleton during fetch.
+
+**Animations**: Framer Motion `fadeInUp` variants with staggered delays per section.
+
+**i18n**: Uses `interviewerProfile` and `humanInterviews` translation namespaces.
+
+### Lint
+ESLint passed with zero errors.
+
+## Task 7 — Admin Interviewer Management Page
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Rewrite /admin/interviewers with full-featured interviewer management UI
+
+### What was done
+
+1. **Enhanced i18n messages** — Added 43 new keys to `adminInterviewers` namespace in both `ar.json` and `en.json` (profile fields, search placeholder, tab labels, CSV export, bulk actions, confirmation modals, loading/error states).
+
+2. **Updated GET /api/admin/interviewers** — Enriched mock data with `bio`, `bioAr`, `linkedInUrl`, `industries`, `languages`, `videoIntroUrl` fields. Extended DB select to include these fields. Mock data now has 12 interviewers across all 4 statuses.
+
+3. **Created POST /api/admin/interviewers/[id]/suspend** — New API route mirroring the approve/reject pattern. Supports optional `reason` body param. Falls back to mock mode when DB unavailable.
+
+4. **Rewrote admin interviewers page** (`/admin/interviewers/page.tsx`):
+   - **Header**: Gold title (text-3xl, font-bold) + Export CSV button (outline, right-aligned)
+   - **Status filter tabs**: 5 tabs (All, Pending, Approved, Rejected, Suspended) with counts, gold active state
+   - **Search**: Rounded-full input with dark bg, gold border, Search icon, gray placeholder
+   - **Desktop table** (hidden on mobile): Checkbox | Name+Email | Experience | Specialties | Status | Rating | Actions
+   - **Mobile cards** (hidden on desktop): Stacked card layout with same info
+   - **Status badges**: PENDING=yellow, APPROVED=green, REJECTED=red, SUSPENDED=gray
+   - **Actions per row**: Eye (view), Check (approve), X (reject), Ban (suspend) — contextual
+   - **Bulk actions bar**: Animated bar with selected count + approve/reject selected buttons
+   - **View Profile Modal**: Full application details (name, email, phone, LinkedIn, experience, specialties badges, industries, languages, price tier, ID verification, bio, video intro link, rejection/suspension reasons). Approve/Reject/Suspend action buttons.
+   - **Reject Modal**: Confirmation with optional reason textarea
+   - **Suspend Modal**: Confirmation with optional reason textarea
+   - **CSV Export**: Generates downloadable CSV from filtered list
+   - **framer-motion**: AnimatePresence on bulk actions bar, motion.div on profile modal content
+   - **Loading state**: Skeleton blocks while fetching
+   - **Error state**: Retry button
+   - **Empty state**: Message when no results match
+   - Uses `useTranslations('adminInterviewers')` namespace
+   - RTL-aware with `useLocale()`
+   - Existing admin layout (sidebar, admin gate) already wraps this page
+
+### Files created/modified
+- `src/app/[locale]/admin/interviewers/page.tsx` — Rewritten (976 lines)
+- `src/app/api/admin/interviewers/route.ts` — Enhanced mock data + DB select
+- `src/app/api/admin/interviewers/[id]/suspend/route.ts` — New
+- `src/messages/ar.json` — Added 43 keys to adminInterviewers
+- `src/messages/en.json` — Added 43 keys to adminInterviewers
+
+### Notes
+- Lint passes with zero errors
+- Page is guarded by existing AdminGate component (cookie-based auth)
+- Middleware enforces SUPER_ADMIN role for /admin/* routes
+- All API calls use relative paths (no port in URL)
+
+---
+
+## Task 10: Booking Confirmation & Booking Success Pages
+
+### Files Created
+- `src/app/[locale]/book/[interviewerId]/page.tsx` — Booking confirmation/details page
+- `src/app/[locale]/booking/confirmation/page.tsx` — Booking success page
+
+### Files Modified
+- `src/messages/ar.json` — Added `booking.copied` and `booking.backToHome` keys
+- `src/messages/en.json` — Added `booking.copied` and `booking.backToHome` keys
+
+### Implementation Details
+
+#### Book Page (`/book/[interviewerId]`)
+- Reads `interviewerId` from URL params, `date` and `time` from searchParams
+- Fetches interviewer data from `/api/interviewers/[id]` on mount
+- Displays booking summary card with interviewer avatar (40px), name, title, date/time, duration (30 min), meeting method (Jitsi), and price
+- Price derived from `priceTier`: STANDARD=$29, PREMIUM=$49, ELITE=$99
+- Note textarea with i18n placeholder
+- Terms checkbox (shadcn Checkbox) — pay button disabled until accepted
+- Pay button redirects to `/booking/confirmation` with all query params + random `meetingId`
+- RTL-aware back arrow, locale-aware date/time formatting
+- Uses Navbar + Footer layout, max-w-2xl centered
+
+#### Confirmation Page (`/booking/confirmation`)
+- Reads interviewerId, date, time, meetingId from searchParams
+- Fetches interviewer data for name/avatar display
+- Success CheckCircle icon (64px, gold) with framer-motion scale animation (0→1.2→1, 1s)
+- Booking summary card with interviewer info, date/time, Jitsi meeting URL
+- Copy link button using `navigator.clipboard.writeText` with sonner toast feedback
+- Add to Calendar button generates .ics file and triggers download (with 15-min alarm)
+- Preparation checklist (3 items) with emerald CheckCircle2 icons
+- Back to home link
+- Uses sonner toast (already in layout) for "Copied!" feedback
+
+### Notes
+- Lint passes with zero errors
+- Both pages are 'use client' components
+- All i18n keys use `useTranslations('booking')` namespace
+- Consistent dark theme with bg-[#0B0F17] cards and gold accents
+
+## Task 11 — Interviewer Dashboard (Layout + Overview Page)
+- **Created** `src/app/[locale]/interviewer/dashboard/layout.tsx` — Sidebar layout for interviewer role
+- **Created** `src/app/[locale]/interviewer/dashboard/page.tsx` — Overview tab with stats + bookings table
+- Layout mirrors admin pattern: `w-64` sticky sidebar (`bg-[#0a0a0f]`, `border-[rgba(212,175,55,0.1)]`), mobile Sheet hamburger, RTL-aware
+- Sidebar nav: overview, upcoming, calendar, earnings, reviews, settings, help — with gold active state
+- Logout link at sidebar bottom using `common.logout` translation
+- Page: 4 animated stat cards (framer-motion staggered entrance) + recent bookings table
+- Table: 5 mock rows with status badges (confirmed=green, completed=gold, cancelled=red, no-show=gray)
+- "Start Interview" action button shown only for confirmed bookings
+- Uses `useTranslations('interviewerDash')` for all labels
+- Lint passes with zero errors
+
+---
+
+## Task 12 — Interviewer Dashboard Tab Pages
+
+**Date**: 2025-07-30
+**Agent**: fullstack-developer
+**Task**: Create remaining interviewer dashboard tab pages (upcoming, calendar, earnings, reviews)
+
+### What was done
+
+#### 1. Upcoming Page (`/interviewer/dashboard/upcoming/page.tsx`)
+- Title: `t('upcoming')` in gold text-2xl
+- Subtitle indicating next 30 days scope
+- 5 mock booking cards sorted by date ascending, each with:
+  - `bg-[#0B0F17]`, `rounded-xl`, `p-5`, `border-l-4 border-gold`
+  - Candidate name (bold white), role specialty, date/time
+  - Countdown timer (dynamic: "بعد 3 ساعات" / "in 3 hours") calculated from current time
+  - Two action buttons: "بدء المقابلة" (gold bg, ExternalLink icon) + "إلغاء" (outline, red text, X icon)
+- Responsive layout (stacks vertically on mobile, horizontal on sm+)
+- Framer-motion staggered entrance animation
+
+#### 2. Calendar Page (`/interviewer/dashboard/calendar/page.tsx`)
+- Title: `t('calendar')`
+- Month calendar grid with 7 columns matching Arabic day names (الأحد through السبت)
+- Day header row with RTL-aware labels
+- Each day cell shows 30-min time slots (9:00–17:00)
+- Color coding:
+  - Available: `border-gold/50 outline text-gold`, clickable → toggles to blocked
+  - Blocked: `bg-gray-800 text-gray-600 line-through`, clickable → toggles back to available
+  - Booked: `bg-gold/20 text-gold` with candidate name, not clickable
+  - Past: `bg-gray-900 text-gray-700`, not interactive
+- `useState` for availability state management
+- Current month display with prev/next month navigation (RTL-aware chevron direction)
+- Color legend (4 items)
+- "Save changes" button at bottom (gold, Check icon)
+- Mock data seeded: some blocked, booked, and past slots
+- Today highlighted with gold border
+
+#### 3. Earnings Page (`/interviewer/dashboard/earnings/page.tsx`)
+- Title: `t('earnings')`
+- Stats row (4 cards):
+  - إجمالي الأرباح: $2,340 (gold)
+  - العمولة المخصومة: $468 (red-400)
+  - صافي الدخل: $1,872 (emerald)
+  - الجلسات المكتملة: 78 (white)
+- Current balance card: "$487 — تُصرف يوم ١٥ أغسطس" with "Request early payout" button (gold outline)
+- CSS-only bar chart: 6 bars for last 6 months (يناير–يونيو), gold gradient fill, amount labels above bars, month labels below
+- Payout history table (5 mock rows):
+  - Columns: التاريخ | المبلغ | الحالة | معرف العملية
+  - Status badges: PAID=green, PENDING=yellow
+- Framer-motion staggered animations for all sections
+
+#### 4. Reviews Page (`/interviewer/dashboard/reviews/page.tsx`)
+- Title: `t('reviews')`
+- Big average rating: "4.8" in gold text-6xl with 5-star visual
+- Rating breakdown bars (horizontal): 5★(89), 4★(28), 3★(7), 2★(2), 1★(1) — gold progress bars proportional to count
+- Additional breakdown cards grid (4 columns) showing per-star count and percentage
+- 8 mock review cards, each with:
+  - Anonymized candidate name (e.g., "مرشح · مبيعات"), date, gold star rating
+  - Comment text in muted color
+  - "Reply" button (outline, text-xs, MessageSquare icon)
+  - Expandable reply section: toggle button with ChevronDown/ChevronUp, reply shown in gray indented box with gold left border
+- Framer-motion staggered entrance animation
+
+### Technical notes
+- All pages are `'use client'` components
+- No Navbar/Footer — renders within existing dashboard layout
+- Uses `useTranslations('interviewerDash')` and `useLocale()` for i18n
+- RTL-aware navigation chevrons (arrows flip based on locale)
+- Mock data only, no API calls
+- Lint passes with zero errors
+---
+Task ID: 1
+Agent: Main
+Task: Fix all Vercel build errors causing deployment failure
 
 Work Log:
-- Created 5 SEO-optimized blog articles (1200+ words each)
-- Created en/index.ts with all exports
+- Ran `next build` and discovered TypeScript compilation was failing
+- Fixed 14 framer-motion `ease` type errors across 8 files (string/array literals need `as const`)
+- Fixed missing Prisma field `email` in admin/interviewers and interviewers/apply API routes
+- Fixed `unknown` type on mock profile generator in interviewers/[id]/route.ts
+- Made `Review.specialty` optional in interviewer dashboard reviews page
+- Fixed type narrowing issue in hero-simulation.tsx (step comparison inside `!showScore` guard)
+- Wrapped `useSearchParams()` in Suspense boundary for booking/confirmation page
+- Fixed i18n namespace mismatch in HumanInterviewsPromo (was using `landing` namespace, keys are in `humanInterviews`)
+- Added missing i18n label keys (statInterviewersLabel, statRatingLabel, statPriceLabel) to ar.json and en.json
+- Build passes cleanly, lint passes with zero errors
+- Pushed commit 6836146 to origin/main → Vercel auto-deploy triggered
 
 Stage Summary:
-- 5 EN articles with full HTML content, meta tags, internal links
+- **Root cause**: Vercel build was failing on TypeScript errors (framer-motion v11+ strict Easing types, Prisma schema mismatches, Suspense boundary requirement)
+- **17 files modified**, 51 insertions, 38 deletions
+- Build now passes 100% — Vercel will auto-deploy from pushed commit
+- Lint: zero errors
+
+---
+
+Task ID: 5-b
+Agent: fullstack-developer
+Task: Add all remaining i18n keys + pages
+
+Work Log:
+- Replaced entire `pricing` namespace in `src/messages/ar.json` with new 3-tier pricing keys (Free/Pro/Unlimited) including comparison table features
+- Added `settings` namespace to both `ar.json` and `en.json` (13 keys each: database section, job status, location, industry, score info)
+- Added `optIn` namespace to both `ar.json` and `en.json` (10 keys each: headline, body, checkbox, save/later, messages)
+- Rewrote `src/app/[locale]/pricing/pricing-content.tsx` with new 3-card design (Free | Pro highlighted with gold border + "Most Popular" badge | Unlimited), feature comparison table (6 rows × 3 columns), using GlowCard/SectionHeading/Button/Badge from design system
+- Created `src/app/[locale]/app/settings/page.tsx` — employer database settings page with Switch toggle, job status Select, location/industry Inputs, save button with toast notifications, read-only score info section
+- Created `src/app/api/paypal/create-order/route.ts` — PayPal one-time order creation endpoint supporting PRO ($9.99), HUMAN_STD ($29), HUMAN_PRO ($49) plans with access token flow
+- Created `src/app/api/candidate-pool/route.ts` — POST for opt-in upsert, PATCH for visibility updates, graceful demo fallback when DB unavailable
+
+Stage Summary:
+- **2 i18n files modified** (ar.json, en.json) — new `pricing`, `settings`, `optIn` namespaces
+- **1 existing file rewritten** (pricing-content.tsx)
+- **3 new files created** (settings page, PayPal create-order API, candidate-pool API)
+- All components use dark theme (bg-void), gold accent colors, RTL/LTR-aware
+- No build run per instructions — all files written and ready for validation
+
+## Phase 6-c — Homepage Stats + Trusted By + Report Scoring + Opt-In Modal
+
+**Date**: 2025-07-15
+**Agent**: fullstack-developer
+**Task**: Update homepage StatsBand & add TrustedBy section, convert report page to 1-10 Muqabaleh scoring, add opt-in modal component
+
+### What was done
+
+#### TASK 1: Homepage StatsBand + TrustedBySection
+
+**`src/app/[locale]/page.tsx`**:
+- Added `Star, Building2` to lucide-react imports (Mic already present)
+- Removed `HumanInterviewsPromo` from brand imports
+- Replaced `<HumanInterviewsPromo />` in main render with `<TrustedBySection t={t} />`
+- Replaced entire `StatsBand` function: now shows 3 icon+number stats (Mic/10,000+ interviews, Star/4.8/5 rating, Building2/47 hiring partners) in a responsive `grid-cols-1 sm:grid-cols-3` layout with dark bg, gold numbers, muted labels, `border-y border-white/5 py-12`
+- Added `TrustedBySection` component: displays ARAMCO, NEOM, STC, SABIC company name badges in styled bordered pills with `trustedByHeadline` translation
+
+#### TASK 2: Report Page 1-10 Scoring
+
+**`src/app/[locale]/app/interview/[id]/report/page.tsx`**:
+- Added imports: `useRef` from React, `toMuqabalehScore`, `toCriterionScore`, `getScoreColor` from `@/lib/scoring`, `OptInModal` from `@/components/opt-in-modal`
+- Added `useTranslations('landing')` for muqabalehScore label
+- Converted `overallScore` (0-100) → Muqabaleh 1-10 score with `toMuqabalehScore()`, displaying `mScore.score/10` with `getScoreColor()` coloring
+- Added "Muqabaleh Interview Score" label above score circle
+- Added locale-aware level label (mScore.levelAr / mScore.levelEn) below circle
+- Converted all 4 criterion scores (Content, Clarity, Confidence, Cultural Fit) to 1-10 with `toCriterionScore()`, displayed as `X/10` with per-bar color
+- Replaced `getRecommendationStyle(rec)` (API-based) with `getRecommendationFromScore(mScore.score)`: ≥6 = RECOMMENDED (green), ≥4 = CONSIDER (amber), <4 = NOT_RECOMMENDED (red)
+- Added opt-in modal state (`showOptIn`, `optInShown` ref) with 2-second auto-trigger via useEffect
+- Rendered `<OptInModal>` at bottom of page
+
+**`src/components/brand/score-bar.tsx`**:
+- Added optional `color` prop (Tailwind text color class) — applies to both the score number text and the bar fill
+- Added optional `suffix` prop (e.g. "10") to display "X/10" format
+- Added `as const` to framer-motion ease array (Vercel build requirement)
+- Bar fill color derived from text color via `color.replace('text-', 'bg-')`
+
+#### TASK 3: Opt-In Modal
+
+**`src/components/opt-in-modal.tsx`** (NEW):
+- Dialog-based modal using shadcn/ui Dialog + Button components
+- Props: `open`, `onOpenChange`, `muqabalehScore`, `interviewId`, `onSave`
+- Shows headline, body, checkbox (pre-checked), low-score warning (if score < 6), Save/Later buttons
+- On save: POSTs to `/api/candidate-pool` with optIn, score, interviewId
+- Shows success confirmation after save
+- All text from `optIn` i18n namespace
+
+### Files modified/created
+
+| File | Action | Summary |
+|------|--------|----------|
+| `src/app/[locale]/page.tsx` | Modified | StatsBand redesign, TrustedBySection added, HumanInterviewsPromo removed |
+| `src/app/[locale]/app/interview/[id]/report/page.tsx` | Modified | 1-10 Muqabaleh scoring, opt-in modal integration |
+| `src/components/brand/score-bar.tsx` | Modified | Added `color` and `suffix` props, `as const` on ease |
+| `src/components/opt-in-modal.tsx` | Created | Dialog modal for talent pool opt-in |
+
+### Notes
+- Translation keys (`statInterviews`, `statRating`, `statPartners`, `trustedByHeadline`, `muqabalehScore`, `optIn.*`) already existed in both en.json and ar.json — no translation changes needed
+- `src/lib/scoring.ts` already existed with all required functions (`toMuqabalehScore`, `toCriterionScore`, `getScoreColor`)
+- No build run per instructions
+---
+Task ID: 1
+Agent: main
+Task: Fix Vercel build errors
+
+Work Log:
+- Ran `next build` to reproduce Vercel build failure
+- Found 5 build errors in the codebase
+- Fixed all errors and verified clean build + lint
+- Pushed to origin/main
+
+Stage Summary:
+- Build errors fixed and pushed as commit 7ebd674
+- Prisma client was stale (schema had Interviewer model but generated client was outdated)
+- book/[interviewerId]/page.tsx needed Suspense wrapper for useSearchParams()
+- Build passes cleanly with 0 TypeScript errors
+---
+Task ID: 3-a
+Agent: api-builder
+Task: Build all marketplace API routes
+
+Work Log:
+- Created 10 API route files for the Human Interview Marketplace
+- `/api/bookings` (POST + GET): Create bookings with price calculation (20% platform fee), list user bookings with UPCOMING/PAST/ALL filtering
+- `/api/bookings/[id]` (GET + PATCH): Single booking with interviewer info, status transitions (PENDING→CONFIRMED, CONFIRMED→COMPLETED/CANCELLED, PENDING→CANCELLED), 24h cancellation rule, auto-increment interviewer stats on completion
+- `/api/reviews` (POST): Create review for completed bookings with duplicate prevention, auto-recalculate interviewer average rating
+- `/api/interviewer/me` (GET): Interviewer own profile with availability and computed stats
+- `/api/interviewer/availability` (GET + PUT): Read/replace availability slots using DB transaction (delete all + createMany)
+- `/api/interviewer/bookings` (GET): List interviewer's bookings with UPCOMING/PAST/ALL filtering
+- `/api/interviewer/earnings` (GET): Total earnings, pending payout calculation (completed bookings minus paid/pending payout records), recent payout history
+- `/api/interviewer/profile` (PUT): Update own profile fields (bio, specialties, industries, languages, hourlyRate ≥ $19.99, payoutEmail) with JSON serialization for array fields
+- `/api/paypal/create-booking-order` (POST): Create PayPal order for pending booking, price in dollars (cents/100), same SDK pattern as existing create-order
+- `/api/paypal/capture-booking-order` (POST): Capture PayPal payment, verify amount matches booking, update status→CONFIRMED, save paypalOrderId, generate Jitsi meeting link
+- All routes use `getServerSession(authOptions)` for auth, `db` from `@/lib/db`, zod for input validation
+- All error responses use bilingual format `{ error: { ar, en } }`
+- Lint passes with 0 errors
+
+Stage Summary:
+- All 10 API routes created and linting clean
+- Full CRUD coverage for bookings, reviews, interviewer self-service
+- PayPal integration for booking payments (create + capture)
+- Price calculations: platformFee=20%, interviewerPayout=80%, minimum hourlyRate=$19.99 (1999 cents)
+---
+Task ID: 3-b
+Agent: booking-flow
+Task: Wire booking flow end-to-end
+
+Work Log:
+- Read worklog.md and all relevant source files (interviewer profile, booking page, confirmation page, PayPalSubscriptionButton, all 4 API routes)
+- **Task 1: Wired Book Slot button on interviewer profile page** (`src/app/[locale]/interviewer/[id]/page.tsx`)
+  - Added `useRouter`, `useSession` imports
+  - Created `handleBookSlot` callback that parses selectedSlot key (format `YYYY-MM-DD-HH:mm`) into date, startTime, endTime, duration
+  - If not authenticated, redirects to `/${locale}/auth/signin?callbackUrl=...` 
+  - If authenticated, navigates to `/${locale}/book/${id}?date=...&startTime=...&endTime=...&duration=...`
+  - Added `onClick={handleBookSlot}` to the existing Book Slot button
+- **Task 4: Created BookingPayPalButton component** (`src/components/BookingPayPalButton.tsx`)
+  - Props: `{ bookingId, amount, onSuccess, onError }`
+  - Uses `intent: 'capture'` (one-time payment, not subscription)
+  - `createOrder` calls `/api/paypal/create-booking-order` with `{ bookingId }`
+  - `onApprove` calls `/api/paypal/capture-booking-order` with `{ bookingId, orderId }`
+  - Shows loading, capturing, error, and unavailable states
+  - Displays price as `$XX.XX USD` below the button
+  - Follows existing design system (gold accent, dark theme, same pattern as PayPalSubscriptionButton)
+- **Task 2: Wired real PayPal payment in booking page** (`src/app/[locale]/book/[interviewerId]/page.tsx`)
+  - Changed URL params to read `date`, `startTime`, `endTime`, `duration` (with `time` fallback for backwards compat)
+  - Added booking creation flow: `handleCreateBooking` POSTs to `/api/bookings` with `{ interviewerId, scheduledAt, durationMinutes, candidateNote }`
+  - Gets back booking with `id` and `priceTotal`
+  - Displays actual price from booking (`priceTotal / 100`) formatted as USD
+  - Shows note/textarea and terms checkbox only before booking is created
+  - After booking creation, hides form and renders `BookingPayPalButton` with the booking ID and amount
+  - On PayPal success, redirects to `/booking/confirmation?bookingId=${booking.id}`
+- **Task 3: Wired booking confirmation page** (`src/app/[locale]/booking/confirmation/page.tsx`)
+  - If `bookingId` URL param exists, fetches real booking from `/api/bookings/[id]`
+  - Shows real interviewer name (with Arabic fallback), initials, rating, price paid, meeting link from booking record
+  - Falls back to legacy URL params (`interviewerId`, `date`, `time`, `meetingId`) when no `bookingId`
+  - Uses `booking.meetingLink` (set by capture-booking-order API) for the Jitsi URL
+  - ICS calendar generation uses real `durationMinutes` from booking
+  - Added error state for failed fetch
+  - Removed old interviewer-only fetch, now fetches complete booking with interviewer included
+
+Stage Summary:
+- Full booking flow wired: slot selection → auth check → booking creation → PayPal payment → confirmation
+- 1 new component: `BookingPayPalButton.tsx`
+- 3 existing files modified: interviewer profile page, booking page, confirmation page
+- All pages use `useSearchParams` wrapped in Suspense
+- Lint passes with 0 errors
+- No Prisma schema or API route changes (those were handled by agent 3-a)
+---
+Task ID: 3-c
+Agent: interviewer-dashboard
+Task: Wire interviewer dashboard pages to real APIs
+
+Work Log:
+- Read worklog.md to understand prior context (agents 3-a API builder, 3-b booking flow)
+- Read all 5 interviewer dashboard page files and all 6 API route files
+- Read Prisma schema to understand data model shapes (HumanBooking, Interviewer, InterviewerAvailability, InterviewerPayout)
+- Read all interviewerPanel translation keys in en.json/ar.json
+
+**Task 1: Overview page** (`src/app/[locale]/interviewer/page.tsx`)
+- Replaced hardcoded KPIs with real data from `/api/interviewer/me` (rating, upcomingBookings, totalEarnings, idVerified)
+- Replaced mock upcoming bookings with real data from `/api/interviewer/bookings?status=UPCOMING`
+- Added loading skeletons (animate-pulse for KPI cards and booking cards)
+- Added error state with retry button
+- Used `formatCents()` to convert stored cents to dollar display
+- Show near-session warning when meetingLink is missing and session < 2h away
+
+**Task 2: Availability page** (`src/app/[locale]/interviewer/availability/page.tsx`)
+- On mount, GET `/api/interviewer/availability` to load existing slots
+- Map API slots (dayOfWeek: number) back to i18n day keys based on locale (AR_DAYS vs EN_DAYS)
+- On save, PUT `/api/interviewer/availability` with slots array (convert day keys back to dayOfWeek numbers)
+- Show success toast on save, error toast on failure
+- Added loading state (skeletons) and saving spinner on button
+- Removed timezone column (API slots don't have timezone — matches DB schema)
+
+**Task 3: Bookings page** (`src/app/[locale]/interviewer/bookings/page.tsx`)
+- Fetch from `/api/interviewer/bookings?status=UPCOMING` and `?status=PAST`
+- Replaced mock Booking interface with real API shape (id, candidateName, scheduledAt, status, meetingLink, etc.)
+- BookingCard now shows real candidate name, formatted date/time, and status badges (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+- Wired meeting link input → PATCH `/api/bookings/[id]` with `{ meetingLink }`
+- Wired "Completed" button → PATCH with `{ status: 'COMPLETED' }`
+- Wired "Cancel" button → PATCH with `{ status: 'CANCELLED', cancelledBy: 'INTERVIEWER' }`
+- Added loading states, error handling, empty state for each tab
+- Added `statusCancelled` and `statusConfirmed` translation keys to both en.json and ar.json
+
+**Task 4: Earnings page** (`src/app/[locale]/interviewer/earnings/page.tsx`)
+- Fetch from `/api/interviewer/earnings`
+- Show real totalEarnings, pendingPayout, totalPaidOut from API
+- Replaced mock earnings table with real payout history from API
+- Each row shows: date, amount, status (PAID/PENDING), method (PayPal/Bank based on paypalTransactionId)
+- Added loading skeletons and error state with retry
+- Added `noPayouts` translation key to both locale files
+- Removed mock candidate name column (payout records don't have candidate info)
+
+**Task 5: Profile page** (`src/app/[locale]/interviewer/profile/page.tsx`)
+- On mount, GET `/api/interviewer/me` to populate form fields (bio, bioAr, specialties, languages, currentTitle, hourlyRate)
+- Created language mapping (AR↔langArabic, EN↔langEnglish, etc.) to convert between i18n keys and API codes
+- On save, PUT `/api/interviewer/profile` with bio, bioAr, specialties, languages, hourlyRate (converted to cents)
+- Show success/error toast via sonner
+- Added loading state with skeletons and saving spinner on button
+- Removed hardcoded initial values — all fields now empty until loaded from API
+- Removed yearsExperience field (not in PUT API schema)
+
+Stage Summary:
+- All 5 interviewer dashboard pages wired to real APIs
+- 5 files modified: overview, availability, bookings, earnings, profile pages
+- 2 translation keys added to both en.json and ar.json (statusCancelled, statusConfirmed, noPayouts)
+- Consistent patterns: loading skeletons, error states with retry, toast notifications
+- Lint passes with 0 errors
+- No Prisma schema, API route, or other page changes
+---
+Task ID: 3-d
+Agent: user-sessions
+Task: Build user My Sessions page + review flow
+
+Work Log:
+- Read worklog.md to understand prior context (agents 3-a API builder, 3-b booking flow, 3-c interviewer dashboard)
+- Read existing bookings page (mock data with InterviewAvatar, fake bookings array), app layout, i18n files, design system components
+- Read API routes (/api/bookings GET, /api/reviews POST, /api/bookings/[id] PATCH) to understand data shapes
+
+**Task 1: Replaced mock bookings page with real API-backed page** (`src/app/[locale]/app/bookings/page.tsx`)
+- Fetches from `/api/bookings?status=UPCOMING` and `/api/bookings?status=PAST` on mount
+- Two tabs: "Upcoming" and "Past" (replaces old 3-tab Upcoming/Completed/Cancelled)
+- Booking cards show: interviewer name + initials avatar, formatted date/time (locale-aware), duration, price (cents→dollars), status badge
+- Status badges: PENDING=amber, CONFIRMED=green, COMPLETED=blue, CANCELLED=red using Badge component
+- CONFIRMED/UPCOMING with meetingLink: "Join Meeting" gold button (external link)
+- UPCOMING/PENDING: "Cancel" button with AlertDialog confirmation → PATCH `/api/bookings/[id]` { status: 'CANCELLED', cancelledBy: 'CANDIDATE' }
+- COMPLETED without review: "Leave Review" outline button (gold) → opens ReviewDialog
+- Loading skeletons using SkeletonBlock, error state with retry button
+- Empty states using EmptyState component with appropriate icons
+- Uses `useLocale()` for date formatting and interviewer name (Arabic vs English)
+
+**Task 2: Created ReviewDialog component** (`src/components/ReviewDialog.tsx`)
+- Props: `{ bookingId, interviewerId, interviewerName, open, onClose, onSubmit }`
+- 5-star clickable rating with hover state, gold fill, scale animation
+- Optional textarea (max 500 chars) with character counter
+- Submit → POST `/api/reviews` { bookingId, rating, comment }
+- On success: toast success + call onSubmit + onClose + reset state
+- On error: toast with API error message (bilingual fallback)
+- Cancel button uses `common.cancel` i18n
+- Uses shadcn Dialog, Textarea, Button components
+- Styled with design system (bg-panel, white/10 borders, gold accents)
+
+**Task 3: Wired review dialog into bookings page**
+- ReviewDialog imported and rendered conditionally when `reviewBooking` state is set
+- Clicking "Leave Review" sets reviewBooking state (bookingId, interviewerId, interviewerName)
+- On submit, `fetchBookings()` is called to refresh both tabs
+- After reviewing, the "Leave Review" button disappears (checks `!booking.review`)
+
+**Task 4: Updated i18n keys** (both `en.json` and `ar.json`)
+- Replaced old mock data keys (b1-b6Interviewer, b1-b6Date, etc.) with real API-ready keys
+- Added: title, upcoming, past, noUpcoming, noPast, joinMeeting, cancelSession, cancelConfirm, leaveReview, reviewTitle, reviewSubtitle, reviewSubmit, reviewPlaceholder, reviewCharLimit, reviewSuccess, reviewError, duration, price, status, statusPending, statusConfirmed, statusCompleted, statusCancelled, meetingLink
+- All keys mirrored in ar.json with proper Arabic translations
+- Removed unused keys: completedTab, cancelled, cancel, cancelTitle, cancelWarning, emptyTitle, emptySub, interviewer, date, time, type, viewReport, b1-b6 mock data
+
+Stage Summary:
+- 3 files modified: bookings page (full rewrite), en.json, ar.json
+- 1 file created: ReviewDialog.tsx
+- Lint passes with 0 errors
+- No Prisma schema or API route changes
+- Review flow: Leave Review → star rating + text → POST /api/reviews → toast + refresh
+
+---
+Task ID: 2-phase2-marketplace-fix
+Agent: main
+Task: Complete Phase 2 Human Marketplace - fix browse/profile/dashboard to use real APIs
+
+Work Log:
+- Assessed full Phase 2 state: ~70% scaffolded but browse page used hardcoded data, profile page had API mapping mismatch, dashboard was 100% mock, duplicate routes existed
+- Rewrote /interviewers page: replaced hardcoded INTERVIEWERS array with API fetch from /api/interviewers, fixed link from /interviewers/[slug] to /interviewer/[id]
+- Rewrote /interviewer/[id]/profile page: added mapApiToProfile() to transform API response (fullName→name, hourlyRate→price, etc.) to page's expected types, locale-aware mock fallback
+- Fixed /interviewers/[slug]/page.tsx: converted from dead slug-based page to redirect to /interviewer/[id]
+- Rewrote /interviewer/layout.tsx: made sidebar conditional - only shows for dashboard sub-paths, public profile pages render without sidebar
+- Rewrote interviewer dashboard overview (/interviewer/dashboard/page.tsx): replaced mock data with API calls to /api/interviewer/bookings and /api/interviewer/earnings
+- Rewrote interviewer earnings page (/interviewer/dashboard/earnings/page.tsx): fetches from /api/interviewer/earnings, shows real stats
+- Fixed /api/interviewer/earnings/route.ts: changed response format to flat fields (totalEarnings, platformFees, netIncome, etc.) matching what dashboard expects
+- Fixed /api/interviewer/bookings/route.ts: added try/catch around DB calls with empty fallback for sandbox
+- Fixed /human-interviews/page.tsx: added mapApiToCard() to transform API response to InterviewerCard format
+- Fixed middleware.ts: allowed public access to /interviewer/[id] (was blocking unauthenticated users from viewing interviewer profiles)
+
+Stage Summary:
+- All Phase 2 pages now fetch from real APIs (with mock fallback for sandbox)
+- Consistent routing: /interviewers (browse) → /interviewer/[id] (profile) → /book/[id] (booking)
+- Interviewer dashboard connected to real APIs
+- 20% platform commission logic already existed in /api/bookings
+- ESLint: 0 errors across all changed files
+- Browser verification limited by 4GB RAM OOM in sandbox - dev server crashes
+
+---
+Task ID: 3a
+Agent: Main Orchestrator + full-stack-developer subagent
+Task: Phase 3A — Admin Panel with real data
+
+Work Log:
+- Fixed pricing page crash: replaced <Link href="/api/paypal/..."> with PayPalPlanButton component (fetch + redirect)
+- Added UNLIMITED plan ($29.99) to create-order API
+- Set 5 PayPal env vars on Vercel (CLIENT_ID, SECRET, PLAN_ID, MODE, NEXT_PUBLIC_CLIENT_ID)
+- Fixed create-order API: hardcoded live PayPal URL → respects PAYPAL_MODE sandbox
+- Fixed create-order API: error serialization (PayPal error is string not object)
+- Verified PayPal flow end-to-end with agent-browser: click → API → PayPal sandbox redirect
+- Created feat/phase-3a branch
+- Added AdminLog table to Prisma schema
+- Replaced password-based admin guard with NextAuth email check (samjo4500@gmail.com)
+- Built 9 API routes: stats, transactions, interviewers, bookings, users, payouts (GET + PATCH)
+- Rebuilt 5 admin pages with real data: Dashboard, Interviewers, Bookings, Users, Payouts
+- Simplified admin nav: 5 items (removed Questions, Interviews, Logs, Settings)
+- Added i18n translations for admin panel (EN + AR)
+- All lint and TypeScript checks pass
+- Deployed to production, verified guard redirects unauthenticated users to sign-in
+
+Stage Summary:
+- Phase 3A Admin Panel deployed to production
+- Access restricted to samjo4500@gmail.com via NextAuth
+- All pages use real database data via API routes
+- AdminLog table added for audit trail
+
+---
+Task ID: 3b
+Agent: Main Agent
+Task: Phase 3B — Complete Email System with Resend
+
+Work Log:
+- Created branch `feat/phase-3b` from main
+- Installed `resend` SDK (v6.18.1)
+- Added `EmailQueue` model to Prisma schema (id, to, subject, html, from, sendAt, sent, sentAt, error)
+- Generated Prisma client
+- Created `src/lib/email.ts` — Resend wrapper with sendEmail(), queueEmail(), processEmailQueue(), emailBaseHtml(), buttonHtml(), dividerHtml()
+- Created 13 email templates in `src/emails/`:
+  1. welcome.ts — Post-registration welcome
+  2. payment-receipt.ts — Invoice-style purchase receipt
+  3. booking-confirmation.ts — Interview confirmed with details
+  4. session-reminder.ts — 24h before session with tips
+  5. session-starting-soon.ts — 15min urgent join-now alert
+  6. review-request.ts — 1h post-session review request
+  7. password-reset.ts — Password reset with security notice
+  8. interviewer-application-received.ts — Application confirmation
+  9. interviewer-approved.ts — Approval with onboarding steps
+  10. interviewer-new-booking.ts — New booking with earnings
+  11. interviewer-payout-sent.ts — Payout confirmation
+  12. admin-new-application.ts — Admin action required alert
+  13. admin-daily-summary.ts — Daily KPI digest
+- Created API routes:
+  - POST /api/email/send — Low-level send with x-email-secret auth
+  - POST /api/email/cron — Process due queued emails (every 5 min via Vercel Cron)
+  - POST /api/email/daily-summary — Generate + send daily KPI digest (9 AM Asia/Amman)
+- Created `src/lib/email-triggers.ts` with 12 trigger functions
+- Integrated triggers into existing routes:
+  - /api/auth/register → triggerWelcomeEmail (ar + en)
+  - /api/auth/forgot-password → triggerPasswordResetEmail (ar + en)
+  - /api/paypal/capture-booking-order → scheduleBookingEmails (immediate + queued)
+  - /api/paypal/activate → triggerPaymentReceiptEmail
+  - /api/interviewers/apply → triggerAdminNewApplicationEmail
+  - /api/admin/interviewers/[id] PATCH → triggerInterviewerApprovedEmail
+  - /api/admin/payouts/[id] PATCH → triggerInterviewerPayoutSentEmail
+- Added vercel.json with cron jobs config
+- Added 115 i18n keys (emails namespace) to en.json and ar.json
+- ESLint: 0 errors
+- TypeScript: 0 errors
+
+Stage Summary:
+- Complete email system with Resend provider
+- 13 bilingual templates (EN/AR) with RTL support
+- 7 trigger points integrated into existing API routes
+- EmailQueue model for delayed/scheduled emails via cron
+- Env vars needed on Vercel: RESEND_API_KEY, ADMIN_EMAIL=samjo4500@gmail.com, EMAIL_INTERNAL_SECRET
+- `bun run db:push` needed on production to create EmailQueue table
+
+---
+Task ID: 3c
+Agent: Main Agent
+Task: Phase 3C - Video Calls with Daily.co
+
+Work Log:
+- Created branch feat/phase-3c from main
+- Installed @daily-co/daily-js SDK
+- Added dailyRoomUrl, dailyRoomName, recordingUrl to HumanBooking Prisma schema
+- Generated Prisma client
+- Created POST /api/daily/create-room (auth, room creation, time-gated access)
+- Created POST /api/daily/webhook (participant-left, recording events)
+- Built /call/[bookingId] video call page (loading, countdown, cancelled, in-call, ended states)
+- Added JoinCallButton to user bookings dashboard (live countdown, 15min gate)
+- Added InterviewerJoinCallButton to interviewer bookings dashboard
+- Updated booking status machine to support IN_PROGRESS state
+- Integrated auto room creation into capture-booking-order
+- Fixed em-dash parser bug in bookings pages
+- Added 20 i18n keys (call namespace) to en.json and ar.json
+- ESLint: 0 errors, TypeScript: 0 errors
+
+Stage Summary:
+- Complete video call system with Daily.co integration
+- 12 files changed, +924 lines
+- Room auto-created on booking payment
+- 15-min join gate with live countdown
+- IN_PROGRESS booking status support
+- Env vars needed on Vercel: DAILY_API_KEY
+- prisma db push needed for new columns
+
+---
+Task ID: 3c-fix
+Agent: Main Agent
+Task: Verify Phase 3C implementation and fix bugs
+
+Work Log:
+- Verified all Phase 3C files exist: create-room route, webhook route, call page, i18n keys
+- Confirmed schema has dailyRoomUrl, dailyRoomName, recordingUrl in HumanBooking
+- Confirmed @daily-co/daily-js is in package.json
+- Found bug: PayPal capture route calls /api/daily/create-room server-to-server without session (would 401)
+- Found bug: startsIn i18n key lacks {time} placeholder so countdown never displays in JoinCallButton
+- Created src/lib/daily.ts with shared createDailyRoom() utility (no auth, just business logic)
+- Refactored create-room route to use shared utility (auth still in route handler)
+- Updated PayPal capture route to call createDailyRoom() directly instead of server-to-server fetch
+- Fixed startsIn in en.json: "Starts in {time}" and ar.json: "يبدأ خلال {time}"
+- All changes pass ESLint with zero errors
+
+Stage Summary:
+- Phase 3C was already fully implemented in previous session (commit 9ff05f6)
+- Fixed 2 bugs: server-to-server auth failure and missing i18n placeholder
+- New file: src/lib/daily.ts
+- Modified: create-room/route.ts, capture-booking-order/route.ts, en.json, ar.json
+- Commit: 7547648 fix(phase-3c): extract shared Daily.co utility, fix auth and i18n bugs
+
+---
+Task ID: 7
+Agent: UI Builder
+Task: Build interviewer earnings page with payout request modal and history table
+
+Work Log:
+- Rewrote /src/app/[locale]/interviewer/earnings/page.tsx
+- Added Request Payout modal with PayPal email and amount inputs
+- Added payout history table with status badges
+- Connected to /api/interviewer/earnings, /api/interviewer/payouts, /api/interviewer/payouts/request
+
+Stage Summary:
+- Interviewer can view earnings stats, request payouts (min $50), and see payout history
+- Status badges: PENDING (yellow), PROCESSING (blue), COMPLETED (green), REJECTED (red)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { toMuqabalehScore, toCriterionScore, formatScore } from '@/lib/scoring';
 
 // GET /api/interviews/[id]/pdf — generate and return PDF report
 export async function GET(
@@ -51,7 +52,7 @@ export async function GET(
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(120, 120, 130);
-    doc.text('Interview Performance Report', margin, y);
+    doc.text('Muqabaleh Interview Report', margin, y);
     y += 10;
 
     doc.setDrawColor(212, 168, 67);
@@ -76,18 +77,23 @@ export async function GET(
     doc.text(`Language: ${interview.language === 'AR' ? 'Arabic' : 'English'}`, margin, y); y += 6;
     doc.text(`Date: ${interview.updatedAt.toISOString().split('T')[0]}`, margin, y); y += 12;
 
-    // Overall Score
+    // Muqabaleh Interview Score
+    const mScore = toMuqabalehScore(interview.overallScore || 0);
     doc.setFillColor(7, 10, 15);
     doc.roundedRect(margin, y - 4, contentW, 22, 3, 3, 'F');
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(28);
     doc.setTextColor(212, 168, 67);
-    doc.text(`${interview.overallScore ?? 'N/A'}`, margin + 8, y + 12);
+    doc.text(`${mScore.score}`, margin + 8, y + 12);
 
     doc.setFontSize(10);
     doc.setTextColor(180, 180, 190);
-    doc.text('/ 100', margin + 30, y + 12);
+    doc.text('/ 10', margin + 22, y + 12);
+
+    doc.setFontSize(10);
+    doc.setTextColor(212, 168, 67);
+    doc.text(`${mScore.levelEn}`, margin + 36, y + 12);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -96,11 +102,11 @@ export async function GET(
     doc.text(recText, pageW - margin - doc.getTextWidth(recText), y + 12);
     y += 28;
 
-    // Score Breakdown
+    // Muqabaleh Score Breakdown
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor(30, 30, 30);
-    doc.text('Score Breakdown', margin, y);
+    doc.text('Muqabaleh Score Breakdown', margin, y);
     y += 8;
 
     const scores = [
@@ -113,7 +119,7 @@ export async function GET(
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     scores.forEach(({ label, value }) => {
-      const score = value ?? 0;
+      const criterionScore = toCriterionScore(value);
       doc.setTextColor(80, 80, 80);
       doc.text(`${label}`, margin, y);
 
@@ -122,13 +128,13 @@ export async function GET(
       doc.setFillColor(240, 240, 240);
       doc.roundedRect(barX, y - 3, barW, 4, 2, 2, 'F');
 
-      const fillW = (score / 100) * barW;
-      const c = score >= 70 ? [34, 197, 94] : score >= 50 ? [234, 179, 8] : [239, 68, 68];
+      const fillW = (criterionScore / 10) * barW;
+      const c = criterionScore >= 8 ? [34, 197, 94] : criterionScore >= 6 ? [234, 179, 8] : criterionScore >= 4 ? [245, 158, 11] : [239, 68, 68];
       doc.setFillColor(c[0], c[1], c[2]);
       doc.roundedRect(barX, y - 3, fillW, 4, 2, 2, 'F');
 
       doc.setTextColor(50, 50, 50);
-      doc.text(`${score}`, pageW - margin - 10, y);
+      doc.text(formatScore(criterionScore), pageW - margin - 10, y);
       y += 10;
     });
     y += 5;

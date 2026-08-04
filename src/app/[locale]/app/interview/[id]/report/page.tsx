@@ -1,11 +1,13 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Plus, ArrowDownLeft, Download, Linkedin, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlowCard, ScoreBar, VerifiedBadge, QrCard, CopyLinkButton, SkeletonBlock } from '@/components/brand';
+import { OptInModal } from '@/components/opt-in-modal';
+import { toMuqabalehScore, toCriterionScore, getScoreColor } from '@/lib/scoring';
 import { toast } from 'sonner';
 
 /* ------------------------------------------------------------------ */
@@ -35,41 +37,32 @@ interface ReportData {
 /*  Recommendation config                                               */
 /* ------------------------------------------------------------------ */
 
-function getRecommendationStyle(rec: string | null | undefined) {
-  switch (rec) {
-    case 'RECOMMENDED':
-      return {
-        border: 'border-emerald/30',
-        bg: 'bg-emerald/10',
-        text: 'text-emerald',
-        labelKey: 'recommendation' as const,
-        icon: CheckCircle2,
-      };
-    case 'CONSIDER':
-      return {
-        border: 'border-[var(--status-amber)]/30',
-        bg: 'bg-[var(--status-amber)]/10',
-        text: 'text-[var(--status-amber)]',
-        labelKey: 'recommendationConsider' as const,
-        icon: AlertTriangle,
-      };
-    case 'NOT_RECOMMENDED':
-      return {
-        border: 'border-[var(--status-red)]/30',
-        bg: 'bg-[var(--status-red)]/10',
-        text: 'text-[var(--status-red)]',
-        labelKey: 'recommendationNo' as const,
-        icon: AlertTriangle,
-      };
-    default:
-      return {
-        border: 'border-emerald/30',
-        bg: 'bg-emerald/10',
-        text: 'text-emerald',
-        labelKey: 'recommendation' as const,
-        icon: CheckCircle2,
-      };
+function getRecommendationFromScore(mScore: number) {
+  if (mScore >= 6) {
+    return {
+      border: 'border-emerald/30',
+      bg: 'bg-emerald/10',
+      text: 'text-emerald',
+      labelKey: 'recommendation' as const,
+      icon: CheckCircle2,
+    };
   }
+  if (mScore >= 4) {
+    return {
+      border: 'border-[var(--status-amber)]/30',
+      bg: 'bg-[var(--status-amber)]/10',
+      text: 'text-[var(--status-amber)]',
+      labelKey: 'recommendationConsider' as const,
+      icon: AlertTriangle,
+    };
+  }
+  return {
+    border: 'border-[var(--status-red)]/30',
+    bg: 'bg-[var(--status-red)]/10',
+    text: 'text-[var(--status-red)]',
+    labelKey: 'recommendationNo' as const,
+    icon: AlertTriangle,
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -82,6 +75,7 @@ export default function ReportPage({
   params: Promise<{ id: string; locale: string }>;
 }) {
   const t = useTranslations('app.report');
+  const tLanding = useTranslations('landing');
   const tCommon = useTranslations('common');
   const locale = useLocale();
 
@@ -89,7 +83,6 @@ export default function ReportPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [interviewId, setInterviewId] = useState<string>('');
-
   useEffect(() => {
     params.then(({ id }) => {
       setInterviewId(id);
@@ -104,7 +97,6 @@ export default function ReportPage({
       const res = await fetch(`/api/interviews/${id}/report`);
       if (!res.ok) {
         if (res.status === 400) {
-          // Report not ready yet
           toast.error(t('reportNotReady'));
         } else {
           setError(true);
@@ -113,12 +105,29 @@ export default function ReportPage({
       }
       const data = await res.json();
       setReport(data.report);
+      setReportData(data.report);
     } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
   }
+
+  // Opt-in modal trigger (must be before conditional returns for hooks rules)
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+  const optInTriggered = useRef(false);
+  const [showOptIn, setShowOptIn] = useState(false);
+
+  useEffect(() => {
+    if (!optInTriggered.current && reportData) {
+      const score = toMuqabalehScore(reportData.overallScore ?? 0);
+      if (score.score > 0) {
+        optInTriggered.current = true;
+        const timer = setTimeout(() => setShowOptIn(true), 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [reportData]);
 
   async function handleDownloadPdf() {
     if (!interviewId) return;
@@ -180,15 +189,17 @@ export default function ReportPage({
     );
   }
 
-  const score = report.overallScore ?? 0;
-  const recStyle = getRecommendationStyle(report.recommendation);
+  // Convert 0-100 to Muqabaleh 1-10 score
+  const mScore = toMuqabalehScore(report.overallScore ?? 0);
+  const scoreColor = getScoreColor(mScore.score);
+  const recStyle = getRecommendationFromScore(mScore.score);
   const RecIcon = recStyle.icon;
 
   const scoreBars = [
-    { label: t('contentScore'), value: report.contentScore ?? 0 },
-    { label: t('clarityScore'), value: report.clarityScore ?? 0 },
-    { label: t('confidenceScore'), value: report.confidenceScore ?? 0 },
-    { label: t('culturalFitScore'), value: report.culturalFitScore ?? 0 },
+    { label: t('contentScore'), value: toCriterionScore(report.contentScore) },
+    { label: t('clarityScore'), value: toCriterionScore(report.clarityScore) },
+    { label: t('confidenceScore'), value: toCriterionScore(report.confidenceScore) },
+    { label: t('culturalFitScore'), value: toCriterionScore(report.culturalFitScore) },
   ];
 
   const verifyId = report.verificationId || '';
@@ -212,21 +223,35 @@ export default function ReportPage({
         {t('backToInterviews')}
       </Link>
 
+      {/* Muqabaleh Score Label */}
+      <p className="text-center text-sm font-medium tracking-wider uppercase text-[var(--text-faint)]">
+        {tLanding('muqabalehScore')}
+      </p>
+
       {/* Score circle */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
         <div className="flex h-36 w-36 items-center justify-center rounded-full border-2 border-gold bg-gold/[0.06]">
           <div className="text-center">
-            <span className={`text-5xl font-bold ${score >= 80 ? 'text-emerald' : score >= 60 ? 'text-[var(--status-amber)]' : 'text-[var(--status-red)]'}`}>{score}</span>
-            <span className="text-lg text-[var(--text-faint)]">/100</span>
+            <span className={`text-5xl font-bold ${scoreColor}`}>{mScore.score}</span>
+            <span className="text-lg text-[var(--text-faint)]">/10</span>
           </div>
         </div>
-        <span className="text-sm text-[var(--text-muted)]">{t('overallScore')}</span>
+        <span className="text-sm text-[var(--text-muted)]">
+          {locale === 'ar' ? mScore.levelAr : mScore.levelEn}
+        </span>
       </div>
 
       {/* Score bars */}
       <GlowCard className="space-y-5 p-6">
         {scoreBars.map((bar) => (
-          <ScoreBar key={bar.label} label={bar.label} value={bar.value} />
+          <ScoreBar
+            key={bar.label}
+            label={bar.label}
+            value={bar.value}
+            max={10}
+            suffix="10"
+            color={getScoreColor(bar.value)}
+          />
         ))}
       </GlowCard>
 
@@ -320,6 +345,15 @@ export default function ReportPage({
           </Button>
         </Link>
       </div>
+
+      {/* Opt-in modal */}
+      <OptInModal
+        open={showOptIn}
+        onOpenChange={setShowOptIn}
+        muqabalehScore={mScore.score}
+        interviewId={interviewId}
+        onSave={() => {}}
+      />
     </div>
   );
 }

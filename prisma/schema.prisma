@@ -37,11 +37,11 @@ model User {
 
   payments             Payment[]
   interviews           Interview[]
-  humanBookings        HumanBooking[]
   interviewerProfile   InterviewerProfile?
   auditLogs            AuditLog[]  @relation("ActorLogs")
   createdB2bJobs       B2BJob[]    @relation("JobCreator")
   paypalSubscriptions  PaypalSubscription[]
+  candidatePool        CandidatePool?
 
   @@index([companyId])
 }
@@ -80,8 +80,6 @@ model Interview {
   userId               String?
   user                 User?     @relation(fields: [userId], references: [id])
   companyId            String?
-  humanBookingId       String?
-  humanBooking         HumanBooking? @relation(fields: [humanBookingId], references: [id])
   guestToken           String?   @unique
   guestName            String?
   guestEmail           String?
@@ -187,7 +185,6 @@ model InterviewerProfile {
   updatedAt         DateTime  @updatedAt
 
   availabilities     Availability[]
-  humanBookings      HumanBooking[]
   companyPanel       CompanyPanel[]
 
   @@index([status])
@@ -206,36 +203,6 @@ model Availability {
   @@index([interviewerId])
 }
 
-// ─── HumanBooking ───
-model HumanBooking {
-  id                   String    @id @default(cuid())
-  userId               String?
-  user                 User?     @relation(fields: [userId], references: [id])
-  companyId            String?
-  b2bJobId             String?
-  interviewerId        String
-  interviewer          InterviewerProfile @relation(fields: [interviewerId], references: [id])
-  candidateName        String?
-  candidateEmail       String?
-  startsAt             DateTime
-  endsAt               DateTime
-  status               String    @default("REQUESTED")
-  meetingUrl           String?
-  priceUsdCents        Int
-  interviewerPayoutCents Int?
-  paypalOrderId        String?
-  rating               Int?
-  ratingComment        String?
-  payoutStatus        String    @default("NOT_DUE")
-  payoutNote          String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-
-  interviews           Interview[]
-
-  @@unique([interviewerId, startsAt])
-  @@index([interviewerId])
-}
 
 // ─── PaypalSubscription ───
 model PaypalSubscription {
@@ -288,4 +255,181 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([actorId])
+}
+
+// ─── Human Interview Marketplace Models ───
+model Interviewer {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  status          String   @default("PENDING")
+  fullName        String
+  fullNameAr      String?
+  bio             String?  @db.Text
+  bioAr           String?  @db.Text
+  linkedInUrl     String?
+  phone           String?
+  yearsExperience Int
+  specialties     String
+  industries      String
+  languages       String   @default("AR")
+  priceTier       String   @default("STANDARD")
+  hourlyRate      Int      @default(2900)
+  rating          Float    @default(0)
+  totalInterviews Int      @default(0)
+  totalEarnings   Int      @default(0)
+  videoIntroUrl   String?
+  idDocumentUrl   String?
+  idVerified      Boolean  @default(false)
+  payoutEmail     String?
+  payoutMethod    String   @default("PAYPAL")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  availability    InterviewerAvailability[] @relation("InterviewerSlots")
+  reviews         InterviewerReview[]        @relation("InterviewerReviews")
+  humanBookings   HumanBooking[]             @relation("InterviewerBookings")
+  payouts         InterviewerPayout[]         @relation("InterviewerPayouts")
+}
+
+model InterviewerAvailability {
+  id            String    @id @default(uuid())
+  interviewerId String
+  dayOfWeek     Int
+  startTime     String
+  endTime       String
+  isAvailable   Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  interviewer   Interviewer @relation("InterviewerSlots", fields: [interviewerId], references: [id], onDelete: Cascade)
+
+  @@index([interviewerId])
+}
+
+model HumanBooking {
+  id                String   @id @default(uuid())
+  userId            String?
+  candidateName     String
+  candidateEmail    String
+  interviewerId     String
+  paypalOrderId     String?  @unique
+  status            String   @default("PENDING")
+  scheduledAt       DateTime
+  durationMinutes   Int      @default(30)
+  priceTotal        Int
+  platformFee       Int
+  interviewerPayout Int
+  provider          String   @default("JITSI")
+  dailyRoomUrl     String?
+  dailyRoomName    String?
+  recordingUrl     String?
+  earnings          Int      @default(0)
+  meetingLink       String?
+  candidateNote     String?  @db.Text
+  interviewerNotes  String?  @db.Text
+  candidateFeedback String?  @db.Text
+  candidateRating   Int?
+  interviewerRating Int?
+  disputeReason     String?
+  cancelledBy       String?
+  cancelledAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  interviewer   Interviewer @relation("InterviewerBookings", fields: [interviewerId], references: [id])
+  review        InterviewerReview?
+
+  @@index([userId])
+  @@index([interviewerId])
+  @@index([status])
+}
+
+model InterviewerReview {
+  id            String   @id @default(uuid())
+  interviewerId String
+  bookingId     String   @unique
+  rating        Int
+  comment       String?  @db.Text
+  isPublic      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  interviewer   Interviewer  @relation("InterviewerReviews", fields: [interviewerId], references: [id])
+  booking       HumanBooking @relation(fields: [bookingId], references: [id])
+
+  @@index([interviewerId])
+}
+
+model InterviewerPayout {
+  id                  String   @id @default(uuid())
+  interviewerId       String
+  amount              Int
+  paypalEmail         String
+  status              String   @default("PENDING")
+  adminNote           String?  @db.Text
+  paypalBatchId       String?
+  requestedAt         DateTime @default(now())
+  processedAt         DateTime?
+  completedAt         DateTime?
+  periodStart         DateTime?
+  periodEnd           DateTime?
+  createdAt           DateTime @default(now())
+
+  interviewer   Interviewer @relation("InterviewerPayouts", fields: [interviewerId], references: [id])
+
+  @@index([interviewerId])
+  @@index([status])
+  @@index([paypalBatchId])
+}
+
+// ─── Admin Log ───
+model AdminLog {
+  id          String   @id @default(cuid())
+  action      String
+  adminEmail  String
+  targetType  String?
+  targetId    String?
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  @@index([adminEmail])
+  @@index([action])
+}
+
+// ─── Email Queue (Scheduled Emails) ───
+model EmailQueue {
+  id        String    @id @default(cuid())
+  to        String
+  subject   String
+  html      String    @db.Text
+  from      String?
+  sendAt    DateTime
+  sent      Boolean   @default(false)
+  sentAt    DateTime?
+  error     String?   @db.Text
+  createdAt DateTime  @default(now())
+
+  @@index([sent, sendAt])
+}
+
+// ─── Candidate Pool (Opt-In) ───
+model CandidatePool {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOptedIn       Boolean   @default(false)
+  isVisible       Boolean   @default(false)
+  role            String
+  level           String
+  industry        String?
+  location        String?
+  muqabalehScore  Float?
+  averageScore    Float?
+  interviewCount  Int       @default(0)
+  languages       String    @default("AR")
+  availability    String    @default("AVAILABLE") // AVAILABLE, OPEN_TO_OFFERS, NOT_LOOKING
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isVisible])
+  @@index([role])
+  @@index([muqabalehScore])
 }

@@ -1,87 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { getPayPalAccessToken } from '@/lib/paypal';
 
-/**
- * POST /api/paypal/create-order
- * Creates a PayPal order for a one-time payment (Pro plan $9.99).
- * Returns the order ID so the frontend can render the PayPal button.
- */
+const PLAN_CONFIG: Record<string, { amount: string; currency: string; description: string; tier: string; sessions: number }> = {
+  PRO: {
+    amount: '9.99',
+    currency: 'USD',
+    description: 'Muqabaleh Pro — 3 AI Interviews + Full Reports',
+    tier: 'PRO',
+    sessions: 3,
+  },
+  UNLIMITED: {
+    amount: '29.99',
+    currency: 'USD',
+    description: 'Muqabaleh Unlimited — Unlimited AI Interviews + All Features',
+    tier: 'UNLIMITED',
+    sessions: 999,
+  },
+  HUMAN_STD: {
+    amount: '29.00',
+    currency: 'USD',
+    description: 'Human Interview — Standard',
+    tier: 'STANDARD_HUMAN',
+    sessions: 0,
+  },
+  HUMAN_PRO: {
+    amount: '49.00',
+    currency: 'USD',
+    description: 'Human Interview — Pro',
+    tier: 'PRO_HUMAN',
+    sessions: 0,
+  },
+};
+
 export async function POST(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const plan = searchParams.get('plan') || 'PRO';
+  const config = PLAN_CONFIG[plan];
+
+  if (!config) {
+    return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+  }
+
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  if (!clientId) {
+    return NextResponse.json({ error: 'PayPal not configured' }, { status: 503 });
+  }
+
+  // Create PayPal order
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = (session.user as Record<string, unknown>).id as string;
-
-    // Read the plan from the request body (default: pro)
-    const body = (await req.json()) as { plan?: string };
-    const plan = body.plan || 'pro';
-
-    if (plan !== 'pro') {
-      return NextResponse.json(
-        { error: 'Only one-time payment for Pro plan is supported via this endpoint. Use /create-subscription for Unlimited.' },
-        { status: 400 },
-      );
-    }
-
-    // Price in USD — hardcoded to match the UI promise
-    const priceUsd = '9.99';
-
     const accessToken = await getPayPalAccessToken();
-    const baseUrl =
-      process.env.PAYPAL_MODE === 'live'
-        ? 'https://api-m.paypal.com'
-        : 'https://api-m.sandbox.paypal.com';
-
-    const orderRes = await fetch(`${baseUrl}/v2/checkout/orders`, {
+    const baseUrl = process.env.PAYPAL_MODE === 'live'
+      ? 'https://api-m.paypal.com'
+      : 'https://api-m.sandbox.paypal.com';
+    const order = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         intent: 'CAPTURE',
-        purchase_units: [
-          {
-            amount: {
-              currency_code: 'USD',
-              value: priceUsd,
-            },
-            description: `Muqabaleh Pro Plan — ${userId}`,
-            custom_id: `${userId}:pro`,
-          },
-        ],
-        application_context: {
-          brand_name: 'Muqabaleh مقابلة',
-          locale: 'ar_SA',
-          shipping_preference: 'NO_SHIPPING',
-          user_action: 'PAY_NOW',
-        },
+        purchase_units: [{
+          amount: { currency_code: config.currency, value: config.amount },
+          description: config.description,
+        }],
       }),
     });
-
-    const orderData = (await orderRes.json()) as Record<string, unknown>;
-
-    if (!orderRes.ok) {
-      console.error('PayPal create order error:', orderData);
-      return NextResponse.json(
-        { error: 'Failed to create order', details: orderData },
-        { status: orderRes.status },
-      );
+    const data = await order.json();
+    if (data.error) {
+      const msg = typeof data.error === 'string' ? data.error : (data.error.message || data.name || 'PayPal error');
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
-
     return NextResponse.json({
-      orderId: orderData.id,
+      orderId: data.id,
+      tier: config.tier,
+      sessions: config.sessions,
     });
   } catch (err) {
-    console.error('PayPal create order error:', err);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'PayPal error' }, { status: 500 });
   }
+}
+
+async function getPayPalAccessToken() {
+  const clientId = process.env.PAYPAL_CLIENT_ID!;
+  const secret = process.env.PAYPAL_SECRET!;
+  const baseUrl = process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
+
+  const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString('base64')}`,
+    },
+    body: 'grant_type=client_credentials',
+  });
+  const data = await res.json();
+  return data.access_token;
 }

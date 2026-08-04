@@ -16,3 +16,4 @@ export { QrCard } from "./qr-card";
 export { InterviewAvatar } from "./interview-avatar";
 export { HeroStoryboard } from "./hero-storyboard";
 export { HeroSimulation } from "./hero-simulation";
+export { HumanInterviewsPromo } from "./human-interviews-promo";

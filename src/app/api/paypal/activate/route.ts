@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getPayPalAccessToken, getPayPalSubscription } from '@/lib/paypal';
+import { triggerPaymentReceiptEmail } from '@/lib/email-triggers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,6 +71,11 @@ export async function POST(req: NextRequest) {
         sessionsLeft: 999,
       },
     });
+
+    // Send payment receipt email (fire and forget)
+    const planId = typeof subData.plan_id === 'string' ? subData.plan_id : '';
+    const planName = planId.includes('PRO') ? 'Pro' : 'Premium';
+    triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (err) {

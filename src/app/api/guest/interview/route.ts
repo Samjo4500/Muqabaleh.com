@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { getDemoQuestions, type Role, LEVEL_MAP } from '@/lib/interview-questions';
+import { demoInterviews } from '@/lib/demo-state';
 
 const IS_DEMO = process.env.DEMO_MODE === 'true';
 
-// In-memory demo state (survives for the lifetime of the serverless function invocation)
-const demoInterviews = new Map<string, {
-  id: string;
-  language: string;
-  status: string;
-  messageCount: number;
-}>();
+// Map form values to roles
+const ROLE_FROM_FORM: Record<string, Role> = {
+  sales: 'SALES_MANAGER', marketing: 'MARKETING_SPECIALIST',
+  hr: 'HR_MANAGER', it: 'SOFTWARE_ENGINEER',
+  finance: 'ACCOUNTANT', engineering: 'PROJECT_MANAGER',
+  operations: 'OPERATIONS_MANAGER', design: 'GRAPHIC_DESIGNER',
+  data: 'DATA_ANALYST', customer_service: 'CUSTOMER_SERVICE',
+};
+
+const INDUSTRY_FROM_FORM: Record<string, string> = {
+  it: 'TECH', finance: 'FINTECH', medicine: 'HEALTHCARE',
+  engineering: 'IT', education: 'TECH', marketing: 'RETAIL',
+  sales: 'RETAIL', hr: 'TECH', operations: 'MANUFACTURING',
+  design: 'TECH', data: 'FINTECH', customer_service: 'TELECOM',
+};
 
 // POST /api/guest/interview — create a guest (demo) interview
 export async function POST(req: NextRequest) {
@@ -17,6 +27,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const language = body.language === 'en' ? 'EN' : 'AR';
     const guestToken = crypto.randomBytes(24).toString('hex');
+
+    // Determine role and industry from request
+    const formIndustry = body.industry || 'it';
+    const formExperience = body.experience || 'mid';
+    const role = ROLE_FROM_FORM[formIndustry] || 'SOFTWARE_ENGINEER';
+    const qIndustry = INDUSTRY_FROM_FORM[formIndustry];
+    const level = LEVEL_MAP[formExperience.toUpperCase()] || 'MID';
+    const questions = getDemoQuestions(role, level, qIndustry, language);
 
     // DEMO_MODE: create in-memory interview without database
     if (IS_DEMO) {
@@ -26,6 +44,7 @@ export async function POST(req: NextRequest) {
         language,
         status: 'PENDING',
         messageCount: 0,
+        questions,
       });
       return NextResponse.json(
         { token: guestToken, interviewId: demoId, demoMode: true },
@@ -39,8 +58,8 @@ export async function POST(req: NextRequest) {
       data: {
         mode: 'AI',
         type: 'BEHAVIORAL',
-        industry: 'GENERAL',
-        experience: 'MID',
+        industry: formIndustry.toUpperCase(),
+        experience: formExperience.toUpperCase(),
         language,
         interviewerGender: 'MALE',
         guestToken,
@@ -60,11 +79,13 @@ export async function POST(req: NextRequest) {
     if (!process.env.DATABASE_URL) {
       const guestToken = crypto.randomBytes(24).toString('hex');
       const demoId = `demo-${crypto.randomUUID()}`;
+      const defaultQs = getDemoQuestions('SOFTWARE_ENGINEER', 'MID', 'TECH', 'AR');
       demoInterviews.set(guestToken, {
         id: demoId,
         language: 'AR',
         status: 'PENDING',
         messageCount: 0,
+        questions: defaultQs,
       });
       return NextResponse.json(
         { token: guestToken, interviewId: demoId, demoMode: true, fallback: true },
@@ -79,5 +100,4 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Export for use by messages route
-export { demoInterviews };
+// Shared demo state is now in src/lib/demo-state.ts and imported above.

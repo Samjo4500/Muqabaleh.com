@@ -1,8 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { Upload, User } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Upload, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,17 +32,74 @@ const langKeys = [
   'langTurkish',
 ] as const;
 
+const LANG_MAP: Record<string, string> = {
+  AR: 'langArabic',
+  EN: 'langEnglish',
+  FR: 'langFrench',
+  UR: 'langUrdu',
+  MS: 'langMalay',
+  TR: 'langTurkish',
+};
+
+const REVERSE_LANG_MAP: Record<string, string> = {
+  langArabic: 'AR',
+  langEnglish: 'EN',
+  langFrench: 'FR',
+  langUrdu: 'UR',
+  langMalay: 'MS',
+  langTurkish: 'TR',
+};
+
 export default function InterviewerProfilePage() {
   const t = useTranslations('interviewerPanel');
+  const tc = useTranslations('common');
 
-  const [bioAr, setBioAr] = useState('محاور معتمد بخبرة تزيد عن 10 سنوات');
-  const [bioEn, setBioEn] = useState('Accredited interviewer with 10+ years of experience');
-  const [selectedSectors, setSelectedSectors] = useState<string[]>(['sectorTech', 'sectorFinance', 'sectorHR']);
-  const [selectedLangs, setSelectedLangs] = useState<string[]>(['langArabic', 'langEnglish']);
-  const [years, setYears] = useState('12');
-  const [currentTitle, setCurrentTitle] = useState('Senior Recruiter');
-  const [price, setPrice] = useState('65');
-  const [exclusionSectors, setExclusionSectors] = useState<string[]>(['sectorGovernment']);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [bioAr, setBioAr] = useState('');
+  const [bioEn, setBioEn] = useState('');
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
+  const [exclusionSectors, setExclusionSectors] = useState<string[]>([]);
+  const [currentTitle, setCurrentTitle] = useState('');
+  const [price, setPrice] = useState('');
+
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/interviewer/me');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData?.error?.en || tc('error'));
+        return;
+      }
+      const data = await res.json();
+      const i = data.interviewer;
+
+      setBioAr(i.bioAr || '');
+      setBioEn(i.bio || '');
+      setCurrentTitle(i.currentTitle || '');
+      setPrice(String(i.hourlyRate / 100));
+
+      const specialties: string[] = i.specialties || [];
+      setSelectedSectors(specialties);
+
+      const languages: string[] = i.languages || ['AR'];
+      const langKeysFromApi = languages
+        .map((code) => LANG_MAP[code])
+        .filter(Boolean);
+      setSelectedLangs(langKeysFromApi);
+    } catch {
+      toast.error(tc('error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [tc]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const toggleSector = (key: string) => {
     setSelectedSectors((prev) =>
@@ -61,6 +118,61 @@ export default function InterviewerProfilePage() {
       prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key]
     );
   };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const langs = selectedLangs
+        .map((k) => REVERSE_LANG_MAP[k])
+        .filter(Boolean);
+
+      const payload: Record<string, unknown> = {
+        bio: bioEn,
+        bioAr,
+        specialties: selectedSectors,
+        languages: langs,
+        hourlyRate: Math.round(parseFloat(price) * 100) || 0,
+      };
+
+      const res = await fetch('/api/interviewer/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.error(errData?.error?.en || tc('error'));
+        return;
+      }
+
+      toast.success(t('saveProfile'));
+    } catch {
+      toast.error(tc('error'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-white/10" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/[0.04] border border-white/[0.06]" />
+            ))}
+          </div>
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-white/[0.04] border border-white/[0.06]" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -132,18 +244,6 @@ export default function InterviewerProfilePage() {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-[var(--text-primary)]">
-                    {t('yearsExperience')}
-                  </Label>
-                  <Input
-                    type="number"
-                    value={years}
-                    onChange={(e) => setYears(e.target.value)}
-                    className="glass-input border-white/10"
-                    min={0}
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-[var(--text-primary)]">
                     {t('sessionPrice')}
@@ -228,8 +328,10 @@ export default function InterviewerProfilePage() {
       <div className="flex justify-end">
         <Button
           className="btn-gold min-w-[160px]"
-          onClick={() => toast.success(t('saveProfile'))}
+          onClick={handleSave}
+          disabled={saving}
         >
+          {saving && <Loader2 size={16} className="me-2 animate-spin" />}
           {t('saveProfile')}
         </Button>
       </div>

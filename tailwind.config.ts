@@ -28,8 +28,10 @@ const config: Config = {
       fontFamily: {
         cairo: ["Cairo", "sans-serif"],
         tajawal: ["Tajawal", "sans-serif"],
+        noto: ["Noto Sans Arabic", "sans-serif"],
         grotesk: ["Space Grotesk", "sans-serif"],
         inter: ["Inter", "sans-serif"],
+        display: ["Space Grotesk", "Tajawal", "sans-serif"],
       },
       borderRadius: {
         "2xl": "1rem",

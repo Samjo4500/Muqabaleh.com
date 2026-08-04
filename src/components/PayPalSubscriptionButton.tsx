@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Loader2, CheckCircle2, Crown } from 'lucide-react';
+import { Loader2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PayPalSubscriptionButtonProps {

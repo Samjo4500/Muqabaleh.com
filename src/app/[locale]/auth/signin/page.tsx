@@ -168,16 +168,6 @@ export default function SignInPage() {
           )}
         </div>
 
-        {/* Forgot password — aligned end */}
-        <div className="flex justify-end">
-          <Link
-            href={`/${locale}/auth/forgot-password`}
-            className="text-sm text-[var(--gold)] hover:text-[var(--gold-hover)] transition-colors"
-          >
-            {t("forgotLink")}
-          </Link>
-        </div>
-
         {/* Submit */}
         <button
           type="submit"

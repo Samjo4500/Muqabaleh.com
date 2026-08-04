@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/session';
 import { db } from '@/lib/db';
 import { ProfileForm } from './profile-form';

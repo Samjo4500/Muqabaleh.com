@@ -44,7 +44,6 @@ export async function sendEmail(opts: {
       return { success: false, error: error.message };
     }
 
-    console.log(`[Email] Sent ${opts.subject} → ${JSON.stringify(opts.to)} id=${data?.id}`);
     return { success: true, id: data?.id };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -73,7 +72,6 @@ export async function queueEmail(opts: {
       sendAt: opts.sendAt,
     },
   });
-  console.log(`[Email] Queued ${opts.subject} → ${opts.to} for ${opts.sendAt.toISOString()}`);
   return record.id;
 }
 

@@ -2,12 +2,20 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
-const ADMIN_EMAIL = 'samjo4500@gmail.com';
-
 export async function verifyAdmin() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email || session.user.email !== ADMIN_EMAIL) {
-    return { authorized: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+  const role = (session?.user as { role?: string } | undefined)?.role;
+
+  if (!session?.user || role !== 'SUPER_ADMIN') {
+    return {
+      authorized: false as const,
+      response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+    };
   }
-  return { authorized: true, adminEmail: session.user.email };
+
+  return {
+    authorized: true as const,
+    adminEmail: session.user.email ?? 'admin',
+    adminId: (session.user as { id?: string }).id,
+  };
 }

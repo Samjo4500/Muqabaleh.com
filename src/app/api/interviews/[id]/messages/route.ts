@@ -148,7 +148,6 @@ async function evaluateAndSave(interviewId: string, language: 'AR' | 'EN', userI
       }
     });
 
-    console.log(`Interview ${interviewId} evaluated: ${evaluation.overallScore}/100, verificationId: ${verificationId}`);
   } catch (err) {
     console.error(`evaluateAndSave failed for ${interviewId}:`, err);
     // Mark as evaluation failed so user can retry

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { getPayPalAccessToken, getPayPalApiBase, refundPayPalCapture } from '@/lib/paypal';
 import { z } from 'zod';
 import { scheduleBookingEmails } from '@/lib/email-triggers';
 import { createDailyRoom } from '@/lib/daily';
@@ -60,7 +61,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Capture the PayPal order
+    // Order must match the one persisted at create-booking-order time
+    if (!booking.paypalOrderId || booking.paypalOrderId !== orderId) {
+      return NextResponse.json(
+        { error: { ar: 'طلب الدفع غير مطابق', en: 'Order does not match booking' } },
+        { status: 403 },
+      );
+    }
+
     const clientId = process.env.PAYPAL_CLIENT_ID;
     if (!clientId) {
       return NextResponse.json(
@@ -70,30 +78,62 @@ export async function POST(req: NextRequest) {
     }
 
     const accessToken = await getPayPalAccessToken();
-    const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+    const captureRes = await fetch(
+      `${getPayPalApiBase()}/v2/checkout/orders/${orderId}/capture`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
-    const captureData = await captureRes.json();
+    const captureData = (await captureRes.json()) as {
+      status?: string;
+      error?: unknown;
+      purchase_units?: Array<{
+        custom_id?: string;
+        payments?: {
+          captures?: Array<{
+            id?: string;
+            amount?: { value?: string };
+          }>;
+        };
+      }>;
+    };
 
-    if (captureData.error || captureData.status !== 'COMPLETED') {
+    if (!captureRes.ok || captureData.error || captureData.status !== 'COMPLETED') {
       console.error('PayPal capture error:', captureData);
       return NextResponse.json(
-        { error: { ar: 'فشل في تأكيد الدفع', en: 'Payment capture failed', details: captureData.error || captureData } },
+        { error: { ar: 'فشل في تأكيد الدفع', en: 'Payment capture failed' } },
         { status: 400 },
       );
     }
 
-    // Verify amount matches booking price
-    const capturedAmount = captureData.purchase_units?.[0]?.amount?.value;
+    const purchaseUnit = captureData.purchase_units?.[0];
+    const capture = purchaseUnit?.payments?.captures?.[0];
+    const captureId = capture?.id;
+    const capturedAmount = capture?.amount?.value;
     const expectedAmount = (booking.priceTotal / 100).toFixed(2);
 
-    if (capturedAmount && parseFloat(capturedAmount) !== parseFloat(expectedAmount)) {
-      console.error(`Amount mismatch: captured ${capturedAmount}, expected ${expectedAmount}`);
+    // Fail closed: missing / zero amount is rejected
+    if (
+      !capturedAmount ||
+      Number.parseFloat(capturedAmount) <= 0 ||
+      Number.parseFloat(capturedAmount).toFixed(2) !==
+        Number.parseFloat(expectedAmount).toFixed(2)
+    ) {
+      console.error(
+        `Amount mismatch or missing: captured ${capturedAmount}, expected ${expectedAmount}`,
+      );
+      if (captureId) {
+        await refundPayPalCapture(
+          accessToken,
+          captureId,
+          'Booking amount validation failed',
+        );
+      }
       return NextResponse.json(
         { error: { ar: 'عدم تطابق المبلغ', en: 'Amount mismatch' } },
         { status: 400 },
@@ -103,7 +143,7 @@ export async function POST(req: NextRequest) {
     // Generate meeting link
     const meetingLink = `https://meet.jit.si/muqabaleh-${bookingId.slice(0, 8)}`;
 
-    // Update booking: status → CONFIRMED, save paypalOrderId and meetingLink
+    // Update booking: status → CONFIRMED
     const updated = await db.humanBooking.update({
       where: { id: bookingId },
       data: {
@@ -128,7 +168,7 @@ export async function POST(req: NextRequest) {
 
     // Create Daily.co room (fire and forget, non-blocking)
     if (process.env.DAILY_API_KEY) {
-      createDailyRoom(bookingId).catch((e) =>
+      createDailyRoom(bookingId).catch((e: Error) =>
         console.warn('[Booking] Daily.co room creation skipped:', e.message),
       );
     }
@@ -144,24 +184,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-async function getPayPalAccessToken() {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const secret = process.env.PAYPAL_SECRET!;
-  const baseUrl =
-    process.env.PAYPAL_MODE === 'live'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
-
-  const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json();
-  return data.access_token;
 }

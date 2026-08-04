@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { textToSpeech } from '@/lib/ai';
+import { rateLimit } from '@/lib/rate-limit';
 import crypto from 'crypto';
 
 // In-memory cache for TTS
@@ -9,6 +12,24 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session.user as Record<string, unknown>).id as string;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Max 10 requests per minute per user
+    if (!rateLimit(`tts:${userId}`, 10, 60_000)) {
+      return NextResponse.json(
+        { error: { ar: 'تم تجاوز الحد المسموح', en: 'Too many requests' } },
+        { status: 429 },
+      );
+    }
+
     const { text, voice = 'fahd' } = await req.json();
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {

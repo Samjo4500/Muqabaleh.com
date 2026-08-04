@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // POST /api/candidate-pool — opt in to employer database
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { userId, role, level, industry, location, muqabalehScore, interviewCount, languages, isOptedIn } = body;
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!userId || !role || !level) {
+    // Never trust client-supplied userId — always use session
+    const userId = (session.user as Record<string, unknown>).id as string;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { role, level, industry, location, muqabalehScore, interviewCount, languages, isOptedIn } = body;
+
+    if (!role || !level) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -54,12 +67,19 @@ export async function POST(req: NextRequest) {
 // PATCH /api/candidate-pool — update visibility settings
 export async function PATCH(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { userId, isVisible, availability, location, industry } = body;
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const userId = (session.user as Record<string, unknown>).id as string;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    // Ignore any client-supplied userId
+    const { isVisible, availability, location, industry } = body;
 
     try {
       const { db } = await import('@/lib/db');

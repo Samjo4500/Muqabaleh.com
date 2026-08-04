@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getPayPalAccessToken } from '@/lib/paypal';
+import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = (session.user as Record<string, unknown>).id as string;
-    const planId = process.env.PAYPAL_PLAN_ID;
+    const planId =
+      process.env.PAYPAL_PLAN_ID ||
+      process.env.PAYPAL_PLAN_ID_UNLIMITED ||
+      process.env.PAYPAL_PLAN_ID_PRO;
 
     if (!planId) {
       return NextResponse.json(
@@ -28,11 +31,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
     const subRes = await fetch(
-      `${
-        process.env.PAYPAL_MODE === 'live'
-          ? 'https://api-m.paypal.com'
-          : 'https://api-m.sandbox.paypal.com'
-      }/v1/billing/subscriptions`,
+      `${getPayPalApiBase()}/v1/billing/subscriptions`,
       {
         method: 'POST',
         headers: {
@@ -42,6 +41,8 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           plan_id: planId,
+          // Bind subscription to our user so /activate can verify ownership
+          custom_id: userId,
           subscriber: {
             name: {
               given_name: session.user.name?.split(' ')[0] || 'Muqabaleh',

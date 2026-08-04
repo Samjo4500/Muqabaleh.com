@@ -5,10 +5,15 @@
 
 import { db } from './db';
 import crypto from 'crypto';
+import type {
+  GenerateContentRequest,
+  GenerativeModel,
+  GoogleGenerativeAI,
+} from '@google/generative-ai';
 
 // ─── Gemini Setup ───
-let _geminiModel: any = null;
-let _geminiClient: any = null;
+let _geminiModel: GenerativeModel | null = null;
+let _geminiClient: GoogleGenerativeAI | null = null;
 
 async function getGeminiModel() {
   if (_geminiModel) return _geminiModel;
@@ -66,12 +71,12 @@ async function callLLM(messages: { role: string; content: string }[]): Promise<s
         lastUserMsg = geminiHistory.pop()!.parts[0].text;
       }
 
-      const request: Record<string, unknown> = {
+      const request: GenerateContentRequest = {
         contents: geminiHistory.length > 0 ? geminiHistory : [{ role: 'user', parts: [{ text: lastUserMsg }] }],
+        ...(systemInstruction
+          ? { systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] } }
+          : {}),
       };
-      if (systemInstruction) {
-        request.systemInstruction = { parts: [{ text: systemInstruction }] };
-      }
 
       const result = await geminiModel.generateContent(request);
       const response = result.response;
@@ -85,7 +90,10 @@ async function callLLM(messages: { role: string; content: string }[]): Promise<s
   // Fallback: z-ai-web-dev-sdk
   const zai = await getZAI();
   const completion = await zai.chat.completions.create({
-    messages: messages as any,
+    messages: messages.map((m) => ({
+      role: m.role as 'system' | 'user' | 'assistant',
+      content: m.content,
+    })),
     thinking: { type: 'disabled' },
   });
   return completion.choices[0]?.message?.content || '';
@@ -270,11 +278,11 @@ export async function generateInterviewResponse(
     const isDone = mockResponse.includes('[INTERVIEW_DONE]');
     const cleaned = mockResponse.replace(/\[INTERVIEW_DONE\]/g, '').trim();
     const nextSeq = (dbMessages[dbMessages.length - 1]?.sequence || 0) + 1;
-    await db.message.create({
-      data: { interviewId, role: 'CANDIDATE', content: candidateMessage, sequence: nextSeq },
-    });
-    await db.message.create({
-      data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: nextSeq + 1 },
+    await db.message.createMany({
+      data: [
+        { interviewId, role: 'CANDIDATE', content: candidateMessage, sequence: nextSeq },
+        { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: nextSeq + 1 },
+      ],
     });
     return { question: cleaned, questionNumber: questionCount + 1, totalQuestions: TOTAL_QUESTIONS, done: isDone };
   }
@@ -306,11 +314,11 @@ export async function generateInterviewResponse(
 
   const nextSeq = (dbMessages[dbMessages.length - 1]?.sequence || 0) + 1;
 
-  await db.message.create({
-    data: { interviewId, role: 'CANDIDATE', content: candidateMessage, sequence: nextSeq },
-  });
-  await db.message.create({
-    data: { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: nextSeq + 1 },
+  await db.message.createMany({
+    data: [
+      { interviewId, role: 'CANDIDATE', content: candidateMessage, sequence: nextSeq },
+      { interviewId, role: 'INTERVIEWER', content: cleaned, sequence: nextSeq + 1 },
+    ],
   });
 
   return {

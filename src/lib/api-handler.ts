@@ -102,7 +102,7 @@ export async function withAuth(
     }
 
     // Public route (auth not required)
-    return handler(req as any, { userId: '', role: '' });
+    return handler(req, { userId: '', role: '' });
   };
 }
 

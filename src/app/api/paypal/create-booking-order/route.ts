@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     const amountUsd = (booking.priceTotal / 100).toFixed(2);
 
     const accessToken = await getPayPalAccessToken();
-    const order = await fetch('https://api-m.paypal.com/v2/checkout/orders', {
+    const order = await fetch(`${getPayPalApiBase()}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,20 +85,31 @@ export async function POST(req: NextRequest) {
               value: amountUsd,
             },
             description: `Muqabaleh — Interview Booking ${bookingId.slice(0, 8)}`,
+            custom_id: bookingId,
           },
         ],
       }),
     });
 
-    const data = await order.json();
+    const data = (await order.json()) as {
+      id?: string;
+      error?: unknown;
+      name?: string;
+    };
 
-    if (data.error) {
-      console.error('PayPal create order error:', data.error);
+    if (!order.ok || data.error || !data.id) {
+      console.error('PayPal create order error:', data.error || data.name);
       return NextResponse.json(
         { error: { ar: 'خطأ في PayPal', en: 'PayPal error', details: data.error } },
         { status: 400 },
       );
     }
+
+    // Persist orderId on booking before client approval
+    await db.humanBooking.update({
+      where: { id: bookingId },
+      data: { paypalOrderId: data.id },
+    });
 
     return NextResponse.json({ orderId: data.id });
   } catch (err) {
@@ -107,24 +119,4 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-async function getPayPalAccessToken() {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const secret = process.env.PAYPAL_SECRET!;
-  const baseUrl =
-    process.env.PAYPAL_MODE === 'live'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
-
-  const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json();
-  return data.access_token;
 }

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Mail, Lock, User, Building2, Globe, ArrowLeft, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, Building2, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 import { AuthShell } from "@/components/brand";

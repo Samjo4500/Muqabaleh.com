@@ -1,12 +1,16 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
+import { routing, type Locale } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
 import { PWAInstallPrompt } from '@/components/pwa/InstallPrompt';
 import type { Metadata } from 'next';
+
+function isLocale(value: string): value is Locale {
+  return (routing.locales as readonly string[]).includes(value);
+}
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
 
@@ -83,7 +87,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!routing.locales.includes(locale as any)) {
+  if (!isLocale(locale)) {
     notFound();
   }
 

@@ -13,11 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
 
-    // Store in CandidatePool if user exists, or just log
-    // For MVP, we log and return success
-    console.log('[Newsletter] New signup:', parsed.data.email);
-
-    // If user exists, update their record
+    // If user exists, touch their record (no-op side effect for MVP signup capture)
     try {
       await db.user.update({
         where: { email: parsed.data.email },

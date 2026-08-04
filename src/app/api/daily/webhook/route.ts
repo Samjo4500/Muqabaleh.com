@@ -60,9 +60,6 @@ export async function POST(req: NextRequest) {
                 });
               }
 
-              console.log(
-                `Booking ${booking.id} marked as COMPLETED — all participants left`
-              );
             }
           }
         } catch (dbError) {
@@ -87,9 +84,6 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          console.log(
-            `Recording URL stored for room ${roomName}: ${payload.recording_url}`
-          );
         } catch (dbError) {
           console.error('Error storing recording URL:', dbError);
         }

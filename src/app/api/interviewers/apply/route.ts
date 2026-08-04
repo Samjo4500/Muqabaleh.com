@@ -155,8 +155,6 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      console.log('[Interviewer Apply] Saved to DB:', application.id);
-
       // Notify admin of new application (fire and forget)
       triggerAdminNewApplicationEmail(application.id).catch(() => {});
 
@@ -173,19 +171,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Mock / demo response ──
-    console.log('[Interviewer Apply] Mock application received:', {
-      fullName,
-      fullNameAr,
-      email,
-      phone,
-      yearsExperience: years,
-      specialties,
-      industries,
-      languages,
-      priceTier,
-      videoIntroSize: videoIntro?.size ?? null,
-      idDocumentSize: idDocument?.size ?? null,
-    });
 
     return NextResponse.json({
       success: true,

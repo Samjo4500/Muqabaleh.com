@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
 
 import { AuthShell } from "@/components/brand";
 import { Input } from "@/components/ui/input";

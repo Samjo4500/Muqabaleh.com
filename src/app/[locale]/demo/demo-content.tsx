@@ -1,13 +1,16 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, ArrowRight, AlertTriangle, Zap } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight, AlertTriangle, Zap, Home } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { easeCrystal } from '@/components/landing/crystal/motion';
 
 export default function DemoContent() {
   const t = useTranslations('demo');
+  const tLanding = useTranslations('landing');
   const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -24,6 +27,18 @@ export default function DemoContent() {
       })
       .catch(() => setConfig({ demoMode: false, services: {} }));
   }, []);
+
+  const goHome = () => {
+    router.push('/');
+  };
+
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    goHome();
+  };
 
   const startDemo = async () => {
     setLoading(true);
@@ -46,103 +61,115 @@ export default function DemoContent() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void px-4 py-12">
-      <div className="aurora-bg pointer-events-none absolute inset-0" aria-hidden="true" />
-
-      <div className="relative z-10 w-full max-w-md">
-        <button
-          onClick={() => router.back()}
-          className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] cursor-pointer"
-        >
-          {locale === 'ar' ? <ArrowRight size={16} strokeWidth={1.75} /> : <ArrowLeft size={16} strokeWidth={1.75} />}
-        </button>
-
-        <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 28 28"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M14 2L26 8v12l-12 6-12-6V8l12-6z"
-                stroke="#D4A843"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <path
-                d="M14 8l6 3v6l-6 3-6-3v-6l6-3z"
-                fill="#D4A843"
-                opacity="0.2"
-              />
-              <circle cx="14" cy="14" r="2" fill="#D4A843" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
-          <p className="mt-2 text-center text-sm text-[var(--text-muted)]">{t('subtitle')}</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-6">
-          {/* Service Status Banner */}
-          {config && (
-            <div className="mb-4 space-y-2">
-              {config.demoMode && (
-                <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-400">
-                  <Zap size={14} />
-                  {locale === 'ar'
-                    ? 'وضع العرض التوضيحي — إجابات محاكاة'
-                    : 'Demo Mode — Simulated responses'}
-                </div>
-              )}
-              {(!config.services?.database || !config.services?.gemini) && !config.demoMode && (
-                <div className="flex items-start gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-[var(--text-muted)]">
-                  <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-400" />
-                  <span>
-                    {locale === 'ar'
-                      ? 'بعض الخدمات غير متوفرة. ستتم المحاكاة تلقائياً.'
-                      : 'Some services unavailable. Will auto-simulate.'}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          <Button
-            onClick={startDemo}
-            disabled={loading}
-            className="btn-gold w-full cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <Loader2 size={16} className="me-2 animate-spin" />
-                {t('starting')}
-              </>
-            ) : (
-              t('start')
-            )}
-          </Button>
-
-          <p className="mt-4 text-center text-xs text-[var(--text-faint)]">{t('note')}</p>
-        </div>
-
-        {/* Quick links for browsing without signing up */}
-        <div className="mt-6 flex flex-col gap-2">
-          <a
-            href="/admin"
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
-          >
-            {locale === 'ar' ? 'لوحة تحكم المسؤول (عرض تجريبي)' : 'Admin Dashboard (demo preview)'}
-          </a>
-          <a
-            href="/pricing"
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
-          >
-            {locale === 'ar' ? 'عرض الأسعار والباقات' : 'Pricing & Plans'}
-          </a>
-        </div>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <motion.div
+          className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-[var(--aurora-1)]/35 blur-[100px] will-change-transform"
+          animate={{ x: [0, 40, -20, 0], y: [0, 30, -10, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute right-0 top-24 h-80 w-80 rounded-full bg-[var(--aurora-2)]/30 blur-[110px] will-change-transform"
+          animate={{ x: [0, -50, 20, 0], y: [0, -25, 35, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
       </div>
+
+      {/* Top bar: Home logo + Back */}
+      <header className="relative z-20 px-4 pt-4 md:px-6">
+        <div className="glass mx-auto flex h-14 max-w-3xl items-center justify-between rounded-2xl px-4">
+          <Link
+            href="/"
+            className="font-display inline-flex items-center gap-2 text-base font-bold tracking-[-0.02em] text-[var(--text-primary)] transition hover:text-white"
+            aria-label={t('home')}
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/15">
+              <Home size={16} className="text-[var(--aurora-2)]" />
+            </span>
+            {tLanding('brand')}
+          </Link>
+          <button
+            type="button"
+            onClick={goBack}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            {locale === 'ar' ? <ArrowRight size={16} strokeWidth={1.75} /> : <ArrowLeft size={16} strokeWidth={1.75} />}
+            {t('back')}
+          </button>
+        </div>
+      </header>
+
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
+        <motion.div
+          className="w-full max-w-md"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: easeCrystal }}
+        >
+          <div className="mb-8 flex flex-col items-center text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/15">
+              <span className="text-lg font-bold gradient-text">AI</span>
+            </div>
+            <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-3xl">
+              {t('title')}
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">{t('subtitle')}</p>
+          </div>
+
+          <div className="glass-strong rounded-3xl p-6 md:p-8">
+            {config && (
+              <div className="relative z-10 mb-4 space-y-2">
+                {config.demoMode && (
+                  <div className="flex items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-xs text-cyan-200">
+                    <Zap size={14} />
+                    {t('demoMode')}
+                  </div>
+                )}
+                {(!config.services?.database || !config.services?.gemini) && !config.demoMode && (
+                  <div className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-[var(--text-muted)]">
+                    <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-400" />
+                    <span>{t('servicesUnavailable')}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={startDemo}
+              disabled={loading}
+              className="glass-button relative z-10 w-full cursor-pointer disabled:opacity-60"
+            >
+              {loading ? (
+                <span className="inline-flex items-center justify-center">
+                  <Loader2 size={16} className="me-2 animate-spin" />
+                  {t('starting')}
+                </span>
+              ) : (
+                t('start')
+              )}
+            </button>
+
+            <p className="relative z-10 mt-4 text-center text-xs text-[var(--text-muted)]">{t('note')}</p>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-2">
+            <Link
+              href="/"
+              className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text-primary)]"
+            >
+              <Home size={16} />
+              {t('home')}
+            </Link>
+            <Link
+              href="/pricing"
+              className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm text-[var(--text-muted)] transition hover:border-white/20 hover:text-[var(--text-primary)]"
+            >
+              {t('pricingLink')}
+            </Link>
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 }

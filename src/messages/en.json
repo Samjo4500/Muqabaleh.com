@@ -1569,7 +1569,12 @@
     "subtitle": "Experience an AI-powered interview — no signup required",
     "start": "Start Demo Interview",
     "starting": "Starting…",
-    "note": "Free demo — your answers are evaluated in real time"
+    "note": "Free demo — your answers are evaluated in real time",
+    "home": "Home",
+    "back": "Back",
+    "demoMode": "Demo Mode — Simulated responses",
+    "servicesUnavailable": "Some services unavailable. Will auto-simulate.",
+    "pricingLink": "Pricing & Plans"
   },
   "interviewerPanel": {
     "sidebarTitle": "Interviewer Panel",

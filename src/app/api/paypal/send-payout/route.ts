@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdmin } from '@/app/api/admin/_lib';
+import { PayoutStatus } from '@/lib/enums';
 import { z } from 'zod';
 
 const schema = z.object({ payoutId: z.string().uuid() });
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payout not found' }, { status: 404 });
     }
 
-    if (payout.status !== 'PENDING') {
+    if (payout.status !== PayoutStatus.PENDING) {
       return NextResponse.json(
         { error: `Payout is already ${payout.status}` },
         { status: 400 },
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
       await db.interviewerPayout.update({
         where: { id: payoutId },
         data: {
-          status: 'PROCESSING',
+          status: PayoutStatus.PROCESSING,
           batchId: batchId || null,
           processedAt: new Date(),
         },

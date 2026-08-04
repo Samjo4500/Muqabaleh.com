@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { UserTier } from '@/lib/enums';
 import { z } from 'zod';
 
 const createSchema = z.object({
@@ -36,7 +37,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { ar: 'المستخدم غير موجود', en: 'User not found' } }, { status: 404 });
     }
 
-    const hasAccess = user.tier === 'PRO' || user.tier === 'UNLIMITED';
+    const hasAccess =
+      user.tier === UserTier.PRO || user.tier === UserTier.UNLIMITED;
     if (!hasAccess && user.sessionsLeft < 1) {
       return NextResponse.json(
         {

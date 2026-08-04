@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { UserTier } from '@/lib/enums';
 import { verifyWebhookSignature } from '@/lib/paypal';
 
 const SUBSCRIPTION_EVENTS = new Set([
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
           if (activeCount === 0) {
             await db.user.update({
               where: { id: sub.userId },
-              data: { tier: 'FREE', sessionsLeft: 1 },
+              data: { tier: UserTier.FREE, sessionsLeft: 1 },
             });
           }
         }

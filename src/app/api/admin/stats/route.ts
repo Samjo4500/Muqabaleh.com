@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import {
+  InterviewerStatus,
+  PaymentStatus,
+  UserTier,
+} from '@/lib/enums';
 import { verifyAdmin } from '../_lib';
 
 export async function GET() {
@@ -16,22 +21,22 @@ export async function GET() {
         db.payment.aggregate({
           _sum: { amount: true },
           where: {
-            status: 'COMPLETED',
+            status: PaymentStatus.COMPLETED,
             capturedAt: { gte: today },
           },
         }),
         db.payment.aggregate({
           _sum: { amount: true },
           where: {
-            status: 'COMPLETED',
+            status: PaymentStatus.COMPLETED,
             capturedAt: { gte: monthStart },
           },
         }),
         db.user.count({
-          where: { tier: { not: 'FREE' } },
+          where: { tier: { not: UserTier.FREE } },
         }),
         db.interviewer.count({
-          where: { status: 'PENDING' },
+          where: { status: InterviewerStatus.PENDING },
         }),
       ]);
 

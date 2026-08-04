@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { PayoutStatus } from '@/lib/enums';
 import { verifyWebhookSignature } from '@/lib/paypal';
 import { triggerInterviewerPayoutSentEmail } from '@/lib/email-triggers';
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       if (!batchId) return NextResponse.json({ received: true });
 
       const payouts = await db.interviewerPayout.findMany({
-        where: { batchId, status: 'PROCESSING' },
+        where: { batchId, status: PayoutStatus.PROCESSING },
       });
 
       for (const payout of payouts) {
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
 
         await db.interviewerPayout.update({
           where: { id: payout.id },
-          data: { status: 'COMPLETED', completedAt: new Date() },
+          data: { status: PayoutStatus.COMPLETED, completedAt: new Date() },
         });
 
         // Fire and forget: send payout confirmation email
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest) {
       if (!batchId) return NextResponse.json({ received: true });
 
       await db.interviewerPayout.updateMany({
-        where: { batchId, status: 'PROCESSING' },
-        data: { status: 'FAILED', processedAt: null },
+        where: { batchId, status: PayoutStatus.PROCESSING },
+        data: { status: PayoutStatus.FAILED, processedAt: null },
       });
     }
 

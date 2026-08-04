@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { adminDailySummaryEmail } from '@/emails/admin-daily-summary';
+import {
+  BookingStatus,
+  InterviewerStatus,
+  PaymentStatus,
+  PayoutStatus,
+} from '@/lib/enums';
 import { sendEmail } from '@/lib/email';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
@@ -39,7 +45,7 @@ export async function POST(req: NextRequest) {
     // Calculate yesterday's revenue from completed payments (amount in dollars)
     const payments = await db.payment.findMany({
       where: {
-        status: 'COMPLETED',
+        status: PaymentStatus.COMPLETED,
         capturedAt: {
           gte: yesterday,
           lt: today,
@@ -50,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const bookingPayments = await db.humanBooking.findMany({
       where: {
-        status: { in: ['CONFIRMED', 'COMPLETED'] },
+        status: { in: [BookingStatus.CONFIRMED, BookingStatus.COMPLETED] },
         createdAt: {
           gte: yesterday,
           lt: today,
@@ -88,12 +94,12 @@ export async function POST(req: NextRequest) {
 
     // Pending applications
     const pendingApplications = await db.interviewer.count({
-      where: { status: 'PENDING' },
+      where: { status: InterviewerStatus.PENDING },
     });
 
     // Pending payouts
     const pendingPayouts = await db.interviewerPayout.count({
-      where: { status: 'PENDING' },
+      where: { status: PayoutStatus.PENDING },
     });
 
     const dateStr = yesterday.toLocaleDateString('en-US', {

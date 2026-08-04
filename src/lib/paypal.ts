@@ -1,4 +1,5 @@
 import { db } from './db';
+import { UserTier } from './enums';
 
 /** One-time checkout plan catalog (amounts must stay in sync with create-order). */
 export const PLAN_CONFIG: Record<
@@ -9,14 +10,14 @@ export const PLAN_CONFIG: Record<
     amount: '9.99',
     currency: 'USD',
     description: 'Muqabaleh Pro — 3 AI Interviews + Full Reports',
-    tier: 'PRO',
+    tier: UserTier.PRO,
     sessions: 3,
   },
   UNLIMITED: {
     amount: '29.99',
     currency: 'USD',
     description: 'Muqabaleh Unlimited — Unlimited AI Interviews + All Features',
-    tier: 'UNLIMITED',
+    tier: UserTier.UNLIMITED,
     sessions: 999,
   },
   HUMAN_STD: {
@@ -248,7 +249,7 @@ export async function deactivateSubscription(paypalSubscriptionId: string) {
   if (activeCount === 0) {
     await db.user.update({
       where: { id: sub.userId },
-      data: { tier: 'FREE', sessionsLeft: 1 },
+      data: { tier: UserTier.FREE, sessionsLeft: 1 },
     });
   }
 }

@@ -74,14 +74,14 @@ export default function ArticleClient({
           </h1>
 
           {/* Share buttons */}
-          <div className="mt-6 flex items-center gap-2">
-            <Share2 size={16} className="text-[var(--text-faint)]" />
+          <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <Share2 size={16} className="shrink-0 text-[var(--text-faint)]" />
             {['twitter', 'linkedin', 'whatsapp'].map((p) => (
               <Button
                 key={p}
                 variant="ghost"
                 size="sm"
-                className="h-8 border border-white/10 text-xs text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)] capitalize"
+                className="shrink-0 h-8 border border-white/10 text-xs text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)] capitalize"
                 onClick={() => handleShare(p, pageUrl, post.title)}
               >
                 {p}
@@ -101,7 +101,7 @@ export default function ArticleClient({
 
           {/* Prose content */}
           <div
-            className="prose-blog"
+            className="prose-blog text-lg md:text-base"
             dir={dir}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />

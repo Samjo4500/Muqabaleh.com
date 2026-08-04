@@ -406,7 +406,7 @@ export function HeroSimulation() {
             {t('heroEyebrow')}
           </motion.div>
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={vis ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}
-            className="hero-headline mx-auto text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            className="hero-headline mx-auto text-3xl font-extrabold leading-[1.08] tracking-tight md:text-5xl lg:text-6xl">
             {t('heroH1')}{' '}
             <span className="hero-aurora-text">{t('heroH1Highlight')}</span>
           </motion.h1>

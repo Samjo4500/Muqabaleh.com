@@ -152,7 +152,7 @@ function StatsBand({ t }: { t: ReturnType<typeof useTranslations> }) {
   ] as const;
   return (
     <section id="stats" className="border-y border-white/5 py-12">
-      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 px-4 text-center sm:grid-cols-3 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 px-4 text-center sm:grid-cols-4 sm:px-6 lg:px-8">
         {stats.map((s) => (
           <div key={s.label} className="flex flex-col items-center gap-2">
             <s.icon size={24} strokeWidth={1.75} className="text-[var(--gold)]" />
@@ -586,7 +586,7 @@ function PricingSection({ t, isRTL }: { t: ReturnType<typeof useTranslations>; i
           sub={t('pricingSub')}
         />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {PRICING_PLANS.map((plan, idx) => (
             <GlowCard
               key={idx}
@@ -870,7 +870,7 @@ function FinalCtaSection({ t, tc }: { t: ReturnType<typeof useTranslations>; tc:
         <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
           {t('finalCtaSub')}
         </p>
-        <a href="/demo" className="btn-gold mt-8 inline-block">
+        <a href="/demo" className="btn-gold mt-8 inline-block w-full sm:w-auto">
           {tc('startFree')}
         </a>
       </div>

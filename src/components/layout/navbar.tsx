@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { key: 'interviewers', href: '#interviewers' },
   { key: 'pricing', href: '#pricing' },
   { key: 'business', href: '/business' },
+  { key: 'blog', href: '/blog' },
   { key: 'faq', href: '#faq' },
 ] as const;
 
@@ -119,7 +120,7 @@ export function Navbar() {
                   key={link.key}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+                  className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
                 >
                   {t(link.key)}
                 </Link>
@@ -130,7 +131,7 @@ export function Navbar() {
                   switchLocale();
                   setOpen(false);
                 }}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+                className="min-h-[44px] flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
               >
                 <Globe size={16} strokeWidth={1.75} />
                 {localeLabel}
@@ -138,14 +139,14 @@ export function Navbar() {
               <Link
                 href="/auth/signin"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
+                className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
               >
                 {tc('login')}
               </Link>
               <Link
                 href="/auth/register"
                 onClick={() => setOpen(false)}
-                className="btn-gold mt-2 text-center text-sm"
+                className="btn-gold mt-2 min-h-[44px] text-center text-sm"
               >
                 {tc('startFree')}
               </Link>

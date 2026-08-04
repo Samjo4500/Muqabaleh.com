@@ -297,6 +297,7 @@ export default function InterviewerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   /* ── Fetch profile ── */
   useEffect(() => {
@@ -565,7 +566,7 @@ export default function InterviewerProfilePage() {
 
                 {profile.reviews.length > 0 ? (
                   <div className="mt-4 space-y-4">
-                    {profile.reviews.map((review, idx) => (
+                    {(showAllReviews ? profile.reviews : profile.reviews.slice(0, 2)).map((review, idx) => (
                       <div
                         key={idx}
                         className="rounded-xl border border-white/5 bg-[#0B0F17] p-4"
@@ -591,6 +592,21 @@ export default function InterviewerProfilePage() {
                         </p>
                       </div>
                     ))}
+                    {profile.reviews.length > 2 && (
+                      <button
+                        onClick={() => setShowAllReviews(!showAllReviews)}
+                        className="mx-auto flex items-center gap-1 px-4 py-2 text-sm font-medium text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80"
+                      >
+                        {showAllReviews
+                          ? (locale === 'ar' ? 'عرض التقييمات الأخيرة' : 'Show fewer reviews')
+                          : (locale === 'ar' ? `عرض جميع التقييمات (${profile.reviewCount})` : `Show all reviews (${profile.reviewCount})`)}
+                        {locale === 'ar' ? (
+                          <ChevronLeft size={14} />
+                        ) : (
+                          <ChevronRight size={14} />
+                        )}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <p className="mt-4 text-sm text-gray-500">
@@ -679,6 +695,20 @@ export default function InterviewerProfilePage() {
             <h3 className="text-lg font-semibold text-white">
               {locale === 'ar' ? 'لم يتم العثور على المحاور' : 'Interviewer not found'}
             </h3>
+          </div>
+        )}
+
+        {/* Mobile-only floating Book button bar */}
+        {!loading && profile && selectedSlot && (
+          <div className="fixed bottom-20 left-0 right-0 z-40 px-4 md:hidden">
+            <div className="mx-auto max-w-lg">
+              <button
+                onClick={handleBookSlot}
+                className="w-full rounded-xl bg-[var(--gold)] py-3 text-sm font-bold text-black shadow-lg shadow-gold/20 transition-all duration-200 hover:bg-[var(--gold)]/90 active:scale-[0.98]"
+              >
+                {t('bookSlot')}
+              </button>
+            </div>
           </div>
         )}
       </main>

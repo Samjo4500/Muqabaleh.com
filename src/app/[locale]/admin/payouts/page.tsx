@@ -247,7 +247,7 @@ export default function AdminPayoutsPage() {
           <p className="py-12 text-center text-sm text-[var(--text-faint)]">{t('noData')}</p>
         ) : (
           <>
-            <div className="max-h-[500px] overflow-y-auto">
+            <div className="max-h-[500px] overflow-x-auto overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/[0.06] hover:bg-transparent">

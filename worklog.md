@@ -1,5 +1,34 @@
 # Muqabaleh Worklog
 
+## setRequestLocale Audit — 8 Pages Under `[locale]/`
+
+**Date**: 2025-07-16
+**Agent**: General-purpose sub-agent
+**Task**: Add missing `setRequestLocale(locale)` calls for static generation with next-intl
+
+### What was done
+
+Audited all 8 listed page files for missing `setRequestLocale` calls:
+
+| # | File | `'use client'`? | Action |
+|---|------|-----------------|--------|
+| 1 | `src/app/[locale]/support/page.tsx` | ✅ Yes | Skipped — client component
+| 2 | `src/app/[locale]/interviewers/page.tsx` | ✅ Yes | Skipped — client component
+| 3 | `src/app/[locale]/join-as-interviewer/page.tsx` | ✅ Yes | Skipped — client component
+| 4 | `src/app/[locale]/human-interviews/page.tsx` | ✅ Yes | Skipped — client component
+| 5 | `src/app/[locale]/interviewer/page.tsx` | ✅ Yes | Skipped — client component
+| 6 | `src/app/[locale]/apply/page.tsx` | ✅ Yes | Skipped — client component
+| 7 | `src/app/[locale]/b2b/page.tsx` | ✅ Yes | Skipped — client component
+| 8 | `src/app/[locale]/admin/page.tsx` | ✅ Yes | Skipped — client component
+
+### Findings
+
+All 8 files are **client components** (have `'use client'` at the top). Per next-intl docs, `setRequestLocale` is only needed in **server components**. The parent layout (`src/app/[locale]/layout.tsx`) already calls `setRequestLocale(locale)` on line 91, which covers all child routes during static generation.
+
+**No code changes were needed.** If the build is still failing, the root cause is likely elsewhere (e.g., a different page that IS a server component but missing the call, or a config issue).
+
+---
+
 ## Phase A — Brand Components
 
 **Date**: 2025-07-15
@@ -2209,3 +2238,194 @@ Stage Summary:
 - Dynamic sitemap and robots.txt
 - Landing page enhanced with 3 new sections
 - Commit: a7a6b39 (initial), ac5ac83 (merge fix), pushed to main
+--- Phase 3f: PWA Install Prompt & i18n ---
+
+- Created `src/hooks/useServiceWorker.ts`: custom hook that registers `/sw.js` service worker, listens for `beforeinstallprompt` and `appinstalled` events, exposes `isInstallable`, `isInstalled`, and `promptInstall()`.
+- Created `src/components/pwa/InstallPrompt.tsx`: dismissible mobile-only install banner. Shows after 2nd visit, hides for 7 days on dismiss, uses gold accent theme, `useTranslations(pwa)` for i18n.
+- Created `src/components/pwa/OfflinePage.tsx`: simple offline fallback component with WifiOff icon.
+- Added `<PWAInstallPrompt />` to `src/components/providers.tsx` inside ThemeProvider.
+- Added `pwa` namespace (installTitle, installDescription, installButton, dismissButton) to both en.json and ar.json.
+- Added `mobile` namespace (tabHome, tabBookings, tabProfile, upcomingSessions, noUpcomingSessions, joinSession, viewAll, filters, showAllReviews, endCall) to both en.json and ar.json.
+- Added `offline`, `offlineAr`, `tapToShowControls` to `common` namespace in both locale files.
+- Fixed lint errors: refactored synchronous `setState` calls in effects to use `useState` initializers and `useMemo` derivation.
+--- Phase 3f: Mobile Bottom Tab Bar ---
+
+**Date**: 2025-07-15
+**Agent**: Layout Builder
+**Task**: Build Mobile Bottom Tab Bar Component
+
+### What was done
+
+Created `src/components/layout/MobileTabBar.tsx` — a fixed bottom tab bar for mobile navigation.
+
+- 3 tabs: **Home** (House icon), **Bookings** (CalendarDays icon), **Profile** (User icon)
+- Only visible on mobile (`md:hidden`), hidden on desktop
+- Fixed at bottom viewport with `z-50`, full width
+- Safe-area padding via `pb-[env(safe-area-inset-bottom)]` for notched phones
+- Active tab highlighted in gold (`var(--gold)`), inactive in `var(--text-faint)`
+- Path matching: strips locale prefix, Home active on `/`, Bookings on `/app/bookings`, Profile on `/app/profile` or `/auth/`
+- Hidden on landing page (pathname after stripping locale is `/`)
+- Profile tab links to `/app/profile` if authenticated, `/auth/signin` otherwise (via `useSession`)
+- Uses `useTranslations('mobile')` for tab labels (`tabHome`, `tabBookings`, `tabProfile`)
+- Uses `useLocale()` for locale-aware links
+- Dark theme: `bg-[var(--bg-panel)]/95 backdrop-blur-lg border-t border-white/[0.08]`
+- Min 44px tap targets
+
+### Integration
+- Imported and rendered `<MobileTabBar />` inside `<NextIntlClientProvider>` and `<Providers>` in `src/app/[locale]/layout.tsx`
+- Lint passes clean
+
+### Files changed
+- `src/components/layout/MobileTabBar.tsx` — created
+- `src/app/[locale]/layout.tsx` — added import + render
+
+## Phase 3F — Video Call Fullscreen on Mobile
+
+**Date**: 2025-07-15
+**Agent**: Fullstack Developer
+**Task**: Make video call page fullscreen on mobile with auto-hiding controls
+
+### What was done
+
+Refactored the in-call section of the video call page (`/src/app/[locale]/call/[bookingId]/page.tsx`) to provide a fullscreen experience on mobile:
+
+1. **Imports & state**:
+   - Added `useIsMobile` hook from `@/hooks/use-mobile`
+   - Added `tMobile = useTranslations('mobile')` for the `endCall` key
+   - Added `controlsVisible` state (boolean, defaults to `true`)
+   - Added `autoHideRef` timer ref
+
+2. **Auto-hide controls logic**:
+   - Created `resetAutoHide` callback: shows controls, starts a 3-second timer that hides them
+   - `useEffect` triggers auto-hide when `inCall && isMobile`
+   - Timer is cleared on unmount
+
+3. **Fullscreen API**:
+   - `handleJoinCall`: after room creation, calls `document.documentElement.requestFullscreen()` on mobile (<768px), wrapped in try/catch
+   - `handleEndCall`: calls `document.exitFullscreen()` if `document.fullscreenElement` exists, wrapped in try/catch; also clears `autoHideRef`
+
+4. **In-call layout restructured**:
+   - Single `<iframe>` fills entire viewport at z-0 (no duplicate iframes)
+   - Container div has `onClick={() => resetAutoHide()}` to capture taps
+   - **Mobile (md:hidden)**:
+     - Top bar: gradient overlay with logo + interviewer name + timer, conditionally visible via `controlsVisible` with CSS transition (translate-y + opacity)
+     - Tap-to-show hint: centered pill with `tCommon('tapToShowControls')`, fades with `controlsVisible`
+     - Floating end-call button: 60px tap target, always visible at bottom center, `stopPropagation` to prevent triggering `resetAutoHide`, uses `tMobile('endCall')`
+   - **Desktop (hidden md:flex)**:
+     - Top bar: absolute overlay with existing styling (gold logo, interviewer name, timer, end call button)
+     - Bottom info bar: absolute overlay with interviewer name, timer, support link
+     - Both bars float over the fullscreen iframe with `bg-[var(--bg-panel)]/80 backdrop-blur-md`
+
+5. **i18n keys used**:
+   - `useTranslations('mobile')` → `endCall`
+   - `useTranslations('common')` → `tapToShowControls`
+
+### Files changed
+- `src/app/[locale]/call/[bookingId]/page.tsx` — modified
+
+## Phase 3F — Responsive Mobile Fixes
+
+**Date**: 2025-07-15
+**Agent**: Responsive Mobile Fixes
+**Task**: Apply responsive mobile fixes to landing page, interviewer listing, blog detail, and global styles
+
+### What was done
+
+Applied comprehensive responsive mobile fixes across 4 files:
+
+1. **Hero text scaling** (`src/components/brand/hero-simulation.tsx`):
+   - Changed h1 from `text-4xl sm:text-5xl md:text-6xl lg:text-7xl` to `text-3xl md:text-5xl lg:text-6xl` for better mobile scaling.
+
+2. **Pricing cards** (`src/app/[locale]/page.tsx`):
+   - Changed grid from `sm:grid-cols-3` to `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` so cards stack on mobile.
+
+3. **Stats band** (`src/app/[locale]/page.tsx`):
+   - Changed from `grid-cols-1 sm:grid-cols-3` to `grid-cols-2 sm:grid-cols-4` for a 2×2 layout on mobile.
+
+4. **Trusted By section** (`src/app/[locale]/page.tsx`):
+   - Verified already uses `flex flex-wrap` — no changes needed.
+
+5. **Final CTA button** (`src/app/[locale]/page.tsx`):
+   - Added `w-full sm:w-auto` to the CTA button for full-width on mobile.
+
+6. **Footer** (`src/components/layout/footer.tsx`):
+   - Added `pb-20 md:pb-0` to the footer's outermost div for mobile tab bar clearance.
+
+7. **Interviewer listing page** (`src/app/[locale]/interviewers/page.tsx`):
+   - Verified already responsive: cards use `sm:grid-cols-2 lg:grid-cols-3`, filters use `flex-wrap`.
+
+8. **Blog detail page** (`src/app/[locale]/blog/[slug]/article-client.tsx`):
+   - Added `text-lg md:text-base` to article body for 18px minimum on mobile.
+   - Added `overflow-x-auto scrollbar-hide` with `shrink-0` on share buttons for horizontal scroll on mobile.
+
+9. **Global mobile styles** (`src/app/globals.css`):
+   - Added iOS zoom prevention (16px font on inputs)
+   - Added 44px minimum touch targets for buttons, role=button, and links
+   - Added opt-out for icon buttons and tooltip triggers
+   - Added `.pb-safe` utility for safe-area-inset-bottom
+   - Added `.scrollbar-hide` utility (cross-browser)
+
+### Files changed
+- `src/components/brand/hero-simulation.tsx` — hero h1 responsive classes
+- `src/app/[locale]/page.tsx` — pricing grid, stats grid, CTA button
+- `src/components/layout/footer.tsx` — mobile tab bar padding
+- `src/app/[locale]/blog/[slug]/article-client.tsx` — prose text size, share buttons scroll
+- `src/app/globals.css` — mobile touch targets and utilities
+
+## Phase 3F — Responsive Mobile Fixes (Dashboard, Auth, Payment, Admin, Interviewer)
+
+**Date**: 2025-07-15
+**Agent**: Mobile Fixes Agent
+**Task**: Apply responsive mobile fixes to dashboard, auth, payment, admin, and interviewer pages
+
+### What was done
+
+Reviewed all target files and applied mobile-specific responsive improvements where needed:
+
+#### 1. Dashboard Layout (`app/[locale]/app/layout.tsx`)
+- **No changes needed** — already well-structured:
+  - Sidebar uses `hidden lg:flex` (hidden on mobile, hamburger on `< lg`)
+  - Mobile top bar with Sheet-based hamburger menu at `lg:hidden`
+  - Content area full width on mobile with `p-4 md:p-6 lg:p-8`
+  - Dashboard main page (`app/page.tsx`) already uses `grid-cols-2 md:grid-cols-4` stats grid
+  - Recent interviews table already has `overflow-x-auto`
+
+#### 2. Auth Pages (AuthShell component)
+- Changed card padding from `p-6` to `p-4 md:p-6` in `auth-shell.tsx`
+- Reduces padding on mobile for better form fit
+- All auth pages (signin, register, forgot-password) use AuthShell, so all benefit
+- Forms already use full-width inputs ✅
+- Container already centered with `max-w-md` ✅
+
+#### 3. Pricing/Payment Page
+- Added responsive section padding: `py-12 md:py-20` (both sections) in `pricing-content.tsx`
+- Plan cards already stack vertically (`md:grid-cols-3`) ✅
+- PayPal buttons already full width ✅
+- Comparison table already has `overflow-x-auto` ✅
+- Packages page already uses `md:grid-cols-2` ✅
+
+#### 4. Admin Panel
+- **Admin dashboard** (`admin/page.tsx`):
+  - KPI grid changed from `grid-cols-1 sm:grid-cols-2` to `grid-cols-2 xl:grid-cols-4` (2×2 on all screens)
+  - Transactions table: added `overflow-x-auto` wrapper
+- **Admin bookings** (`admin/bookings/page.tsx`): added `overflow-x-auto` to table
+- **Admin users** (`admin/users/page.tsx`): added `overflow-x-auto` to table
+- **Admin interviewers** (`admin/interviewers/page.tsx`): added `overflow-x-auto` to table
+- **Admin payouts** (`admin/payouts/page.tsx`): added `overflow-x-auto` to table
+- Admin layout already has hamburger menu on mobile ✅
+
+#### 5. Interviewer Profile/Booking Page (`interviewer/[id]/page.tsx`)
+- **Collapsible reviews**: Added `showAllReviews` state — shows first 2 reviews by default with a "Show all reviews" toggle button (localized AR/EN)
+- **Mobile sticky Book button**: Added `fixed bottom-20 z-40 md:hidden` floating bar that appears when a time slot is selected, positioned above the mobile tab bar. Hidden on desktop since the sidebar card already has the book button with `sticky top-24`
+- Calendar already has `overflow-x-auto` with `min-w-[700px]` ✅
+
+### Files changed
+- `src/components/brand/auth-shell.tsx` — responsive card padding
+- `src/app/[locale]/pricing/pricing-content.tsx` — responsive section padding
+- `src/app/[locale]/admin/page.tsx` — KPI grid cols, table overflow
+- `src/app/[locale]/admin/bookings/page.tsx` — table overflow
+- `src/app/[locale]/admin/users/page.tsx` — table overflow
+- `src/app/[locale]/admin/interviewers/page.tsx` — table overflow
+- `src/app/[locale]/admin/payouts/page.tsx` — table overflow
+- `src/app/[locale]/interviewer/[id]/page.tsx` — collapsible reviews, mobile floating book button
+

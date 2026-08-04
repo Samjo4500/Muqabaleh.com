@@ -526,3 +526,44 @@
 .prose-blog a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
 .prose-blog a:hover { opacity: 0.8; }
 .prose-blog blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; margin-bottom: 1.25rem; font-style: italic; color: var(--text-faint); }
+
+/* Mobile touch targets */
+@media (max-width: 767px) {
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Minimum touch target for interactive elements */
+  button, [role="button"], a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Override for small inline buttons/icons */
+  button.btn-icon, [data-slot="button-icon"], [data-slot="tooltip-trigger"] {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
+/* Safe area padding for fixed bottom elements */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

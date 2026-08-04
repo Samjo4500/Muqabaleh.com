@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
       </h1>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {kpiCards.map((kpi) => {
           const Icon = kpi.icon;
           return (
@@ -186,7 +186,7 @@ export default function AdminDashboardPage() {
         ) : transactions.length === 0 ? (
           <p className="py-8 text-center text-sm text-[var(--text-faint)]">{t('noData')}</p>
         ) : (
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-x-auto overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-white/[0.06] hover:bg-transparent">

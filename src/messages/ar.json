@@ -25,7 +25,10 @@
     "madeWithLove": "صُنع بحب للمهنيين العرب",
     "paymentMock": "وضع الدفع التجريبي",
     "currencyNote": "الدفع بالدولار",
-    "comingSoon": "ستتوفر هذه الميزة في المرحلة القادمة"
+    "comingSoon": "ستتوفر هذه الميزة في المرحلة القادمة",
+    "offline": "You are offline. Some features may be unavailable.",
+    "offlineAr": "أنت غير متصل بالإنترنت. بعض الميزات قد لا تكون متاحة.",
+    "tapToShowControls": "Tap to show controls"
   },
   "nav": {
     "why": "لماذا مقابلة؟",
@@ -33,6 +36,7 @@
     "interviewers": "المحاورون",
     "pricing": "الأسعار",
     "business": "للأعمال",
+    "blog": "المدوّنة",
     "faq": "الأسئلة الشائعة",
     "support": "الدعم",
     "joinInterviewer": "انضم كمحاور",
@@ -2166,5 +2170,23 @@
     "ctaTitle": "مستعد للتدريب؟",
     "ctaSubtitle": "ابدأ مقابلة تجريبية مجانية واحصل على تقييم فوري.",
     "ctaButton": "ابدأ مقابلة مجانية"
+  },
+  "pwa": {
+    "installTitle": "أضف مقابلة إلى شاشتك الرئيسية",
+    "installDescription": "احصل على وصول فوري للتدريب على المقابلات في أي وقت",
+    "installButton": "تثبيت",
+    "dismissButton": "ليس الآن"
+  },
+  "mobile": {
+    "tabHome": "الرئيسية",
+    "tabBookings": "الحجوزات",
+    "tabProfile": "الملف",
+    "upcomingSessions": "الجلسات القادمة",
+    "noUpcomingSessions": "لا توجد جلسات قادمة",
+    "joinSession": "انضمام",
+    "viewAll": "عرض الكل",
+    "filters": "تصفية",
+    "showAllReviews": "عرض جميع التقييمات",
+    "endCall": "إنهاء المكالمة"
   }
 }

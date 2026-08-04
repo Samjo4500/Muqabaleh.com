@@ -25,7 +25,10 @@
     "madeWithLove": "Made with love for Arab professionals",
     "paymentMock": "Test Payment Mode",
     "currencyNote": "Payment in USD",
-    "comingSoon": "This feature will be available in the next phase"
+    "comingSoon": "This feature will be available in the next phase",
+    "offline": "You are offline. Some features may be unavailable.",
+    "offlineAr": "أنت غير متصل بالإنترنت. بعض الميزات قد لا تكون متاحة.",
+    "tapToShowControls": "Tap to show controls"
   },
   "nav": {
     "why": "Why Muqabaleh?",
@@ -33,6 +36,7 @@
     "interviewers": "Interviewers",
     "pricing": "Pricing",
     "business": "For Business",
+    "blog": "Blog",
     "faq": "FAQ",
     "support": "Support",
     "joinInterviewer": "Join as Interviewer",
@@ -2166,5 +2170,23 @@
     "ctaTitle": "Ready to Practice?",
     "ctaSubtitle": "Start with a free AI mock interview and get instant feedback.",
     "ctaButton": "Start Free Interview"
+  },
+  "pwa": {
+    "installTitle": "Add Muqabaleh to your home screen",
+    "installDescription": "Get instant access to interview practice anytime",
+    "installButton": "Install",
+    "dismissButton": "Not now"
+  },
+  "mobile": {
+    "tabHome": "Home",
+    "tabBookings": "Bookings",
+    "tabProfile": "Profile",
+    "upcomingSessions": "Upcoming Sessions",
+    "noUpcomingSessions": "No upcoming sessions",
+    "joinSession": "Join",
+    "viewAll": "View All",
+    "filters": "Filters",
+    "showAllReviews": "Show all reviews",
+    "endCall": "End Call"
   }
 }

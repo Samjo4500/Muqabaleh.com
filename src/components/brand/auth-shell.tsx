@@ -74,7 +74,7 @@ export function AuthShell({
 
         <div
           className={cn(
-            "glass-card rounded-2xl p-6",
+            "glass-card rounded-2xl p-4 md:p-6",
             className
           )}
         >

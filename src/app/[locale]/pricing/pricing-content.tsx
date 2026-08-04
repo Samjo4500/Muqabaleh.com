@@ -67,7 +67,7 @@ export default function PricingContent() {
       <Navbar />
       <main className="flex-1 pt-16">
         {/* ── Pricing Cards ── */}
-        <section className="py-20">
+        <section className="py-12 md:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
               eyebrow="Muqabaleh"
@@ -155,7 +155,7 @@ export default function PricingContent() {
         </section>
 
         {/* ── Feature Comparison Table ── */}
-        <section className="border-t border-white/5 py-20">
+        <section className="border-t border-white/5 py-12 md:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <SectionHeading
               eyebrow={t('comparisonTitle')}

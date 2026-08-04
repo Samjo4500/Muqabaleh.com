@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { UserTier } from '@prisma/client';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
@@ -19,6 +20,8 @@ type CaptureUnit = {
     }>;
   };
 };
+
+const USER_TIERS = new Set<string>(Object.values(UserTier));
 
 /**
  * POST /api/paypal/capture-order
@@ -123,17 +126,18 @@ export async function POST(req: NextRequest) {
     }
 
     const [, config] = matched;
-    const amountUsdCents = Math.round(Number.parseFloat(config.amount) * 100);
 
     try {
       // Record the payment in the database
       await db.payment.create({
         data: {
           userId,
+          type: 'AI_PACKAGE',
+          amount: Number.parseFloat(config.amount),
+          currency: 'USD',
           packageType: config.tier,
-          amountUsdCents,
           paypalOrderId: orderId,
-          status: 'CAPTURED',
+          status: 'COMPLETED',
           sessionsCredited: config.sessions,
           idempotencyKey: `${userId}-${orderId}`,
           capturedAt: new Date(),
@@ -142,15 +146,24 @@ export async function POST(req: NextRequest) {
 
       // Upgrade user tier / credit sessions for AI packages
       if (config.sessions > 0) {
+        const updateData: {
+          sessionsLeft: number | { increment: number };
+          tier?: UserTier;
+        } = {
+          sessionsLeft:
+            config.tier === 'UNLIMITED'
+              ? 999
+              : { increment: config.sessions },
+        };
+
+        // Only set user.tier when config.tier is a UserTier (not STANDARD_HUMAN/PRO_HUMAN)
+        if (USER_TIERS.has(config.tier)) {
+          updateData.tier = config.tier as UserTier;
+        }
+
         await db.user.update({
           where: { id: userId },
-          data: {
-            subscriptionTier: config.tier,
-            sessionsLeft:
-              config.tier === 'UNLIMITED'
-                ? 999
-                : { increment: config.sessions },
-          },
+          data: updateData,
         });
       }
     } catch (dbErr) {

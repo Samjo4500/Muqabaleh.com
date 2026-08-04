@@ -53,7 +53,7 @@ interface UserRow {
   email: string;
   name: string | null;
   country: string | null;
-  subscriptionTier: string;
+  tier: string;
   sessionsLeft: number;
   role: string;
   accountType: string;
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                   {data.map((item) => (
                     <TableRow key={item.id} className="border-white/[0.04]">
                       <TableCell className="text-sm font-medium text-[var(--text-primary)]">{item.email}</TableCell>
-                      <TableCell><TierBadge tier={item.subscriptionTier} /></TableCell>
+                      <TableCell><TierBadge tier={item.tier} /></TableCell>
                       <TableCell className="text-sm text-[var(--text-primary)]">{item._count.interviews}</TableCell>
                       <TableCell className="text-sm text-[var(--text-primary)]">—</TableCell>
                       <TableCell className="text-sm text-[var(--text-muted)]">{formatDate(item.createdAt)}</TableCell>
@@ -217,7 +217,7 @@ export default function AdminUsersPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <DetailRow label={t('colEmail')} value={expanded.email} />
             <DetailRow label={t('colName')} value={expanded.name ?? '—'} />
-            <DetailRow label={t('colTier')} value={expanded.subscriptionTier} />
+            <DetailRow label={t('colTier')} value={expanded.tier} />
             <DetailRow label={t('colRole')} value={expanded.role} />
             <DetailRow label={t('colCountry')} value={expanded.country ?? '—'} />
             <DetailRow label={t('colSessionsUsed')} value={String(expanded._count.interviews)} />

@@ -1,7 +1,8 @@
 import { NextAuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
-import { auditLoginFailed, auditLoginSuccess, isAdminPassword } from './security';
+import { UserRole } from '@prisma/client';
+import { auditLoginFailed, auditLoginSuccess } from './security';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -35,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           // SUPER_ADMIN login audit
-          if (user.role === 'SUPER_ADMIN') {
+          if (user.role === UserRole.SUPER_ADMIN) {
             await auditLoginSuccess(user.id, user.email);
           }
 
@@ -48,7 +49,7 @@ export const authOptions: NextAuthOptions = {
             companyId: user.companyId ?? undefined,
             sessionsLeft: user.sessionsLeft,
             language: user.language,
-            subscriptionTier: user.subscriptionTier,
+            tier: user.tier,
           };
         } catch {
           await auditLoginFailed(credentials.email);
@@ -80,7 +81,7 @@ export const authOptions: NextAuthOptions = {
         token.accountType = user.accountType;
         token.companyId = user.companyId;
         token.sessionsLeft = user.sessionsLeft;
-        token.subscriptionTier = user.subscriptionTier;
+        token.tier = user.tier;
       }
       return token;
     },
@@ -92,7 +93,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as Record<string, unknown>).companyId = token.companyId;
         (session.user as Record<string, unknown>).sessionsLeft = token.sessionsLeft;
         (session.user as Record<string, unknown>).language = token.language;
-        (session.user as Record<string, unknown>).subscriptionTier = token.subscriptionTier;
+        (session.user as Record<string, unknown>).tier = token.tier;
       }
       return session;
     },
@@ -115,7 +116,7 @@ declare module 'next-auth' {
       companyId?: string;
       sessionsLeft: number;
       language: string;
-      subscriptionTier: string;
+      tier: string;
     } & DefaultSession['user'];
   }
   interface User {
@@ -124,7 +125,7 @@ declare module 'next-auth' {
     companyId?: string;
     sessionsLeft: number;
     language: string;
-    subscriptionTier: string;
+    tier: string;
   }
 }
 
@@ -136,6 +137,6 @@ declare module 'next-auth/jwt' {
     companyId?: string;
     sessionsLeft: number;
     language: string;
-    subscriptionTier: string;
+    tier: string;
   }
 }

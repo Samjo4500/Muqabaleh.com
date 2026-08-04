@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { hash } from 'bcryptjs';
+import { randomBytes } from 'crypto';
+import { UserRole } from '@prisma/client';
 import { triggerAdminNewApplicationEmail } from '@/lib/email-triggers';
 
 // POST /api/interviewers/apply — submit interviewer application (multipart form)
@@ -136,12 +139,52 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Silence unused file refs (upload handled separately / future)
+    void videoIntro;
+    void idDocument;
+
     // ── Try DB, fall back to mock ──
     try {
       const { db } = await import('@/lib/db');
+
+      // Find or create a User for this interviewer email (userId is required FK)
+      let user = await db.user.findUnique({ where: { email: email!.trim().toLowerCase() } });
+      if (!user) {
+        const passwordHash = await hash(randomBytes(32).toString('hex'), 12);
+        user = await db.user.create({
+          data: {
+            email: email!.trim().toLowerCase(),
+            passwordHash,
+            name: fullName!.trim(),
+            role: UserRole.INTERVIEWER,
+            accountType: 'INDIVIDUAL',
+            sessionsLeft: 0,
+          },
+        });
+      } else if (user.role === UserRole.USER) {
+        user = await db.user.update({
+          where: { id: user.id },
+          data: { role: UserRole.INTERVIEWER },
+        });
+      }
+
+      // Reject duplicate interviewer applications for the same user
+      const existing = await db.interviewer.findUnique({ where: { userId: user.id } });
+      if (existing) {
+        return NextResponse.json(
+          {
+            error: {
+              ar: 'لديك طلب محاور بالفعل',
+              en: 'An interviewer application already exists for this account',
+            },
+          },
+          { status: 409 },
+        );
+      }
+
       const application = await db.interviewer.create({
         data: {
-          userId: 'pending', // Will be linked to a user account
+          userId: user.id,
           fullName: fullName!.trim(),
           fullNameAr: fullNameAr?.trim() || null,
           phone: phone!.trim(),

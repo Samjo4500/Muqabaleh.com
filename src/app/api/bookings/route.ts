@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus, InterviewerStatus } from '@/lib/enums';
 import { z } from 'zod';
 
 const createBookingSchema = z.object({
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
       where: { id: interviewerId },
     });
 
-    if (!interviewer || interviewer.status !== 'APPROVED') {
+    if (!interviewer || interviewer.status !== InterviewerStatus.ACTIVE) {
       return NextResponse.json(
         { error: { ar: 'المقابل غير موجود أو غير معتمد', en: 'Interviewer not found or not approved' } },
         { status: 404 },
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
         platformFee,
         interviewerPayout,
         candidateNote: candidateNote || null,
-        status: 'PENDING',
+        status: BookingStatus.PENDING,
       },
       include: {
         interviewer: {
@@ -116,11 +117,11 @@ export async function GET(req: NextRequest) {
 
     if (statusFilter === 'UPCOMING') {
       where.scheduledAt = { gte: new Date() };
-      where.status = { in: ['PENDING', 'CONFIRMED'] };
+      where.status = { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] };
     } else if (statusFilter === 'PAST') {
       where.OR = [
         { scheduledAt: { lt: new Date() } },
-        { status: { in: ['COMPLETED', 'CANCELLED'] } },
+        { status: { in: [BookingStatus.COMPLETED, BookingStatus.CANCELLED] } },
       ];
     }
 

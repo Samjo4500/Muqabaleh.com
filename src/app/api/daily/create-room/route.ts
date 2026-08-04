@@ -59,7 +59,6 @@ export async function POST(req: NextRequest) {
     const isInterviewer =
       booking.interviewerId != null &&
       booking.interviewer?.userId != null &&
-      booking.interviewer.userId !== 'pending' &&
       session.user.id === booking.interviewer.userId;
 
     if (!isBookingUser && !isInterviewer) {

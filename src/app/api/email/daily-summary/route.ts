@@ -36,16 +36,16 @@ export async function POST(req: NextRequest) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Calculate yesterday's revenue from captured payments
+    // Calculate yesterday's revenue from completed payments (amount in dollars)
     const payments = await db.payment.findMany({
       where: {
-        status: 'CAPTURED',
+        status: 'COMPLETED',
         capturedAt: {
           gte: yesterday,
           lt: today,
         },
       },
-      select: { amountUsdCents: true },
+      select: { amount: true },
     });
 
     const bookingPayments = await db.humanBooking.findMany({
@@ -59,8 +59,9 @@ export async function POST(req: NextRequest) {
       select: { priceTotal: true },
     });
 
+    // Payments are dollars; bookings remain cents
     const totalRevenueCents =
-      payments.reduce((sum, p) => sum + p.amountUsdCents, 0) +
+      Math.round(payments.reduce((sum, p) => sum + p.amount, 0) * 100) +
       bookingPayments.reduce((sum, b) => sum + b.priceTotal, 0);
 
     const totalRevenue = `$${(totalRevenueCents / 100).toFixed(2)}`;

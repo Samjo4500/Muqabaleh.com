@@ -27,10 +27,13 @@ export async function POST(req: NextRequest) {
       if (!batchId) return NextResponse.json({ received: true });
 
       const payouts = await db.interviewerPayout.findMany({
-        where: { paypalBatchId: batchId, status: 'PROCESSING' },
+        where: { batchId, status: 'PROCESSING' },
       });
 
       for (const payout of payouts) {
+        // COMPLETED requires batchId (already present from PROCESSING)
+        if (!payout.batchId) continue;
+
         await db.interviewerPayout.update({
           where: { id: payout.id },
           data: { status: 'COMPLETED', completedAt: new Date() },
@@ -49,8 +52,8 @@ export async function POST(req: NextRequest) {
       if (!batchId) return NextResponse.json({ received: true });
 
       await db.interviewerPayout.updateMany({
-        where: { paypalBatchId: batchId, status: 'PROCESSING' },
-        data: { status: 'PENDING', processedAt: null },
+        where: { batchId, status: 'PROCESSING' },
+        data: { status: 'FAILED', processedAt: null },
       });
     }
 

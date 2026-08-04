@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { UserRole } from '@prisma/client';
 import { db } from './db';
 
 // ─── Input Sanitization ─────────────────────────────────────────
@@ -170,10 +171,11 @@ export async function auditLoginSuccess(
 // ─── RBAC Constants ─────────────────────────────────────────────
 
 export const ROLES = {
-  USER: 'USER',
-  INTERVIEWER: 'INTERVIEWER',
-  COMPANY_ADMIN: 'COMPANY_ADMIN',
-  SUPER_ADMIN: 'SUPER_ADMIN',
+  USER: UserRole.USER,
+  INTERVIEWER: UserRole.INTERVIEWER,
+  COMPANY_ADMIN: UserRole.COMPANY_ADMIN,
+  SUPER_ADMIN: UserRole.SUPER_ADMIN,
+  ADMIN: UserRole.ADMIN,
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];

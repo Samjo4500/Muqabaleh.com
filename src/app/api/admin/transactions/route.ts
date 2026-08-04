@@ -30,7 +30,9 @@ export async function GET(req: NextRequest) {
         email: p.user?.email ?? 'N/A',
         name: p.user?.name ?? null,
         packageType: p.packageType,
-        amountUsdCents: p.amountUsdCents,
+        // Convert dollars → cents at API boundary for existing admin UI
+        amountUsdCents: Math.round(p.amount * 100),
+        amount: p.amount,
         status: p.status,
         capturedAt: p.capturedAt,
         createdAt: p.createdAt,

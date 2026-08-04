@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { InterviewerStatus } from '@/lib/enums';
 import { verifyAdmin } from '../../_lib';
 import { triggerInterviewerApprovedEmail } from '@/lib/email-triggers';
+
+const ALLOWED_STATUSES = [
+  InterviewerStatus.ACTIVE,
+  InterviewerStatus.SUSPENDED,
+  InterviewerStatus.REJECTED,
+] as const;
+
+type AdminInterviewerStatus = (typeof ALLOWED_STATUSES)[number];
 
 export async function PATCH(
   req: NextRequest,
@@ -13,15 +22,18 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { status } = body as { status: 'ACTIVE' | 'BLOCKED' | 'REJECTED' };
+    let { status } = body as { status: string };
 
-    if (!['ACTIVE', 'BLOCKED', 'REJECTED'].includes(status)) {
+    // Legacy client payloads used BLOCKED; map to SUSPENDED
+    if (status === 'BLOCKED') status = InterviewerStatus.SUSPENDED;
+
+    if (!ALLOWED_STATUSES.includes(status as AdminInterviewerStatus)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
     const interviewer = await db.interviewer.update({
       where: { id },
-      data: { status },
+      data: { status: status as AdminInterviewerStatus },
     });
 
     await db.adminLog.create({
@@ -35,7 +47,7 @@ export async function PATCH(
     });
 
     // Send approval email if status changed to ACTIVE
-    if (status === 'ACTIVE') {
+    if (status === InterviewerStatus.ACTIVE) {
       triggerInterviewerApprovedEmail(id, 'ar').catch(() => {});
       triggerInterviewerApprovedEmail(id, 'en').catch(() => {});
     }

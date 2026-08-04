@@ -35,13 +35,20 @@ export async function GET() {
           paypalEmail: true,
           status: true,
           adminNote: true,
+          batchId: true,
           requestedAt: true,
           processedAt: true,
           completedAt: true,
         },
       });
 
-      return NextResponse.json({ payouts });
+      // Convert dollars → cents for existing interviewer UI formatCents
+      return NextResponse.json({
+        payouts: payouts.map((p) => ({
+          ...p,
+          amount: Math.round(p.amount * 100),
+        })),
+      });
     } catch (dbErr) {
       console.warn('[GET /api/interviewer/payouts] DB unavailable:', dbErr);
       return NextResponse.json({ payouts: [] });

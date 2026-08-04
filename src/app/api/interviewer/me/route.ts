@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 
 // GET /api/interviewer/me — interviewer's own profile
 export async function GET() {
@@ -35,13 +36,13 @@ export async function GET() {
       db.humanBooking.count({
         where: {
           interviewerId: interviewer.id,
-          status: 'COMPLETED',
+          status: BookingStatus.COMPLETED,
         },
       }),
       db.humanBooking.count({
         where: {
           interviewerId: interviewer.id,
-          status: { in: ['PENDING', 'CONFIRMED'] },
+          status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
           scheduledAt: { gte: new Date() },
         },
       }),

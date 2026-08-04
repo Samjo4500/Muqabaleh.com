@@ -39,7 +39,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
     ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    BLOCKED: 'bg-red-500/10 text-red-400 border-red-500/30',
+    SUSPENDED: 'bg-red-500/10 text-red-400 border-red-500/30',
     REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',
   };
   return (
@@ -146,7 +146,7 @@ export default function AdminInterviewersPage() {
             <SelectItem value="ALL">{t('statusAll')}</SelectItem>
             <SelectItem value="PENDING">{t('statusPending')}</SelectItem>
             <SelectItem value="ACTIVE">{t('statusActive')}</SelectItem>
-            <SelectItem value="BLOCKED">{t('statusBlocked')}</SelectItem>
+            <SelectItem value="SUSPENDED">{t('statusBlocked')}</SelectItem>
             <SelectItem value="REJECTED">{t('statusRejected')}</SelectItem>
           </SelectContent>
         </Select>
@@ -216,7 +216,7 @@ export default function AdminInterviewersPage() {
                             </>
                           )}
                           {item.status === 'ACTIVE' && (
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:text-red-300" onClick={() => handleAction(item.id, 'BLOCKED')}>
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:text-red-300" onClick={() => handleAction(item.id, 'SUSPENDED')}>
                               {t('block')}
                             </Button>
                           )}

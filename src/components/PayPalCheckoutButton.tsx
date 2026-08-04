@@ -27,7 +27,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
-  const userTier = (session?.user as Record<string, unknown> | undefined)?.subscriptionTier as string | undefined;
+  const userTier = (session?.user as Record<string, unknown> | undefined)?.tier as string | undefined;
   const isCurrentPlan = (plan === 'pro' && userTier === 'PRO') || (plan === 'unlimited' && userTier === 'UNLIMITED');
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;

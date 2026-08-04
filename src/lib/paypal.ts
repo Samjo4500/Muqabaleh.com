@@ -248,7 +248,7 @@ export async function deactivateSubscription(paypalSubscriptionId: string) {
   if (activeCount === 0) {
     await db.user.update({
       where: { id: sub.userId },
-      data: { subscriptionTier: 'FREE', sessionsLeft: 1 },
+      data: { tier: 'FREE', sessionsLeft: 1 },
     });
   }
 }

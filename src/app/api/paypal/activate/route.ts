@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     await db.user.update({
       where: { id: userId },
       data: {
-        subscriptionTier: 'UNLIMITED',
+        tier: 'UNLIMITED',
         sessionsLeft: 999,
       },
     });

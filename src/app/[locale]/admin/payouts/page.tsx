@@ -31,8 +31,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-function formatCents(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
+/** Format InterviewerPayout.amount (USD dollars). */
+function formatDollars(amount: number) {
+  return `$${amount.toFixed(2)}`;
 }
 
 function formatDate(dateStr: string | null) {
@@ -48,6 +49,7 @@ const STATUS_STYLES: Record<string, string> = {
   PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
   PROCESSING: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
   COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  FAILED: 'bg-red-500/10 text-red-400 border-red-500/30',
   REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',
 };
 
@@ -65,7 +67,7 @@ interface Payout {
   paypalEmail: string;
   status: string;
   adminNote: string | null;
-  paypalBatchId: string | null;
+  batchId: string | null;
   requestedAt: string;
   processedAt: string | null;
   completedAt: string | null;
@@ -273,7 +275,7 @@ export default function AdminPayoutsPage() {
                       <TableCell className="text-sm text-[var(--text-muted)]">
                         {item.paypalEmail}
                       </TableCell>
-                      <TableCell className="text-sm font-medium text-[var(--text-primary)]">{formatCents(item.amount)}</TableCell>
+                      <TableCell className="text-sm font-medium text-[var(--text-primary)]">{formatDollars(item.amount)}</TableCell>
                       <TableCell><StatusBadge status={item.status} /></TableCell>
                       <TableCell className="text-sm text-[var(--text-muted)]">{formatDate(item.requestedAt)}</TableCell>
                       <TableCell>
@@ -314,7 +316,7 @@ export default function AdminPayoutsPage() {
                           )}
                           {item.status === 'PROCESSING' && (
                             <span className="text-xs text-[var(--text-faint)]">
-                              {item.paypalBatchId ? `Batch: ${item.paypalBatchId.slice(0, 12)}…` : ''}
+                              {item.batchId ? `Batch: ${item.batchId.slice(0, 12)}…` : ''}
                             </span>
                           )}
                           {item.status === 'COMPLETED' && item.completedAt && (

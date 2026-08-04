@@ -14,30 +14,31 @@ export async function GET() {
     const [revenueToday, revenueThisMonth, activeUsers, pendingApplications] =
       await Promise.all([
         db.payment.aggregate({
-          _sum: { amountUsdCents: true },
+          _sum: { amount: true },
           where: {
-            status: 'CAPTURED',
+            status: 'COMPLETED',
             capturedAt: { gte: today },
           },
         }),
         db.payment.aggregate({
-          _sum: { amountUsdCents: true },
+          _sum: { amount: true },
           where: {
-            status: 'CAPTURED',
+            status: 'COMPLETED',
             capturedAt: { gte: monthStart },
           },
         }),
         db.user.count({
-          where: { subscriptionTier: { not: 'FREE' } },
+          where: { tier: { not: 'FREE' } },
         }),
         db.interviewer.count({
           where: { status: 'PENDING' },
         }),
       ]);
 
+    // Convert dollars → cents at API boundary for existing admin UI formatCents
     return NextResponse.json({
-      revenueTodayCents: revenueToday._sum.amountUsdCents ?? 0,
-      revenueThisMonthCents: revenueThisMonth._sum.amountUsdCents ?? 0,
+      revenueTodayCents: Math.round((revenueToday._sum.amount ?? 0) * 100),
+      revenueThisMonthCents: Math.round((revenueThisMonth._sum.amount ?? 0) * 100),
       activeUsers,
       pendingApplications,
     });

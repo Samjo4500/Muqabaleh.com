@@ -29,8 +29,8 @@ function formatDate(dateStr: string) {
 
 function StatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, string> = {
-    CAPTURED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    CREATED: 'bg-white/5 text-[var(--text-muted)] border-white/10',
+    COMPLETED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    PENDING: 'bg-white/5 text-[var(--text-muted)] border-white/10',
     REFUNDED: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
     FAILED: 'bg-red-500/10 text-red-400 border-red-500/30',
   };

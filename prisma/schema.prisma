@@ -1,5 +1,6 @@
 // ─── Muqabaleh (مقابلة) — Full Data Model ───
 // PostgreSQL (Supabase)
+// P0.5: enums + FK integrity (preserves production auth/billing fields)
 
 generator client {
   provider = "prisma-client-js"
@@ -10,106 +11,167 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── User ───
-model User {
-  id                   String    @id @default(cuid())
-  email                String    @unique
-  passwordHash         String
-  name                 String?
-  image                String?
-  country              String?
-  industry             String?
-  experience           String?
-  interviewerGender    String    @default("MALE")
-  language             String    @default("AR")
-  accountType          String    @default("INDIVIDUAL")
-  role                 String    @default("USER")
-  companyId            String?
-  company              Company?  @relation(fields: [companyId], references: [id])
-  sessionsLeft         Int       @default(1)
-  subscriptionTier     String    @default("FREE")
-  subscriptionExpiresAt DateTime?
-  isActive             Boolean   @default(true)
-  passwordResetToken   String?
-  passwordResetExpiry  DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+// ─── Enums ───
 
-  payments             Payment[]
-  interviews           Interview[]
-  interviewerProfile   InterviewerProfile?
-  auditLogs            AuditLog[]  @relation("ActorLogs")
-  createdB2bJobs       B2BJob[]    @relation("JobCreator")
-  paypalSubscriptions  PaypalSubscription[]
-  candidatePool        CandidatePool?
+enum UserRole {
+  USER
+  INTERVIEWER
+  ADMIN
+  SUPER_ADMIN
+  COMPANY_ADMIN
+}
+
+enum UserTier {
+  FREE
+  BASIC
+  PRO
+  PREMIUM
+  UNLIMITED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+  NO_SHOW
+  REFUNDED
+}
+
+enum InterviewerStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum PaymentType {
+  AI_PACKAGE
+  BOOKING
+  SUBSCRIPTION
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+// ─── User ───
+// Keeps passwordHash/sessionsLeft/interview relations required by production auth & AI flow.
+// Prompt's simplified User is extended — not gutted — so login/billing keep working.
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  passwordHash          String
+  name                  String?
+  image                 String?
+  country               String?
+  industry              String?
+  experience            String?
+  interviewerGender     String    @default("MALE")
+  language              String    @default("AR")
+  accountType           String    @default("INDIVIDUAL")
+  role                  UserRole  @default(USER)
+  companyId             String?
+  company               Company?  @relation(fields: [companyId], references: [id])
+  sessionsLeft          Int       @default(1)
+  tier                  UserTier  @default(FREE)
+  subscriptionExpiresAt DateTime?
+  isActive              Boolean   @default(true)
+  passwordResetToken    String?
+  passwordResetExpiry   DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  payments            Payment[]
+  interviews          Interview[]
+  interviewer         Interviewer?
+  humanBookings       HumanBooking[]
+  payouts             InterviewerPayout[]
+  auditLogs           AuditLog[]           @relation("ActorLogs")
+  createdB2bJobs      B2BJob[]             @relation("JobCreator")
+  paypalSubscriptions PaypalSubscription[]
+  candidatePool       CandidatePool?
 
   @@index([companyId])
 }
 
 // ─── Company ───
 model Company {
-  id          String           @id @default(cuid())
-  name        String
-  size        String           @default("SMALL")
-  industry    String
-  country     String
-  plan        String           @default("B2B_STARTER")
-  credits     Int              @default(0)
-  slaHours    Int              @default(72)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  size      String   @default("SMALL")
+  industry  String
+  country   String
+  plan      String   @default("B2B_STARTER")
+  credits   Int      @default(0)
+  slaHours  Int      @default(72)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  users       User[]
-  panel       CompanyPanel[]
-  b2bJobs     B2BJob[]
+  users   User[]
+  panel   CompanyPanel[]
+  b2bJobs B2BJob[]
 }
 
-// ─── CompanyPanel ───
+// ─── CompanyPanel (now points at marketplace Interviewer) ───
 model CompanyPanel {
   companyId     String
   interviewerId String
-  company       Company            @relation(fields: [companyId], references: [id])
-  interviewer   InterviewerProfile @relation(fields: [interviewerId], references: [id])
+  company       Company     @relation(fields: [companyId], references: [id])
+  interviewer   Interviewer @relation(fields: [interviewerId], references: [id])
 
   @@id([companyId, interviewerId])
 }
 
 // ─── Interview ───
 model Interview {
-  id                   String    @id @default(cuid())
-  userId               String?
-  user                 User?     @relation(fields: [userId], references: [id])
-  companyId            String?
-  guestToken           String?   @unique
-  guestName            String?
-  guestEmail           String?
-  mode                 String    @default("AI")
-  type                 String
-  industry             String
-  experience           String?
-  position             String?
-  language             String    @default("AR")
-  interviewerGender    String    @default("MALE")
-  status               String    @default("PENDING")
-  overallScore         Int?
-  contentScore         Int?
-  clarityScore         Int?
-  confidenceScore      Int?
-  culturalFitScore     Int?
-  feedback             String?
-  strengths            String?
-  improvements         String?
-  recommendation       String?
-  sessionDebited       Boolean   @default(false)
-  verificationId       String?   @unique
-  pdfUrl               String?
-  b2bJobId             String?
-  b2bJob               B2BJob?   @relation(fields: [b2bJobId], references: [id])
-  expiresAt            DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  userId           String?
+  user             User?     @relation(fields: [userId], references: [id])
+  companyId        String?
+  guestToken       String?   @unique
+  guestName        String?
+  guestEmail       String?
+  mode             String    @default("AI")
+  type             String
+  industry         String
+  experience       String?
+  position         String?
+  language         String    @default("AR")
+  interviewerGender String   @default("MALE")
+  status           String    @default("PENDING")
+  overallScore     Int?
+  contentScore     Int?
+  clarityScore     Int?
+  confidenceScore  Int?
+  culturalFitScore Int?
+  feedback         String?
+  strengths        String?
+  improvements     String?
+  recommendation   String?
+  sessionDebited   Boolean   @default(false)
+  verificationId   String?   @unique
+  pdfUrl           String?
+  b2bJobId         String?
+  b2bJob           B2BJob?   @relation(fields: [b2bJobId], references: [id])
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  messages             Message[]
+  messages Message[]
 
   @@index([userId])
   @@index([companyId])
@@ -117,92 +179,59 @@ model Interview {
 
 // ─── Message ───
 model Message {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   interviewId String
   interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
   role        String
   content     String
   sequence    Int
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([interviewId])
 }
 
-// ─── Payment ───
+// ─── Payment (AI packages, bookings, subscriptions) ───
 model Payment {
-  id              String   @id @default(cuid())
-  userId          String?
-  user            User?    @relation(fields: [userId], references: [id])
-  companyId       String?
-  packageType     String
-  amountUsdCents  Int
-  paypalOrderId   String   @unique
-  status          String   @default("CREATED")
-  sessionsCredited Int     @default(0)
-  idempotencyKey  String   @unique
-  createdAt       DateTime @default(now())
-  capturedAt      DateTime?
+  id                     String        @id @default(cuid())
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type                   PaymentType
+  /// USD amount in dollars (e.g. 9.99). Migrated from amountUsdCents / 100.
+  amount                 Float
+  currency               String        @default("USD")
+  status                 PaymentStatus @default(PENDING)
+  paypalOrderId          String?       @unique
+  paypalSubscriptionId   String?
+  bookingId              String?
+  booking                HumanBooking? @relation(fields: [bookingId], references: [id])
+  /// Legacy AI package SKU (PRO, UNLIMITED, STANDARD_HUMAN, …)
+  packageType            String?
+  sessionsCredited       Int           @default(0)
+  idempotencyKey         String?       @unique
+  companyId              String?
+  capturedAt             DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
   @@index([paypalOrderId])
+  @@index([userId])
+  @@index([type])
+  @@index([status])
 }
 
 // ─── Question ───
 model Question {
-  id          String   @id @default(cuid())
-  textAr      String
-  textEn      String
-  industry    String
-  type        String
-  difficulty  String   @default("MEDIUM")
-  category    String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  textAr     String
+  textEn     String
+  industry   String
+  type       String
+  difficulty String   @default("MEDIUM")
+  category   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
-
-// ─── InterviewerProfile ───
-model InterviewerProfile {
-  id                String    @id @default(cuid())
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id])
-  slug              String    @unique
-  bioAr             String
-  bioEn             String
-  industries        String
-  languages         String
-  yearsExperience   Int
-  currentTitle      String
-  photoUrl          String?
-  sessionPriceUsdCents Int  @default(4900)
-  status            String    @default("PENDING")
-  avgRatingCents   Int      @default(0)
-  totalSessions     Int      @default(0)
-  payoutMethod      String?
-  excludedCompanies String?
-  excludedIndustries String?
-  ndaAcceptedAt     DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  availabilities     Availability[]
-  companyPanel       CompanyPanel[]
-
-  @@index([status])
-}
-
-// ─── Availability ───
-model Availability {
-  id             String   @id @default(cuid())
-  interviewerId  String
-  interviewer    InterviewerProfile @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
-  weekday        Int
-  startTime      String
-  endTime        String
-  timezone       String
-
-  @@index([interviewerId])
-}
-
 
 // ─── PaypalSubscription ───
 model PaypalSubscription {
@@ -224,23 +253,23 @@ model PaypalSubscription {
 
 // ─── B2BJob ───
 model B2BJob {
-  id                String    @id @default(cuid())
-  companyId         String
-  company           Company   @relation(fields: [companyId], references: [id])
-  title             String
-  industry          String
-  type              String
-  mode              String    @default("AI")
-  assignmentMode    String    @default("AUTO")
-  mustAskQuestions  String?
+  id                 String    @id @default(cuid())
+  companyId          String
+  company            Company   @relation(fields: [companyId], references: [id])
+  title              String
+  industry           String
+  type               String
+  mode               String    @default("AI")
+  assignmentMode     String    @default("AUTO")
+  mustAskQuestions   String?
   humanPriceUsdCents Int?
-  inviteDeadline    DateTime?
-  createdById       String
-  createdBy         User      @relation("JobCreator", fields: [createdById], references: [id])
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  inviteDeadline     DateTime?
+  createdById        String
+  createdBy          User      @relation("JobCreator", fields: [createdById], references: [id])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  interviews        Interview[]
+  interviews Interview[]
 
   @@index([companyId])
 }
@@ -257,87 +286,112 @@ model AuditLog {
   @@index([actorId])
 }
 
-// ─── Human Interview Marketplace Models ───
+// ─── Unified Interviewer (marketplace + former InterviewerProfile fields) ───
+// InterviewerProfile removed. Unique profile fields merged below as optional.
 model Interviewer {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  status          String   @default("PENDING")
+  id              String            @id @default(uuid())
+  userId          String            @unique
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          InterviewerStatus @default(PENDING)
   fullName        String
   fullNameAr      String?
-  bio             String?  @db.Text
-  bioAr           String?  @db.Text
+  bio             String?           @db.Text
+  bioAr           String?           @db.Text
+  /// Former InterviewerProfile.bioEn
+  bioEn           String?           @db.Text
+  /// Former InterviewerProfile.slug (public profile URL)
+  slug            String?           @unique
+  /// Former InterviewerProfile.currentTitle
+  currentTitle    String?
+  /// Former InterviewerProfile.photoUrl
+  photoUrl        String?
+  expertise       String?
   linkedInUrl     String?
   phone           String?
   yearsExperience Int
   specialties     String
   industries      String
-  languages       String   @default("AR")
-  priceTier       String   @default("STANDARD")
-  hourlyRate      Int      @default(2900)
-  rating          Float    @default(0)
-  totalInterviews Int      @default(0)
-  totalEarnings   Int      @default(0)
+  languages       String            @default("AR")
+  priceTier       String            @default("STANDARD")
+  /// Stored in USD cents (marketplace). Prompt "hourlyRate Float" kept as Int cents for money safety.
+  hourlyRate      Int               @default(2900)
+  /// Former InterviewerProfile.sessionPriceUsdCents
+  sessionPriceUsdCents Int?
+  rating          Float             @default(0)
+  totalInterviews Int               @default(0)
+  totalEarnings   Int               @default(0)
   videoIntroUrl   String?
   idDocumentUrl   String?
-  idVerified      Boolean  @default(false)
+  idVerified      Boolean           @default(false)
   payoutEmail     String?
-  payoutMethod    String   @default("PAYPAL")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  payoutMethod    String            @default("PAYPAL")
+  timezone        String?
+  excludedCompanies  String?
+  excludedIndustries String?
+  ndaAcceptedAt   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  availability    InterviewerAvailability[] @relation("InterviewerSlots")
-  reviews         InterviewerReview[]        @relation("InterviewerReviews")
-  humanBookings   HumanBooking[]             @relation("InterviewerBookings")
-  payouts         InterviewerPayout[]         @relation("InterviewerPayouts")
+  availability  InterviewerAvailability[] @relation("InterviewerSlots")
+  reviews       InterviewerReview[]       @relation("InterviewerReviews")
+  humanBookings HumanBooking[]            @relation("InterviewerBookings")
+  payouts       InterviewerPayout[]       @relation("InterviewerPayouts")
+  companyPanel  CompanyPanel[]
+
+  @@index([status])
 }
 
 model InterviewerAvailability {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   interviewerId String
   dayOfWeek     Int
   startTime     String
   endTime       String
-  isAvailable   Boolean   @default(true)
-  createdAt     DateTime  @default(now())
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
 
-  interviewer   Interviewer @relation("InterviewerSlots", fields: [interviewerId], references: [id], onDelete: Cascade)
+  interviewer Interviewer @relation("InterviewerSlots", fields: [interviewerId], references: [id], onDelete: Cascade)
 
   @@index([interviewerId])
 }
 
 model HumanBooking {
-  id                String   @id @default(uuid())
-  userId            String?
+  id                String        @id @default(uuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   candidateName     String
   candidateEmail    String
-  interviewerId     String
-  paypalOrderId     String?  @unique
-  status            String   @default("PENDING")
+  interviewerId     String?
+  interviewer       Interviewer?  @relation("InterviewerBookings", fields: [interviewerId], references: [id])
+  paypalOrderId     String?       @unique
+  status            BookingStatus @default(PENDING)
   scheduledAt       DateTime
-  durationMinutes   Int      @default(30)
+  durationMinutes   Int           @default(30)
+  /// USD cents (marketplace money path). Not Float dollars — avoids fee rounding bugs.
   priceTotal        Int
   platformFee       Int
   interviewerPayout Int
-  provider          String   @default("JITSI")
-  dailyRoomUrl     String?
-  dailyRoomName    String?
-  recordingUrl     String?
-  earnings          Int      @default(0)
+  provider          String        @default("JITSI")
+  dailyRoomUrl      String?
+  dailyRoomName     String?
+  recordingUrl      String?
+  earnings          Int           @default(0)
   meetingLink       String?
-  candidateNote     String?  @db.Text
-  interviewerNotes  String?  @db.Text
-  candidateFeedback String?  @db.Text
+  candidateNote     String?       @db.Text
+  interviewerNotes  String?       @db.Text
+  candidateFeedback String?       @db.Text
   candidateRating   Int?
   interviewerRating Int?
   disputeReason     String?
   cancelledBy       String?
   cancelledAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  interviewer   Interviewer @relation("InterviewerBookings", fields: [interviewerId], references: [id])
-  review        InterviewerReview?
+  review   InterviewerReview?
+  payments Payment[]
 
+  @@unique([interviewerId, scheduledAt])
   @@index([userId])
   @@index([interviewerId])
   @@index([status])
@@ -352,43 +406,51 @@ model InterviewerReview {
   isPublic      Boolean  @default(true)
   createdAt     DateTime @default(now())
 
-  interviewer   Interviewer  @relation("InterviewerReviews", fields: [interviewerId], references: [id])
-  booking       HumanBooking @relation(fields: [bookingId], references: [id])
+  interviewer Interviewer  @relation("InterviewerReviews", fields: [interviewerId], references: [id])
+  booking     HumanBooking @relation(fields: [bookingId], references: [id])
 
   @@index([interviewerId])
 }
 
 model InterviewerPayout {
-  id                  String   @id @default(uuid())
-  interviewerId       String
-  amount              Int
-  paypalEmail         String
-  status              String   @default("PENDING")
-  adminNote           String?  @db.Text
-  paypalBatchId       String?
-  requestedAt         DateTime @default(now())
-  processedAt         DateTime?
-  completedAt         DateTime?
-  periodStart         DateTime?
-  periodEnd           DateTime?
-  createdAt           DateTime @default(now())
-
-  interviewer   Interviewer @relation("InterviewerPayouts", fields: [interviewerId], references: [id])
+  id            String       @id @default(uuid())
+  interviewerId String
+  interviewer   Interviewer  @relation("InterviewerPayouts", fields: [interviewerId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  /// USD dollars
+  amount        Float
+  currency      String       @default("USD")
+  status        PayoutStatus @default(PENDING)
+  /// PayPal payout batch ID — REQUIRED for COMPLETED (enforced in API)
+  batchId       String?
+  /// HumanBooking IDs covered by this payout
+  bookingIds    String[]     @default([])
+  paypalEmail   String?
+  adminNote     String?      @db.Text
+  requestedAt   DateTime     @default(now())
+  processedAt   DateTime?
+  completedAt   DateTime?
+  periodStart   DateTime?
+  periodEnd     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([interviewerId])
+  @@index([userId])
   @@index([status])
-  @@index([paypalBatchId])
+  @@index([batchId])
 }
 
 // ─── Admin Log ───
 model AdminLog {
-  id          String   @id @default(cuid())
-  action      String
-  adminEmail  String
-  targetType  String?
-  targetId    String?
-  metadata    String   @default("{}")
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  action     String
+  adminEmail String
+  targetType String?
+  targetId   String?
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
 
   @@index([adminEmail])
   @@index([action])
@@ -412,22 +474,22 @@ model EmailQueue {
 
 // ─── Candidate Pool (Opt-In) ───
 model CandidatePool {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isOptedIn       Boolean   @default(false)
-  isVisible       Boolean   @default(false)
-  role            String
-  level           String
-  industry        String?
-  location        String?
-  muqabalehScore  Float?
-  averageScore    Float?
-  interviewCount  Int       @default(0)
-  languages       String    @default("AR")
-  availability    String    @default("AVAILABLE") // AVAILABLE, OPEN_TO_OFFERS, NOT_LOOKING
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOptedIn      Boolean  @default(false)
+  isVisible      Boolean  @default(false)
+  role           String
+  level          String
+  industry       String?
+  location       String?
+  muqabalehScore Float?
+  averageScore   Float?
+  interviewCount Int      @default(0)
+  languages      String   @default("AR")
+  availability   String   @default("AVAILABLE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([isVisible])
   @@index([role])

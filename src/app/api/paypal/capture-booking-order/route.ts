@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus, PaymentStatus, PaymentType } from '@/lib/enums';
 import { getPayPalAccessToken, getPayPalApiBase, refundPayPalCapture } from '@/lib/paypal';
 import { z } from 'zod';
 import { scheduleBookingEmails } from '@/lib/email-triggers';
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (booking.status !== 'PENDING') {
+    if (booking.status !== BookingStatus.PENDING) {
       return NextResponse.json(
         { error: { ar: 'الحجز ليس في حالة انتظار', en: 'Booking is not in PENDING status' } },
         { status: 400 },
@@ -143,24 +144,42 @@ export async function POST(req: NextRequest) {
     // Generate meeting link
     const meetingLink = `https://meet.jit.si/muqabaleh-${bookingId.slice(0, 8)}`;
 
-    // Update booking: status → CONFIRMED
-    const updated = await db.humanBooking.update({
-      where: { id: bookingId },
-      data: {
-        status: 'CONFIRMED',
-        paypalOrderId: orderId,
-        meetingLink,
-      },
-      include: {
-        interviewer: {
-          select: {
-            id: true,
-            fullName: true,
-            fullNameAr: true,
-            hourlyRate: true,
+    // Update booking: status → CONFIRMED + record Payment (BOOKING)
+    const updated = await db.$transaction(async (tx) => {
+      const confirmed = await tx.humanBooking.update({
+        where: { id: bookingId },
+        data: {
+          status: BookingStatus.CONFIRMED,
+          paypalOrderId: orderId,
+          meetingLink,
+        },
+        include: {
+          interviewer: {
+            select: {
+              id: true,
+              fullName: true,
+              fullNameAr: true,
+              hourlyRate: true,
+            },
           },
         },
-      },
+      });
+
+      await tx.payment.create({
+        data: {
+          userId,
+          type: PaymentType.BOOKING,
+          amount: booking.priceTotal / 100,
+          currency: 'USD',
+          status: PaymentStatus.COMPLETED,
+          paypalOrderId: orderId,
+          bookingId,
+          capturedAt: new Date(),
+          idempotencyKey: `booking-${bookingId}-${orderId}`,
+        },
+      });
+
+      return confirmed;
     });
 
     // Send booking confirmation + schedule delayed emails (fire and forget)

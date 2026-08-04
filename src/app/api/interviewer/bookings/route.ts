@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 
 // GET /api/interviewer/bookings — list interviewer's bookings
 export async function GET(req: NextRequest) {
@@ -30,11 +31,11 @@ export async function GET(req: NextRequest) {
 
         if (statusFilter === 'UPCOMING') {
           where.scheduledAt = { gte: new Date() };
-          where.status = { in: ['PENDING', 'CONFIRMED'] };
+          where.status = { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] };
         } else if (statusFilter === 'PAST') {
           where.OR = [
             { scheduledAt: { lt: new Date() } },
-            { status: { in: ['COMPLETED', 'CANCELLED'] } },
+            { status: { in: [BookingStatus.COMPLETED, BookingStatus.CANCELLED] } },
           ];
         }
 

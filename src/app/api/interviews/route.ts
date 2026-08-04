@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: { ar: 'المستخدم غير موجود', en: 'User not found' } }, { status: 404 });
     }
 
-    const hasAccess = user.subscriptionTier === 'PRO' || user.subscriptionTier === 'UNLIMITED';
+    const hasAccess = user.tier === 'PRO' || user.tier === 'UNLIMITED';
     if (!hasAccess && user.sessionsLeft < 1) {
       return NextResponse.json(
         {

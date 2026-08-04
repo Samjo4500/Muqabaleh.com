@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { PayoutStatus } from '@/lib/enums';
 import { verifyAdmin } from '../../_lib';
 import { triggerInterviewerPayoutSentEmail } from '@/lib/email-triggers';
 import { z } from 'zod';
 
 const patchSchema = z.object({
-  status: z.enum(['COMPLETED', 'REJECTED']),
+  status: z.enum([PayoutStatus.COMPLETED, PayoutStatus.REJECTED, PayoutStatus.FAILED]),
   adminNote: z.string().optional(),
+  batchId: z.string().optional(),
+  /** @deprecated alias — prefer batchId */
+  paypalBatchId: z.string().optional(),
 });
 
 export async function PATCH(
@@ -26,25 +30,36 @@ export async function PATCH(
     }
 
     const { status, adminNote } = parsed.data;
+    const incomingBatchId = parsed.data.batchId || parsed.data.paypalBatchId;
 
-    // Fetch payout
     const payout = await db.interviewerPayout.findUnique({ where: { id } });
     if (!payout) {
       return NextResponse.json({ error: 'Payout not found' }, { status: 404 });
     }
 
-    if (payout.status === 'COMPLETED') {
+    if (payout.status === PayoutStatus.COMPLETED) {
       return NextResponse.json({ error: 'Payout already completed' }, { status: 400 });
     }
 
-    // Build update data
     const data: Record<string, unknown> = { status };
 
-    if (status === 'COMPLETED') {
+    if (status === PayoutStatus.COMPLETED) {
+      // Reject if neither stored batchId nor incoming batchId/paypalBatchId is present
+      const resolvedBatchId = payout.batchId || incomingBatchId || null;
+      if (!resolvedBatchId) {
+        return NextResponse.json(
+          {
+            error:
+              'batchId is required to mark payout COMPLETED (process via PayPal or provide batchId)',
+          },
+          { status: 400 },
+        );
+      }
+      data.batchId = resolvedBatchId;
       data.completedAt = new Date();
     }
 
-    if (status === 'REJECTED') {
+    if (status === PayoutStatus.REJECTED || status === PayoutStatus.FAILED) {
       data.adminNote = adminNote || 'No reason provided';
     }
 
@@ -53,19 +68,26 @@ export async function PATCH(
       data,
     });
 
-    // Log admin action
     await db.adminLog.create({
       data: {
-        action: status === 'COMPLETED' ? 'PAYOUT_COMPLETED_MANUAL' : 'PAYOUT_REJECTED',
+        action:
+          status === PayoutStatus.COMPLETED
+            ? 'PAYOUT_COMPLETED_MANUAL'
+            : status === PayoutStatus.FAILED
+              ? 'PAYOUT_FAILED'
+              : 'PAYOUT_REJECTED',
         adminEmail: auth.adminEmail!,
         targetType: 'INTERVIEWER_PAYOUT',
         targetId: id,
-        metadata: JSON.stringify({ amount: payout.amount, adminNote }),
+        metadata: JSON.stringify({
+          amount: payout.amount,
+          adminNote,
+          batchId: updated.batchId,
+        }),
       },
     });
 
-    // Send email on completion
-    if (status === 'COMPLETED') {
+    if (status === PayoutStatus.COMPLETED) {
       triggerInterviewerPayoutSentEmail(id, 'ar').catch(() => {});
       triggerInterviewerPayoutSentEmail(id, 'en').catch(() => {});
     }

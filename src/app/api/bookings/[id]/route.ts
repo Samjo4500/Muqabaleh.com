@@ -2,17 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 import { z } from 'zod';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  PENDING: ['CONFIRMED', 'CANCELLED', 'RESCHEDULED'],
-  CONFIRMED: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'],
-  IN_PROGRESS: ['COMPLETED'],
+  [BookingStatus.PENDING]: [BookingStatus.CONFIRMED, BookingStatus.CANCELLED, BookingStatus.RESCHEDULED],
+  [BookingStatus.CONFIRMED]: [
+    BookingStatus.IN_PROGRESS,
+    BookingStatus.COMPLETED,
+    BookingStatus.CANCELLED,
+    BookingStatus.RESCHEDULED,
+  ],
+  [BookingStatus.IN_PROGRESS]: [BookingStatus.COMPLETED],
 };
 
 const updateBookingSchema = z.object({
   status: z
-    .enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'])
+    .enum([
+      BookingStatus.CONFIRMED,
+      BookingStatus.IN_PROGRESS,
+      BookingStatus.COMPLETED,
+      BookingStatus.CANCELLED,
+      BookingStatus.RESCHEDULED,
+    ])
     .optional(),
   cancelledBy: z.string().max(50).optional(),
   meetingLink: z.string().url().max(500).optional(),
@@ -143,7 +155,11 @@ export async function PATCH(
 
     // Candidates may only cancel or reschedule
     if (isOwner && !isAssignedInterviewer && !isAdmin) {
-      if (status && status !== 'CANCELLED' && status !== 'RESCHEDULED') {
+      if (
+        status &&
+        status !== BookingStatus.CANCELLED &&
+        status !== BookingStatus.RESCHEDULED
+      ) {
         return NextResponse.json(
           {
             error: {
@@ -158,7 +174,7 @@ export async function PATCH(
 
     // COMPLETED only for assigned interviewer or admin
     // (Verified Daily/PayPal webhooks complete bookings via their own routes)
-    if (status === 'COMPLETED' && !isAssignedInterviewer && !isAdmin) {
+    if (status === BookingStatus.COMPLETED && !isAssignedInterviewer && !isAdmin) {
       return NextResponse.json(
         {
           error: {
@@ -197,7 +213,7 @@ export async function PATCH(
         );
       }
 
-      if (status === 'CANCELLED') {
+      if (status === BookingStatus.CANCELLED) {
         const hoursUntilScheduled =
           (booking.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
         if (hoursUntilScheduled <= 24 && !isAdmin) {
@@ -212,14 +228,25 @@ export async function PATCH(
           );
         }
 
-        updateData.status = 'CANCELLED';
+        updateData.status = BookingStatus.CANCELLED;
         updateData.cancelledBy = cancelledBy || userId;
         updateData.cancelledAt = new Date();
       } else {
         updateData.status = status;
       }
 
-      if (status === 'COMPLETED') {
+      if (status === BookingStatus.COMPLETED) {
+        if (!booking.interviewerId) {
+          return NextResponse.json(
+            {
+              error: {
+                ar: 'لا يوجد محاور مرتبط بهذا الحجز',
+                en: 'Booking has no assigned interviewer',
+              },
+            },
+            { status: 400 },
+          );
+        }
         updateData.earnings = booking.interviewerPayout;
         await db.interviewer.update({
           where: { id: booking.interviewerId },

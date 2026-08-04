@@ -223,7 +223,7 @@ export async function GET(req: NextRequest) {
     // ── Try DB first ──
     try {
       const { db } = await import('@/lib/db');
-      const where: Record<string, unknown> = { status: 'APPROVED' };
+      const where: Record<string, unknown> = { status: 'ACTIVE' };
 
       if (role) {
         where.specialties = { contains: role };

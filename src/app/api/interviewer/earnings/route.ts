@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 // GET /api/interviewer/earnings — total earnings, available balance, stats
+// Returns amounts in cents for existing interviewer UI (formatCents).
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -38,31 +39,32 @@ export async function GET() {
         });
       }
 
-      // Sum of interviewerPayout from completed bookings
+      // Sum of interviewerPayout from completed bookings (cents)
       const bookingAgg = await db.humanBooking.aggregate({
         where: { interviewerId: interviewer.id, status: 'COMPLETED' },
         _sum: { interviewerPayout: true },
         _count: true,
       });
 
-      const totalEarned = bookingAgg._sum.interviewerPayout || 0;
+      const totalEarnedCents = bookingAgg._sum.interviewerPayout || 0;
       const sessionsCompleted = bookingAgg._count || 0;
 
-      // Sum of payouts that are COMPLETED or PROCESSING (money already sent/out)
+      // Payouts store amount in dollars — convert to cents for UI.
+      // Include PENDING so requested-but-unpaid amounts aren't double-spent.
       const payoutAgg = await db.interviewerPayout.aggregate({
         where: {
           interviewerId: interviewer.id,
-          status: { in: ['COMPLETED', 'PROCESSING'] },
+          status: { in: ['COMPLETED', 'PROCESSING', 'PENDING'] },
         },
         _sum: { amount: true },
       });
 
-      const totalWithdrawn = payoutAgg._sum.amount || 0;
-      const availableBalance = totalEarned - totalWithdrawn;
+      const totalWithdrawnCents = Math.round((payoutAgg._sum.amount || 0) * 100);
+      const availableBalance = totalEarnedCents - totalWithdrawnCents;
 
       return NextResponse.json({
-        totalEarnings: totalEarned,
-        totalWithdrawn,
+        totalEarnings: totalEarnedCents,
+        totalWithdrawn: totalWithdrawnCents,
         availableBalance,
         sessionsCompleted,
         payoutEmail: interviewer.payoutEmail,

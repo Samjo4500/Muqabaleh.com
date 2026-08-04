@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'PayPal not configured' }, { status: 503 });
     }
 
-    const amountUsd = (payout.amount / 100).toFixed(2);
+    // amount is stored in USD dollars
+    const amountUsd = payout.amount.toFixed(2);
     const senderBatchId = `payout_${payout.id}`;
 
     try {
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
         where: { id: payoutId },
         data: {
           status: 'PROCESSING',
-          paypalBatchId: batchId || null,
+          batchId: batchId || null,
           processedAt: new Date(),
         },
       });

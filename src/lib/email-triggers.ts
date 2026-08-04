@@ -89,7 +89,7 @@ export async function triggerBookingConfirmationEmail(
         interviewer: { select: { fullName: true, fullNameAr: true } },
       },
     });
-    if (!booking) return;
+    if (!booking || !booking.interviewer) return;
 
     const interviewerName = locale === 'ar' && booking.interviewer.fullNameAr
       ? booking.interviewer.fullNameAr
@@ -140,7 +140,7 @@ export async function triggerSessionReminderEmail(
         interviewer: { select: { fullName: true, fullNameAr: true } },
       },
     });
-    if (!booking) return;
+    if (!booking || !booking.interviewer) return;
 
     const interviewerName = locale === 'ar' && booking.interviewer.fullNameAr
       ? booking.interviewer.fullNameAr
@@ -191,7 +191,7 @@ export async function triggerSessionStartingSoonEmail(
         interviewer: { select: { fullName: true, fullNameAr: true } },
       },
     });
-    if (!booking) return;
+    if (!booking || !booking.interviewer) return;
 
     const interviewerName = locale === 'ar' && booking.interviewer.fullNameAr
       ? booking.interviewer.fullNameAr
@@ -236,7 +236,7 @@ export async function triggerReviewRequestEmail(
         interviewer: { select: { fullName: true, fullNameAr: true } },
       },
     });
-    if (!booking) return;
+    if (!booking || !booking.interviewer) return;
 
     const interviewerName = locale === 'ar' && booking.interviewer.fullNameAr
       ? booking.interviewer.fullNameAr
@@ -301,12 +301,14 @@ export async function triggerInterviewerApplicationReceivedEmail(
       locale,
     });
 
-    // The interviewer may not have a User account yet (userId is 'pending')
-    // The email was provided in the application form - we'll send to the admin
-    // and also try the interviewer email from application data
-    // For now, we primarily notify the admin. The interviewer email notification
-    // happens through the apply route where we have the raw email.
+    // Notify admin; interviewer confirmation goes via linked User email when available
     await sendEmail({ to: ADMIN_EMAIL, subject: html ? '' : subject, html: html });
+    if (interviewer.userId) {
+      const user = await db.user.findUnique({ where: { id: interviewer.userId } });
+      if (user) {
+        await sendEmail({ to: user.email, subject, html });
+      }
+    }
   } catch (err) {
     console.error('[EmailTrigger] Application received email failed:', err);
   }
@@ -328,9 +330,8 @@ export async function triggerInterviewerApprovedEmail(
       locale,
     });
 
-    // Send to the interviewer's linked user email, or use a stored email if available
-    // Since Interviewer model doesn't have a direct email field, we look up by userId
-    if (interviewer.userId && interviewer.userId !== 'pending') {
+    // Send to the interviewer's linked user email
+    if (interviewer.userId) {
       const user = await db.user.findUnique({ where: { id: interviewer.userId } });
       if (user) {
         await sendEmail({ to: user.email, subject, html });
@@ -355,7 +356,7 @@ export async function triggerInterviewerNewBookingEmail(
         interviewer: { select: { id: true, fullName: true, fullNameAr: true, userId: true } },
       },
     });
-    if (!booking) return;
+    if (!booking || !booking.interviewer) return;
 
     const interviewerName = locale === 'ar' && booking.interviewer.fullNameAr
       ? booking.interviewer.fullNameAr
@@ -387,7 +388,7 @@ export async function triggerInterviewerNewBookingEmail(
     });
 
     // Get interviewer user email
-    if (booking.interviewer.userId && booking.interviewer.userId !== 'pending') {
+    if (booking.interviewer.userId) {
       const user = await db.user.findUnique({ where: { id: booking.interviewer.userId } });
       if (user) {
         await sendEmail({ to: user.email, subject, html });
@@ -414,7 +415,8 @@ export async function triggerInterviewerPayoutSentEmail(
     });
     if (!payout) return;
 
-    const amount = `$${(payout.amount / 100).toFixed(2)}`;
+    // InterviewerPayout.amount is USD dollars
+    const amount = `$${payout.amount.toFixed(2)}`;
     const date = new Date().toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
       year: 'numeric',
       month: 'long',
@@ -428,13 +430,13 @@ export async function triggerInterviewerPayoutSentEmail(
       locale,
       amount,
       date,
-      paypalTransactionId: (payout as Record<string, unknown>).paypalTransactionId as string | undefined,
+      paypalTransactionId: payout.batchId ?? undefined,
       periodStart,
       periodEnd,
     });
 
     // Get interviewer user email
-    if (payout.interviewer.userId && payout.interviewer.userId !== 'pending') {
+    if (payout.interviewer.userId) {
       const user = await db.user.findUnique({ where: { id: payout.interviewer.userId } });
       if (user) {
         await sendEmail({ to: user.email, subject, html });

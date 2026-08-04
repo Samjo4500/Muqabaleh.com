@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 import { z } from 'zod';
 
 const createReviewSchema = z.object({
@@ -53,9 +54,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (booking.status !== 'COMPLETED') {
+    if (booking.status !== BookingStatus.COMPLETED) {
       return NextResponse.json(
         { error: { ar: 'لا يمكن تقييم حجز غير مكتمل', en: 'Cannot review a booking that is not completed' } },
+        { status: 400 },
+      );
+    }
+
+    if (!booking.interviewerId) {
+      return NextResponse.json(
+        { error: { ar: 'لا يوجد محاور مرتبط بهذا الحجز', en: 'Booking has no assigned interviewer' } },
         { status: 400 },
       );
     }
@@ -67,10 +75,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const interviewerId = booking.interviewerId;
+
     // Create the review
     const review = await db.interviewerReview.create({
       data: {
-        interviewerId: booking.interviewerId,
+        interviewerId,
         bookingId,
         rating,
         comment: comment || null,
@@ -80,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     // Recalculate average rating for the interviewer
     const reviews = await db.interviewerReview.findMany({
-      where: { interviewerId: booking.interviewerId },
+      where: { interviewerId },
       select: { rating: true },
     });
 
@@ -90,7 +100,7 @@ export async function POST(req: NextRequest) {
         : 0;
 
     await db.interviewer.update({
-      where: { id: booking.interviewerId },
+      where: { id: interviewerId },
       data: { rating: Math.round(avgRating * 100) / 100 },
     });
 

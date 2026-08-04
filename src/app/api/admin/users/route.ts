@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
-    if (tier) where.subscriptionTier = tier;
+    if (tier) where.tier = tier;
     if (search) {
       where.OR = [
         { email: { contains: search, mode: 'insensitive' } },
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
           email: true,
           name: true,
           country: true,
-          subscriptionTier: true,
+          tier: true,
           sessionsLeft: true,
           role: true,
           accountType: true,

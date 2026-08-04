@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
 import { z } from 'zod';
 
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (booking.status !== 'PENDING') {
+    if (booking.status !== BookingStatus.PENDING) {
       return NextResponse.json(
         { error: { ar: 'الحجز ليس في حالة انتظار', en: 'Booking is not in PENDING status' } },
         { status: 400 },

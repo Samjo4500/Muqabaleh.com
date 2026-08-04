@@ -166,9 +166,10 @@ async function seed() {
       email: 'admin@muqabaleh.com',
       passwordHash: hashSync('admin123', 12),
       name: 'مدير النظام',
-      role: 'ADMIN',
+      role: 'SUPER_ADMIN',
       accountType: 'INDIVIDUAL',
       sessionsLeft: 999,
+      tier: 'UNLIMITED',
       isActive: true,
     },
   });
@@ -225,7 +226,7 @@ async function seed() {
   });
   console.log(`  ✓ User: ${regularUser.email} (${regularUser.sessionsLeft} sessions)`);
 
-  // 4. Interviewer profiles
+  // 4. Interviewers (marketplace model — InterviewerProfile removed)
   for (const intv of interviewers) {
     const user = await db.user.upsert({
       where: { email: intv.email },
@@ -237,48 +238,57 @@ async function seed() {
         role: 'INTERVIEWER',
         accountType: 'INDIVIDUAL',
         sessionsLeft: 0,
-      },
-    });
-    const profile = await db.interviewerProfile.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
-        userId: user.id,
-        slug: intv.slug,
-        bioAr: intv.bioAr,
-        bioEn: intv.bioEn,
-        industries: ja(intv.industries),
-        languages: ja(intv.languages),
-        yearsExperience: intv.years,
-        currentTitle: intv.title,
-        sessionPriceUsdCents: intv.price,
-        status: 'APPROVED',
-        avgRatingCents: intv.rating,
-        totalSessions: Math.floor(Math.random() * 50) + 20,
-        ndaAcceptedAt: new Date(),
+        tier: 'FREE',
       },
     });
 
-    // Add availability for next 2 weeks
-    const now = new Date();
-    for (let w = 0; w < 2; w++) {
-      for (let d = 0; d < 5; d++) { // Sun-Thu
-        await db.availability.create({
+    const existing = await db.interviewer.findUnique({ where: { userId: user.id } });
+    const interviewer =
+      existing ??
+      (await db.interviewer.create({
+        data: {
+          userId: user.id,
+          slug: intv.slug,
+          fullName: intv.name,
+          bioAr: intv.bioAr,
+          bioEn: intv.bioEn,
+          industries: ja(intv.industries),
+          languages: ja(intv.languages),
+          yearsExperience: intv.years,
+          currentTitle: intv.title,
+          specialties: ja(intv.industries),
+          sessionPriceUsdCents: intv.price,
+          hourlyRate: intv.price,
+          status: 'ACTIVE',
+          rating: intv.rating / 100,
+          totalInterviews: Math.floor(Math.random() * 50) + 20,
+          ndaAcceptedAt: new Date(),
+          timezone: 'Asia/Riyadh',
+        },
+      }));
+
+    // Weekly availability slots (Sun–Thu)
+    const slotCount = await db.interviewerAvailability.count({
+      where: { interviewerId: interviewer.id },
+    });
+    if (slotCount === 0) {
+      for (let d = 0; d < 5; d++) {
+        await db.interviewerAvailability.create({
           data: {
-            interviewerId: profile.id,
-            weekday: d,
+            interviewerId: interviewer.id,
+            dayOfWeek: d,
             startTime: '09:00',
             endTime: '12:00',
-            timezone: 'Asia/Riyadh',
+            isAvailable: true,
           },
         });
-        await db.availability.create({
+        await db.interviewerAvailability.create({
           data: {
-            interviewerId: profile.id,
-            weekday: d,
+            interviewerId: interviewer.id,
+            dayOfWeek: d,
             startTime: '14:00',
             endTime: '17:00',
-            timezone: 'Asia/Riyadh',
+            isAvailable: true,
           },
         });
       }
@@ -298,25 +308,32 @@ async function seed() {
         role: 'INTERVIEWER',
         accountType: 'INDIVIDUAL',
         sessionsLeft: 0,
+        tier: 'FREE',
       },
     });
-    await db.interviewerProfile.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
-        userId: user.id,
-        slug: intv.slug,
-        bioAr: intv.bioAr,
-        bioEn: intv.bioEn,
-        industries: ja(intv.industries),
-        languages: ja(intv.languages),
-        yearsExperience: intv.years,
-        currentTitle: intv.title,
-        sessionPriceUsdCents: intv.price,
-        status: 'PENDING',
-        ndaAcceptedAt: new Date(),
-      },
-    });
+
+    const existing = await db.interviewer.findUnique({ where: { userId: user.id } });
+    if (!existing) {
+      await db.interviewer.create({
+        data: {
+          userId: user.id,
+          slug: intv.slug,
+          fullName: intv.name,
+          bioAr: intv.bioAr,
+          bioEn: intv.bioEn,
+          industries: ja(intv.industries),
+          languages: ja(intv.languages),
+          yearsExperience: intv.years,
+          currentTitle: intv.title,
+          specialties: ja(intv.industries),
+          sessionPriceUsdCents: intv.price,
+          hourlyRate: intv.price,
+          status: 'PENDING',
+          ndaAcceptedAt: new Date(),
+          timezone: 'Asia/Riyadh',
+        },
+      });
+    }
     console.log(`  ⏳ Pending interviewer: ${intv.name}`);
   }
 

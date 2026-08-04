@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 import crypto from 'crypto';
 
 /**
@@ -76,14 +77,14 @@ export async function POST(req: NextRequest) {
             include: { interviewer: true },
           });
 
-          if (booking && booking.status !== 'COMPLETED') {
+          if (booking && booking.status !== BookingStatus.COMPLETED) {
             const participantCount: number = payload.participant_count ?? 0;
 
             if (participantCount === 0) {
               await db.humanBooking.update({
                 where: { id: booking.id },
                 data: {
-                  status: 'COMPLETED',
+                  status: BookingStatus.COMPLETED,
                   earnings: booking.interviewerPayout,
                 },
               });
@@ -94,6 +95,9 @@ export async function POST(req: NextRequest) {
                   data: {
                     totalInterviews: {
                       increment: 1,
+                    },
+                    totalEarnings: {
+                      increment: booking.interviewerPayout,
                     },
                   },
                 });

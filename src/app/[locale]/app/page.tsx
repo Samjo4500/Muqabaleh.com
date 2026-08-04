@@ -217,7 +217,7 @@ export default async function DashboardPage({
         {interviews.length === 0 ? (
           <GlowCard className="p-8">
             <EmptyState
-              icon={MessageSquare}
+              icon={<MessageSquare size={40} strokeWidth={1.75} />}
               title={t('recentInterviews')}
             />
           </GlowCard>

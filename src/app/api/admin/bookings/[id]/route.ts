@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { BookingStatus } from '@/lib/enums';
 import { verifyAdmin } from '../../_lib';
 
 export async function PATCH(
@@ -12,9 +13,12 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await req.json();
-    const { status, reason } = body as { status: 'CANCELLED' | 'REFUNDED'; reason?: string };
+    const { status, reason } = body as {
+      status: typeof BookingStatus.CANCELLED | typeof BookingStatus.REFUNDED;
+      reason?: string;
+    };
 
-    if (!['CANCELLED', 'REFUNDED'].includes(status)) {
+    if (status !== BookingStatus.CANCELLED && status !== BookingStatus.REFUNDED) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 

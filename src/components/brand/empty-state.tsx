@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { type LucideIcon } from "lucide-react";
+import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: ReactNode;
   title: string;
   sub?: string;
   cta?: string;
@@ -14,7 +14,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   sub,
   cta,
@@ -23,12 +23,8 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cn("flex flex-col items-center justify-center py-16 text-center", className)}>
-      <div className="mb-4 rounded-2xl bg-white/5 p-4">
-        <Icon
-          size={40}
-          strokeWidth={1.75}
-          className="text-[var(--text-faint)]"
-        />
+      <div className="mb-4 rounded-2xl bg-white/5 p-4 text-[var(--text-faint)]">
+        {icon}
       </div>
       <h3 className="text-lg font-semibold text-[var(--text-primary)]">
         {title}

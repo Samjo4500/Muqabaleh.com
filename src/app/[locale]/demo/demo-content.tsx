@@ -16,7 +16,12 @@ export default function DemoContent() {
   useEffect(() => {
     fetch('/api/config')
       .then((r) => r.json())
-      .then(setConfig)
+      .then((data: { demoMode?: boolean; services?: Record<string, boolean> }) => {
+        setConfig({
+          demoMode: Boolean(data?.demoMode),
+          services: data?.services ?? {},
+        });
+      })
       .catch(() => setConfig({ demoMode: false, services: {} }));
   }, []);
 
@@ -91,7 +96,7 @@ export default function DemoContent() {
                     : 'Demo Mode — Simulated responses'}
                 </div>
               )}
-              {(!config.services.database || !config.services.gemini) && !config.demoMode && (
+              {(!config.services?.database || !config.services?.gemini) && !config.demoMode && (
                 <div className="flex items-start gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-[var(--text-muted)]">
                   <AlertTriangle size={14} className="mt-0.5 shrink-0 text-amber-400" />
                   <span>

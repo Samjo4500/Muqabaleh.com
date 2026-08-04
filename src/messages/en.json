@@ -306,7 +306,18 @@
       "title": "Master Your Interview. Land Your Dream Role.",
       "subtitle": "AI-powered mock interviews with real-time feedback and human coaches — practice until you're ready.",
       "ctaPrimary": "Start Free Interview",
-      "ctaSecondary": "For Companies"
+      "ctaSecondary": "For Companies",
+      "simLive": "Live AI Interview",
+      "simQuestion": "Tell me about a challenge you led end-to-end.",
+      "simAnswer": "I aligned product, design, and engineering around one milestone…",
+      "simScore": "Interview Score",
+      "simClarity": "Clarity",
+      "simStructure": "Structure",
+      "simConfidence": "Confidence",
+      "simListening": "Listening…",
+      "chipAi": "Adaptive AI questions",
+      "chipFeedback": "Instant feedback",
+      "chipCoach": "Human coaches"
     },
     "b2c": {
       "eyebrow": "For Job Seekers",

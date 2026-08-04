@@ -190,6 +190,8 @@
     -webkit-backdrop-filter: blur(20px);
     padding: 0.85rem 1.5rem;
     font-weight: 600;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
     transition: transform 0.2s var(--ease-crystal), border-color 0.2s ease,
       box-shadow 0.2s ease;
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);

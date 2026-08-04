@@ -96,13 +96,13 @@ export function Navbar() {
           >
             {tc('login')}
           </Link>
-          <Link href="/assessment" className="glass-button gradient-text text-sm !px-4 !py-2">
+          <Link href="/assessment" className="glass-button text-sm !px-4 !py-2">
             {tc('startFree')}
           </Link>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <Link href="/assessment" className="glass-button gradient-text text-xs !px-3 !py-1.5">
+          <Link href="/assessment" className="glass-button text-xs !px-3 !py-1.5">
             {tc('startFree')}
           </Link>
           <Sheet open={open} onOpenChange={setOpen}>
@@ -154,7 +154,7 @@ export function Navbar() {
                 <Link
                   href="/assessment"
                   onClick={() => setOpen(false)}
-                  className="glass-button gradient-text mt-2 min-h-[44px] text-center text-sm"
+                  className="glass-button mt-2 min-h-[44px] text-center text-sm"
                 >
                   {tc('startFree')}
                 </Link>

@@ -90,7 +90,7 @@ export function CrystalHero() {
             transition={{ duration: 0.6, delay: 1.1 }}
             className="rounded-[0.875rem]"
           >
-            <Link href="/assessment" className="glass-button gradient-text inline-flex w-full justify-center sm:w-auto">
+            <Link href="/assessment" className="glass-button inline-flex w-full justify-center sm:w-auto">
               {t('heroCtaPrimary')}
             </Link>
           </motion.div>

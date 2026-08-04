@@ -45,7 +45,7 @@ export function CrystalFinalCta() {
             transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
             className="rounded-[0.875rem]"
           >
-            <Link href="/assessment" className="glass-button gradient-text inline-flex w-full justify-center sm:w-auto">
+            <Link href="/assessment" className="glass-button inline-flex w-full justify-center sm:w-auto">
               {t('finalCtaPrimary')}
             </Link>
           </motion.div>

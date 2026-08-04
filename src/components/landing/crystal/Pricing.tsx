@@ -119,7 +119,7 @@ export function CrystalPricing() {
             <Link
               href={tier.href}
               className={`mt-8 inline-flex justify-center text-center text-sm ${
-                tier.featured ? 'glass-button gradient-text' : 'btn-ghost-crystal'
+                tier.featured ? 'glass-button' : 'btn-ghost-crystal'
               }`}
             >
               {tier.cta}

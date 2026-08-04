@@ -31,7 +31,7 @@ const MEMBERS = [
 
 function roleBadge(role: string) {
   if (role === 'roleAdmin' || role === 'مدير' || role === 'Admin') {
-    return 'border-gold/30 bg-gold/10 text-gold';
+    return 'border-indigo-400/30 bg-indigo-500/10 text-[var(--aurora-2)]';
   }
   return 'border-white/20 bg-white/5 text-[var(--text-muted)]';
 }
@@ -56,7 +56,7 @@ export default function TeamPage() {
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
         <Button
           onClick={() => setInviteOpen(true)}
-          className="btn-gold flex items-center gap-2 cursor-pointer"
+          className="glass-button flex items-center gap-2 cursor-pointer"
         >
           <Plus size={18} strokeWidth={1.75} />
           {t('inviteMember')}
@@ -166,11 +166,11 @@ export default function TeamPage() {
             <Button
               variant="ghost"
               onClick={() => setInviteOpen(false)}
-              className="text-[var(--text-muted)] hover:text-gold cursor-pointer"
+              className="text-[var(--text-muted)] hover:text-[var(--aurora-2)] cursor-pointer"
             >
               {tCommon('cancel')}
             </Button>
-            <Button onClick={handleInvite} className="btn-gold cursor-pointer">
+            <Button onClick={handleInvite} className="glass-button cursor-pointer">
               {t('sendInvite')}
             </Button>
           </DialogFooter>

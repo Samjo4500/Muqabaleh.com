@@ -37,6 +37,19 @@ export function CrystalNavbar() {
   };
 
   const localeLabel = locale === 'ar' ? 'EN' : 'AR';
+  const isHome =
+    pathname === '/' ||
+    pathname === `/${locale}` ||
+    pathname === `/${locale}/` ||
+    pathname === '/en' ||
+    pathname === '/en/';
+
+  const resolveHref = (href: string) => {
+    if (href.startsWith('#') && !isHome) {
+      return locale === 'ar' ? `/${href}` : `/${locale}${href}`;
+    }
+    return href;
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3 md:px-6">
@@ -57,7 +70,7 @@ export function CrystalNavbar() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.key}
-              href={link.href}
+              href={resolveHref(link.href)}
               className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
               {t(link.key)}
@@ -112,7 +125,7 @@ export function CrystalNavbar() {
                 {NAV_LINKS.map((link) => (
                   <Link
                     key={link.key}
-                    href={link.href}
+                    href={resolveHref(link.href)}
                     onClick={() => setOpen(false)}
                     className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]"
                   >

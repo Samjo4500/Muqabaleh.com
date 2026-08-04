@@ -51,7 +51,7 @@ export default function NewJobPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/b2b/jobs" className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-gold">
+        <Link href="/b2b/jobs" className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--aurora-2)]">
           <ArrowRight size={20} strokeWidth={1.75} />
         </Link>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('newTitle')}</h1>
@@ -98,11 +98,11 @@ export default function NewJobPage() {
           <Label className="text-sm text-[var(--text-muted)]">{t('mode')}</Label>
           <RadioGroup value={mode} onValueChange={setMode} className="flex gap-4">
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="ai" id="mode-ai" className="border-white/20 text-gold" />
+              <RadioGroupItem value="ai" id="mode-ai" className="border-white/20 text-[var(--aurora-2)]" />
               <Label htmlFor="mode-ai" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('modeAI')}</Label>
             </div>
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="human" id="mode-human" className="border-white/20 text-gold" />
+              <RadioGroupItem value="human" id="mode-human" className="border-white/20 text-[var(--aurora-2)]" />
               <Label htmlFor="mode-human" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('modeHuman')}</Label>
             </div>
           </RadioGroup>
@@ -117,11 +117,11 @@ export default function NewJobPage() {
             <Label className="text-sm text-[var(--text-muted)]">{t('assignmentMode')}</Label>
             <RadioGroup value={assignmentMode} onValueChange={setAssignmentMode} className="flex gap-4">
               <div className="flex items-center gap-2">
-                <RadioGroupItem value="auto" id="assign-auto" className="border-white/20 text-gold" />
+                <RadioGroupItem value="auto" id="assign-auto" className="border-white/20 text-[var(--aurora-2)]" />
                 <Label htmlFor="assign-auto" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('assignmentAuto')}</Label>
               </div>
               <div className="flex items-center gap-2">
-                <RadioGroupItem value="panel" id="assign-panel" className="border-white/20 text-gold" />
+                <RadioGroupItem value="panel" id="assign-panel" className="border-white/20 text-[var(--aurora-2)]" />
                 <Label htmlFor="assign-panel" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('assignmentPanel')}</Label>
               </div>
             </RadioGroup>
@@ -179,7 +179,7 @@ export default function NewJobPage() {
             <button
               type="button"
               onClick={addQuestion}
-              className="flex items-center gap-2 text-sm text-gold transition-colors hover:text-gold-hover"
+              className="flex items-center gap-2 text-sm text-[var(--aurora-2)] transition-colors hover:text-cyan-300"
             >
               <Plus size={16} strokeWidth={1.75} />
               {t('addQuestion')}
@@ -204,12 +204,12 @@ export default function NewJobPage() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer" aria-label="CSV" />
-              <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-gold">
+              <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--aurora-2)]">
                 <Upload size={16} strokeWidth={1.75} />
                 {t('orUpload')}
               </button>
             </div>
-            <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-gold">
+            <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--aurora-2)]">
               <Download size={16} strokeWidth={1.75} />
               {t('downloadTemplate')}
             </button>
@@ -218,7 +218,7 @@ export default function NewJobPage() {
 
         {/* Create button */}
         <div className="pt-2">
-          <Button onClick={handleCreate} className="btn-gold w-full cursor-pointer">
+          <Button onClick={handleCreate} className="glass-button w-full cursor-pointer">
             {t('create')}
           </Button>
         </div>

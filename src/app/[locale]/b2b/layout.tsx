@@ -53,7 +53,7 @@ function SidebarNav({
             onClick={onNavigate}
             className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               isActive
-                ? 'border-s-gold text-gold bg-gold/10'
+                ? 'border-s-indigo-400 text-[var(--aurora-2)] bg-indigo-500/10'
                 : 'border-s-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
             }`}
           >
@@ -74,9 +74,9 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-void">
+    <div className="flex min-h-screen bg-[var(--bg-deep)]">
       {/* Desktop sidebar — RTL: fixed right */}
-      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-panel)]">
+      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-surface)]/80 backdrop-blur-xl">
         {/* Top: logo + title */}
         <div className="p-4 pb-2">
           <div className="flex items-center gap-3">
@@ -104,7 +104,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
         {/* Bottom: sessions badge, company name, sign out */}
         <div className="mt-auto border-t border-white/[0.08] p-4 space-y-3">
           <div className="flex justify-center">
-            <span className="inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-bold text-gold">
+            <span className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-[var(--aurora-2)]">
               {t('sessionsBadge', { count: 15 })}
             </span>
           </div>
@@ -126,7 +126,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile top bar */}
       <div className="flex flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 backdrop-blur-md lg:hidden">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-surface)]/80 px-4 backdrop-blur-md lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <button
@@ -139,7 +139,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent
               side={locale === 'ar' ? 'left' : 'right'}
-              className="w-[260px] border-s border-white/[0.08] bg-[var(--bg-panel)] p-0"
+              className="w-[260px] border-s border-white/[0.08] bg-[var(--bg-deep)]/95 backdrop-blur-xl p-0"
             >
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="p-4 pb-2">
@@ -164,7 +164,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
               />
               <div className="mt-auto border-t border-white/[0.08] p-4 space-y-3">
                 <div className="flex justify-center">
-                  <span className="inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-bold text-gold">
+                  <span className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-[var(--aurora-2)]">
                     {t('sessionsBadge', { count: 15 })}
                   </span>
                 </div>

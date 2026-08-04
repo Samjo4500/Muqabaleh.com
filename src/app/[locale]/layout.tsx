@@ -5,6 +5,7 @@ import { routing } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
+import { PWAInstallPrompt } from '@/components/pwa/InstallPrompt';
 import type { Metadata } from 'next';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
@@ -112,6 +113,7 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <MobileTabBar />
+            <PWAInstallPrompt />
           </NextIntlClientProvider>
           <Toaster />
         </Providers>

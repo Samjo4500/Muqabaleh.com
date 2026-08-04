@@ -2,7 +2,13 @@ import { NextAuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { UserRole } from '@prisma/client';
+import { verifySync } from 'otplib';
 import { auditLoginFailed, auditLoginSuccess } from './security';
+
+const LOCKOUT_ATTEMPTS = 5;
+const LOCKOUT_MINUTES = 15;
+const SUPER_ADMIN_SESSION_SECONDS = 2 * 60 * 60; // 2 hours
+const DEFAULT_SESSION_SECONDS = 24 * 60 * 60;
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,6 +17,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        totpCode: { label: '2FA Code', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -29,13 +36,49 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          const valid = await compare(credentials.password, user.passwordHash);
-          if (!valid) {
+          if (user.lockedUntil && user.lockedUntil > new Date()) {
             await auditLoginFailed(credentials.email);
             return null;
           }
 
-          // SUPER_ADMIN login audit
+          const valid = await compare(credentials.password, user.passwordHash);
+          if (!valid) {
+            const attempts = (user.failedLoginAttempts || 0) + 1;
+            await db.user.update({
+              where: { id: user.id },
+              data: {
+                failedLoginAttempts: attempts,
+                lockedUntil:
+                  attempts >= LOCKOUT_ATTEMPTS
+                    ? new Date(Date.now() + LOCKOUT_MINUTES * 60 * 1000)
+                    : null,
+              },
+            });
+            await auditLoginFailed(credentials.email);
+            return null;
+          }
+
+          // SUPER_ADMIN 2FA enforcement when enrolled
+          if (user.role === UserRole.SUPER_ADMIN && user.totpEnabled && user.totpSecret) {
+            const code = (credentials as { totpCode?: string }).totpCode?.trim();
+            const ok = code
+              ? Boolean(verifySync({ token: code, secret: user.totpSecret }).valid)
+              : false;
+            if (!ok) {
+              await auditLoginFailed(credentials.email);
+              return null;
+            }
+          }
+
+          await db.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              lockedUntil: null,
+              lastLoginAt: new Date(),
+            },
+          });
+
           if (user.role === UserRole.SUPER_ADMIN) {
             await auditLoginSuccess(user.id, user.email);
           }
@@ -60,7 +103,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours (was 30 days)
+    maxAge: DEFAULT_SESSION_SECONDS,
   },
   cookies: {
     sessionToken: {
@@ -82,6 +125,10 @@ export const authOptions: NextAuthOptions = {
         token.companyId = user.companyId;
         token.sessionsLeft = user.sessionsLeft;
         token.tier = user.tier;
+        // Shorter session timeout for Super Admin
+        if (user.role === UserRole.SUPER_ADMIN) {
+          token.exp = Math.floor(Date.now() / 1000) + SUPER_ADMIN_SESSION_SECONDS;
+        }
       }
       return token;
     },

@@ -81,9 +81,41 @@ async function callLLM(messages: { role: string; content: string }[]): Promise<s
       const result = await geminiModel.generateContent(request);
       const response = result.response;
       const text = response.text();
-      if (text) return text;
+      if (text) {
+        // Best-effort Gemini usage accounting for Super Admin AI dashboard
+        const usage = response.usageMetadata;
+        const inputTokens = usage?.promptTokenCount ?? Math.ceil(JSON.stringify(messages).length / 4);
+        const outputTokens = usage?.candidatesTokenCount ?? Math.ceil(text.length / 4);
+        // Gemini 1.5 Flash approximate USD rates
+        const estimatedCostUsd = (inputTokens * 0.000000075) + (outputTokens * 0.0000003);
+        void db.aiApiUsage
+          .create({
+            data: {
+              provider: 'gemini',
+              model: 'gemini-1.5-flash',
+              operation: 'generateContent',
+              inputTokens,
+              outputTokens,
+              estimatedCostUsd,
+              success: true,
+            },
+          })
+          .catch(() => undefined);
+        return text;
+      }
     } catch (err) {
       console.error('Gemini LLM failed, falling back to ZAI:', err);
+      void db.aiApiUsage
+        .create({
+          data: {
+            provider: 'gemini',
+            model: 'gemini-1.5-flash',
+            operation: 'generateContent',
+            success: false,
+            meta: { error: String(err) },
+          },
+        })
+        .catch(() => undefined);
     }
   }
 

@@ -1,178 +1,214 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { signOut } from 'next-auth/react';
 import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  Calendar,
-  CreditCard,
-  ShieldCheck,
+  ArrowRight,
+  ChevronDown,
   LogOut,
   Menu,
+  Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ShieldCheck,
+  Sun,
 } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { BiInline, BiLabel } from '@/components/admin/BiLabel';
+import { L } from '@/lib/admin/labels';
+import { ADMIN_NAV, parentAdminPath } from '@/lib/admin/nav';
+import { localePath } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
-const navItems = [
-  { key: 'navOverview', icon: LayoutDashboard, href: '/admin' },
-  { key: 'navInterviewers', icon: UserCheck, href: '/admin/interviewers' },
-  { key: 'navBookings', icon: Calendar, href: '/admin/bookings' },
-  { key: 'navUsers', icon: Users, href: '/admin/users' },
-  { key: 'navPayouts', icon: CreditCard, href: '/admin/payouts' },
-] as const;
+function useAdminTheme() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem('muqabaleh-admin-theme');
+    const next = stored === 'light' ? 'light' : 'dark';
+    setTheme(next);
+    document.documentElement.classList.toggle('light', next === 'light');
+    document.documentElement.classList.toggle('dark', next === 'dark');
+  }, []);
+
+  const toggle = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    window.localStorage.setItem('muqabaleh-admin-theme', next);
+    document.documentElement.classList.toggle('light', next === 'light');
+    document.documentElement.classList.toggle('dark', next === 'dark');
+  };
+
+  return { theme, toggle };
+}
 
 function SidebarNav({
   pathname,
   locale,
-  t,
+  collapsed,
   onNavigate,
 }: {
   pathname: string;
   locale: string;
-  t: ReturnType<typeof useTranslations>;
+  collapsed?: boolean;
   onNavigate?: () => void;
 }) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+
+  const activeGroup = useMemo(() => {
+    for (const g of ADMIN_NAV) {
+      if (g.items.some((i) => pathname.includes(i.href))) return g.id;
+    }
+    return 'main';
+  }, [pathname]);
+
+  useEffect(() => {
+    setOpenGroups((prev) => ({ ...prev, [activeGroup]: true }));
+  }, [activeGroup]);
+
   return (
-    <nav className="flex flex-1 flex-col gap-1 p-3">
-      {navItems.map((item) => {
-        const fullPath = `/${locale}${item.href}`;
-        const isActive =
-          item.href === '/admin'
-            ? pathname === fullPath
-            : pathname.startsWith(fullPath);
-        const Icon = item.icon;
+    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2" dir="rtl">
+      {ADMIN_NAV.map((group) => {
+        const open = openGroups[group.id] ?? group.id === activeGroup;
+        const label = L[group.label];
         return (
-          <Link
-            key={item.key}
-            href={item.href}
-            onClick={onNavigate}
-            className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-              isActive
-                ? 'border-s-gold text-gold bg-gold/10'
-                : 'border-s-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <Icon size={20} strokeWidth={1.75} />
-            <span>{t(item.key)}</span>
-          </Link>
+          <div key={group.id} className="mb-1">
+            <button
+              type="button"
+              onClick={() => setOpenGroups((p) => ({ ...p, [group.id]: !open }))}
+              className={cn(
+                'flex w-full items-center justify-between rounded-lg px-2 py-2 text-start text-[var(--text-muted)] hover:bg-white/5',
+                collapsed && 'justify-center',
+              )}
+            >
+              {!collapsed ? <BiLabel ar={label.ar} en={label.en} size="sm" /> : <span className="text-xs">•</span>}
+              {!collapsed ? <ChevronDown size={14} className={cn('transition', open && 'rotate-180')} /> : null}
+            </button>
+            {open && !collapsed ? (
+              <div className="ms-1 mt-0.5 space-y-0.5 border-s border-white/10 ps-2">
+                {group.items.map((item) => {
+                  const itemLabel = L[item.label];
+                  const href = localePath(item.href, locale);
+                  const isActive = pathname === href || pathname.endsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={href}
+                      onClick={onNavigate}
+                      className={cn(
+                        'block rounded-lg px-2 py-2 transition',
+                        isActive
+                          ? 'bg-cyan-500/15 text-cyan-200'
+                          : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]',
+                      )}
+                    >
+                      <BiLabel ar={itemLabel.ar} en={itemLabel.en} size="sm" />
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
         );
       })}
     </nav>
   );
 }
 
-function SidebarBottom({ t }: { t: ReturnType<typeof useTranslations> }) {
-  return (
-    <div className="mt-auto border-t border-white/[0.08] p-4 space-y-3">
-      <div className="flex justify-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-400">
-          <ShieldCheck size={14} strokeWidth={1.75} />
-          {t('systemAdminBadge')}
-        </span>
-      </div>
-      <button
-        type="button"
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
-        aria-label={t('signOut')}
-      >
-        <LogOut size={18} strokeWidth={1.75} />
-        <span>{t('signOut')}</span>
-      </button>
-    </div>
-  );
-}
-
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const t = useTranslations('adminPanel');
-  const locale = useLocale();
   const pathname = usePathname();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const { theme, toggle } = useAdminTheme();
+  const backHref = localePath(parentAdminPath(pathname), locale);
+  const showGlobalBack = !pathname.endsWith('/admin/dashboard') && !pathname.endsWith('/admin');
 
   return (
-    <div className="flex min-h-screen bg-void">
-      {/* Desktop sidebar — RTL: fixed right */}
-      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-panel)]">
-        <div className="p-4 pb-2">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-            />
-            <span className="text-sm font-bold text-[var(--text-primary)]">
-              {t('sidebarTitle')}
+    <div className="flex min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]" dir="rtl">
+      <aside
+        className={cn(
+          'hidden flex-col border-s border-white/[0.08] bg-[var(--bg-panel)] transition-all lg:flex',
+          collapsed ? 'w-[72px]' : 'w-[280px]',
+        )}
+      >
+        <div className="flex items-center gap-3 p-4">
+          <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={36} height={36} className="h-9 w-9" />
+          {!collapsed ? <BiLabel ar={L.brand.ar} en={L.brand.en} /> : null}
+        </div>
+        <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
+        <div className="mt-auto space-y-2 border-t border-white/[0.08] p-3">
+          <div className="flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-400">
+              <ShieldCheck size={14} />
+              {!collapsed ? <BiInline ar={L.systemAdmin.ar} en={L.systemAdmin.en} /> : null}
             </span>
           </div>
+          <button
+            type="button"
+            onClick={toggle}
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-white/5"
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {!collapsed ? <BiInline ar={L.theme.ar} en={L.theme.en} /> : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-white/5"
+          >
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            {!collapsed ? <BiInline ar={collapsed ? L.expand.ar : L.collapse.ar} en={collapsed ? L.expand.en : L.collapse.en} /> : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400"
+          >
+            <LogOut size={16} />
+            {!collapsed ? <BiInline ar={L.signOut.ar} en={L.signOut.en} /> : null}
+          </button>
         </div>
-
-        <SidebarNav pathname={pathname} locale={locale} t={t} />
-        <SidebarBottom t={t} />
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 backdrop-blur-md lg:hidden">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/85 px-4 backdrop-blur-md lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5 cursor-pointer"
-                aria-label="Menu"
-              >
-                <Menu size={20} strokeWidth={1.75} />
+              <button type="button" className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5" aria-label="Menu">
+                <Menu size={20} />
               </button>
             </SheetTrigger>
-            <SheetContent
-              side={locale === 'ar' ? 'left' : 'right'}
-              className="w-[260px] border-s border-white/[0.08] bg-[var(--bg-panel)] p-0"
-            >
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <div className="p-4 pb-2">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/images/logos/v2-balanced-a-T.webp"
-                    alt="Muqabaleh"
-                    width={32}
-                    height={32}
-                    className="h-8 w-8"
-                  />
-                  <span className="text-sm font-bold text-[var(--text-primary)]">
-                    {t('sidebarTitle')}
-                  </span>
-                </div>
+            <SheetContent side="right" className="w-[280px] border-s border-white/[0.08] bg-[var(--bg-panel)] p-0">
+              <SheetTitle className="sr-only">Admin Menu</SheetTitle>
+              <div className="flex items-center gap-3 p-4">
+                <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={32} height={32} className="h-8 w-8" />
+                <BiLabel ar={L.brand.ar} en={L.brand.en} />
               </div>
-              <SidebarNav
-                pathname={pathname}
-                locale={locale}
-                t={t}
-                onNavigate={() => setOpen(false)}
-              />
-              <SidebarBottom t={t} />
+              <SidebarNav pathname={pathname} locale={locale} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <Image
-            src="/images/logos/v2-balanced-a-T.webp"
-            alt="Muqabaleh"
-            width={28}
-            height={28}
-            className="h-7 w-7"
-          />
-          <span className="text-sm font-bold text-[var(--text-primary)]">
-            {t('sidebarTitle')}
-          </span>
+          <BiLabel ar={L.brand.ar} en={L.brand.en} size="sm" />
+          <button type="button" onClick={toggle} className="ms-auto rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5">
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
         </header>
-
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          {showGlobalBack ? (
+            <div className="mb-4">
+              <Link
+                href={backHref}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm"
+              >
+                <ArrowRight size={16} />
+                <BiInline ar={L.back.ar} en={L.back.en} />
+              </Link>
+            </div>
+          ) : null}
           {children}
         </main>
       </div>

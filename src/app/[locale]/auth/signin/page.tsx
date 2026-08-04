@@ -20,6 +20,7 @@ export default function SignInPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [demoMode, setDemoMode] = useState(false);
@@ -63,6 +64,7 @@ export default function SignInPage() {
       const result = await signIn("credentials", {
         email,
         password,
+        totpCode: totpCode || undefined,
         redirect: false,
       });
 
@@ -166,6 +168,23 @@ export default function SignInPage() {
               {passwordError}
             </p>
           )}
+        </div>
+
+        {/* Optional Super Admin 2FA */}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="signin-totp" className="text-[var(--text-muted)]">
+            {locale === 'ar' ? 'رمز التحقق الثنائي (إن وُجد)' : '2FA code (if enabled)'}
+          </Label>
+          <Input
+            id="signin-totp"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="000000"
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value)}
+            className="glass-input h-11"
+          />
         </div>
 
         {/* Submit */}

@@ -4,8 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { UserRole } from '@/lib/enums';
 
 /**
- * Server-side admin gate. Client-side email checks are bypassable —
- * this runs on the server and redirects non-SUPER_ADMIN users.
+ * Server-side SUPER_ADMIN gate.
+ * Unauthenticated → sign-in. Authenticated but wrong role → 403 forbidden page.
  */
 export async function AdminGate({
   children,
@@ -17,8 +17,12 @@ export async function AdminGate({
   const session = await getServerSession(authOptions);
   const role = (session?.user as { role?: string } | undefined)?.role;
 
-  if (!session?.user || role !== UserRole.SUPER_ADMIN) {
-    redirect(locale === 'ar' ? '/' : `/${locale}`);
+  if (!session?.user) {
+    redirect(locale === 'ar' ? '/auth/signin' : `/${locale}/auth/signin`);
+  }
+
+  if (role !== UserRole.SUPER_ADMIN) {
+    redirect(locale === 'ar' ? '/forbidden' : `/${locale}/forbidden`);
   }
 
   return <>{children}</>;

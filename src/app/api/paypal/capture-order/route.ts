@@ -2,12 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getPayPalAccessToken } from '@/lib/paypal';
+import {
+  findPlanByAmount,
+  getPayPalAccessToken,
+  getPayPalApiBase,
+  refundPayPalCapture,
+} from '@/lib/paypal';
+
+type CaptureUnit = {
+  custom_id?: string;
+  payments?: {
+    captures?: Array<{
+      id?: string;
+      amount?: { currency_code?: string; value?: string };
+      status?: string;
+    }>;
+  };
+};
 
 /**
  * POST /api/paypal/capture-order
  * Captures a PayPal order after user approves payment.
- * Credits 1 Pro session and upgrades user to PRO tier.
+ * Credits sessions / upgrades tier based on PLAN_CONFIG amount mapping.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -27,14 +43,10 @@ export async function POST(req: NextRequest) {
     }
 
     const accessToken = await getPayPalAccessToken();
-    const baseUrl =
-      process.env.PAYPAL_MODE === 'live'
-        ? 'https://api-m.paypal.com'
-        : 'https://api-m.sandbox.paypal.com';
 
     // Capture the order
     const captureRes = await fetch(
-      `${baseUrl}/v2/checkout/orders/${orderId}/capture`,
+      `${getPayPalApiBase()}/v2/checkout/orders/${orderId}/capture`,
       {
         method: 'POST',
         headers: {
@@ -44,53 +56,119 @@ export async function POST(req: NextRequest) {
       },
     );
 
-    const captureData = (await captureRes.json()) as Record<string, unknown>;
+    const captureData = (await captureRes.json()) as {
+      status?: string;
+      purchase_units?: CaptureUnit[];
+      details?: unknown;
+    };
 
     if (!captureRes.ok) {
       console.error('PayPal capture error:', captureData);
       return NextResponse.json(
-        { error: 'Capture failed', details: captureData },
+        { error: 'Capture failed' },
         { status: captureRes.status },
       );
     }
 
-    // Verify the captured amount matches $9.99
-    const purchaseUnits = captureData.purchase_units as
-      | Array<{ amount: { currency_code: string; value: string } }>
-      | undefined;
-    const capturedAmount = purchaseUnits?.[0]?.amount?.value;
-    if (capturedAmount !== '9.99') {
-      console.error(`Amount mismatch! Expected 9.99, got ${capturedAmount}`);
+    const purchaseUnit = captureData.purchase_units?.[0];
+    const capture = purchaseUnit?.payments?.captures?.[0];
+    const captureId = capture?.id;
+    const capturedAmount = capture?.amount?.value;
+    const orderCustomId = purchaseUnit?.custom_id;
+
+    // Ownership: custom_id must match session user
+    if (!orderCustomId || orderCustomId !== userId) {
+      console.error(
+        `Order ownership mismatch: custom_id=${orderCustomId}, userId=${userId}`,
+      );
+      if (captureId) {
+        await refundPayPalCapture(
+          accessToken,
+          captureId,
+          'Order ownership mismatch',
+        );
+      }
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    if (!capturedAmount) {
+      console.error('Missing captured amount on PayPal capture response');
+      if (captureId) {
+        await refundPayPalCapture(
+          accessToken,
+          captureId,
+          'Missing captured amount',
+        );
+      }
+      return NextResponse.json(
+        { error: 'Amount missing — payment not processed for safety' },
+        { status: 400 },
+      );
+    }
+
+    const matched = findPlanByAmount(capturedAmount);
+    if (!matched) {
+      console.error(`Amount mismatch! No plan for captured amount ${capturedAmount}`);
+      if (captureId) {
+        await refundPayPalCapture(
+          accessToken,
+          captureId,
+          'Amount does not match any plan',
+        );
+      }
       return NextResponse.json(
         { error: 'Amount mismatch — payment not processed for safety' },
         { status: 400 },
       );
     }
 
-    // Record the payment in the database
-    await db.payment.create({
-      data: {
-        userId,
-        packageType: 'PRO',
-        amountUsdCents: 999,
-        paypalOrderId: orderId,
-        status: 'CAPTURED',
-        sessionsCredited: 1,
-        idempotencyKey: `${userId}-${orderId}`,
-        capturedAt: new Date(),
-      },
-    });
+    const [, config] = matched;
+    const amountUsdCents = Math.round(Number.parseFloat(config.amount) * 100);
 
-    // Upgrade user to PRO tier
-    await db.user.update({
-      where: { id: userId },
-      data: {
-        subscriptionTier: 'PRO',
-        sessionsLeft: { increment: 1 },
-      },
-    });
+    try {
+      // Record the payment in the database
+      await db.payment.create({
+        data: {
+          userId,
+          packageType: config.tier,
+          amountUsdCents,
+          paypalOrderId: orderId,
+          status: 'CAPTURED',
+          sessionsCredited: config.sessions,
+          idempotencyKey: `${userId}-${orderId}`,
+          capturedAt: new Date(),
+        },
+      });
 
-    return NextResponse.json({ success: true, tier: 'PRO' });
+      // Upgrade user tier / credit sessions for AI packages
+      if (config.sessions > 0) {
+        await db.user.update({
+          where: { id: userId },
+          data: {
+            subscriptionTier: config.tier,
+            sessionsLeft:
+              config.tier === 'UNLIMITED'
+                ? 999
+                : { increment: config.sessions },
+          },
+        });
+      }
+    } catch (dbErr) {
+      console.error('Post-capture DB error — initiating refund:', dbErr);
+      if (captureId) {
+        await refundPayPalCapture(
+          accessToken,
+          captureId,
+          'Failed to credit purchase',
+        );
+      }
+      return NextResponse.json(
+        { error: 'Failed to credit purchase — refund initiated' },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ success: true, tier: config.tier });
   } catch (err) {
     console.error('PayPal capture error:', err);
     return NextResponse.json(

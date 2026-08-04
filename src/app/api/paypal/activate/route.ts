@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getPayPalAccessToken, getPayPalSubscription } from '@/lib/paypal';
+import {
+  getAllowedPayPalPlanIds,
+  getPayPalAccessToken,
+  getPayPalSubscription,
+} from '@/lib/paypal';
 import { triggerPaymentReceiptEmail } from '@/lib/email-triggers';
 
 export async function POST(req: NextRequest) {
@@ -32,11 +36,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert subscription record
-    const billingInfo = subData.billing_info as
+    // Ownership: custom_id must match the authenticated user
+    const customId =
+      typeof subData.custom_id === 'string' ? subData.custom_id : null;
+    const subscriber = subData.subscriber as
       | Record<string, unknown>
       | undefined;
-    const subscriber = subData.subscriber as
+    const payerId =
+      typeof subscriber?.payer_id === 'string'
+        ? (subscriber.payer_id as string)
+        : null;
+
+    const existing = await db.paypalSubscription.findUnique({
+      where: { paypalSubscriptionId: subscriptionId },
+    });
+
+    const ownsByCustomId = customId === userId;
+    const ownsByDbRecord = existing?.userId === userId;
+    // payer_id is a PayPal identifier — only accept when we already bound this sub to the user
+    const ownsByPayer =
+      !!payerId && existing?.userId === userId && !!existing;
+
+    if (!ownsByCustomId && !ownsByDbRecord && !ownsByPayer) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Plan must be one of the configured plan IDs
+    const planId = typeof subData.plan_id === 'string' ? subData.plan_id : '';
+    const allowedPlans = getAllowedPayPalPlanIds();
+    if (!planId || !allowedPlans.includes(planId)) {
+      return NextResponse.json(
+        { error: 'Unknown or disallowed plan' },
+        { status: 400 },
+      );
+    }
+
+    const billingInfo = subData.billing_info as
       | Record<string, unknown>
       | undefined;
 
@@ -45,7 +80,7 @@ export async function POST(req: NextRequest) {
       create: {
         userId,
         paypalSubscriptionId: subscriptionId,
-        paypalPlanId: process.env.PAYPAL_PLAN_ID || 'unknown',
+        paypalPlanId: planId,
         status: 'ACTIVE',
         startTime: subData.start_time
           ? new Date(subData.start_time as string)
@@ -57,6 +92,7 @@ export async function POST(req: NextRequest) {
       },
       update: {
         status: 'ACTIVE',
+        paypalPlanId: planId,
         nextBillingTime: billingInfo?.next_billing_time
           ? new Date(billingInfo.next_billing_time as string)
           : null,
@@ -73,9 +109,10 @@ export async function POST(req: NextRequest) {
     });
 
     // Send payment receipt email (fire and forget)
-    const planId = typeof subData.plan_id === 'string' ? subData.plan_id : '';
     const planName = planId.includes('PRO') ? 'Pro' : 'Premium';
-    triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(() => {});
+    triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(
+      () => {},
+    );
 
     return NextResponse.json({ success: true });
   } catch (err) {

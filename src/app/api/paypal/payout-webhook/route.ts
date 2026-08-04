@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { verifyWebhookSignature } from '@/lib/paypal';
 import { triggerInterviewerPayoutSentEmail } from '@/lib/email-triggers';
 
 // POST /api/paypal/payout-webhook
 // Handles PayPal Payouts webhooks
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
+    const body = await req.text();
+
+    const valid = await verifyWebhookSignature(body, req.headers);
+    if (!valid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const payload = JSON.parse(body) as {
+      event_type?: string;
+      resource?: { payout_batch_id?: string };
+    };
     const eventType: string = payload.event_type ?? '';
 
     // Handle payout item completed
@@ -29,8 +40,6 @@ export async function POST(req: NextRequest) {
         triggerInterviewerPayoutSentEmail(payout.id, 'ar').catch(() => {});
         triggerInterviewerPayoutSentEmail(payout.id, 'en').catch(() => {});
       }
-
-      console.log(`[Payout Webhook] Completed ${payouts.length} payouts for batch ${batchId}`);
     }
 
     // Handle payout item failed
@@ -43,12 +52,11 @@ export async function POST(req: NextRequest) {
         where: { paypalBatchId: batchId, status: 'PROCESSING' },
         data: { status: 'PENDING', processedAt: null },
       });
-
-      console.warn(`[Payout Webhook] Payout failed for batch ${batchId}, reverted to PENDING`);
     }
+
+    return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Error processing PayPal payout webhook:', error);
+    return NextResponse.json({ error: 'Webhook failed' }, { status: 500 });
   }
-
-  return NextResponse.json({ received: true });
 }

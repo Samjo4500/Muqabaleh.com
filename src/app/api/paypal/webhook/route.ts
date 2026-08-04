@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { deactivateSubscription } from '@/lib/paypal';
+import { verifyWebhookSignature } from '@/lib/paypal';
 
 const SUBSCRIPTION_EVENTS = new Set([
   'BILLING.SUBSCRIPTION.CANCELLED',
@@ -13,12 +13,19 @@ const SUBSCRIPTION_EVENTS = new Set([
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
+
+    const valid = await verifyWebhookSignature(body, req.headers);
+    if (!valid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const event = JSON.parse(body) as {
       event_type: string;
       resource?: {
         id?: string;
         status?: string;
         billing_info?: { next_billing_time: string };
+        billing_agreement_id?: string;
       };
     };
 
@@ -27,7 +34,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    const subscriptionId = event.resource?.id;
+    // For sale events, subscription id lives on billing_agreement_id
+    const subscriptionId =
+      event.event_type === 'PAYMENT.SALE.COMPLETED'
+        ? event.resource?.billing_agreement_id || event.resource?.id
+        : event.resource?.id;
+
     if (!subscriptionId) {
       return NextResponse.json({ received: true, note: 'no subscription ID' });
     }

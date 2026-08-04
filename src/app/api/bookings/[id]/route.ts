@@ -5,16 +5,25 @@ import { db } from '@/lib/db';
 import { z } from 'zod';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+  PENDING: ['CONFIRMED', 'CANCELLED', 'RESCHEDULED'],
+  CONFIRMED: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'],
   IN_PROGRESS: ['COMPLETED'],
 };
 
 const updateBookingSchema = z.object({
-  status: z.enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  status: z
+    .enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'RESCHEDULED'])
+    .optional(),
   cancelledBy: z.string().max(50).optional(),
   meetingLink: z.string().url().max(500).optional(),
 });
+
+async function resolveInterviewerForUser(userId: string) {
+  return db.interviewer.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+}
 
 // GET /api/bookings/[id] — single booking with interviewer info
 export async function GET(
@@ -32,6 +41,7 @@ export async function GET(
 
     const { id } = await params;
     const userId = (session.user as Record<string, unknown>).id as string;
+    const userRole = (session.user as Record<string, unknown>).role as string;
 
     const booking = await db.humanBooking.findUnique({
       where: { id },
@@ -60,8 +70,12 @@ export async function GET(
       );
     }
 
-    // Only the booking owner or the interviewer can view
-    if (booking.userId !== userId && booking.interviewerId !== userId) {
+    const interviewer = await resolveInterviewerForUser(userId);
+    const isOwner = booking.userId === userId;
+    const isAssignedInterviewer = !!interviewer && booking.interviewerId === interviewer.id;
+    const isAdmin = userRole === 'SUPER_ADMIN';
+
+    if (!isOwner && !isAssignedInterviewer && !isAdmin) {
       return NextResponse.json(
         { error: { ar: 'غير مصرح بالوصول لهذا الحجز', en: 'Not authorized to access this booking' } },
         { status: 403 },
@@ -115,10 +129,43 @@ export async function PATCH(
       );
     }
 
-    // Authorization: owner or interviewer or admin
-    if (booking.userId !== userId && booking.interviewerId !== userId && userRole !== 'SUPER_ADMIN') {
+    const interviewer = await resolveInterviewerForUser(userId);
+    const isOwner = booking.userId === userId;
+    const isAssignedInterviewer = !!interviewer && booking.interviewerId === interviewer.id;
+    const isAdmin = userRole === 'SUPER_ADMIN';
+
+    if (!isOwner && !isAssignedInterviewer && !isAdmin) {
       return NextResponse.json(
         { error: { ar: 'غير مصرح', en: 'Unauthorized' } },
+        { status: 403 },
+      );
+    }
+
+    // Candidates may only cancel or reschedule
+    if (isOwner && !isAssignedInterviewer && !isAdmin) {
+      if (status && status !== 'CANCELLED' && status !== 'RESCHEDULED') {
+        return NextResponse.json(
+          {
+            error: {
+              ar: 'يمكن للمرشح فقط الإلغاء أو إعادة الجدولة',
+              en: 'Candidates may only cancel or reschedule',
+            },
+          },
+          { status: 403 },
+        );
+      }
+    }
+
+    // COMPLETED only for assigned interviewer or admin
+    // (Verified Daily/PayPal webhooks complete bookings via their own routes)
+    if (status === 'COMPLETED' && !isAssignedInterviewer && !isAdmin) {
+      return NextResponse.json(
+        {
+          error: {
+            ar: 'فقط المحاور أو المسؤول يمكنه إكمال الحجز',
+            en: 'Only the assigned interviewer or an admin can complete a booking',
+          },
+        },
         { status: 403 },
       );
     }
@@ -127,11 +174,16 @@ export async function PATCH(
     const updateData: Record<string, unknown> = {};
 
     if (meetingLink) {
+      if (!isAssignedInterviewer && !isAdmin) {
+        return NextResponse.json(
+          { error: { ar: 'غير مصرح', en: 'Unauthorized' } },
+          { status: 403 },
+        );
+      }
       updateData.meetingLink = meetingLink;
     }
 
     if (status) {
-      // Validate transition
       const allowed = VALID_TRANSITIONS[booking.status];
       if (!allowed || !allowed.includes(status)) {
         return NextResponse.json(
@@ -145,11 +197,10 @@ export async function PATCH(
         );
       }
 
-      // For cancellation, check >24h before scheduled time
       if (status === 'CANCELLED') {
         const hoursUntilScheduled =
           (booking.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
-        if (hoursUntilScheduled <= 24) {
+        if (hoursUntilScheduled <= 24 && !isAdmin) {
           return NextResponse.json(
             {
               error: {
@@ -168,7 +219,6 @@ export async function PATCH(
         updateData.status = status;
       }
 
-      // If completing, set earnings and increment interviewer stats
       if (status === 'COMPLETED') {
         updateData.earnings = booking.interviewerPayout;
         await db.interviewer.update({

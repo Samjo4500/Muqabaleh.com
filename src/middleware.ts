@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import { routing } from './i18n/routing';
-import { decodeJwt } from 'jose';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -13,10 +13,8 @@ const ROUTE_ROLES: Record<string, string[]> = {
   '/admin': ['SUPER_ADMIN'],
 };
 
-const SESSION_COOKIES = [
-  'next-auth.session-token',
-  '__Secure-next-auth.session-token',
-];
+/** Public interviewer paths that do not require INTERVIEWER role */
+const INTERVIEWER_PUBLIC_SUFFIXES = ['/apply', '/login'];
 
 function getLocaleFromPath(pathname: string): string {
   return pathname.startsWith('/en') ? 'en' : 'ar';
@@ -26,12 +24,18 @@ function stripLocale(pathname: string): string {
   return pathname.replace(/^\/(ar|en)(\/|$)/, '/');
 }
 
+function isInterviewerPublicPath(bare: string): boolean {
+  return INTERVIEWER_PUBLIC_SUFFIXES.some(
+    (suffix) => bare === `/interviewer${suffix}` || bare.startsWith(`/interviewer${suffix}/`),
+  );
+}
+
 function getProtectedRoute(pathname: string): { route: string; roles: string[] } | null {
   const bare = stripLocale(pathname);
   for (const [route, roles] of Object.entries(ROUTE_ROLES)) {
     if (bare === route || bare.startsWith(route + '/')) {
-      // /interviewer/[id] is public (browsable by anyone), but sub-paths like /interviewer/dashboard are protected
-      if (route === '/interviewer' && bare !== '/interviewer' && bare.split('/').length <= 3) {
+      // Only /interviewer/apply and /interviewer/login are public under /interviewer/*
+      if (route === '/interviewer' && isInterviewerPublicPath(bare)) {
         return null;
       }
       return { route, roles };
@@ -41,32 +45,57 @@ function getProtectedRoute(pathname: string): { route: string; roles: string[] }
 }
 
 /**
- * Decode the NextAuth JWT cookie to extract the user's role.
- * Returns null if the cookie doesn't exist or is invalid.
+ * Verify the NextAuth JWT (signature-checked) and return the user's role.
  */
-function getRoleFromRequest(request: NextRequest): string | null {
-  for (const name of SESSION_COOKIES) {
-    const token = request.cookies.get(name)?.value;
-    if (!token) continue;
-    try {
-      const payload = decodeJwt(token);
-      return (payload.role as string) || 'USER';
-    } catch {
-      // Invalid/expired token — treat as no session
-      return null;
+async function getRoleFromRequest(request: NextRequest): Promise<string | null> {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) return null;
+
+  try {
+    const token = await getToken({
+      req: request,
+      secret,
+      // Matches auth.ts cookie name (__Secure- prefix always configured)
+      cookieName: '__Secure-next-auth.session-token',
+    });
+
+    if (!token) {
+      // Fallback for local/dev cookies without __Secure- prefix
+      const fallback = await getToken({
+        req: request,
+        secret,
+        cookieName: 'next-auth.session-token',
+      });
+      if (!fallback) return null;
+      return (fallback.role as string) || 'USER';
     }
+
+    return (token.role as string) || 'USER';
+  } catch {
+    return null;
   }
-  return null;
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Check if this is a protected route
+  // Protect admin APIs explicitly (matcher includes /api/admin)
+  if (pathname.startsWith('/api/admin')) {
+    const role = await getRoleFromRequest(request);
+    if (!role) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
+
+  // Check if this is a protected page route
   const protectedRoute = getProtectedRoute(pathname);
 
   if (protectedRoute) {
-    const role = getRoleFromRequest(request);
+    const role = await getRoleFromRequest(request);
     const locale = getLocaleFromPath(pathname);
 
     // No valid session → redirect to signin
@@ -90,6 +119,7 @@ export const config = {
   matcher: [
     '/',
     '/(ar|en)/:path*',
+    '/api/admin/:path*',
     '/((?!api|_next|_vercel|.*\\..*).*)',
   ],
 };

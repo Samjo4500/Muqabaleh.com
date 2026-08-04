@@ -1,18 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import crypto from 'crypto';
 
-// POST /api/daily/webhook
-// Daily.co sends events here
-export async function POST(req: NextRequest) {
-  // Always return 200 quickly — Daily.co retries on non-200
-  // Process the event asynchronously
+/**
+ * Verify Daily.co webhook signature.
+ * Daily sends X-Webhook-Signature + X-Webhook-Timestamp (HMAC-SHA256 over
+ * `${timestamp}.${rawBody}`, secret is base64-encoded).
+ * Also accepts X-Daily-Signature as an alias when present.
+ */
+function verifyDailySignature(rawBody: string, headers: Headers): boolean {
+  const secret = process.env.DAILY_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error('[Daily] DAILY_WEBHOOK_SECRET is not configured');
+    return false;
+  }
+
+  const signature =
+    headers.get('x-daily-signature') || headers.get('x-webhook-signature');
+  const timestamp = headers.get('x-webhook-timestamp');
+
+  if (!signature) {
+    return false;
+  }
 
   try {
-    // Read raw body (for future signature verification)
+    // Daily docs: base64-decode the hmac secret, sign `${timestamp}.${body}`
+    const signedPayload = timestamp ? `${timestamp}.${rawBody}` : rawBody;
+    let key: Buffer;
+    try {
+      key = Buffer.from(secret, 'base64');
+      // If secret wasn't valid base64 of meaningful length, fall back to raw utf8
+      if (key.length === 0) key = Buffer.from(secret, 'utf8');
+    } catch {
+      key = Buffer.from(secret, 'utf8');
+    }
+
+    const computed = crypto
+      .createHmac('sha256', key)
+      .update(signedPayload)
+      .digest('base64');
+
+    const a = Buffer.from(computed);
+    const b = Buffer.from(signature);
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  } catch (err) {
+    console.error('[Daily] Signature verification error:', err);
+    return false;
+  }
+}
+
+// POST /api/daily/webhook
+export async function POST(req: NextRequest) {
+  try {
     const rawBody = await req.text();
-    // TODO: Verify Daily.co signature for production
-    // For MVP, just log a warning
-    console.warn('Daily.co webhook received without signature verification');
+
+    if (!verifyDailySignature(rawBody, req.headers)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const payload = JSON.parse(rawBody);
     const eventType: string = payload.event ?? '';
@@ -26,20 +71,15 @@ export async function POST(req: NextRequest) {
 
       if (roomName && roomName.startsWith('muqabaleh-')) {
         try {
-          // Find the booking by daily room name
           const booking = await db.humanBooking.findFirst({
             where: { dailyRoomName: roomName },
             include: { interviewer: true },
           });
 
           if (booking && booking.status !== 'COMPLETED') {
-            // Check if all participants have left
-            // The participant-left event means someone left;
-            // we check current participant count from the payload
             const participantCount: number = payload.participant_count ?? 0;
 
             if (participantCount === 0) {
-              // All participants have left — mark as completed + set earnings
               await db.humanBooking.update({
                 where: { id: booking.id },
                 data: {
@@ -48,7 +88,6 @@ export async function POST(req: NextRequest) {
                 },
               });
 
-              // Increment interviewer stats if interviewer exists
               if (booking.interviewerId) {
                 await db.interviewer.update({
                   where: { id: booking.interviewerId },
@@ -59,7 +98,6 @@ export async function POST(req: NextRequest) {
                   },
                 });
               }
-
             }
           }
         } catch (dbError) {
@@ -69,10 +107,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle recording events to store recording URL
-    if (
-      eventType.includes('recording') &&
-      payload.recording_url
-    ) {
+    if (eventType.includes('recording') && payload.recording_url) {
       const roomName: string | undefined = payload.room_name;
 
       if (roomName && roomName.startsWith('muqabaleh-')) {
@@ -83,16 +118,15 @@ export async function POST(req: NextRequest) {
               recordingUrl: payload.recording_url,
             },
           });
-
         } catch (dbError) {
           console.error('Error storing recording URL:', dbError);
         }
       }
     }
-  } catch (error) {
-    // Log but don't throw — we must always return 200
-    console.error('Error processing Daily.co webhook:', error);
-  }
 
-  return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error('Error processing Daily.co webhook:', error);
+    return NextResponse.json({ error: 'Webhook failed' }, { status: 500 });
+  }
 }

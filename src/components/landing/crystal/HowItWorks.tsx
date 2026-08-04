@@ -1,76 +1,50 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
-import { fadeUp, stagger, easeCrystal } from './motion';
+import { BiText } from './BiText';
+import { C } from './copy';
+import { fadeUp, stagger } from './motion';
 
 export function CrystalHowItWorks() {
-  const t = useTranslations('landing.steps');
-  const steps = [
-    { title: t('step1'), desc: t('desc1') },
-    { title: t('step2'), desc: t('desc2') },
-    { title: t('step3'), desc: t('desc3') },
-    { title: t('step4'), desc: t('desc4') },
-  ];
-
   return (
-    <section id="how-it-works" className="section-pad relative">
-      <motion.div
-        className="content-wrap mb-12 max-w-2xl text-center"
-        variants={stagger}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.25 }}
-      >
-        <motion.h2
+    <section id="how-it-works" className="section-pad scroll-mt-28">
+      <div className="content-wrap">
+        <motion.div
           variants={fadeUp}
-          className="font-display text-[32px] font-bold tracking-[-0.02em] md:text-4xl lg:text-[48px] lg:leading-[56px]"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-80px' }}
+          className="mb-12"
         >
-          {t('title')}
-        </motion.h2>
-        <motion.p variants={fadeUp} className="mt-3 text-lg leading-7 text-[var(--text-secondary)]">
-          {t('subtitle')}
-        </motion.p>
-      </motion.div>
-
-      <div className="content-wrap relative">
-        <div className="pointer-events-none absolute start-8 end-8 top-[1.75rem] hidden h-px overflow-hidden md:block" aria-hidden>
-          <motion.div
-            className="h-full w-full origin-left rtl:origin-right"
-            style={{ background: 'linear-gradient(90deg, #6366f1, #06b6d4)' }}
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2, ease: easeCrystal }}
+          <BiText
+            as="h2"
+            bi={C.how.title}
+            primaryClassName="font-display text-3xl font-bold tracking-[-0.02em] md:text-4xl"
           />
-        </div>
+        </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ delay: 0.08 * i, duration: 0.4, ease: easeCrystal }}
-              className="relative"
-            >
-              <motion.div
-                className="glass relative z-10 mb-4 flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold gradient-text"
-                initial={{ boxShadow: '0 0 0 rgba(99,102,241,0)' }}
-                whileInView={{ boxShadow: '0 0 24px rgba(99,102,241,0.45)' }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 + i * 0.08, duration: 0.4 }}
-              >
-                {i + 1}
-              </motion.div>
-              <div className="glass rounded-2xl p-8">
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">{step.title}</h3>
-                <p className="mt-2 text-sm text-[var(--text-muted)]">{step.desc}</p>
-              </div>
-            </motion.div>
+        <motion.ol
+          variants={stagger}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-60px' }}
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {C.how.steps.map((step, i) => (
+            <motion.li key={step.title.en} variants={fadeUp} className="relative">
+              <span className="font-display mb-4 block text-4xl font-bold text-cyan-400/30">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <BiText
+                as="h3"
+                bi={step.title}
+                className="mb-2"
+                primaryClassName="font-display text-lg font-semibold"
+              />
+              <BiText bi={step.desc} primaryClassName="text-sm text-[var(--text-secondary)]" />
+            </motion.li>
           ))}
-        </div>
+        </motion.ol>
       </div>
     </section>
   );

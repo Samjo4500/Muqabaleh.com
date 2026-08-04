@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      { source: '/login', destination: '/auth/signin', permanent: false },
+      { source: '/register', destination: '/auth/register', permanent: false },
+      { source: '/en/login', destination: '/en/auth/signin', permanent: false },
+      { source: '/en/register', destination: '/en/auth/register', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

@@ -11,13 +11,13 @@ import { cn } from '@/lib/utils';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
 
 const NAV_LINKS = [
-  { key: 'why', href: '#why' },
+  { key: 'why', href: '#learners' },
   { key: 'how', href: '#how' },
-  { key: 'interviewers', href: '#interviewers' },
+  { key: 'interviewers', href: '#business' },
   { key: 'pricing', href: '#pricing' },
   { key: 'business', href: '/business' },
   { key: 'blog', href: '/blog' },
-  { key: 'faq', href: '#faq' },
+  { key: 'faq', href: '#testimonials' },
 ] as const;
 
 export function Navbar() {
@@ -47,7 +47,7 @@ export function Navbar() {
       className={cn(
         'fixed inset-x-0 top-0 z-50 transition-all duration-300',
         scrolled
-          ? 'border-b border-white/5 bg-[var(--bg-panel)]/80 backdrop-blur-lg'
+          ? 'border-b border-white/10 bg-black/40 backdrop-blur-xl'
           : 'bg-transparent'
       )}
     >

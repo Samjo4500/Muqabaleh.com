@@ -98,7 +98,7 @@ export default function DemoContent() {
               className="h-10 w-auto sm:h-11"
               priority
             />
-            <span className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] sm:inline-flex">
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]">
               <Home size={12} className="text-[var(--aurora-2)]" />
               {t('home')}
             </span>

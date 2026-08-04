@@ -10,7 +10,8 @@ import {
 } from 'framer-motion';
 import Link from 'next/link';
 import { Mic } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 import { easeCrystal } from './motion';
 
 function ScoreRing({ value }: { value: number }) {
@@ -211,6 +212,7 @@ function HeroInterviewDeck() {
 
 export function CrystalHero() {
   const t = useTranslations('landing');
+  const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -319,7 +321,7 @@ export function CrystalHero() {
                 transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
                 className="rounded-[0.875rem]"
               >
-                <Link href="/demo" className="glass-button inline-flex w-full justify-center sm:w-auto">
+                <Link href={localePath('/demo', locale)} className="glass-button inline-flex w-full justify-center sm:w-auto">
                   {t('hero.ctaPrimary')}
                 </Link>
               </motion.div>

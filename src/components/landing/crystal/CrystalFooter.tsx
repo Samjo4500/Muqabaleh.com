@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { getLocaleSwitchPath } from '@/i18n/navigation';
+import { getLocaleSwitchPath, localePath } from '@/i18n/navigation';
 
 export function CrystalFooter() {
   const t = useTranslations('landing.footer');
@@ -16,31 +16,31 @@ export function CrystalFooter() {
       title: t('product'),
       links: [
         { label: t('pricing'), href: '#pricing' },
-        { label: t('demo'), href: '/demo' },
-        { label: t('business'), href: '/business' },
+        { label: t('demo'), href: localePath('/demo', locale) },
+        { label: t('business'), href: localePath('/business', locale) },
       ],
     },
     {
       title: t('resources'),
       links: [
-        { label: t('blog'), href: '/blog' },
-        { label: t('support'), href: '/support' },
-        { label: t('demo'), href: '/demo' },
+        { label: t('blog'), href: localePath('/blog', locale) },
+        { label: t('support'), href: localePath('/support', locale) },
+        { label: t('demo'), href: localePath('/demo', locale) },
       ],
     },
     {
       title: t('company'),
       links: [
-        { label: t('about'), href: '/about' },
-        { label: t('support'), href: '/support#contact' },
+        { label: t('about'), href: localePath('/about', locale) },
+        { label: t('support'), href: localePath('/support#contact', locale) },
       ],
     },
     {
       title: t('legal'),
       links: [
-        { label: t('privacy'), href: '/privacy' },
-        { label: t('terms'), href: '/terms' },
-        { label: t('refund'), href: '/refund' },
+        { label: t('privacy'), href: localePath('/privacy', locale) },
+        { label: t('terms'), href: localePath('/terms', locale) },
+        { label: t('refund'), href: localePath('/refund', locale) },
       ],
     },
   ];
@@ -55,7 +55,7 @@ export function CrystalFooter() {
       <div className="content-wrap py-12">
         <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <Link href="/" className="font-display text-lg font-bold tracking-[-0.02em] text-[var(--text-primary)]">
+            <Link href={localePath('/', locale)} className="font-display text-lg font-bold tracking-[-0.02em] text-[var(--text-primary)]">
               {tLanding('brand')}
             </Link>
             <p className="mt-2 max-w-sm text-sm text-[var(--text-muted)]">{t('tagline')}</p>

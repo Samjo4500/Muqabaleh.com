@@ -4,7 +4,8 @@ import { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { Mic } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 import { fadeUp, stagger, easeCrystal } from './motion';
 
 function InterviewSim() {
@@ -111,6 +112,7 @@ function InterviewSim() {
 
 export function CrystalB2C() {
   const t = useTranslations('landing.b2c');
+  const locale = useLocale();
   const pills = [t('feature1'), t('feature2'), t('feature3')];
 
   return (
@@ -137,7 +139,7 @@ export function CrystalB2C() {
             ))}
           </motion.div>
           <motion.div variants={fadeUp} className="mt-8">
-            <Link href="/demo" className="glass-button inline-flex">
+            <Link href={localePath('/demo', locale)} className="glass-button inline-flex">
               {t('cta')}
             </Link>
           </motion.div>

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { easeCrystal } from '@/components/landing/crystal/motion';
+import { localePath } from '@/i18n/navigation';
 
 export default function DemoContent() {
   const t = useTranslations('demo');
@@ -29,7 +30,7 @@ export default function DemoContent() {
   }, []);
 
   const goHome = () => {
-    router.push('/');
+    router.push(localePath('/', locale));
   };
 
   const goBack = () => {
@@ -86,7 +87,7 @@ export default function DemoContent() {
       <header className="relative z-20 px-4 pt-4 md:px-6">
         <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 rounded-2xl px-3 sm:px-4">
           <Link
-            href="/"
+            href={localePath('/', locale)}
             className="group inline-flex min-w-0 items-center gap-2.5 rounded-xl py-1 pe-2 transition hover:bg-white/[0.04]"
             aria-label={t('home')}
           >
@@ -175,14 +176,14 @@ export default function DemoContent() {
 
           <div className="mt-6 flex flex-col gap-2">
             <Link
-              href="/"
+              href={localePath('/', locale)}
               className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text-primary)]"
             >
               <Home size={16} />
               {t('home')}
             </Link>
             <Link
-              href="/pricing"
+              href={localePath('/pricing', locale)}
               className="glass flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm text-[var(--text-muted)] transition hover:border-white/20 hover:text-[var(--text-primary)]"
             >
               {t('pricingLink')}

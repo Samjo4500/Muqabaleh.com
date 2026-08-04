@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { getLocaleSwitchPath } from '@/i18n/navigation';
+import { getLocaleSwitchPath, localePath } from '@/i18n/navigation';
 
 const NAV_LINKS = [
   { key: 'learners', href: '#learners' },
@@ -37,6 +37,7 @@ export function CrystalNavbar() {
   };
 
   const localeLabel = locale === 'ar' ? 'EN' : 'AR';
+  const homeHref = localePath('/', locale);
   const isHome =
     pathname === '/' ||
     pathname === `/${locale}` ||
@@ -45,10 +46,13 @@ export function CrystalNavbar() {
     pathname === '/en/';
 
   const resolveHref = (href: string) => {
-    if (href.startsWith('#') && !isHome) {
-      return locale === 'ar' ? `/${href}` : `/${locale}${href}`;
+    if (href.startsWith('#')) {
+      if (!isHome) {
+        return `${homeHref === '/' ? '' : homeHref}${href}`;
+      }
+      return href;
     }
-    return href;
+    return localePath(href, locale);
   };
 
   return (
@@ -60,7 +64,7 @@ export function CrystalNavbar() {
         )}
       >
         <Link
-          href="/"
+          href={homeHref}
           className="font-display shrink-0 text-lg font-bold tracking-[-0.02em] text-[var(--text-primary)]"
         >
           {tLanding('brand')}
@@ -88,18 +92,18 @@ export function CrystalNavbar() {
             {localeLabel}
           </button>
           <Link
-            href="/auth/signin"
+            href={localePath('/auth/signin', locale)}
             className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
           >
             {t('signIn')}
           </Link>
-          <Link href="/demo" className="glass-button text-sm !px-4 !py-2">
+          <Link href={localePath('/demo', locale)} className="glass-button text-sm !px-4 !py-2">
             {t('startFree')}
           </Link>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <Link href="/demo" className="glass-button text-xs !px-3 !py-1.5">
+          <Link href={localePath('/demo', locale)} className="glass-button text-xs !px-3 !py-1.5">
             {t('startFree')}
           </Link>
           <Sheet open={open} onOpenChange={setOpen}>
@@ -144,14 +148,14 @@ export function CrystalNavbar() {
                   {localeLabel}
                 </button>
                 <Link
-                  href="/auth/signin"
+                  href={localePath('/auth/signin', locale)}
                   onClick={() => setOpen(false)}
                   className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)]"
                 >
                   {t('signIn')}
                 </Link>
                 <Link
-                  href="/demo"
+                  href={localePath('/demo', locale)}
                   onClick={() => setOpen(false)}
                   className="glass-button mt-2 min-h-[44px] text-center text-sm"
                 >

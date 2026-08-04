@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Menu, Globe } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { getLocaleSwitchPath } from '@/i18n/navigation';
+import { getLocaleSwitchPath, localePath } from '@/i18n/navigation';
 
 const NAV_LINKS = [
   { key: 'why', href: '#why' },
@@ -41,6 +41,23 @@ export function Navbar() {
   };
 
   const localeLabel = locale === 'ar' ? 'EN' : 'AR';
+  const homeHref = localePath('/', locale);
+  const isHome =
+    pathname === '/' ||
+    pathname === `/${locale}` ||
+    pathname === `/${locale}/` ||
+    pathname === '/en' ||
+    pathname === '/en/';
+
+  const resolveHref = (href: string) => {
+    if (href.startsWith('#')) {
+      if (!isHome) {
+        return `${homeHref === '/' ? '' : homeHref}${href}`;
+      }
+      return href;
+    }
+    return localePath(href, locale);
+  };
 
   return (
     <header
@@ -53,7 +70,7 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo — RTL: right, LTR: left */}
-        <Link href="/" className="shrink-0">
+        <Link href={homeHref} className="shrink-0">
           <Image
             src="/images/logos/v2-balanced-a-T.webp"
             alt="مقابلة | Muqabaleh"
@@ -69,7 +86,7 @@ export function Navbar() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.key}
-              href={link.href}
+              href={resolveHref(link.href)}
               className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
               {t(link.key)}
@@ -87,10 +104,10 @@ export function Navbar() {
             <Globe size={16} strokeWidth={1.75} />
             {localeLabel}
           </button>
-          <Link href="/auth/signin" className="btn-ghost text-sm">
+          <Link href={localePath('/auth/signin', locale)} className="btn-ghost text-sm">
             {tc('login')}
           </Link>
-          <Link href="/auth/register" className="btn-gold text-sm">
+          <Link href={localePath('/auth/register', locale)} className="btn-gold text-sm">
             {tc('startFree')}
           </Link>
         </div>
@@ -118,7 +135,7 @@ export function Navbar() {
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.key}
-                  href={link.href}
+                  href={resolveHref(link.href)}
                   onClick={() => setOpen(false)}
                   className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
                 >
@@ -137,14 +154,14 @@ export function Navbar() {
                 {localeLabel}
               </button>
               <Link
-                href="/auth/signin"
+                href={localePath('/auth/signin', locale)}
                 onClick={() => setOpen(false)}
                 className="min-h-[44px] rounded-lg px-3 py-2.5 text-sm text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--text-primary)]"
               >
                 {tc('login')}
               </Link>
               <Link
-                href="/auth/register"
+                href={localePath('/auth/register', locale)}
                 onClick={() => setOpen(false)}
                 className="btn-gold mt-2 min-h-[44px] text-center text-sm"
               >

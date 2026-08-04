@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
+import { localePath } from '@/i18n/navigation';
 
 const SOCIAL_LINKS = [
   {
@@ -86,7 +87,7 @@ export function Footer() {
               {productLinks.map((link) => (
                 <li key={link.key}>
                   <Link
-                    href={link.href}
+                    href={localePath(link.href, locale)}
                     className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
                   >
                     {t(link.key)}
@@ -105,7 +106,7 @@ export function Footer() {
               {companyLinks.map((link) => (
                 <li key={link.key}>
                   <Link
-                    href={link.href}
+                    href={localePath(link.href, locale)}
                     className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
                   >
                     {t(link.key)}
@@ -124,7 +125,7 @@ export function Footer() {
               {supportLinks.map((link) => (
                 <li key={link.key}>
                   <Link
-                    href={link.href}
+                    href={localePath(link.href, locale)}
                     className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
                   >
                     {t(link.key)}
@@ -143,7 +144,7 @@ export function Footer() {
               {legalLinks.map((link) => (
                 <li key={link.key}>
                   <Link
-                    href={link.href}
+                    href={localePath(link.href, locale)}
                     className="text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
                   >
                     {t(link.key)}

@@ -3,7 +3,8 @@
 import { motion, useInView } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 import { fadeUp, stagger, easeCrystal } from './motion';
 
 function CountUp({ value, suffix = '' }: { value: number; suffix?: string }) {
@@ -120,6 +121,7 @@ function DashboardSim() {
 
 export function CrystalB2B() {
   const t = useTranslations('landing.b2b');
+  const locale = useLocale();
   const pills = [t('feature1'), t('feature2'), t('feature3')];
 
   return (
@@ -155,7 +157,7 @@ export function CrystalB2B() {
             ))}
           </motion.div>
           <motion.div variants={fadeUp} className="mt-8">
-            <Link href="/business" className="glass-button inline-flex">
+            <Link href={localePath('/business', locale)} className="glass-button inline-flex">
               {t('cta')}
             </Link>
           </motion.div>

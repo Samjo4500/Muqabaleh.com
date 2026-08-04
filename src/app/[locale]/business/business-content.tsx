@@ -7,6 +7,7 @@ import { Users, ListChecks, FileDown, LayoutDashboard, UserCheck, Lock, Check } 
 import { CrystalNavbar } from '@/components/landing/crystal/CrystalNavbar';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
+import { localePath } from '@/i18n/navigation';
 
 const FEATURE_ICONS = [Users, ListChecks, FileDown, LayoutDashboard, UserCheck, Lock] as const;
 
@@ -94,7 +95,7 @@ export default function BusinessContent() {
               {t('heroSub')}
             </p>
             <div className="relative z-10 mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-              <Link href="/demo" className="glass-button inline-flex justify-center">
+              <Link href={localePath('/demo', locale)} className="glass-button inline-flex justify-center">
                 {t('ctaTitle')}
               </Link>
               <Link href="#how" className="btn-ghost-crystal inline-flex justify-center">
@@ -253,7 +254,7 @@ export default function BusinessContent() {
                     ))}
                   </ul>
                   <Link
-                    href={plan.href}
+                    href={localePath(plan.href, locale)}
                     className={`w-full text-center text-sm ${plan.popular ? 'glass-button' : 'btn-ghost-crystal'}`}
                   >
                     {t(plan.ctaKey)}
@@ -303,7 +304,7 @@ export default function BusinessContent() {
             <p className="relative z-10 mx-auto mt-6 max-w-xl text-lg text-[var(--text-secondary)]">
               {t('ctaSub')}
             </p>
-            <Link href="/demo" className="glass-button relative z-10 mt-8 inline-flex">
+            <Link href={localePath('/demo', locale)} className="glass-button relative z-10 mt-8 inline-flex">
               {t('ctaTitle')}
             </Link>
           </motion.div>

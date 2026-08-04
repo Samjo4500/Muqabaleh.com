@@ -3,11 +3,13 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
 export function CrystalPricing() {
   const t = useTranslations('landing.pricing');
+  const locale = useLocale();
 
   const tiers = [
     {
@@ -16,7 +18,7 @@ export function CrystalPricing() {
       period: t('period'),
       features: [t('feat1'), t('feat2'), t('feat3')],
       cta: t('ctaFree'),
-      href: '/demo',
+      href: localePath('/demo', locale),
       featured: false,
     },
     {
@@ -25,7 +27,7 @@ export function CrystalPricing() {
       period: t('period'),
       features: [t('feat4'), t('feat5'), t('feat6'), t('feat7')],
       cta: t('ctaPro'),
-      href: '/pricing',
+      href: localePath('/pricing', locale),
       featured: false,
     },
     {
@@ -34,7 +36,7 @@ export function CrystalPricing() {
       period: t('period'),
       features: [t('feat8'), t('feat9'), t('feat10'), t('feat11')],
       cta: t('ctaUnlimited'),
-      href: '/pricing',
+      href: localePath('/pricing', locale),
       featured: true,
     },
     {
@@ -43,7 +45,7 @@ export function CrystalPricing() {
       period: '',
       features: [t('feat12'), t('feat13'), t('feat14')],
       cta: t('ctaEnterprise'),
-      href: '/business',
+      href: localePath('/business', locale),
       featured: false,
     },
   ];

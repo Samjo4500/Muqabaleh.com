@@ -2,11 +2,13 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 import { easeCrystal } from './motion';
 
 export function CrystalFinalCta() {
   const t = useTranslations('landing.finalCta');
+  const locale = useLocale();
 
   return (
     <section className="section-pad relative overflow-hidden">
@@ -45,11 +47,11 @@ export function CrystalFinalCta() {
             transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
             className="rounded-[0.875rem]"
           >
-            <Link href="/demo" className="glass-button inline-flex w-full justify-center sm:w-auto">
+            <Link href={localePath('/demo', locale)} className="glass-button inline-flex w-full justify-center sm:w-auto">
               {t('ctaPrimary')}
             </Link>
           </motion.div>
-          <Link href="/business" className="btn-ghost-crystal inline-flex w-full justify-center sm:w-auto">
+          <Link href={localePath('/business', locale)} className="btn-ghost-crystal inline-flex w-full justify-center sm:w-auto">
             {t('ctaSecondary')}
           </Link>
         </div>

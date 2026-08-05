@@ -144,12 +144,12 @@ export default function RegisterPage() {
   const sharedFields = (
     <>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="reg-name" className="text-[var(--text-muted)]">
+        <Label htmlFor="reg-name" className="text-white/60">
           {t('name')}
         </Label>
         <div className="relative">
           <User
-            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
             size={18}
             strokeWidth={1.75}
           />
@@ -173,12 +173,12 @@ export default function RegisterPage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="reg-email" className="text-[var(--text-muted)]">
+        <Label htmlFor="reg-email" className="text-white/60">
           {t('email')}
         </Label>
         <div className="relative">
           <Mail
-            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
             size={18}
             strokeWidth={1.75}
           />
@@ -235,13 +235,13 @@ export default function RegisterPage() {
       />
 
       <div className="flex flex-col gap-2">
-        <Label className="text-[var(--text-muted)]">{t('country')}</Label>
+        <Label className="text-white/60">{t('country')}</Label>
         <Select value={country} onValueChange={setCountry}>
-          <SelectTrigger className="glass-input h-11 w-full border-white/10 text-[var(--text-muted)]">
-            <Globe className="me-2 inline text-[var(--text-faint)]" size={16} strokeWidth={1.75} />
+          <SelectTrigger className="glass-input h-11 w-full border-white/10 text-white/60">
+            <Globe className="me-2 inline text-white/40" size={16} strokeWidth={1.75} />
             <SelectValue placeholder={t('countryPlaceholder')} />
           </SelectTrigger>
-          <SelectContent className="border-white/10 bg-[var(--bg-panel)]">
+          <SelectContent className="border-white/10 bg-[#0a1220]">
             <SelectItem value="sa">{t('countrySaudi')}</SelectItem>
             <SelectItem value="ae">{t('countryUAE')}</SelectItem>
             <SelectItem value="qa">{t('countryQatar')}</SelectItem>
@@ -264,13 +264,13 @@ export default function RegisterPage() {
           <TabsList className="mx-auto flex w-full bg-white/5">
             <TabsTrigger
               value="individual"
-              className="flex-1 text-[var(--text-muted)] data-[state=active]:bg-[var(--gold)] data-[state=active]:text-[var(--bg-void)] data-[state=active]:shadow-none"
+              className="flex-1 text-white/60 data-[state=active]:bg-teal-400/25 data-[state=active]:text-teal-100 data-[state=active]:shadow-none"
             >
               {t('tabIndividual')}
             </TabsTrigger>
             <TabsTrigger
               value="company"
-              className="flex-1 text-[var(--text-muted)] data-[state=active]:bg-[var(--gold)] data-[state=active]:text-[var(--bg-void)] data-[state=active]:shadow-none"
+              className="flex-1 text-white/60 data-[state=active]:bg-teal-400/25 data-[state=active]:text-teal-100 data-[state=active]:shadow-none"
             >
               {t('tabCompany')}
             </TabsTrigger>
@@ -282,12 +282,12 @@ export default function RegisterPage() {
 
           <TabsContent value="company" className="mt-5 flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="reg-company" className="text-[var(--text-muted)]">
+              <Label htmlFor="reg-company" className="text-white/60">
                 {t('companyName')}
               </Label>
               <div className="relative">
                 <Building2
-                  className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+                  className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
                   size={18}
                   strokeWidth={1.75}
                 />
@@ -313,12 +313,12 @@ export default function RegisterPage() {
             {sharedFields}
 
             <div className="flex flex-col gap-2">
-              <Label className="text-[var(--text-muted)]">{t('companySize')}</Label>
+              <Label className="text-white/60">{t('companySize')}</Label>
               <Select value={companySize} onValueChange={setCompanySize}>
-                <SelectTrigger className="glass-input h-11 w-full border-white/10 text-[var(--text-muted)]">
+                <SelectTrigger className="glass-input h-11 w-full border-white/10 text-white/60">
                   <SelectValue placeholder={t('companySizePlaceholder')} />
                 </SelectTrigger>
-                <SelectContent className="border-white/10 bg-[var(--bg-panel)]">
+                <SelectContent className="border-white/10 bg-[#0a1220]">
                   <SelectItem value="small">{t('sizeSmall')}</SelectItem>
                   <SelectItem value="medium">{t('sizeMedium')}</SelectItem>
                   <SelectItem value="large">{t('sizeLarge')}</SelectItem>
@@ -327,12 +327,12 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-[var(--text-muted)]">{t('companySector')}</Label>
+              <Label className="text-white/60">{t('companySector')}</Label>
               <Select value={companySector} onValueChange={setCompanySector}>
-                <SelectTrigger className="glass-input h-11 w-full border-white/10 text-[var(--text-muted)]">
+                <SelectTrigger className="glass-input h-11 w-full border-white/10 text-white/60">
                   <SelectValue placeholder={t('companySectorPlaceholder')} />
                 </SelectTrigger>
-                <SelectContent className="border-white/10 bg-[var(--bg-panel)]">
+                <SelectContent className="border-white/10 bg-[#0a1220]">
                   <SelectItem value="tech">{t('sectorTech')}</SelectItem>
                   <SelectItem value="finance">{t('sectorFinance')}</SelectItem>
                   <SelectItem value="healthcare">{t('sectorHealthcare')}</SelectItem>
@@ -350,17 +350,17 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-gold flex w-full cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
+          className="mq-btn mq-btn-primary flex w-full min-h-[48px] cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : null}
           {tCommon('submit')}
         </button>
 
-        <p className="text-center text-sm text-[var(--text-muted)]">
+        <p className="text-center text-sm text-white/60">
           {t('hasAccount')}{' '}
           <Link
             href={`/${locale}/auth/signin`}
-            className="font-semibold text-[var(--gold)] transition-colors hover:text-[var(--gold-hover)]"
+            className="font-semibold text-teal-300 transition-colors hover:text-teal-200"
           >
             {t('signinLink')}
           </Link>

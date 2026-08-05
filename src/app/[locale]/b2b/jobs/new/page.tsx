@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { ArrowRight, Plus, X, Upload, Download } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -15,213 +16,256 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 
-const INDUSTRIES = ['sectorTech', 'sectorFinance', 'sectorHealthcare', 'sectorEducation', 'sectorEngineering', 'sectorMarketing', 'sectorHr', 'sectorOther'] as const;
+const INDUSTRIES = [
+  'Technology',
+  'Finance',
+  'Healthcare',
+  'Education',
+  'Engineering',
+  'Marketing',
+  'HR',
+  'Other',
+] as const;
 
 export default function NewJobPage() {
   const t = useTranslations('b2b.jobs');
-  const tAuth = useTranslations('auth');
-  const tSettings = useTranslations('b2b.settings');
-  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [title, setTitle] = useState('');
+  const [industry, setIndustry] = useState('Technology');
+  const [employmentType, setEmploymentType] = useState('fulltime');
+  const [department, setDepartment] = useState('engineering');
+  const [city, setCity] = useState('remote');
+  const [location, setLocation] = useState('');
+  const [salaryRange, setSalaryRange] = useState('');
+  const [description, setDescription] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [tags, setTags] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
+  const [status, setStatus] = useState('OPEN');
 
-  const [mode, setMode] = useState('ai');
-  const [assignmentMode, setAssignmentMode] = useState('auto');
-  const [questions, setQuestions] = useState(['']);
-
-  const addQuestion = () => {
-    if (questions.length < 5) {
-      setQuestions((prev) => [...prev, '']);
+  async function handleCreate() {
+    if (title.trim().length < 2) {
+      toast.error(locale === 'ar' ? 'أدخل عنوان الوظيفة' : 'Enter a job title');
+      return;
     }
-  };
-
-  const removeQuestion = (i: number) => {
-    setQuestions((prev) => prev.filter((_, idx) => idx !== i));
-  };
-
-  const updateQuestion = (i: number, val: string) => {
-    setQuestions((prev) => prev.map((q, idx) => (idx === i ? val : q)));
-  };
-
-  const handleCreate = () => {
-    toast.info(tCommon('comingSoon'));
-  };
+    setSaving(true);
+    try {
+      const res = await fetch('/api/b2b/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          industry,
+          type: 'behavioral',
+          mode: 'AI',
+          employmentType,
+          department,
+          city,
+          location: location || city,
+          salaryRange: salaryRange || null,
+          description: description || null,
+          requirements: requirements || null,
+          tags: tags || null,
+          isPublic,
+          status,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Failed');
+        return;
+      }
+      toast.success(locale === 'ar' ? 'تم إنشاء الوظيفة' : 'Job created');
+      router.push(`/b2b/jobs/${data.job.id}`);
+    } catch {
+      toast.error(locale === 'ar' ? 'فشل الإنشاء' : 'Create failed');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/b2b/jobs" className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--aurora-2)]">
+        <Link
+          href="/b2b/jobs"
+          className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--aurora-2)]"
+        >
           <ArrowRight size={20} strokeWidth={1.75} />
         </Link>
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('newTitle')}</h1>
       </div>
 
-      <div className="glass-card rounded-2xl p-6 space-y-6">
-        {/* Job title */}
+      <div className="glass-card space-y-6 rounded-2xl p-6">
         <div className="space-y-2">
           <Label className="text-sm text-[var(--text-muted)]">{t('jobTitle')}</Label>
-          <Input placeholder={t('jobTitlePlaceholder')} className="glass-input" />
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t('jobTitlePlaceholder')}
+            className="glass-input"
+          />
         </div>
 
-        {/* Industry + Type row */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">{t('industry')}</Label>
-            <Select>
+            <Select value={industry} onValueChange={setIndustry}>
               <SelectTrigger className="glass-input">
-                <SelectValue placeholder={t('industryPlaceholder')} />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {INDUSTRIES.map((ind) => (
-                  <SelectItem key={ind} value={ind}>{tAuth(ind)}</SelectItem>
+                  <SelectItem key={ind} value={ind}>
+                    {ind}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-sm text-[var(--text-muted)]">{t('type')}</Label>
-            <Select>
+            <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'نوع الدوام' : 'Employment type'}
+            </Label>
+            <Select value={employmentType} onValueChange={setEmploymentType}>
               <SelectTrigger className="glass-input">
-                <SelectValue placeholder={t('typePlaceholder')} />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="behavioral">{t('typeBehavioral')}</SelectItem>
-                <SelectItem value="technical">{t('typeTechnical')}</SelectItem>
+                <SelectItem value="fulltime">{locale === 'ar' ? 'دوام كامل' : 'Full-time'}</SelectItem>
+                <SelectItem value="contract">{locale === 'ar' ? 'تعاقد' : 'Contract'}</SelectItem>
+                <SelectItem value="remote">{locale === 'ar' ? 'عن بُعد' : 'Remote'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {/* Mode: AI vs Human */}
-        <div className="space-y-2">
-          <Label className="text-sm text-[var(--text-muted)]">{t('mode')}</Label>
-          <RadioGroup value={mode} onValueChange={setMode} className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="ai" id="mode-ai" className="border-white/20 text-[var(--aurora-2)]" />
-              <Label htmlFor="mode-ai" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('modeAI')}</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="human" id="mode-human" className="border-white/20 text-[var(--aurora-2)]" />
-              <Label htmlFor="mode-human" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('modeHuman')}</Label>
-            </div>
-          </RadioGroup>
-          {mode === 'human' && (
-            <p className="text-xs text-amber">{t('modeHumanNote')}</p>
-          )}
-        </div>
-
-        {/* Human mode: assignment mode */}
-        {mode === 'human' && (
-          <div className="space-y-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <Label className="text-sm text-[var(--text-muted)]">{t('assignmentMode')}</Label>
-            <RadioGroup value={assignmentMode} onValueChange={setAssignmentMode} className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="auto" id="assign-auto" className="border-white/20 text-[var(--aurora-2)]" />
-                <Label htmlFor="assign-auto" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('assignmentAuto')}</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="panel" id="assign-panel" className="border-white/20 text-[var(--aurora-2)]" />
-                <Label htmlFor="assign-panel" className="cursor-pointer text-sm text-[var(--text-primary)]">{t('assignmentPanel')}</Label>
-              </div>
-            </RadioGroup>
-
-            {assignmentMode === 'panel' && (
-              <div className="space-y-3 pt-2">
-                <Label className="text-sm text-[var(--text-muted)]">{t('interviewers')}</Label>
-                <Select>
-                  <SelectTrigger className="glass-input">
-                    <SelectValue placeholder={t('interviewerPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="huda">{tSettings('interviewer1Name')}</SelectItem>
-                    <SelectItem value="sultan">{tSettings('interviewer2Name')}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger className="glass-input">
-                    <SelectValue placeholder={t('interviewerPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="huda2">{tSettings('interviewer1Name')}</SelectItem>
-                    <SelectItem value="sultan2">{tSettings('interviewer2Name')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'القسم' : 'Department'}
+            </Label>
+            <Select value={department} onValueChange={setDepartment}>
+              <SelectTrigger className="glass-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {['engineering', 'product', 'design', 'people', 'data', 'sales'].map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {d}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        )}
-
-        {/* Must-ask questions */}
-        <div className="space-y-3">
-          <Label className="text-sm text-[var(--text-muted)]">{t('mustAskQuestions')}</Label>
-          {questions.map((q, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <Input
-                value={q}
-                onChange={(e) => updateQuestion(i, e.target.value)}
-                placeholder={t('mustAskPlaceholder')}
-                className="glass-input"
-              />
-              {questions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeQuestion(i)}
-                  className="shrink-0 rounded-lg p-2 text-[var(--text-faint)] transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  aria-label={tCommon('delete')}
-                >
-                  <X size={18} strokeWidth={1.75} />
-                </button>
-              )}
-            </div>
-          ))}
-          {questions.length < 5 && (
-            <button
-              type="button"
-              onClick={addQuestion}
-              className="flex items-center gap-2 text-sm text-[var(--aurora-2)] transition-colors hover:text-cyan-300"
-            >
-              <Plus size={16} strokeWidth={1.75} />
-              {t('addQuestion')}
-            </button>
-          )}
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'المدينة' : 'City'}
+            </Label>
+            <Select value={city} onValueChange={setCity}>
+              <SelectTrigger className="glass-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {['dubai', 'riyadh', 'cairo', 'doha', 'remote'].map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Invite deadline */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'الموقع الظاهر' : 'Display location'}
+            </Label>
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="glass-input"
+              placeholder={locale === 'ar' ? 'دبي · هجين' : 'Dubai · Hybrid'}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'نطاق الراتب' : 'Salary range'}
+            </Label>
+            <Input
+              value={salaryRange}
+              onChange={(e) => setSalaryRange(e.target.value)}
+              className="glass-input"
+              placeholder="AED 15–25k"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <Label className="text-sm text-[var(--text-muted)]">{t('inviteDeadline')}</Label>
-          <Input type="date" className="glass-input" />
-        </div>
-
-        {/* Candidates */}
-        <div className="space-y-3">
-          <Label className="text-sm text-[var(--text-muted)]">{t('candidates')}</Label>
+          <Label className="text-sm text-[var(--text-muted)]">
+            {locale === 'ar' ? 'الوصف' : 'Description'}
+          </Label>
           <Textarea
-            placeholder={t('candidatesPlaceholder')}
-            rows={4}
-            className="glass-input min-h-[100px] resize-y"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="glass-input min-h-[120px]"
           />
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <input type="file" accept=".csv" className="absolute inset-0 opacity-0 cursor-pointer" aria-label="CSV" />
-              <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--aurora-2)]">
-                <Upload size={16} strokeWidth={1.75} />
-                {t('orUpload')}
-              </button>
-            </div>
-            <button type="button" className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--aurora-2)]">
-              <Download size={16} strokeWidth={1.75} />
-              {t('downloadTemplate')}
-            </button>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm text-[var(--text-muted)]">
+            {locale === 'ar' ? 'المتطلبات' : 'Requirements'}
+          </Label>
+          <Textarea
+            value={requirements}
+            onChange={(e) => setRequirements(e.target.value)}
+            className="glass-input min-h-[100px]"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm text-[var(--text-muted)]">
+            {locale === 'ar' ? 'وسوم (مفصولة بفواصل)' : 'Tags (comma-separated)'}
+          </Label>
+          <Input value={tags} onChange={(e) => setTags(e.target.value)} className="glass-input" />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="accent-teal-400"
+            />
+            {locale === 'ar' ? 'نشر على صفحة الوظائف العامة' : 'Publish on public jobs board'}
+          </label>
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">{t('status')}</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="glass-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="OPEN">OPEN</SelectItem>
+                <SelectItem value="DRAFT">DRAFT</SelectItem>
+                <SelectItem value="PAUSED">PAUSED</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Create button */}
-        <div className="pt-2">
-          <Button onClick={handleCreate} className="glass-button w-full cursor-pointer">
-            {t('create')}
-          </Button>
-        </div>
+        <Button
+          onClick={handleCreate}
+          disabled={saving}
+          className="glass-button w-full cursor-pointer sm:w-auto"
+        >
+          {saving ? <Loader2 className="me-2 animate-spin" size={16} /> : null}
+          {t('createJob')}
+        </Button>
       </div>
     </div>
   );

@@ -1185,8 +1185,8 @@
       "time5": "6 hours ago"
     },
     "jobs": {
-      "title": "Recruitment Interviews",
-      "createJob": "Create Interview",
+      "title": "Jobs & ATS",
+      "createJob": "Create job",
       "jobTitle": "Job Title",
       "industry": "Industry",
       "candidatesCount": "Candidates",
@@ -1214,7 +1214,7 @@
       "job3Completed": "10",
       "job3Status": "Completed",
       "job3Date": "2026-07-10",
-      "newTitle": "Create New Interview",
+      "newTitle": "Create job posting",
       "jobTitlePlaceholder": "e.g. Senior Software Engineer",
       "industryPlaceholder": "Select industry",
       "type": "Interview Type",
@@ -1408,7 +1408,8 @@
       "slaCustomText": "Custom SLA Text",
       "slaCustomPlaceholder": "Enter custom SLA text...",
       "save": "Save Settings"
-    }
+    },
+    "navTalent": "Talent pool"
   },
   "interviewerApp": {
     "dashboard": {
@@ -2579,7 +2580,8 @@
     "onboardingDnsHint": "Point your domain CNAME to partners.muqabaleh.com, then ask support to verify.",
     "back": "Back",
     "continue": "Continue",
-    "launchConsole": "Launch console"
+    "launchConsole": "Launch console",
+    "navAts": "Hiring ATS"
   },
   "partnersMarketing": {
     "eyebrow": "Muqabaleh Partners",

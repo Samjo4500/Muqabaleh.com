@@ -70,6 +70,24 @@ enum PaymentStatus {
   FAILED
 }
 
+enum JobPostingStatus {
+  DRAFT
+  OPEN
+  PAUSED
+  CLOSED
+}
+
+enum ApplicationStage {
+  NEW
+  REVIEWING
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
 // ─── User ───
 // Keeps passwordHash/sessionsLeft/interview relations required by production auth & AI flow.
 // Prompt's simplified User is extended — not gutted — so login/billing keep working.
@@ -120,6 +138,8 @@ model User {
   supportTicketsCreated  SupportTicket[]      @relation("TicketCreator")
   interviewPrequals      InterviewPrequal[]
   interviewSessions      InterviewSession[]
+  jobApplications        JobApplication[]
+  mediaAssets            MediaAsset[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -277,25 +297,84 @@ model PaypalSubscription {
 
 // ─── B2BJob ───
 model B2BJob {
-  id                 String    @id @default(cuid())
+  id                 String           @id @default(cuid())
   companyId          String
-  company            Company   @relation(fields: [companyId], references: [id])
+  company            Company          @relation(fields: [companyId], references: [id])
   title              String
+  titleAr            String?
   industry           String
   type               String
-  mode               String    @default("AI")
-  assignmentMode     String    @default("AUTO")
+  mode               String           @default("AI")
+  assignmentMode     String           @default("AUTO")
   mustAskQuestions   String?
   humanPriceUsdCents Int?
   inviteDeadline     DateTime?
+  /// Public ATS posting fields
+  description        String?          @db.Text
+  descriptionAr      String?          @db.Text
+  requirements       String?          @db.Text
+  benefits           String?          @db.Text
+  location           String?
+  city               String?
+  department         String?
+  employmentType     String           @default("fulltime")
+  salaryRange        String?
+  tags               String?
+  isPublic           Boolean          @default(false)
+  isFeatured         Boolean          @default(false)
+  status             JobPostingStatus @default(DRAFT)
+  closesAt           DateTime?
   createdById        String
-  createdBy          User      @relation("JobCreator", fields: [createdById], references: [id])
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdBy          User             @relation("JobCreator", fields: [createdById], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
-  interviews Interview[]
+  interviews   Interview[]
+  applications JobApplication[]
 
   @@index([companyId])
+  @@index([status, isPublic])
+  @@index([city])
+  @@index([department])
+}
+
+// ─── Media uploads (CV / photo) stored in Postgres for portability ───
+model MediaAsset {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  kind      String
+  filename  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([kind])
+}
+
+// ─── Job applications (ATS pipeline) ───
+model JobApplication {
+  id           String           @id @default(cuid())
+  jobId        String
+  job          B2BJob           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId  String
+  candidate    User             @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  stage        ApplicationStage @default(NEW)
+  coverLetter  String?          @db.Text
+  cvAssetId    String?
+  photoAssetId String?
+  source       String           @default("DIRECT")
+  employerNote String?          @db.Text
+  score        Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([jobId, candidateId])
+  @@index([jobId, stage])
+  @@index([candidateId])
+  @@index([stage])
 }
 
 // ─── AuditLog ───
@@ -496,28 +575,43 @@ model EmailQueue {
   @@index([sent, sendAt])
 }
 
-// ─── Candidate Pool (Opt-In) ───
+// ─── Candidate Pool (Opt-In talent database for employers) ───
 model CandidatePool {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isOptedIn      Boolean  @default(false)
-  isVisible      Boolean  @default(false)
-  role           String
-  level          String
-  industry       String?
-  location       String?
-  muqabalehScore Float?
-  averageScore   Float?
-  interviewCount Int      @default(0)
-  languages      String   @default("AR")
-  availability   String   @default("AVAILABLE")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOptedIn        Boolean  @default(false)
+  isVisible        Boolean  @default(false)
+  openToWork       Boolean  @default(true)
+  role             String
+  level            String
+  industry         String?
+  location         String?
+  headline         String?
+  summary          String?  @db.Text
+  skills           String?
+  yearsExperience  Int?
+  phone            String?
+  linkedInUrl      String?
+  desiredRole      String?
+  desiredLocations String?
+  cvAssetId        String?
+  cvFileName       String?
+  photoAssetId     String?
+  muqabalehScore   Float?
+  averageScore     Float?
+  interviewCount   Int      @default(0)
+  languages        String   @default("AR")
+  availability     String   @default("AVAILABLE")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([isVisible])
+  @@index([openToWork])
   @@index([role])
   @@index([muqabalehScore])
+  @@index([industry])
+  @@index([location])
 }
 
 // ─── Super Admin Control Panel (Muqabaleh only) ───

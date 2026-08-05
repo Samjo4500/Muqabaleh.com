@@ -9,6 +9,7 @@ import { signOut } from 'next-auth/react';
 import {
   BarChart3,
   BookOpen,
+  Briefcase,
   Building2,
   CreditCard,
   KeyRound,
@@ -30,6 +31,7 @@ import type { PartnerRecord } from '@/lib/partner/types';
 const NAV = [
   { href: '/partner', key: 'navOverview', icon: LayoutDashboard },
   { href: '/partner/clients', key: 'navClients', icon: Building2 },
+  { href: '/partner/ats', key: 'navAts', icon: Briefcase },
   { href: '/partner/branding', key: 'navBranding', icon: Palette },
   { href: '/partner/analytics', key: 'navAnalytics', icon: BarChart3 },
   { href: '/partner/api-keys', key: 'navApiKeys', icon: KeyRound },

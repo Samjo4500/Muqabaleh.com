@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Briefcase,
   Users,
+  UserSearch,
   Receipt,
   Settings,
   LogOut,
@@ -21,6 +22,7 @@ import { BackButton } from '@/components/navigation';
 const navItems = [
   { key: 'navOverview', icon: LayoutDashboard, href: '/b2b' },
   { key: 'navJobs', icon: Briefcase, href: '/b2b/jobs' },
+  { key: 'navTalent', icon: UserSearch, href: '/b2b/talent' },
   { key: 'navTeam', icon: Users, href: '/b2b/team' },
   { key: 'navBilling', icon: Receipt, href: '/b2b/billing' },
   { key: 'navSettings', icon: Settings, href: '/b2b/settings' },

@@ -14,7 +14,7 @@ export function CrystalForCompanies() {
   return (
     <section id="for-companies" className="mq-section scroll-mt-28">
       <div className="mq-wrap">
-        <div className="overflow-hidden rounded-[2rem] bg-[var(--mq-ink)] text-white">
+        <div className="mq-panel overflow-hidden !bg-[rgba(8,14,26,0.72)]">
           <div className="grid items-center gap-10 p-8 md:grid-cols-2 md:p-12 lg:p-16">
             <motion.div
               variants={stagger}
@@ -29,22 +29,22 @@ export function CrystalForCompanies() {
                 <T
                   as="h2"
                   bi={C.companies.headline}
-                  className="mq-display mb-4 text-3xl font-bold tracking-tight md:text-5xl"
+                  className="mq-display mb-4 text-3xl font-bold tracking-tight text-white md:text-5xl"
                 />
               </motion.div>
               <motion.div variants={fadeUp}>
-                <T as="p" bi={C.companies.body} className="mb-7 text-base leading-relaxed text-white/75" />
+                <T as="p" bi={C.companies.body} className="mb-7 text-base leading-relaxed text-white/70" />
               </motion.div>
               <motion.ul variants={stagger} className="mb-8 space-y-3">
                 {C.companies.bullets.map((b) => (
-                  <motion.li key={b.en} variants={fadeUp} className="flex items-start gap-3 text-sm text-white/90">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--mq-sand)]" />
+                  <motion.li key={b.en} variants={fadeUp} className="flex items-start gap-3 text-sm text-white/85">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" />
                     <BiInline bi={b} />
                   </motion.li>
                 ))}
               </motion.ul>
               <motion.div variants={fadeUp}>
-                <Link href={localePath('/business', locale)} className="mq-btn mq-btn-on-dark">
+                <Link href={localePath('/business', locale)} className="mq-btn mq-btn-primary">
                   <BiInline bi={C.companies.cta} />
                 </Link>
               </motion.div>
@@ -55,7 +55,7 @@ export function CrystalForCompanies() {
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
-              className="relative min-h-[280px] rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-[rgba(216,195,165,0.15)] p-6"
+              className="relative min-h-[280px] rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-teal-400/10 via-transparent to-[rgba(232,201,122,0.12)] p-6"
             >
               <div className="grid h-full grid-cols-2 gap-3">
                 {[
@@ -64,9 +64,9 @@ export function CrystalForCompanies() {
                   { en: 'Avg score', ar: 'متوسط الدرجة', v: '81' },
                   { en: 'Time saved', ar: 'وقت موفّر', v: '70%' },
                 ].map((m) => (
-                  <div key={m.en} className="flex flex-col justify-between rounded-2xl bg-white/5 p-4">
-                    <p className="mq-display text-3xl font-bold text-[var(--mq-sand)]">{m.v}</p>
-                    <T bi={m} className="mt-3 text-xs text-white/65" />
+                  <div key={m.en} className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+                    <p className="mq-display text-3xl font-bold text-teal-300">{m.v}</p>
+                    <T bi={m} className="mt-3 text-xs text-white/55" />
                   </div>
                 ))}
               </div>

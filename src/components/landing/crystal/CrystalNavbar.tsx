@@ -56,13 +56,11 @@ export function CrystalNavbar() {
     <header className="sticky top-0 z-50 w-full px-3 pt-3 pe-20 md:px-5 md:pe-24">
       <nav
         className={cn(
-          'mq-wrap mx-auto flex h-[68px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:px-6',
-          scrolled
-            ? 'border border-[rgba(16,35,58,0.1)] bg-white/90 shadow-[0_10px_40px_rgba(16,35,58,0.08)] backdrop-blur-xl'
-            : 'border border-transparent bg-white/55 backdrop-blur-md',
+          'mq-glass-nav mq-wrap mx-auto flex h-[68px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:px-6',
+          scrolled && 'border-white/20 bg-[rgba(8,12,22,0.78)] shadow-[0_16px_50px_rgba(0,0,0,0.45)]',
         )}
       >
-        <Link href={homeHref} className="mq-display text-xl font-bold tracking-tight text-[var(--mq-ink)] md:text-2xl">
+        <Link href={homeHref} className="mq-display text-xl font-bold tracking-tight text-white md:text-2xl">
           <BiInline bi={C.brand} />
         </Link>
 
@@ -71,7 +69,7 @@ export function CrystalNavbar() {
             <Link
               key={link.href}
               href={resolveHref(link.href)}
-              className="text-sm font-medium text-[var(--mq-ink-soft)] transition-colors hover:text-[var(--mq-accent)]"
+              className="text-sm font-medium text-white/60 transition-colors hover:text-teal-300"
             >
               <BiInline bi={link.bi} />
             </Link>
@@ -81,7 +79,7 @@ export function CrystalNavbar() {
         <div className="hidden items-center gap-3 lg:flex">
           <Link
             href={localePath('/login', locale)}
-            className="text-sm font-semibold text-[var(--mq-ink-soft)] hover:text-[var(--mq-ink)]"
+            className="text-sm font-semibold text-white/65 hover:text-white"
           >
             <BiInline bi={C.nav.login} />
           </Link>
@@ -93,16 +91,16 @@ export function CrystalNavbar() {
         <div className="lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button type="button" className="rounded-lg p-2 text-[var(--mq-ink)]" aria-label="Menu">
+              <button type="button" className="rounded-lg p-2 text-white/80" aria-label="Menu">
                 <Menu size={22} strokeWidth={1.75} />
               </button>
             </SheetTrigger>
             <SheetContent
               side={locale === 'ar' ? 'left' : 'right'}
-              className="w-80 border-[var(--mq-line)] bg-[var(--mq-paper)] text-[var(--mq-ink)]"
+              className="w-80 border-white/10 bg-[#0a1220]/95 text-white backdrop-blur-xl"
             >
               <SheetHeader>
-                <SheetTitle className="mq-display text-start text-[var(--mq-ink)]">
+                <SheetTitle className="mq-display text-start text-white">
                   <BiInline bi={C.brand} />
                 </SheetTitle>
               </SheetHeader>
@@ -112,12 +110,12 @@ export function CrystalNavbar() {
                     key={link.href}
                     href={resolveHref(link.href)}
                     onClick={() => setOpen(false)}
-                    className="min-h-[48px] rounded-xl px-3 py-3 text-[var(--mq-ink)] hover:bg-white"
+                    className="min-h-[48px] rounded-xl px-3 py-3 text-white hover:bg-white/5"
                   >
                     <T bi={link.bi} className="text-sm font-semibold" />
                   </Link>
                 ))}
-                <hr className="my-2 border-[var(--mq-line)]" />
+                <hr className="my-2 border-white/10" />
                 <Link href={localePath('/login', locale)} onClick={() => setOpen(false)} className="min-h-[48px] px-3 py-3">
                   <T bi={C.nav.login} className="text-sm font-semibold" />
                 </Link>

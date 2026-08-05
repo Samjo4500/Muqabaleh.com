@@ -14,7 +14,12 @@ export function CrystalHero() {
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.08, opacity: 0.7 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.4, ease: easeCrystal }}
+      >
         <Image
           src="/images/hero-interview.png"
           alt=""
@@ -24,7 +29,7 @@ export function CrystalHero() {
           sizes="100vw"
         />
         <div className="mq-hero-shade absolute inset-0" />
-      </div>
+      </motion.div>
 
       <div className="mq-wrap relative flex min-h-[100svh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
         <motion.div
@@ -35,7 +40,7 @@ export function CrystalHero() {
         >
           <motion.p
             variants={fadeUp}
-            className="mq-display mb-5 text-2xl font-bold tracking-tight text-white md:text-3xl"
+            className="mq-display mb-5 text-2xl font-bold tracking-tight text-teal-200 md:text-3xl"
           >
             <BiInline bi={C.brand} />
           </motion.p>
@@ -52,7 +57,7 @@ export function CrystalHero() {
             <T
               as="p"
               bi={C.hero.sub}
-              className="mb-9 max-w-xl text-base leading-relaxed text-white/85 md:text-lg"
+              className="mb-9 max-w-xl text-base leading-relaxed text-white/80 md:text-lg"
             />
           </motion.div>
 
@@ -71,11 +76,12 @@ export function CrystalHero() {
       </div>
 
       <motion.div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--mq-paper)] to-transparent"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.8, ease: easeCrystal }}
+        className="mq-shine-line pointer-events-none absolute inset-x-0 bottom-10 mx-auto h-px w-40"
+        initial={{ opacity: 0, scaleX: 0.4 }}
+        animate={{ opacity: 1, scaleX: 1 }}
+        transition={{ delay: 0.8, duration: 0.9, ease: easeCrystal }}
       />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--mq-paper)] to-transparent" />
     </section>
   );
 }

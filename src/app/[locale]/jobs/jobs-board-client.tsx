@@ -258,7 +258,7 @@ export function JobsBoardClient() {
 
       <main>
         {/* Hero — one composition */}
-        <section className="relative overflow-hidden pb-10 pt-10 md:pb-14 md:pt-14">
+        <section className="relative flex min-h-[min(88vh,820px)] items-center overflow-hidden pb-16 pt-8 md:pb-20 md:pt-10">
           <div
             className="pointer-events-none absolute inset-0"
             aria-hidden
@@ -273,16 +273,22 @@ export function JobsBoardClient() {
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
             aria-hidden
           />
+          <motion.div
+            className="pointer-events-none absolute -start-[15%] bottom-[5%] h-[22rem] w-[22rem] rounded-full bg-amber-200/8 blur-3xl"
+            animate={{ opacity: [0.2, 0.45, 0.2], y: [0, -18, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            aria-hidden
+          />
 
-          <div className="mq-wrap relative">
+          <div className="mq-wrap relative w-full">
             <motion.div
               initial="hidden"
               animate="show"
               variants={stagger}
               className="mx-auto max-w-3xl text-center"
             >
-              <motion.div variants={fadeUp} className="mb-6 flex justify-center">
-                <BrandLogo size="lg" priority />
+              <motion.div variants={fadeUp} className="mb-7 flex justify-center">
+                <BrandLogo size="hero" priority className="mq-logo-glow" />
               </motion.div>
 
               <motion.p variants={fadeUp} className="mq-kicker mb-3">

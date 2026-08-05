@@ -1,8 +1,7 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierLegalPage } from '@/components/landing/crystal/AtelierLegalPage';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -21,34 +20,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RefundPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations('legal');
-
-  const paragraphs: string[] = Array.from({ length: 12 }, (_, i) =>
-    t(`refundP${i + 1}`),
-  );
+  const paragraphs: string[] = Array.from({ length: 12 }, (_, i) => t(`refundP${i + 1}`));
 
   return (
-    <div className="flex min-h-screen flex-col bg-void">
-      <Navbar />
-      <main className="flex-1 pt-16">
-        <section className="py-20">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-extrabold md:text-4xl">
-              <span className="gold-gradient-text">{t('refundTitle')}</span>
-            </h1>
-            <p className="mt-4 text-sm text-[var(--text-faint)]">{t('lastUpdated')}</p>
-
-            <div className="mt-10 space-y-6">
-              {paragraphs.map((p, i) => (
-                <p key={i} className="text-sm leading-loose text-[var(--text-muted)]">
-                  {p}
-                </p>
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <AtelierLegalPage
+      title={t('refundTitle')}
+      updated={t('lastUpdated')}
+      paragraphs={paragraphs}
+    />
   );
 }

@@ -2,18 +2,11 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { motion } from 'framer-motion';
+import { Target, Eye, Users, Globe, Shield, Sparkles } from 'lucide-react';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
+import { fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
-import {
-  Target,
-  Eye,
-  Users,
-  Globe,
-  Shield,
-  Sparkles,
-} from 'lucide-react';
-import { SectionHeading, GlowCard } from '@/components/brand';
 
 const VALUES = [
   { icon: Target, key: 'v1Title', descKey: 'v1Desc' },
@@ -30,113 +23,115 @@ export default function AboutContent() {
   const locale = useLocale();
 
   return (
-    <div className="flex min-h-screen flex-col bg-void">
-      <Navbar />
-      <main className="flex-1 pt-16">
-        {/* Hero */}
-        <section className="py-20">
-          <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow={t('eyebrow')}
-              title={t('heroH1')}
-              titleHighlight={t('heroH1Highlight')}
-              sub={t('heroSub')}
-            />
-          </div>
-        </section>
+    <AtelierShell showHeroLogo>
+      <section className="mq-section relative overflow-hidden pb-10 pt-6">
+        <div className="mq-wrap relative mx-auto max-w-3xl text-center">
+          <motion.div initial="hidden" animate="show" variants={stagger}>
+            <motion.p variants={fadeUp} className="mq-kicker mb-3">
+              {t('eyebrow')}
+            </motion.p>
+            <motion.h1
+              variants={fadeUp}
+              className="mq-display mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
+            >
+              {t('heroH1')}{' '}
+              <span className="bg-gradient-to-r from-teal-200 to-amber-200 bg-clip-text text-transparent">
+                {t('heroH1Highlight')}
+              </span>
+            </motion.h1>
+            <motion.p variants={fadeUp} className="mx-auto max-w-xl text-base text-white/60 md:text-lg">
+              {t('heroSub')}
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
 
-        {/* Mission & Vision */}
-        <section className="border-t border-white/5 py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-8 md:grid-cols-2">
-              <GlowCard className="p-8">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
-                  <Target size={24} className="text-gold" strokeWidth={1.75} />
+      <section className="mq-section border-t border-white/10 pt-0">
+        <div className="mq-wrap grid gap-5 md:grid-cols-2">
+          {[
+            { icon: Target, title: t('missionTitle'), desc: t('missionDesc'), tone: 'teal' },
+            { icon: Eye, title: t('visionTitle'), desc: t('visionDesc'), tone: 'gold' },
+          ].map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.title}
+                className="rounded-3xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur"
+              >
+                <div
+                  className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${
+                    card.tone === 'teal' ? 'bg-teal-400/15 text-teal-200' : 'bg-amber-300/15 text-amber-200'
+                  }`}
+                >
+                  <Icon size={22} strokeWidth={1.75} />
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-[var(--text-primary)]">
-                  {t('missionTitle')}
-                </h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  {t('missionDesc')}
-                </p>
-              </GlowCard>
-              <GlowCard className="p-8">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald/10">
-                  <Eye size={24} className="text-emerald" strokeWidth={1.75} />
+                <h2 className="mq-display mb-3 text-xl text-white">{card.title}</h2>
+                <p className="text-sm leading-relaxed text-white/60">{card.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mq-section border-t border-white/10">
+        <div className="mq-wrap">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <p className="mq-kicker mb-3">{t('valuesEyebrow')}</p>
+            <h2 className="mq-display text-3xl text-white md:text-4xl">{t('valuesTitle')}</h2>
+            <p className="mt-3 text-white/60">{t('valuesSub')}</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {VALUES.map((v) => {
+              const Icon = v.icon;
+              return (
+                <div
+                  key={v.key}
+                  className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-teal-300/30"
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-teal-400/12 text-teal-200">
+                    <Icon size={18} strokeWidth={1.75} />
+                  </div>
+                  <h3 className="mb-2 text-base font-semibold text-white">{t(v.key)}</h3>
+                  <p className="text-sm leading-relaxed text-white/55">{t(v.descKey)}</p>
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-[var(--text-primary)]">
-                  {t('visionTitle')}
-                </h3>
-                <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                  {t('visionDesc')}
-                </p>
-              </GlowCard>
-            </div>
+              );
+            })}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Values */}
-        <section className="border-t border-white/5 py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow={t('valuesEyebrow')}
-              title={t('valuesTitle')}
-              titleHighlight={t('valuesTitle')}
-              sub={t('valuesSub')}
-            />
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {VALUES.map((v) => {
-                const Icon = v.icon;
-                return (
-                  <GlowCard key={v.key} className="p-6">
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10">
-                      <Icon size={20} className="text-gold" strokeWidth={1.75} />
-                    </div>
-                    <h4 className="mb-2 text-base font-bold text-[var(--text-primary)]">
-                      {t(v.key)}
-                    </h4>
-                    <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                      {t(v.descKey)}
-                    </p>
-                  </GlowCard>
-                );
-              })}
-            </div>
+      <section className="mq-section border-t border-white/10">
+        <div className="mq-wrap mx-auto max-w-3xl">
+          <p className="mq-kicker mb-3">{t('storyEyebrow')}</p>
+          <h2 className="mq-display mb-8 text-3xl text-white md:text-4xl">{t('storyTitle')}</h2>
+          <div className="space-y-5 text-sm leading-relaxed text-white/60 md:text-base">
+            {([1, 2, 3, 4] as const).map((n) => (
+              <p key={n}>{t(`storyP${n}`)}</p>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Story */}
-        <section className="border-t border-white/5 py-20">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow={t('storyEyebrow')}
-              title={t('storyTitle')}
-              titleHighlight={t('storyTitle')}
-            />
-            <div className="mt-8 space-y-5 text-sm leading-relaxed text-[var(--text-muted)]">
-              {([1, 2, 3, 4] as const).map((n) => (
-                <p key={n}>{t(`storyP${n}`)}</p>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="aurora-bg relative overflow-hidden py-24">
-          <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold md:text-5xl">
-              <span className="gold-gradient-text">{t('ctaTitle')}</span>
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
-              {t('ctaSub')}
-            </p>
-            <Link href={localePath('/demo', locale)} className="btn-gold mt-8 inline-block">
-              {tc('startFree')}
-            </Link>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+      <section className="mq-section relative overflow-hidden border-t border-white/10">
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            background:
+              'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(45,212,191,0.14), transparent 60%)',
+          }}
+        />
+        <div className="mq-wrap relative mx-auto max-w-3xl text-center">
+          <h2 className="mq-display text-3xl text-white md:text-5xl">{t('ctaTitle')}</h2>
+          <p className="mx-auto mt-4 max-w-xl text-white/60">{t('ctaSub')}</p>
+          <Link
+            href={localePath('/demo', locale)}
+            className="mq-btn mq-btn-on-dark mq-btn-shimmer mt-8 inline-flex"
+          >
+            {tc('startFree')}
+          </Link>
+        </div>
+      </section>
+    </AtelierShell>
   );
 }

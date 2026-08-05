@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { MENA_COUNTRIES } from '@/lib/constants';
 
 const INDUSTRIES = [
   'Technology',
@@ -38,7 +39,8 @@ export default function NewJobPage() {
   const [industry, setIndustry] = useState('Technology');
   const [employmentType, setEmploymentType] = useState('fulltime');
   const [department, setDepartment] = useState('engineering');
-  const [city, setCity] = useState('remote');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('SA');
   const [location, setLocation] = useState('');
   const [salaryRange, setSalaryRange] = useState('');
   const [description, setDescription] = useState('');
@@ -64,8 +66,9 @@ export default function NewJobPage() {
           mode: 'AI',
           employmentType,
           department,
+          country,
           city,
-          location: location || city,
+          location: location || city || country,
           salaryRange: salaryRange || null,
           description: description || null,
           requirements: requirements || null,
@@ -164,18 +167,23 @@ export default function NewJobPage() {
           </div>
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">
-              {locale === 'ar' ? 'المدينة' : 'City'}
+              {locale === 'ar' ? 'الدولة' : 'Country'}
             </Label>
-            <Select value={city} onValueChange={setCity}>
+            <Select value={country} onValueChange={setCountry}>
               <SelectTrigger className="glass-input">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {['dubai', 'riyadh', 'cairo', 'doha', 'remote'].map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
+                {MENA_COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {locale === 'ar'
+                      ? `${c.flag_emoji} ${c.name_ar}`
+                      : `${c.flag_emoji} ${c.name_en}`}
                   </SelectItem>
                 ))}
+                <SelectItem value="REMOTE">
+                  {locale === 'ar' ? 'عن بُعد · المنطقة' : 'Remote · MENA'}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -184,15 +192,29 @@ export default function NewJobPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">
+              {locale === 'ar' ? 'المدينة' : 'City'}
+            </Label>
+            <Input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="glass-input"
+              placeholder={locale === 'ar' ? 'الرياض' : 'Riyadh'}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm text-[var(--text-muted)]">
               {locale === 'ar' ? 'الموقع الظاهر' : 'Display location'}
             </Label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="glass-input"
-              placeholder={locale === 'ar' ? 'دبي · هجين' : 'Dubai · Hybrid'}
+              placeholder={locale === 'ar' ? 'الرياض · هجين' : 'Riyadh · Hybrid'}
             />
           </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">
               {locale === 'ar' ? 'نطاق الراتب' : 'Salary range'}
@@ -241,7 +263,7 @@ export default function NewJobPage() {
               onChange={(e) => setIsPublic(e.target.checked)}
               className="accent-teal-400"
             />
-            {locale === 'ar' ? 'نشر على صفحة الوظائف العامة' : 'Publish on public jobs board'}
+            {locale === 'ar' ? 'نشر في الشواغر المتاحة' : 'Publish on Available Vacancies'}
           </label>
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">{t('status')}</Label>

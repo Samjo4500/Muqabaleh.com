@@ -10,6 +10,7 @@ type JobRow = {
   benefits: string | null;
   location: string | null;
   city: string | null;
+  country?: string | null;
   department: string | null;
   employmentType: string;
   salaryRange: string | null;
@@ -41,6 +42,7 @@ export function serializePublicJob(job: JobRow) {
     benefits: job.benefits,
     location: job.location,
     city: job.city,
+    country: job.country || null,
     department: job.department,
     employmentType: job.employmentType,
     salaryRange: job.salaryRange,

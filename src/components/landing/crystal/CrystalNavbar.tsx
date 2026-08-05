@@ -61,8 +61,12 @@ export function CrystalNavbar() {
           scrolled && 'border-white/20 bg-[rgba(8,12,22,0.78)] shadow-[0_16px_50px_rgba(0,0,0,0.45)]',
         )}
       >
-        <Link href={homeHref} className="flex items-center" aria-label="Muqabaleh">
-          <BrandLogo size="sm" priority />
+        <Link
+          href={homeHref}
+          className="relative z-10 flex h-full shrink-0 items-center overflow-visible"
+          aria-label="Muqabaleh"
+        >
+          <BrandLogo size="nav" priority />
         </Link>
 
         <div className="hidden items-center gap-6 xl:flex">
@@ -102,7 +106,7 @@ export function CrystalNavbar() {
             >
               <SheetHeader>
                 <SheetTitle className="text-start">
-                  <BrandLogo size="sm" />
+                  <BrandLogo size="nav" />
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-1 px-2 pb-6">

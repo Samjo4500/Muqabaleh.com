@@ -39,22 +39,17 @@ export function CrystalHero() {
         <div className="mq-hero-shade absolute inset-0" />
       </motion.div>
 
-      {/* Floating glass shards */}
+      {/* Atmospheric motion — soft orbs, not overlay cards */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <motion.div
-          className="mq-hero-shard absolute start-[8%] top-[22%] h-28 w-28 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl md:h-36 md:w-36"
-          animate={{ y: [0, -18, 0], rotate: [-6, 4, -6], opacity: [0.35, 0.65, 0.35] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -start-10 top-[18%] h-56 w-56 rounded-full bg-teal-400/15 blur-3xl"
+          animate={{ y: [0, -24, 0], opacity: [0.25, 0.55, 0.25] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="mq-hero-shard absolute end-[10%] top-[34%] h-20 w-20 rounded-2xl border border-teal-300/20 bg-teal-400/10 backdrop-blur-xl md:h-28 md:w-28"
-          animate={{ y: [0, 22, 0], rotate: [8, -5, 8], opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-        />
-        <motion.div
-          className="mq-hero-shard absolute bottom-[18%] start-[42%] h-16 w-40 rounded-full border border-white/10 bg-white/5 backdrop-blur-lg"
-          animate={{ x: [0, 30, 0], opacity: [0.2, 0.45, 0.2] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+          className="absolute -end-8 top-[40%] h-64 w-64 rounded-full bg-amber-300/10 blur-3xl"
+          animate={{ y: [0, 28, 0], opacity: [0.2, 0.45, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
         <motion.div
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/50 to-transparent"
@@ -85,13 +80,6 @@ export function CrystalHero() {
               <BrandLogo size="hero" priority className="relative drop-shadow-[0_12px_40px_rgba(45,212,191,0.35)]" />
             </motion.div>
           </motion.div>
-
-          <motion.p
-            variants={fadeUp}
-            className="mq-display mb-4 text-xl font-bold tracking-tight text-teal-200 md:text-2xl"
-          >
-            <BiInline bi={C.brand} />
-          </motion.p>
 
           <motion.div variants={fadeUp}>
             <T

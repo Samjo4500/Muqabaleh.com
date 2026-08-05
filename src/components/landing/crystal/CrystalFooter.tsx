@@ -43,11 +43,8 @@ export function CrystalFooter() {
     <footer className="border-t border-white/10 bg-black/20">
       <div className="mq-wrap grid gap-10 py-14 md:grid-cols-4">
         <div>
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4">
             <BrandLogo size="md" />
-            <p className="mq-display text-xl font-bold text-white">
-              <BiInline bi={C.brand} />
-            </p>
           </div>
           <T bi={C.footer.tagline} className="text-sm leading-relaxed text-white/55" />
         </div>

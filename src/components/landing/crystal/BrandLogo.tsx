@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
+/** Official Muqabaleh mark used across the product (mic + bilingual wordmark). */
 const LOGO_SRC = '/images/logos/v2-balanced-a-T.webp';
 
 export function BrandLogo({
@@ -15,10 +16,10 @@ export function BrandLogo({
   priority?: boolean;
 }) {
   const dims = {
-    sm: { w: 36, h: 36, className: 'h-9 w-9' },
-    md: { w: 44, h: 44, className: 'h-11 w-11' },
-    lg: { w: 64, h: 64, className: 'h-16 w-16' },
-    hero: { w: 220, h: 220, className: 'h-[7.5rem] w-[7.5rem] sm:h-40 sm:w-40 md:h-48 md:w-48' },
+    sm: { w: 140, h: 70, className: 'h-9 w-auto' },
+    md: { w: 180, h: 90, className: 'h-11 w-auto' },
+    lg: { w: 260, h: 130, className: 'h-16 w-auto' },
+    hero: { w: 560, h: 280, className: 'h-auto w-[15rem] sm:w-[19rem] md:w-[23rem]' },
   }[size];
 
   return (

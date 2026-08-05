@@ -29,6 +29,7 @@ export function CrystalFooter() {
     company: [
       { bi: C.footer.about, href: '/about' },
       { bi: C.nav.forCompanies, href: '/#for-companies' },
+      { bi: C.nav.partners, href: '/partners' },
       { bi: C.nav.blog, href: '/blog' },
       { bi: C.footer.support, href: '/support' },
     ],

@@ -2405,18 +2405,21 @@
     "paypalError": "PayPal payout failed. Try Mark as Paid manually."
   },
   "blog": {
-    "eyebrow": "Blog",
-    "title": "Interview Tips & Guides",
+    "eyebrow": "Muqabaleh Journal",
+    "title": "Walk in sharper than the room",
     "titleHighlight": "Blog",
-    "subtitle": "Expert advice on job interviews, communication skills, and career growth.",
+    "subtitle": "Field notes on interviews, English confidence, and getting hired — written for MENA talent.",
+    "browseCta": "Browse guides",
+    "featured": "Featured",
+    "share": "Share",
     "readMore": "Read more",
     "minRead": "min read",
     "author": "Muqabaleh Team",
-    "backToBlog": "Back to Blog",
-    "relatedArticles": "Related Articles",
-    "ctaTitle": "Ready to Practice?",
-    "ctaSubtitle": "Start with a free AI mock interview and get instant feedback.",
-    "ctaButton": "Start Free Interview"
+    "backToBlog": "All guides",
+    "relatedArticles": "Keep reading",
+    "ctaTitle": "Ready to practice?",
+    "ctaSubtitle": "Turn the advice into muscle memory — start a free AI mock interview.",
+    "ctaButton": "Start free interview"
   },
   "pwa": {
     "installTitle": "Add Muqabaleh to your home screen",

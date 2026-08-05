@@ -14,12 +14,8 @@ import { C } from './copy';
 
 const NAV_LINKS = [
   { bi: C.nav.services, href: '#services' },
-  { bi: C.nav.howItWorks, href: '#how-it-works' },
-  { bi: C.nav.forCompanies, href: '#for-companies' },
   { bi: C.nav.pricing, href: '#pricing' },
   { bi: C.nav.jobs, href: '/jobs' },
-  { bi: C.nav.partners, href: '/partners' },
-  { bi: C.nav.blog, href: '/blog' },
 ] as const;
 
 export function CrystalNavbar() {
@@ -70,7 +66,7 @@ export function CrystalNavbar() {
           <BrandLogo size="nav" priority />
         </Link>
 
-        <div className="hidden items-center gap-6 xl:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}

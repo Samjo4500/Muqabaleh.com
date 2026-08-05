@@ -11,7 +11,7 @@ import { easeCrystal, fadeUp, stagger } from './motion';
 
 const PLAN_FACETS = [
   'mq-facet mq-facet-cyan mq-facet-shape-soft',
-  'mq-facet mq-facet-teal mq-facet-shape-cut',
+  'mq-facet mq-facet-teal mq-facet-shape-soft',
   'mq-facet mq-facet-gold mq-facet-shape-wave',
   'mq-facet mq-facet-amber mq-facet-shape-cap',
 ] as const;

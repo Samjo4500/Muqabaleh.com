@@ -55,7 +55,7 @@ const PRICING_PLANS = [
     ctaKey: 'chooseBusiness' as const,
     href: '/demo',
     popular: true,
-    facet: 'mq-facet mq-facet-teal mq-facet-shape-cut',
+    facet: 'mq-facet mq-facet-teal mq-facet-shape-soft',
   },
   {
     titleKey: 'enterpriseTitle' as const,
@@ -297,46 +297,48 @@ export default function BusinessContent() {
               </h2>
               <p className="mt-3 text-base text-white/60 md:text-lg">{t('pricingSub')}</p>
             </div>
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid items-stretch gap-5 overflow-visible md:grid-cols-3">
               {PRICING_PLANS.map((plan, idx) => (
                 <motion.article
                   key={plan.titleKey}
                   className={cn(
-                    'mq-panel relative flex flex-col p-6 md:p-7',
+                    'mq-panel relative flex h-full flex-col overflow-visible p-6 md:p-7',
                     plan.facet,
-                    plan.popular && 'ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] md:-translate-y-2',
+                    plan.popular && 'ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] md:-translate-y-1',
                   )}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.08, duration: 0.45, ease: easeCrystal }}
-                  whileHover={{ y: -6 }}
+                  whileHover={{ y: -4 }}
                 >
-                  {plan.badge ? (
-                    <span className="absolute -top-3 start-1/2 -translate-x-1/2 rounded-lg border border-teal-300/30 bg-teal-400/15 px-3 py-1 text-[11px] font-bold text-teal-300">
-                      {t(plan.badge)}
-                    </span>
-                  ) : null}
+                  <div className="mb-3 min-h-[28px]">
+                    {plan.badge ? (
+                      <span className="inline-flex rounded-lg border border-teal-300/30 bg-teal-400/15 px-3 py-1 text-[11px] font-bold text-teal-300">
+                        {t(plan.badge)}
+                      </span>
+                    ) : null}
+                  </div>
                   <h3 className="mq-display text-lg font-bold text-white">{t(plan.titleKey)}</h3>
-                  <p className="mt-1 text-xs text-white/45">{t(plan.descKey)}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/45">{t(plan.descKey)}</p>
                   <p className="mq-display my-5 text-3xl font-bold text-white">
                     {t(plan.priceKey)}
                     {plan.unitKey ? (
-                      <span className="text-base font-semibold text-white/45">{t(plan.unitKey)}</span>
+                      <span className="ms-1 text-base font-semibold text-white/45">{t(plan.unitKey)}</span>
                     ) : null}
                   </p>
                   <ul className="mb-6 flex flex-1 flex-col gap-2.5">
                     {plan.features.map((fk) => (
-                      <li key={fk} className="flex items-center gap-2 text-sm text-white/60">
-                        <Check size={15} className="shrink-0 text-teal-300" />
-                        {t(fk)}
+                      <li key={fk} className="flex items-start gap-2 text-sm leading-snug text-white/60">
+                        <Check size={15} className="mt-0.5 shrink-0 text-teal-300" />
+                        <span>{t(fk)}</span>
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={localePath(plan.href, locale)}
                     className={cn(
-                      'inline-flex min-h-[44px] items-center justify-center rounded-xl px-4 text-sm font-bold transition',
+                      'inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 text-sm font-bold transition',
                       plan.popular
                         ? 'mq-btn mq-btn-primary'
                         : 'mq-btn mq-btn-ghost',

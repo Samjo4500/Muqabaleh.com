@@ -979,16 +979,12 @@
 .mq-atelier .mq-facet-shape-cap {
   border-radius: 2rem 2rem 1rem 1rem;
 }
+/* Soft corner notch without clipping card content (avoid clip-path) */
 .mq-atelier .mq-facet-shape-cut {
-  border-radius: 1.35rem;
-  clip-path: polygon(
-    0 0,
-    calc(100% - 22px) 0,
-    100% 22px,
-    100% 100%,
-    22px 100%,
-    0 calc(100% - 22px)
-  );
+  border-radius: 1.35rem 0.65rem 1.35rem 0.65rem;
+}
+.mq-atelier .mq-panel.overflow-visible {
+  overflow: visible;
 }
 .mq-atelier .mq-facet-teal {
   --mq-facet-rail: #2DD4BF;

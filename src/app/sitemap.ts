@@ -7,7 +7,9 @@ const PUBLIC_ROUTES = [
   '',
   '/pricing',
   '/business',
-  '/jobs',
+  '/portal',
+  '/portal/jobs',
+  '/request-demo',
   '/demo',
   '/about',
   '/support',
@@ -18,7 +20,6 @@ const PUBLIC_ROUTES = [
   '/interviewers',
   '/blog',
   '/partners',
-  '/human-interviews',
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

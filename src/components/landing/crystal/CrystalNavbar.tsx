@@ -15,7 +15,8 @@ import { C } from './copy';
 const NAV_LINKS = [
   { bi: C.nav.services, href: '#services' },
   { bi: C.nav.pricing, href: '#pricing' },
-  { bi: C.nav.jobs, href: '/jobs' },
+  { bi: C.nav.jobs, href: '/portal' },
+  { bi: C.nav.forCompanies, href: '/business' },
 ] as const;
 
 export function CrystalNavbar() {

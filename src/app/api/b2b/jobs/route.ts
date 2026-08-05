@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireCompanyUser } from '@/lib/ats/auth';
 import { JOB_STATUSES } from '@/lib/ats/constants';
 import { serializePublicJob } from '@/lib/ats/serialize';
+import { b2bPreviewWriteBlocked } from '@/lib/b2b-preview';
 import { z } from 'zod';
 
 const createSchema = z.object({
@@ -74,6 +75,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const previewBlock = b2bPreviewWriteBlocked();
+  if (previewBlock) {
+    return NextResponse.json(previewBlock, { status: 403 });
+  }
+
   const auth = await requireCompanyUser();
   if (auth.error) return auth.error;
   const user = auth.user;

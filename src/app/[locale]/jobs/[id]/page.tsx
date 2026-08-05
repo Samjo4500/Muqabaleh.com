@@ -1,12 +1,11 @@
-import { setRequestLocale } from 'next-intl/server';
-import { JobDetailClient } from './job-detail-client';
+import { redirect } from 'next/navigation';
+import { localePath } from '@/i18n/navigation';
 
-export default async function JobDetailPage({
+export default async function JobDetailRedirect({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
-  setRequestLocale(locale);
-  return <JobDetailClient jobId={id} />;
+  redirect(localePath(`/portal/jobs/${id}`, locale));
 }

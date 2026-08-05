@@ -316,7 +316,7 @@ export function CrystalForCompanies() {
               </motion.ul>
 
               <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
-                <Link href={localePath('/business', locale)} className="mq-btn mq-btn-primary mq-btn-shimmer">
+                <Link href={localePath('/request-demo', locale)} className="mq-btn mq-btn-primary mq-btn-shimmer">
                   <BiInline bi={C.companies.cta} />
                 </Link>
                 <motion.p

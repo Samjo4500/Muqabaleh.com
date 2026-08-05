@@ -184,6 +184,6 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
 export const ROUTE_ROLES: Record<string, Role[]> = {
   '/app': [ROLES.USER, ROLES.SUPER_ADMIN],
   '/interviewer': [ROLES.INTERVIEWER, ROLES.SUPER_ADMIN],
-  '/b2b': [ROLES.COMPANY_ADMIN, ROLES.SUPER_ADMIN],
+  // /b2b public preview — writes gated via B2B_CONSOLE_PREVIEW
   '/admin': [ROLES.SUPER_ADMIN],
 };

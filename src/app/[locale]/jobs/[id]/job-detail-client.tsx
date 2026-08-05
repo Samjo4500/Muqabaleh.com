@@ -53,7 +53,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
     e.preventDefault();
     if (status !== 'authenticated') {
       window.location.href = localePath(
-        `/auth/signin?callbackUrl=/jobs/${jobId}`,
+        `/auth/signin?callbackUrl=/portal/jobs/${jobId}`,
         locale,
       );
       return;
@@ -99,7 +99,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
         ) : error || !job ? (
           <div className="mx-auto max-w-lg text-center">
             <p className="mb-4 text-white/70">{error || (isAr ? 'غير موجود' : 'Not found')}</p>
-            <Link href={localePath('/jobs', locale)} className="text-teal-300 hover:underline">
+            <Link href={localePath('/portal/jobs', locale)} className="text-teal-300 hover:underline">
               {isAr ? 'كل الوظائف' : 'All jobs'}
             </Link>
           </div>
@@ -233,7 +233,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
               )}
 
               <Link
-                href={localePath('/jobs?tab=candidates', locale)}
+                href={localePath('/portal/jobs?tab=candidates', locale)}
                 className="block text-center text-sm font-semibold text-teal-300 hover:underline"
               >
                 {isAr

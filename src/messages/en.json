@@ -536,15 +536,25 @@
     "chooseEnterprise": "Contact Us"
   },
   "interviewers": {
-    "title": "Book a human expert",
+    "title": "Meet the room that hires you",
     "eyebrow": "Muqabaleh Interviewers",
-    "sub": "Live video with certified interviewers from your field — coaching that feels like the real room.",
-    "searchPlaceholder": "Search by name or specialty…",
+    "sub": "Portraits of certified experts — filter by price, years in the field, and industry, then book a live session.",
+    "searchPlaceholder": "Search by name, title, or specialty…",
     "searchCta": "Find experts",
+    "galleryTitle": "Expert gallery",
+    "filterPrice": "Price tier",
+    "filterExperience": "Years of experience",
+    "filterIndustry": "Industry",
+    "filterSpecialty": "Specialty",
+    "clearOne": "Clear",
+    "clearFilters": "Clear filters",
+    "sortLabel": "Sort",
+    "online": "Online",
+    "yearsLabel": "{years} yrs",
     "allSectors": "All fields",
-    "allLanguages": "All languages",
+    "allLanguages": "Language",
     "allGenders": "Gender",
-    "allRatings": "All ratings",
+    "allRatings": "Rating",
     "priceRange": "Price",
     "anyPrice": "Any price",
     "from": "From",
@@ -552,7 +562,6 @@
     "sessionsPlural": "sessions",
     "viewProfile": "View profile",
     "results": "experts",
-    "clearFilters": "Clear filters",
     "joinCtaTitle": "Interview for a living?",
     "joinCtaBody": "Join the Muqabaleh interviewer network — set your rates, calendar, and specialties.",
     "joinCtaButton": "Become an interviewer",
@@ -586,7 +595,41 @@
     "dialectMSA": "Arabic",
     "dialectEnglish": "English",
     "dialectFrench": "French",
-    "perSession": "session"
+    "perSession": "session",
+    "tier": {
+      "STANDARD": "Standard",
+      "PREMIUM": "Premium",
+      "ELITE": "Elite"
+    },
+    "tierDesc": {
+      "STANDARD": "Sharp coaches for focused practice",
+      "PREMIUM": "Seasoned leads across core roles",
+      "ELITE": "Executive-level interview pressure"
+    },
+    "experience": {
+      "JUNIOR": "Rising",
+      "MID": "Solid",
+      "SENIOR": "Senior",
+      "EXPERT": "Veteran"
+    },
+    "sort": {
+      "rating": "Top rated",
+      "priceLow": "Price ↑",
+      "priceHigh": "Price ↓",
+      "experience": "Most experience"
+    },
+    "specialtyLabels": {
+      "SOFTWARE_ENGINEER": "Software Eng.",
+      "PROJECT_MANAGER": "Project Mgmt",
+      "HR_MANAGER": "HR / People",
+      "DATA_ANALYST": "Data / AI",
+      "MARKETING_SPECIALIST": "Marketing",
+      "SALES_MANAGER": "Sales",
+      "OPERATIONS_MANAGER": "Operations",
+      "ACCOUNTANT": "Finance / CPA",
+      "CUSTOMER_SERVICE": "Customer Exp.",
+      "GRAPHIC_DESIGNER": "Design / UX"
+    }
   },
   "joinInterviewer": {
     "heroHeadline": "Share Your Expertise. Earn Extra Income.",

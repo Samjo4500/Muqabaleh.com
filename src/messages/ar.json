@@ -536,15 +536,25 @@
     "chooseEnterprise": "تواصل معنا"
   },
   "interviewers": {
-    "title": "احجز خبيراً بشرياً",
+    "title": "تعرّف على من يقابلك",
     "eyebrow": "محاورو مقابلة",
-    "sub": "جلسة مرئية مباشرة مع محاورين معتمدين من مجال تخصصك — تدريب يشبه غرفة المقابلة الحقيقية.",
-    "searchPlaceholder": "ابحث بالاسم أو التخصص…",
+    "sub": "صور خبراء معتمدين — صفِّ حسب السعر وسنوات الخبرة والمجال، ثم احجز جلسة مباشرة.",
+    "searchPlaceholder": "ابحث بالاسم أو المسمى أو التخصص…",
     "searchCta": "اعثر على خبراء",
+    "galleryTitle": "معرض الخبراء",
+    "filterPrice": "مستوى السعر",
+    "filterExperience": "سنوات الخبرة",
+    "filterIndustry": "المجال",
+    "filterSpecialty": "التخصص",
+    "clearOne": "مسح",
+    "clearFilters": "مسح الفلاتر",
+    "sortLabel": "ترتيب",
+    "online": "متصل",
+    "yearsLabel": "{years} سنة",
     "allSectors": "كل المجالات",
-    "allLanguages": "كل اللغات",
+    "allLanguages": "اللغة",
     "allGenders": "الجنس",
-    "allRatings": "كل التقييمات",
+    "allRatings": "التقييم",
     "priceRange": "السعر",
     "anyPrice": "أي سعر",
     "from": "من",
@@ -552,7 +562,6 @@
     "sessionsPlural": "جلسات",
     "viewProfile": "عرض الملف",
     "results": "خبير",
-    "clearFilters": "مسح الفلاتر",
     "joinCtaTitle": "تعمل مقابلات باحتراف؟",
     "joinCtaBody": "انضم إلى شبكة محاوري مقابلة — حدّد أسعارك ومواعيدك وتخصصاتك.",
     "joinCtaButton": "كن محاوراً",
@@ -586,7 +595,41 @@
     "dialectMSA": "العربية",
     "dialectEnglish": "الإنجليزية",
     "dialectFrench": "الفرنسية",
-    "perSession": "جلسة"
+    "perSession": "جلسة",
+    "tier": {
+      "STANDARD": "أساسي",
+      "PREMIUM": "متميّز",
+      "ELITE": "نخبة"
+    },
+    "tierDesc": {
+      "STANDARD": "مدربون دقيقون لتدريب مركّز",
+      "PREMIUM": "قادة متمرسون في الأدوار الأساسية",
+      "ELITE": "ضغط مقابلات على مستوى تنفيذي"
+    },
+    "experience": {
+      "JUNIOR": "صاعد",
+      "MID": "متين",
+      "SENIOR": "أول",
+      "EXPERT": "محضرم"
+    },
+    "sort": {
+      "rating": "الأعلى تقييماً",
+      "priceLow": "السعر ↑",
+      "priceHigh": "السعر ↓",
+      "experience": "الأكثر خبرة"
+    },
+    "specialtyLabels": {
+      "SOFTWARE_ENGINEER": "هندسة برمجيات",
+      "PROJECT_MANAGER": "إدارة مشاريع",
+      "HR_MANAGER": "موارد بشرية",
+      "DATA_ANALYST": "بيانات / ذكاء",
+      "MARKETING_SPECIALIST": "تسويق",
+      "SALES_MANAGER": "مبيعات",
+      "OPERATIONS_MANAGER": "عمليات",
+      "ACCOUNTANT": "مالية / محاسبة",
+      "CUSTOMER_SERVICE": "تجربة عملاء",
+      "GRAPHIC_DESIGNER": "تصميم / UX"
+    }
   },
   "joinInterviewer": {
     "heroHeadline": "شارك خبرتك. اكسب دخلاً إضافياً.",

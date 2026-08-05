@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { Star, Play, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -40,6 +41,7 @@ interface InterviewerProfile {
   name: string;
   nameAr: string;
   initials: string;
+  photoUrl: string | null;
   title: string;
   titleAr: string;
   location: string;
@@ -184,6 +186,10 @@ function mapApiToProfile(apiData: Record<string, unknown>, locale: string): Inte
     name: locale === 'ar' ? fullNameAr : fullName,
     nameAr: fullNameAr,
     initials: (apiData.initials as string) || getInitials(fullName),
+    photoUrl:
+      (apiData.photoUrl as string | null) ||
+      (apiData.avatar as string | null) ||
+      null,
     title: `${formatSpecialty(specialties[0] || '')} · ${apiData.yearsExperience || '?'} yr`,
     titleAr: `${formatSpecialty(specialties[0] || '')} · ${apiData.yearsExperience || '?'} سنة`,
     location: 'Saudi Arabia',
@@ -200,7 +206,10 @@ function mapApiToProfile(apiData: Record<string, unknown>, locale: string): Inte
     bio: locale === 'ar' ? bioAr : bio,
     bioAr,
     videoUrl: (apiData.videoIntroUrl as string) || null,
-    videoPoster: null,
+    videoPoster:
+      (apiData.photoUrl as string | null) ||
+      (apiData.avatar as string | null) ||
+      null,
     isOnline: true,
     timezone: locale === 'ar' ? 'الرياض (GMT+3)' : 'Riyadh (GMT+3)',
     reviews: mappedReviews,
@@ -398,10 +407,23 @@ export default function InterviewerProfilePage() {
               <div className="sticky top-24 rounded-xl border border-[rgba(212,175,55,0.2)] bg-[#0B0F17] p-6 text-center">
                 {/* Avatar */}
                 <div className="mx-auto relative h-[200px] w-[200px]">
-                  <div className="flex h-full w-full items-center justify-center rounded-full border-[3px] border-[var(--gold)] bg-[#0B0F17] [background-image:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(212,175,55,0.05))]">
-                    <span className="text-5xl font-bold text-[var(--gold)]">
-                      {profile.initials}
-                    </span>
+                  <div className="relative h-full w-full overflow-hidden rounded-full border-[3px] border-[var(--gold)] bg-[#0B0F17]">
+                    {profile.photoUrl ? (
+                      <Image
+                        src={profile.photoUrl}
+                        alt={profile.name}
+                        fill
+                        className="object-cover"
+                        sizes="200px"
+                        priority
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center [background-image:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(212,175,55,0.05))]">
+                        <span className="text-5xl font-bold text-[var(--gold)]">
+                          {profile.initials}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {profile.isOnline && (
                     <span className="absolute bottom-2 right-2 flex h-5 w-5">
@@ -754,6 +776,7 @@ function getMockProfile(id: string, locale: string): InterviewerProfile {
       name: 'د. سارة المنصوري',
       nameAr: 'د. سارة المنصوري',
       initials: 'سم',
+      photoUrl: '/images/interviewers/int-f1.webp',
       title: 'مديرة موارد بشرية — ١٢ سنة',
       titleAr: 'مديرة موارد بشرية — ١٢ سنة',
       location: 'الرياض',
@@ -808,6 +831,7 @@ function getMockProfile(id: string, locale: string): InterviewerProfile {
     name: 'Dr. Sarah Al-Mansouri',
     nameAr: 'د. سارة المنصوري',
     initials: 'SM',
+    photoUrl: '/images/interviewers/int-f1.webp',
     title: 'HR Director — 12 years',
     titleAr: 'مديرة موارد بشرية — ١٢ سنة',
     location: 'Riyadh',

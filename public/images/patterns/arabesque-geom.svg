@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" fill="none">
+  <!-- Tasteful Islamic geometric tile: 8-pointed star + interlaced octagon -->
+  <g stroke="#F0D9A0" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M120 12 L168 48 L228 48 L192 96 L228 144 L168 144 L120 180 L72 144 L12 144 L48 96 L12 48 L72 48 Z"/>
+    <path d="M120 40 L148 72 L188 72 L160 104 L188 136 L148 136 L120 168 L92 136 L52 136 L80 104 L52 72 L92 72 Z"/>
+    <path d="M120 78 L142 104 L120 130 L98 104 Z"/>
+    <circle cx="120" cy="104" r="34"/>
+    <circle cx="120" cy="104" r="18"/>
+  </g>
+  <g stroke="#5EEAD4" stroke-width="0.95">
+    <path d="M48 96 H192"/>
+    <path d="M120 40 V168"/>
+    <path d="M72 48 L168 144"/>
+    <path d="M168 48 L72 144"/>
+  </g>
+</svg>

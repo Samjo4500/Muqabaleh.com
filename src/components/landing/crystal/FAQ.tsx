@@ -7,14 +7,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { BiText } from './BiText';
+import { T } from './BiText';
 import { C } from './copy';
 import { fadeUp } from './motion';
 
 export function CrystalFAQ() {
   return (
-    <section id="faq" className="section-pad scroll-mt-28">
-      <div className="content-wrap mx-auto max-w-3xl">
+    <section id="faq" className="mq-section scroll-mt-28">
+      <div className="mq-wrap mx-auto max-w-3xl">
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -22,10 +22,10 @@ export function CrystalFAQ() {
           viewport={{ once: true, margin: '-80px' }}
           className="mb-10"
         >
-          <BiText
+          <T
             as="h2"
             bi={C.faq.title}
-            primaryClassName="font-display text-3xl font-bold tracking-[-0.02em] md:text-4xl"
+            className="mq-display text-3xl font-bold tracking-tight md:text-5xl"
           />
         </motion.div>
 
@@ -40,20 +40,13 @@ export function CrystalFAQ() {
               <AccordionItem
                 key={item.q.en}
                 value={`faq-${i}`}
-                className="glass-card rounded-2xl border-none px-5"
+                className="mq-panel border-none px-5"
               >
                 <AccordionTrigger className="py-5 text-start hover:no-underline">
-                  <BiText
-                    bi={item.q}
-                    primaryClassName="text-sm font-semibold md:text-base"
-                    secondaryClassName="text-xs"
-                  />
+                  <T bi={item.q} className="text-sm font-semibold md:text-base" />
                 </AccordionTrigger>
                 <AccordionContent className="pb-5">
-                  <BiText
-                    bi={item.a}
-                    primaryClassName="text-sm leading-relaxed text-[var(--text-secondary)]"
-                  />
+                  <T bi={item.a} className="text-sm leading-relaxed text-[var(--mq-ink-soft)]" />
                 </AccordionContent>
               </AccordionItem>
             ))}

@@ -3,32 +3,35 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
-import { Bot, Briefcase, Building2, UserRound } from 'lucide-react';
+import { ArrowUpLeft, ArrowUpRight } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
-import { BiInline, BiText } from './BiText';
+import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { fadeUp, stagger } from './motion';
 
-const ICONS = [Bot, UserRound, Briefcase, Building2];
-
 export function CrystalServices() {
   const locale = useLocale();
+  const Arrow = locale === 'ar' ? ArrowUpLeft : ArrowUpRight;
 
   return (
-    <section id="services" className="section-pad scroll-mt-28">
-      <div className="content-wrap">
+    <section id="services" className="mq-section scroll-mt-28">
+      <div className="mq-wrap">
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-80px' }}
-          className="mb-12"
+          className="mb-12 max-w-2xl"
         >
-          <BiText
+          <p className="mq-kicker mb-3">
+            <BiInline bi={C.nav.services} />
+          </p>
+          <T
             as="h2"
             bi={C.services.title}
-            primaryClassName="font-display text-3xl font-bold tracking-[-0.02em] md:text-4xl"
+            className="mq-display mb-3 text-3xl font-bold tracking-tight md:text-5xl"
           />
+          <T as="p" bi={C.services.subtitle} className="text-base text-[var(--mq-ink-soft)] md:text-lg" />
         </motion.div>
 
         <motion.div
@@ -36,48 +39,38 @@ export function CrystalServices() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid gap-6 md:grid-cols-2"
+          className="grid gap-5 md:grid-cols-2"
         >
-          {C.services.cards.map((card, i) => {
-            const Icon = ICONS[i] ?? Bot;
-            return (
-              <motion.article
-                key={card.title.en}
-                variants={fadeUp}
-                className="glass-card flex flex-col rounded-2xl p-6 md:p-8"
+          {C.services.cards.map((card, i) => (
+            <motion.article
+              key={card.title.en}
+              variants={fadeUp}
+              className="mq-panel group flex flex-col p-6 transition duration-300 hover:-translate-y-1 hover:border-[rgba(15,110,86,0.28)] md:p-8"
+            >
+              <span className="mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--mq-accent-soft)] text-sm font-bold text-[var(--mq-accent)]">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <T as="h3" bi={card.title} className="mq-display mb-3 text-xl font-bold md:text-2xl" />
+              <T as="p" bi={card.body} className="mb-5 text-sm leading-relaxed text-[var(--mq-ink-soft)] md:text-[0.95rem]" />
+              <ul className="mb-7 flex flex-1 flex-wrap gap-2">
+                {card.features.map((f) => (
+                  <li
+                    key={f.en}
+                    className="rounded-lg bg-[var(--mq-paper-2)] px-2.5 py-1.5 text-xs font-medium text-[var(--mq-ink-soft)]"
+                  >
+                    <BiInline bi={f} />
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={localePath(card.href, locale)}
+                className="inline-flex items-center gap-2 text-sm font-bold text-[var(--mq-accent)] transition group-hover:gap-3"
               >
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
-                  <Icon size={22} strokeWidth={1.75} />
-                </div>
-                <BiText
-                  as="h3"
-                  bi={card.title}
-                  className="mb-3"
-                  primaryClassName="font-display text-xl font-semibold"
-                />
-                <BiText
-                  as="p"
-                  bi={card.body}
-                  className="mb-5"
-                  primaryClassName="text-sm leading-relaxed text-[var(--text-secondary)]"
-                />
-                <ul className="mb-6 flex flex-1 flex-col gap-2">
-                  {card.features.map((f) => (
-                    <li key={f.en} className="flex items-start gap-2 text-sm text-[var(--text-muted)]">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400/80" />
-                      <BiInline bi={f} />
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={localePath(card.href, locale)}
-                  className="glass-button mt-auto inline-flex min-h-[44px] items-center justify-center text-sm font-semibold"
-                >
-                  <BiInline bi={card.cta} />
-                </Link>
-              </motion.article>
-            );
-          })}
+                <BiInline bi={card.cta} />
+                <Arrow size={16} />
+              </Link>
+            </motion.article>
+          ))}
         </motion.div>
       </div>
     </section>

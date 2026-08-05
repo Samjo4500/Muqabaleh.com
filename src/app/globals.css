@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config";
 
@@ -705,4 +705,130 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ─── Muqabaleh Atelier Landing ─── */
+.mq-atelier {
+  --mq-ink: #10233a;
+  --mq-ink-soft: #3a4f66;
+  --mq-mute: #6b7c8f;
+  --mq-line: rgba(16, 35, 58, 0.1);
+  --mq-paper: #f3f6f8;
+  --mq-paper-2: #e7eef3;
+  --mq-accent: #0f6e56;
+  --mq-accent-2: #148f6f;
+  --mq-accent-soft: rgba(15, 110, 86, 0.1);
+  --mq-sand: #d8c3a5;
+  --mq-white: #ffffff;
+  --mq-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--mq-ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(15, 110, 86, 0.12), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 0%, rgba(216, 195, 165, 0.28), transparent 50%),
+    linear-gradient(180deg, #f7fafb 0%, var(--mq-paper) 40%, #eef3f6 100%);
+  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+}
+.mq-atelier[dir='rtl'],
+.mq-atelier [lang='ar'] {
+  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Cairo', sans-serif;
+}
+.mq-atelier .mq-display {
+  font-family: 'Syne', 'Readex Pro', 'Cairo', sans-serif;
+  letter-spacing: -0.03em;
+}
+.mq-atelier[dir='rtl'] .mq-display {
+  font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+  letter-spacing: 0;
+}
+.mq-atelier .mq-wrap {
+  margin-inline: auto;
+  max-width: 1180px;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .mq-atelier .mq-wrap { padding-inline: 2rem; }
+}
+.mq-atelier .mq-section {
+  padding-block: 4.5rem;
+}
+@media (min-width: 768px) {
+  .mq-atelier .mq-section { padding-block: 6.5rem; }
+}
+.mq-atelier .mq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.4rem;
+  border-radius: 0.85rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform 0.25s var(--mq-ease), background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.mq-atelier .mq-btn:hover { transform: translateY(-2px); }
+.mq-atelier .mq-btn-primary {
+  background: var(--mq-accent);
+  color: #fff;
+}
+.mq-atelier .mq-btn-primary:hover { background: var(--mq-accent-2); }
+.mq-atelier .mq-btn-ghost {
+  border: 1px solid rgba(16, 35, 58, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--mq-ink);
+  backdrop-filter: blur(10px);
+}
+.mq-atelier .mq-btn-ghost:hover {
+  border-color: rgba(15, 110, 86, 0.45);
+  background: #fff;
+}
+.mq-atelier .mq-btn-on-dark {
+  background: #fff;
+  color: var(--mq-ink);
+}
+.mq-atelier .mq-btn-on-dark-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: transparent;
+  color: #fff;
+}
+.mq-atelier .mq-panel {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--mq-line);
+  border-radius: 1.35rem;
+  backdrop-filter: blur(14px);
+}
+.mq-atelier .mq-kicker {
+  color: var(--mq-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mq-atelier[dir='rtl'] .mq-kicker {
+  letter-spacing: 0;
+  text-transform: none;
+}
+@keyframes mq-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes mq-marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
+.mq-atelier .mq-marquee {
+  animation: mq-marquee 36s linear infinite;
+  width: max-content;
+}
+.mq-atelier[dir='rtl'] .mq-marquee {
+  animation-name: mq-marquee-rtl;
+}
+.mq-atelier .mq-hero-shade {
+  background:
+    linear-gradient(105deg, rgba(16, 35, 58, 0.78) 0%, rgba(16, 35, 58, 0.45) 48%, rgba(16, 35, 58, 0.18) 100%),
+    linear-gradient(180deg, rgba(16, 35, 58, 0.2) 0%, rgba(16, 35, 58, 0.55) 100%);
+}
+.mq-atelier[dir='rtl'] .mq-hero-shade {
+  background:
+    linear-gradient(255deg, rgba(16, 35, 58, 0.78) 0%, rgba(16, 35, 58, 0.45) 48%, rgba(16, 35, 58, 0.18) 100%),
+    linear-gradient(180deg, rgba(16, 35, 58, 0.2) 0%, rgba(16, 35, 58, 0.55) 100%);
 }

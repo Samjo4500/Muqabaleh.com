@@ -1,4 +1,4 @@
-/** Exact bilingual landing copy from product prompt — Muqabaleh only. */
+/** Muqabaleh landing copy — professional Arabic, not literal calques. */
 
 export type Bi = { en: string; ar: string };
 
@@ -6,143 +6,154 @@ export const C = {
   brand: { en: 'Muqabaleh', ar: 'مقابلة' } as Bi,
   nav: {
     services: { en: 'Services', ar: 'الخدمات' },
-    howItWorks: { en: 'How It Works', ar: 'كيف تعمل' },
-    forCompanies: { en: 'For Companies', ar: 'للشركات' },
+    howItWorks: { en: 'How it works', ar: 'كيف تعمل' },
+    forCompanies: { en: 'For companies', ar: 'للشركات' },
     pricing: { en: 'Pricing', ar: 'الأسعار' },
     jobs: { en: 'Jobs', ar: 'الوظائف' },
     blog: { en: 'Blog', ar: 'المدونة' },
-    login: { en: 'Log In', ar: 'تسجيل الدخول' },
-    getStarted: { en: 'Get Started', ar: 'ابدأ الآن' },
-    lang: { en: 'EN / عربي', ar: 'EN / عربي' },
+    login: { en: 'Log in', ar: 'تسجيل الدخول' },
+    getStarted: { en: 'Get started', ar: 'ابدأ الآن' },
   },
   hero: {
     headline: {
-      en: 'AI-Powered Mock Interviews. Real Human Experts. Your Path to the Perfect Job.',
-      ar: 'مقابلات تجريبية بالذكاء الاصطناعي. خبراء بشريون حقيقيون. طريقك إلى الوظيفة المثالية.',
+      en: 'Walk into every interview ready.',
+      ar: 'ادخل كل مقابلة وأنت مستعد.',
     },
     sub: {
-      en: 'Practice with AI avatars, book real interviewers by the hour, or let companies find you through our job board. All in one platform.',
-      ar: 'تدرب مع شخصيات ذكاء اصطناعي، احجز مقابلين حقيقيين بالساعة، أو دع الشركات تجدك عبر لوحة الوظائف. كل ذلك في منصة واحدة.',
+      en: 'Practice with AI, book human experts by the hour, and get discovered by employers — one platform for your next offer.',
+      ar: 'تدرّب مع الذكاء الاصطناعي، احجز خبراء بشريين بالساعة، ودع الشركات تكتشفك — منصة واحدة لعرضك الوظيفي القادم.',
     },
-    ctaInterview: { en: 'Start Free Interview', ar: 'ابدأ مقابلة مجانية' },
-    ctaJobs: { en: 'Browse Jobs', ar: 'تصفح الوظائف' },
-    ctaHr: { en: "I'm an HR Company", ar: 'أنا شركة موارد بشرية' },
-    statInterviews: { en: '10,000+ Interviews', ar: '+١٠,٠٠٠ مقابلة' },
-    statPartners: { en: '500+ HR Partners', ar: '+٥٠٠ شريك' },
-    statSuccess: { en: '95% Success Rate', ar: '٩٥٪ نسبة النجاح' },
+    ctaInterview: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
+    ctaJobs: { en: 'Browse jobs', ar: 'تصفح الوظائف' },
+    ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
+    statInterviews: { en: '10,000+ interviews', ar: '+١٠٬٠٠٠ مقابلة' },
+    statPartners: { en: '500+ HR partners', ar: '+٥٠٠ شريك موارد بشرية' },
+    statSuccess: { en: '95% success rate', ar: '٩٥٪ نسبة نجاح' },
   },
   trust: {
     text: {
-      en: 'Trusted by leading companies across MENA',
-      ar: 'موثوق من قبل الشركات الرائدة في منطقة الشرق الأوسط وشمال أفريقيا',
+      en: 'Trusted by leading teams across MENA',
+      ar: 'موثوقة لدى الفرق الرائدة في الشرق الأوسط وشمال أفريقيا',
     },
   },
   services: {
-    title: { en: 'Services', ar: 'الخدمات' },
+    title: { en: 'Everything you need to land the role', ar: 'كل ما تحتاجه للوصول إلى الوظيفة' },
+    subtitle: {
+      en: 'Four ways Muqabaleh moves you from practice to offer.',
+      ar: 'أربع طرق تنقلك مقابلة من التدريب إلى العرض الوظيفي.',
+    },
     cards: [
       {
-        title: { en: 'AI Mock Interview', ar: 'مقابلة تجريبية بالذكاء الاصطناعي' },
+        title: { en: 'AI mock interview', ar: 'مقابلة تجريبية بالذكاء الاصطناعي' },
         body: {
-          en: 'Practice unlimited interviews with our AI avatar interviewer. Get instant feedback on your answers, body language analysis, and a detailed scorecard in 30 seconds.',
-          ar: 'تدرب على مقابلات غير محدودة مع مقابل ذكاء اصطناعي تفاعلي. احصل على ملاحظات فورية على إجاباتك، تحليل لغة الجسد، وتقرير تقييم مفصل في ٣٠ ثانية.',
+          en: 'Unlimited practice with an interactive AI interviewer. Instant notes on your answers, body-language cues, and a full scorecard in about 30 seconds.',
+          ar: 'تدريب بلا حدود مع مقابل ذكاء اصطناعي تفاعلي. ملاحظات فورية على إجاباتك، إشارات لغة الجسد، وتقرير تقييم كامل خلال نحو ٣٠ ثانية.',
         },
         features: [
-          { en: 'Real-time AI dialogue', ar: 'حوار ذكاء اصطناعي فوري' },
+          { en: 'Real-time dialogue', ar: 'حوار فوري' },
           { en: 'Instant scoring', ar: 'تقييم فوري' },
           { en: 'Industry questions', ar: 'أسئلة حسب التخصص' },
-          { en: 'Bilingual', ar: 'ثنائي اللغة' },
-          { en: '24/7', ar: 'متاح على مدار الساعة' },
+          { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
+          { en: 'Available 24/7', ar: 'متاح على مدار الساعة' },
         ],
-        cta: { en: 'Try AI Interview', ar: 'جرب المقابلة الذكية' },
+        cta: { en: 'Try AI interview', ar: 'جرّب المقابلة الذكية' },
         href: '/demo',
       },
       {
-        title: { en: 'Human Expert', ar: 'احجز خبيراً بشرياً' },
+        title: { en: 'Book a human expert', ar: 'احجز خبيراً بشرياً' },
         body: {
-          en: 'Schedule a live video session with a certified interviewer from your industry. Get personalized coaching, real-time corrections, and insider tips from hiring managers.',
-          ar: 'حدد موعد جلسة مرئية مباشرة مع مقابل معتمد من مجال تخصصك. احصل على توجيه شخصي، تصحيحات فورية، ونصائح من مديري التوظيف.',
+          en: 'Live video with a certified interviewer from your field. Personalized coaching, real-time corrections, and hiring-manager insight.',
+          ar: 'جلسة مرئية مباشرة مع مقابل معتمد من مجال تخصصك. توجيه شخصي، تصحيح فوري، ورؤية من مديري التوظيف.',
         },
         features: [
           { en: 'Certified experts', ar: 'خبراء معتمدون' },
           { en: 'Hourly booking', ar: 'حجز بالساعة' },
-          { en: 'Video/audio/chat', ar: 'جلسات مرئية أو صوتية أو نصية' },
+          { en: 'Video, audio, or chat', ar: 'مرئي أو صوتي أو نصي' },
           { en: 'Panel simulation', ar: 'محاكاة لجنة' },
           { en: 'Career coaching', ar: 'استشارة مهنية' },
         ],
-        cta: { en: 'Book Now', ar: 'احجز الآن' },
+        cta: { en: 'Book now', ar: 'احجز الآن' },
         href: '/interviewers',
       },
       {
-        title: { en: 'Job Board', ar: 'اعثر على وظيفة أحلامك' },
+        title: { en: 'Find your next role', ar: 'اعثر على وظيفتك التالية' },
         body: {
-          en: 'Browse hundreds of verified job postings from top employers. Apply directly, track your application status, and get matched based on your interview scores.',
-          ar: 'تصفح مئات إعلانات الوظائف الموثقة من أفضل أصحاب العمل. قدم طلبك مباشرة، تابع حالة طلبك، واحصل على توصيات بناءً على درجات مقابلتك.',
+          en: 'Verified openings from top employers. Apply in one click, track status, and get matched using your interview scores.',
+          ar: 'فرص موثّقة من أفضل أصحاب العمل. قدّم بنقرة واحدة، تابع حالة طلبك، واحصل على توصيات بناءً على درجات مقابلتك.',
         },
         features: [
-          { en: 'Verified postings', ar: 'إعلانات موثقة' },
-          { en: 'AI matching', ar: 'توصية بالذكاء الاصطناعي' },
+          { en: 'Verified postings', ar: 'إعلانات موثّقة' },
+          { en: 'AI matching', ar: 'توصية ذكية' },
           { en: 'One-click apply', ar: 'تقديم بنقرة واحدة' },
-          { en: 'Application tracker', ar: 'متتبع الطلبات' },
-          { en: 'Featured jobs', ar: 'فرص مميزة' },
+          { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+          { en: 'Featured roles', ar: 'فرص مميزة' },
         ],
-        cta: { en: 'Browse Jobs', ar: 'تصفح الوظائف' },
+        cta: { en: 'Browse jobs', ar: 'تصفح الوظائف' },
         href: '/jobs',
       },
       {
-        title: { en: 'HR Whitelabel', ar: 'منصة مقابلات الموارد البشرية' },
+        title: { en: 'HR interview platform', ar: 'منصة مقابلات للموارد البشرية' },
         body: {
-          en: 'Launch your own branded interview platform under your company domain. Screen candidates with AI, manage pipelines, and build your talent pool — fully whitelabeled.',
-          ar: 'أطلق منصة مقابلات بعلامتك التجارية الخاصة تحت نطاق شركتك. قيّم المرشحين بالذكاء الاصطناعي، أدر خطوط التوظيف، وابنِ قاعدة مواهبك — بشكل كامل وخاص.',
+          en: 'Launch a branded interview experience on your domain. Screen with AI, manage pipelines, and grow your talent pool — fully white-labeled.',
+          ar: 'أطلق تجربة مقابلات بعلامتك على نطاقك. فرز بالذكاء الاصطناعي، إدارة خطوط المرشحين، وبناء قاعدة مواهب — بهوية خاصة بالكامل.',
         },
         features: [
           { en: 'Custom subdomain', ar: 'نطاق فرعي مخصص' },
-          { en: 'AI + Human options', ar: 'خيارات ذكاء اصطناعي وبشري' },
+          { en: 'AI + human options', ar: 'ذكاء اصطناعي وبشري' },
           { en: 'Pipeline management', ar: 'إدارة خطوط المرشحين' },
-          { en: 'Team tools', ar: 'أدوات التعاون' },
-          { en: 'Analytics', ar: 'تحليلات مفصلة' },
+          { en: 'Team tools', ar: 'أدوات للفريق' },
+          { en: 'Deep analytics', ar: 'تحليلات مفصّلة' },
         ],
-        cta: { en: 'Request Demo', ar: 'اطلب عرضاً توضيحياً' },
+        cta: { en: 'Request a demo', ar: 'اطلب عرضاً توضيحياً' },
         href: '/business',
       },
     ],
   },
   how: {
-    title: { en: 'How It Works', ar: 'كيف تعمل' },
+    title: { en: 'How it works', ar: 'كيف تعمل' },
+    subtitle: {
+      en: 'Four clear steps from signup to offer.',
+      ar: 'أربع خطوات واضحة من التسجيل إلى العرض.',
+    },
     steps: [
       {
-        title: { en: 'Create Profile', ar: 'أنشئ ملفك' },
-        desc: { en: 'Sign up and set goals', ar: 'سجّل وحدد أهدافك' },
+        title: { en: 'Create your profile', ar: 'أنشئ ملفك' },
+        desc: { en: 'Sign up and set your goals.', ar: 'سجّل وحدد أهدافك المهنية.' },
       },
       {
-        title: { en: 'Choose Interview', ar: 'اختر نوع المقابلة' },
-        desc: { en: 'AI, human, or job', ar: 'ذكاء اصطناعي، بشري، أو وظيفة' },
+        title: { en: 'Choose your path', ar: 'اختر مسارك' },
+        desc: { en: 'AI practice, human coach, or jobs.', ar: 'تدريب ذكي، خبير بشري، أو وظائف.' },
       },
       {
-        title: { en: 'Practice & Feedback', ar: 'تدرب واحصل على ملاحظات' },
-        desc: { en: 'Complete and get scored', ar: 'أكمل واحصل على تقييم' },
+        title: { en: 'Practice & get scored', ar: 'تدرّب واحصل على تقييم' },
+        desc: { en: 'Finish the session. See clear feedback.', ar: 'أكمل الجلسة واطّلع على ملاحظات واضحة.' },
       },
       {
-        title: { en: 'Land the Job', ar: 'احصل على الوظيفة' },
-        desc: { en: 'Apply with confidence', ar: 'قدم بثقة' },
+        title: { en: 'Land the job', ar: 'احصل على الوظيفة' },
+        desc: { en: 'Apply with confidence and proof.', ar: 'قدّم بثقة وبما يثبت جاهزيتك.' },
       },
     ],
   },
   companies: {
-    headline: { en: 'Hire Smarter with Muqabaleh', ar: 'وظّف بذكاء مع مقابلة' },
+    headline: { en: 'Hire smarter with Muqabaleh', ar: 'وظّف بذكاء مع مقابلة' },
     body: {
-      en: 'Stop wasting time on unqualified candidates. Our AI screening interviews filter top talent automatically, while our human experts provide deep behavioral assessments.',
-      ar: 'توقف عن إضاعة الوقت مع المرشحين غير المؤهلين. مقابلات الفرز الذكية لدينا تُرشّح المواهب المتميزة تلقائياً.',
+      en: 'Stop spending cycles on unqualified candidates. AI screening surfaces top talent automatically, while human experts deliver deep behavioral assessment.',
+      ar: 'توقّف عن إضاعة الوقت مع مرشحين غير مؤهلين. فرز الذكاء الاصطناعي يُظهر أفضل المواهب تلقائياً، ويقدّم خبراؤنا تقييماً سلوكياً عميقاً.',
     },
     bullets: [
-      { en: 'Reduce time-to-hire 70%', ar: 'اختصر وقت التوظيف ٧٠٪' },
-      { en: 'AI scoring', ar: 'تقييم ذكاء اصطناعي' },
-      { en: 'Your brand your domain', ar: 'علامتك نطاقك' },
-      { en: 'Real-time analytics', ar: 'تحليلات فورية' },
+      { en: 'Cut time-to-hire by up to 70%', ar: 'اختصر وقت التوظيف حتى ٧٠٪' },
+      { en: 'Consistent AI scoring', ar: 'تقييم ذكي موحّد' },
+      { en: 'Your brand, your domain', ar: 'علامتك، نطاقك' },
+      { en: 'Real-time hiring analytics', ar: 'تحليلات توظيف فورية' },
     ],
-    cta: { en: 'Talk to Sales', ar: 'تحدث مع المبيعات' },
+    cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
   },
   pricing: {
-    title: { en: 'Pricing', ar: 'الأسعار' },
+    title: { en: 'Simple pricing', ar: 'أسعار واضحة' },
+    subtitle: {
+      en: 'Start free. Upgrade when you are ready to go further.',
+      ar: 'ابدأ مجاناً. حدّث خطتك عندما تكون مستعداً للمزيد.',
+    },
     plans: [
       {
         name: { en: 'Free', ar: 'مجاني' },
@@ -154,8 +165,8 @@ export const C = {
           { en: 'Job board access', ar: 'الوصول إلى لوحة الوظائف' },
           { en: 'Email support', ar: 'دعم عبر البريد' },
         ],
-        cta: { en: 'Start Free', ar: 'ابدأ مجاناً' },
-        href: '/auth/register',
+        cta: { en: 'Start free', ar: 'ابدأ مجاناً' },
+        href: '/register',
         popular: false,
       },
       {
@@ -182,7 +193,7 @@ export const C = {
           { en: '4 human sessions', ar: '٤ جلسات بشرية' },
           { en: 'Career coaching', ar: 'استشارة مهنية' },
           { en: 'Resume review', ar: 'مراجعة السيرة الذاتية' },
-          { en: 'LinkedIn optimization', ar: 'تحسين LinkedIn' },
+          { en: 'LinkedIn optimization', ar: 'تحسين ملف LinkedIn' },
         ],
         cta: { en: 'Go Expert', ar: 'اشترك في الخبير' },
         href: '/pricing',
@@ -193,19 +204,19 @@ export const C = {
         price: { en: 'Custom', ar: 'مخصص' },
         period: { en: '', ar: '' },
         features: [
-          { en: 'Full whitelabel', ar: 'علامة تجارية خاصة كاملة' },
+          { en: 'Full white-label', ar: 'علامة تجارية خاصة كاملة' },
           { en: 'Unlimited screening', ar: 'فرز بلا حدود' },
-          { en: 'Account manager', ar: 'مدير حساب' },
-          { en: 'API access', ar: 'وصول API' },
+          { en: 'Dedicated account manager', ar: 'مدير حساب مخصص' },
+          { en: 'API access', ar: 'وصول عبر واجهة برمجية' },
         ],
-        cta: { en: 'Contact Sales', ar: 'تواصل مع المبيعات' },
+        cta: { en: 'Contact sales', ar: 'تواصل مع المبيعات' },
         href: '/business',
         popular: false,
       },
     ],
   },
   testimonials: {
-    title: { en: 'What people say', ar: 'ماذا يقولون' },
+    title: { en: 'Stories from people who got ready', ar: 'قصص ممن استعدّوا معنا' },
     items: [
       {
         name: { en: 'Sara Al-Mansouri', ar: 'سارة المنصوري' },
@@ -220,21 +231,21 @@ export const C = {
         role: { en: 'HR Director — Riyadh', ar: 'مدير موارد بشرية — الرياض' },
         quote: {
           en: 'We cut screening time dramatically and still got richer candidate signal.',
-          ar: 'اختصرنا وقت الفرز بشكل كبير مع إشارات أوضح عن المرشحين.',
+          ar: 'اختصرنا وقت الفرز بشكل كبير، وحصلنا على صورة أوضح عن المرشحين.',
         },
       },
       {
         name: { en: 'Lina Haddad', ar: 'لينا حداد' },
         role: { en: 'Software Engineer — Amman', ar: 'مهندسة برمجيات — عمّان' },
         quote: {
-          en: 'The bilingual practice made English interviews feel natural, not scary.',
-          ar: 'التدرّب ثنائي اللغة جعل مقابلات الإنجليزية طبيعية لا مخيفة.',
+          en: 'Bilingual practice made English interviews feel natural — not intimidating.',
+          ar: 'التدرّب بلغتين جعل مقابلات الإنجليزية طبيعية، لا مخيفة.',
         },
       },
     ],
   },
   faq: {
-    title: { en: 'FAQ', ar: 'الأسئلة المتكررة' },
+    title: { en: 'Common questions', ar: 'أسئلة شائعة' },
     items: [
       {
         q: {
@@ -253,7 +264,7 @@ export const C = {
         },
         a: {
           en: 'Both. Choose your language per session — the platform is fully bilingual.',
-          ar: 'كلاهما. اختر لغتك لكل جلسة — المنصة ثنائية اللغة بالكامل.',
+          ar: 'كلاهما. اختر لغة كل جلسة — المنصة ثنائية اللغة بالكامل.',
         },
       },
       {
@@ -273,7 +284,7 @@ export const C = {
         },
         a: {
           en: 'Yes. Start with free AI interviews and upgrade when you need more.',
-          ar: 'نعم. ابدأ بمقابلات ذكاء اصطناعي مجانية ورقِّ خطتك عند الحاجة.',
+          ar: 'نعم. ابدأ بمقابلات ذكاء اصطناعي مجانية، وحدّث خطتك عند الحاجة.',
         },
       },
       {
@@ -290,16 +301,16 @@ export const C = {
   },
   finalCta: {
     headline: {
-      en: 'Ready to Ace Your Next Interview?',
-      ar: 'مستعد لتتقن مقابلتك القادمة؟',
+      en: 'Ready for your next interview?',
+      ar: 'هل أنت مستعد لمقابلتك القادمة؟',
     },
-    startFree: { en: 'Start Free', ar: 'ابدأ مجاناً' },
-    hiring: { en: "I'm Hiring", ar: 'أنا أبحث عن مواهب' },
+    startFree: { en: 'Start free', ar: 'ابدأ مجاناً' },
+    hiring: { en: "I'm hiring", ar: 'أبحث عن مواهب' },
   },
   footer: {
     tagline: {
-      en: 'AI mock interviews, human experts, and jobs — one platform.',
-      ar: 'مقابلات ذكاء اصطناعي، خبراء بشريون، ووظائف — منصة واحدة.',
+      en: 'AI practice, human experts, and jobs — one platform.',
+      ar: 'تدريب ذكي، خبراء بشريون، ووظائف — منصة واحدة.',
     },
     services: { en: 'Services', ar: 'الخدمات' },
     company: { en: 'Company', ar: 'الشركة' },

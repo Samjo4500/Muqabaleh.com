@@ -2,10 +2,9 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
-import { BiInline, BiText } from './BiText';
+import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { fadeUp, stagger } from './motion';
 
@@ -13,75 +12,66 @@ export function CrystalForCompanies() {
   const locale = useLocale();
 
   return (
-    <section id="for-companies" className="section-pad scroll-mt-28">
-      <div className="content-wrap">
-        <div className="glass-strong grid items-center gap-10 overflow-hidden rounded-3xl p-8 md:grid-cols-2 md:p-12">
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-80px' }}
-          >
-            <motion.div variants={fadeUp} className="mb-5">
-              <BiText
-                as="h2"
-                bi={C.companies.headline}
-                primaryClassName="font-display text-3xl font-bold tracking-[-0.02em] md:text-4xl"
-              />
+    <section id="for-companies" className="mq-section scroll-mt-28">
+      <div className="mq-wrap">
+        <div className="overflow-hidden rounded-[2rem] bg-[var(--mq-ink)] text-white">
+          <div className="grid items-center gap-10 p-8 md:grid-cols-2 md:p-12 lg:p-16">
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-80px' }}
+            >
+              <motion.p variants={fadeUp} className="mb-4 text-sm font-bold tracking-wide text-[var(--mq-sand)]">
+                <BiInline bi={C.nav.forCompanies} />
+              </motion.p>
+              <motion.div variants={fadeUp}>
+                <T
+                  as="h2"
+                  bi={C.companies.headline}
+                  className="mq-display mb-4 text-3xl font-bold tracking-tight md:text-5xl"
+                />
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <T as="p" bi={C.companies.body} className="mb-7 text-base leading-relaxed text-white/75" />
+              </motion.div>
+              <motion.ul variants={stagger} className="mb-8 space-y-3">
+                {C.companies.bullets.map((b) => (
+                  <motion.li key={b.en} variants={fadeUp} className="flex items-start gap-3 text-sm text-white/90">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--mq-sand)]" />
+                    <BiInline bi={b} />
+                  </motion.li>
+                ))}
+              </motion.ul>
+              <motion.div variants={fadeUp}>
+                <Link href={localePath('/business', locale)} className="mq-btn mq-btn-on-dark">
+                  <BiInline bi={C.companies.cta} />
+                </Link>
+              </motion.div>
             </motion.div>
-            <motion.div variants={fadeUp} className="mb-6">
-              <BiText
-                as="p"
-                bi={C.companies.body}
-                primaryClassName="text-base leading-relaxed text-[var(--text-secondary)]"
-              />
-            </motion.div>
-            <motion.ul variants={stagger} className="mb-8 space-y-3">
-              {C.companies.bullets.map((b) => (
-                <motion.li key={b.en} variants={fadeUp} className="flex items-start gap-3">
-                  <Check className="mt-0.5 shrink-0 text-emerald-400" size={18} />
-                  <BiInline bi={b} />
-                </motion.li>
-              ))}
-            </motion.ul>
-            <motion.div variants={fadeUp}>
-              <Link
-                href={localePath('/business', locale)}
-                className="glass-button inline-flex min-h-[48px] items-center justify-center px-6 text-sm font-semibold"
-              >
-                <BiInline bi={C.companies.cta} />
-              </Link>
-            </motion.div>
-          </motion.div>
 
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="relative min-h-[280px] rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/10 via-transparent to-emerald-500/10 p-6"
-          >
-            <div className="absolute inset-6 rounded-xl border border-dashed border-white/15" />
-            <div className="relative flex h-full flex-col justify-between gap-4">
-              <BiText
-                bi={{ en: 'HR Screening Portal', ar: 'بوابة فرز الموارد البشرية' }}
-                primaryClassName="font-display text-lg font-semibold"
-              />
-              <div className="grid grid-cols-2 gap-3">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              className="relative min-h-[280px] rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-[rgba(216,195,165,0.15)] p-6"
+            >
+              <div className="grid h-full grid-cols-2 gap-3">
                 {[
-                  { en: 'Candidates', ar: 'مرشحون', v: '128' },
+                  { en: 'Candidates screened', ar: 'مرشحون فُرزوا', v: '128' },
                   { en: 'Pass rate', ar: 'نسبة النجاح', v: '34%' },
                   { en: 'Avg score', ar: 'متوسط الدرجة', v: '81' },
                   { en: 'Time saved', ar: 'وقت موفّر', v: '70%' },
                 ].map((m) => (
-                  <div key={m.en} className="glass rounded-xl p-3">
-                    <p className="text-xl font-bold text-cyan-300">{m.v}</p>
-                    <BiText bi={m} primaryClassName="text-xs text-[var(--text-muted)]" />
+                  <div key={m.en} className="flex flex-col justify-between rounded-2xl bg-white/5 p-4">
+                    <p className="mq-display text-3xl font-bold text-[var(--mq-sand)]">{m.v}</p>
+                    <T bi={m} className="mt-3 text-xs text-white/65" />
                   </div>
                 ))}
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

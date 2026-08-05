@@ -13,6 +13,39 @@ const ROUTE_ROLES: Record<string, string[]> = {
   '/b2b': [UserRole.COMPANY_ADMIN, UserRole.SUPER_ADMIN],
   '/partner': ['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN],
   '/admin': [UserRole.SUPER_ADMIN],
+  // Gated AI mock interview engine — any authenticated role with email session
+  '/interview/prequal': [
+    UserRole.USER,
+    UserRole.INTERVIEWER,
+    UserRole.COMPANY_ADMIN,
+    UserRole.PARTNER_ADMIN,
+    UserRole.PARTNER_MEMBER,
+    UserRole.SUPER_ADMIN,
+  ],
+  '/interview/summary': [
+    UserRole.USER,
+    UserRole.INTERVIEWER,
+    UserRole.COMPANY_ADMIN,
+    UserRole.PARTNER_ADMIN,
+    UserRole.PARTNER_MEMBER,
+    UserRole.SUPER_ADMIN,
+  ],
+  '/interview/session': [
+    UserRole.USER,
+    UserRole.INTERVIEWER,
+    UserRole.COMPANY_ADMIN,
+    UserRole.PARTNER_ADMIN,
+    UserRole.PARTNER_MEMBER,
+    UserRole.SUPER_ADMIN,
+  ],
+  '/interview/report': [
+    UserRole.USER,
+    UserRole.INTERVIEWER,
+    UserRole.COMPANY_ADMIN,
+    UserRole.PARTNER_ADMIN,
+    UserRole.PARTNER_MEMBER,
+    UserRole.SUPER_ADMIN,
+  ],
 };
 
 /** Public interviewer paths that do not require INTERVIEWER role */
@@ -126,14 +159,21 @@ export default async function middleware(request: NextRequest) {
     const role = await getRoleFromRequest(request);
     const locale = getLocaleFromPath(pathname);
 
-    // No valid session → redirect to signin
+    // No valid session → redirect to register for interview engine (capture email), else signin
     if (!role) {
-      const signinUrl = new URL(
-        locale === 'ar' ? '/auth/signin' : `/${locale}/auth/signin`,
+      const bare = stripLocale(pathname);
+      const preferRegister =
+        bare.startsWith('/interview/prequal') ||
+        bare.startsWith('/interview/summary') ||
+        bare.startsWith('/interview/session') ||
+        bare.startsWith('/interview/report');
+      const authPath = preferRegister ? '/auth/register' : '/auth/signin';
+      const authUrl = new URL(
+        locale === 'ar' ? authPath : `/${locale}${authPath}`,
         request.url,
       );
-      signinUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(signinUrl);
+      authUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(authUrl);
     }
 
     // Valid session but wrong role → redirect to forbidden

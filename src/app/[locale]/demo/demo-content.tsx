@@ -1,28 +1,36 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, ArrowRight, ShieldCheck, Mail, ClipboardList } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { easeCrystal } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
 
-/**
- * Free interviews are gated: registration (email) + pre-qualifying questions required.
- * This page no longer starts an ungated guest interview.
- */
-export default function DemoContent({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const t = useTranslations('demo');
+export default function DemoContent({
+  isAuthenticated,
+  userEmail,
+}: {
+  isAuthenticated: boolean;
+  userEmail?: string | null;
+}) {
   const locale = useLocale();
   const router = useRouter();
   const isAr = locale === 'ar';
 
-  const goHome = () => {
-    router.push(localePath('/', locale));
-  };
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const prequalPath = localePath('/interview/prequal', locale);
+
+  const goHome = () => router.push(localePath('/', locale));
   const goBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
@@ -33,10 +41,87 @@ export default function DemoContent({ isAuthenticated }: { isAuthenticated: bool
 
   const BackIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
-  const prequalPath = localePath('/interview/prequal', locale);
-  const continueHref = isAuthenticated
-    ? prequalPath
-    : `${localePath('/auth/register', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`;
+  const startAsAuthenticated = () => {
+    router.push(prequalPath);
+  };
+
+  const handleCapture = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedName = name.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setError(isAr ? 'أدخل اسمك' : 'Enter your name');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError(isAr ? 'أدخل بريداً إلكترونياً صالحاً' : 'Enter a valid email');
+      return;
+    }
+    if (password.length < 8) {
+      setError(
+        isAr ? 'كلمة المرور يجب أن تكون ٨ أحرف على الأقل' : 'Password must be at least 8 characters',
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountType: 'INDIVIDUAL',
+          name: trimmedName,
+          email: trimmedEmail,
+          password,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 409) {
+        // Existing account — sign in with same credentials
+        const login = await signIn('credentials', {
+          email: trimmedEmail,
+          password,
+          redirect: false,
+        });
+        if (login?.ok) {
+          router.push(prequalPath);
+          return;
+        }
+        setError(
+          isAr
+            ? 'هذا البريد مسجّل. سجّل الدخول للمتابعة.'
+            : 'This email is already registered. Sign in to continue.',
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || (isAr ? 'تعذّر إنشاء الحساب' : 'Could not create account'));
+      }
+
+      const login = await signIn('credentials', {
+        email: trimmedEmail,
+        password,
+        redirect: false,
+      });
+      if (!login?.ok) {
+        router.push(
+          `${localePath('/auth/signin', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`,
+        );
+        return;
+      }
+      router.push(prequalPath);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : isAr ? 'حدث خطأ' : 'Something went wrong');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
@@ -58,7 +143,7 @@ export default function DemoContent({ isAuthenticated }: { isAuthenticated: bool
           <Link
             href={localePath('/', locale)}
             className="group inline-flex min-w-0 items-center gap-2.5 rounded-xl py-1 pe-2 transition hover:bg-white/[0.04]"
-            aria-label={t('home')}
+            aria-label={isAr ? 'الرئيسية' : 'Home'}
           >
             <Image
               src="/images/logos/v2-balanced-a-T.webp"
@@ -87,70 +172,123 @@ export default function DemoContent({ isAuthenticated }: { isAuthenticated: bool
           transition={{ duration: 0.45, ease: easeCrystal }}
           className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur md:p-10"
         >
-          <p className="text-sm uppercase tracking-[0.18em] text-teal-300/80">Muqabaleh</p>
-          <h1 className="mt-3 font-display text-3xl md:text-5xl">
-            {isAr ? 'مقابلة تجريبية مجانية — بعد التأهيل' : 'Free mock interview — after pre-qual'}
+          <p className="font-display text-4xl tracking-tight text-[var(--text-primary)] md:text-5xl">
+            Muqabaleh
+          </p>
+          <h1 className="mt-3 text-xl font-medium text-[var(--text-primary)] md:text-2xl">
+            {isAr ? 'مقابلة تجريبية بالذكاء الاصطناعي' : 'AI mock interview practice'}
           </h1>
-          <p className="mt-4 max-w-xl text-[var(--text-secondary)]">
+          <p className="mt-3 max-w-xl text-[var(--text-secondary)]">
             {isAr
-              ? 'لا توجد مقابلة مجانية دون التسجيل ببريدك الإلكتروني والإجابة عن أسئلة التأهيل. بعد الجلسة يمكنك تصفّح الوظائف أو دعوة صديق للتسجيل.'
-              : 'There is no free interview without email registration and pre-qualifying questions. After your session you can browse jobs or invite a friend to register.'}
+              ? 'خصّص جلستك حسب دورك ومستواك، ثم احصل على ملاحظات فورية.'
+              : 'Personalize a session for your role and level, then get instant feedback.'}
           </p>
 
-          <ul className="mt-8 space-y-4">
-            {[
-              {
-                icon: Mail,
-                title: isAr ? '١) سجّل ببريدك' : '1) Register with your email',
-                body: isAr
-                  ? 'نحتاج بريدك لفتح جلستك المجانية وحفظ تقدّمك.'
-                  : 'We need your email to unlock your free session and save progress.',
-              },
-              {
-                icon: ClipboardList,
-                title: isAr ? '٢) أجب عن أسئلة التأهيل' : '2) Answer pre-qualifying questions',
-                body: isAr
-                  ? '٨ أسئلة تخصّص الدور والمستوى واللغة ومدة المقابلة.'
-                  : 'Eight questions tailor role, level, language, and interview length.',
-              },
-              {
-                icon: ShieldCheck,
-                title: isAr ? '٣) ابدأ المقابلة واحصل على تقرير' : '3) Start interview & get a report',
-                body: isAr
-                  ? 'ثم تصفّح قائمة الوظائف أو سجّل دعوة لصديق.'
-                  : 'Then browse the job listing or share registration with a friend.',
-              },
-            ].map((item) => (
-              <li key={item.title} className="flex gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-                <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-teal-300" />
-                <div>
-                  <div className="font-medium">{item.title}</div>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">{item.body}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {isAuthenticated ? (
+            <div className="mt-8 space-y-4">
+              {userEmail ? (
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {isAr ? 'متصل باسم ' : 'Signed in as '}
+                  <span className="text-[var(--text-primary)]">{userEmail}</span>
+                </p>
+              ) : null}
+              <button
+                type="button"
+                onClick={startAsAuthenticated}
+                className="w-full rounded-xl bg-teal-300 px-5 py-3.5 text-sm font-semibold text-[var(--bg-deep)]"
+              >
+                {isAr ? 'ابدأ مقابلتك' : 'Start your interview'}
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleCapture} className="mt-8 space-y-4" noValidate>
+              <div>
+                <label htmlFor="demo-name" className="mb-1.5 block text-sm text-[var(--text-secondary)]">
+                  {isAr ? 'الاسم' : 'Name'}
+                </label>
+                <input
+                  id="demo-name"
+                  name="name"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  placeholder={isAr ? 'اسمك الكامل' : 'Your full name'}
+                />
+              </div>
+              <div>
+                <label htmlFor="demo-email" className="mb-1.5 block text-sm text-[var(--text-secondary)]">
+                  {isAr ? 'البريد الإلكتروني' : 'Email'}
+                </label>
+                <input
+                  id="demo-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="demo-password"
+                  className="mb-1.5 block text-sm text-[var(--text-secondary)]"
+                >
+                  {isAr ? 'كلمة المرور' : 'Password'}
+                </label>
+                <input
+                  id="demo-password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  placeholder={isAr ? '٨ أحرف على الأقل' : 'At least 8 characters'}
+                />
+              </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={continueHref}
-              className="flex-1 rounded-xl bg-teal-300 px-5 py-3.5 text-center text-sm font-semibold text-[var(--bg-deep)]"
-            >
-              {isAuthenticated
-                ? isAr
-                  ? 'متابعة إلى التأهيل'
-                  : 'Continue to pre-qual'
-                : isAr
-                  ? 'سجّل ثم ابدأ التأهيل'
-                  : 'Register, then start pre-qual'}
-            </Link>
-            <Link
-              href={localePath('/jobs', locale)}
-              className="rounded-xl border border-white/15 px-5 py-3.5 text-center text-sm"
-            >
-              {isAr ? 'تصفّح الوظائف' : 'Browse jobs'}
-            </Link>
-          </div>
+              {error ? (
+                <p className="text-sm text-rose-300" role="alert">
+                  {error}{' '}
+                  {error.toLowerCase().includes('registered') || error.includes('مسجّل') ? (
+                    <Link
+                      href={`${localePath('/auth/signin', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`}
+                      className="underline text-teal-200"
+                    >
+                      {isAr ? 'تسجيل الدخول' : 'Sign in'}
+                    </Link>
+                  ) : null}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-300 px-5 py-3.5 text-sm font-semibold text-[var(--bg-deep)] disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isAr ? 'متابعة إلى مقابلتك' : 'Continue to your interview'}
+              </button>
+
+              <p className="text-center text-xs text-[var(--text-secondary)]">
+                {isAr ? 'لديك حساب؟ ' : 'Already have an account? '}
+                <Link
+                  href={`${localePath('/auth/signin', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`}
+                  className="text-teal-200 hover:text-teal-100"
+                >
+                  {isAr ? 'سجّل الدخول' : 'Sign in'}
+                </Link>
+              </p>
+            </form>
+          )}
         </motion.div>
       </main>
     </div>

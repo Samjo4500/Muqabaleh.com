@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : 'Interview Pre-Qual — Muqabaleh',
     },
     description: isAr
-      ? 'أجب عن أسئلة التأهيل قبل بدء مقابلتك المجانية على مقابلة.'
-      : 'Answer pre-qualifying questions before starting your free Muqabaleh interview.',
+      ? 'خصّص جلسة مقابلة تجريبية حسب دورك ومستواك ولغتك على مقابلة.'
+      : 'Tailor your Muqabaleh mock interview session to your role, level, and language.',
   };
 }
 

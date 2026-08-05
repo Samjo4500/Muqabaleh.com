@@ -183,26 +183,22 @@ export function PrequalClient({ email }: { email: string }) {
               priority
             />
           </Link>
-          <div className="text-xs text-[var(--text-secondary)] sm:text-sm">
-            {email
-              ? email
-              : isAr
-                ? 'التسجيل مطلوب'
-                : 'Registration required'}
+          <div className="truncate text-xs text-[var(--text-secondary)] sm:text-sm">
+            {email}
           </div>
         </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 md:px-6">
         <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.18em] text-teal-300/80">Muqabaleh</p>
-          <h1 className="mt-2 font-display text-3xl md:text-4xl">
-            {isAr ? 'استبيان التأهيل للمقابلة' : 'Interview pre-qualification'}
+          <p className="font-display text-3xl tracking-tight md:text-4xl">Muqabaleh</p>
+          <h1 className="mt-2 text-xl font-medium md:text-2xl">
+            {isAr ? 'خصّص مقابلتك' : 'Personalize your interview'}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-[var(--text-secondary)]">
             {isAr
-              ? 'أجب عن ٨ أسئلة لنخصّص مقابلتك. لا مقابلة مجانية دون تأهيل وتسجيل بالبريد.'
-              : 'Answer 8 questions so we can personalize your mock interview. No free interview without pre-qual and email registration.'}
+              ? 'أجب عن بضعة أسئلة لنجهّز جلسة تناسب دورك ومستواك.'
+              : 'Answer a few questions so we can tailor a session to your role and level.'}
           </p>
         </div>
 

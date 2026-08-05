@@ -83,9 +83,7 @@ export function SummaryScreen({
           {isAr ? 'خطة مقابلتك' : 'Your Interview Plan'}
         </h2>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          {isAr
-            ? 'راجع اختياراتك ثم ابدأ. لا يمكن بدء مقابلة مجانية دون استبيان التأهيل والتسجيل.'
-            : 'Review your selections, then start. Free interviews require pre-qual and registration.'}
+          {isAr ? 'راجع اختياراتك ثم ابدأ جلستك.' : 'Review your selections, then begin your session.'}
         </p>
       </div>
 

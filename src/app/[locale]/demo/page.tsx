@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : 'Free Practice — Muqabaleh',
     },
     description: isAr
-      ? 'سجّل وأجب عن أسئلة التأهيل قبل بدء مقابلتك المجانية.'
-      : 'Register and answer pre-qualifying questions before your free interview.',
+      ? 'تدرّب على مقابلات العمل مع محاور ذكاء اصطناعي مخصّص لدورك على مقابلة.'
+      : 'Practice job interviews with an AI interviewer tailored to your role on Muqabaleh.',
   };
 }
 
@@ -27,5 +27,10 @@ export default async function DemoPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await getServerSession(authOptions);
-  return <PageContent isAuthenticated={Boolean(session?.user?.email)} />;
+  return (
+    <PageContent
+      isAuthenticated={Boolean(session?.user?.email)}
+      userEmail={session?.user?.email}
+    />
+  );
 }

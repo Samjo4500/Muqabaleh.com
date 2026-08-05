@@ -8,8 +8,8 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'طلبات الانضمام للشراكة', en: 'Partner Applications' }}
       description={{
-        ar: 'مراجعة الطلبات، موافقة/رفض مع سبب، تواصل بالبريد، وتتبع الحالة.',
-        en: 'Review requests, approve/reject with reason, email applicant, status tracker.',
+        ar: 'مراجعة الطلبات، موافقة مع تهيئة حساب الشريك، رفض، وتتبع الحالة.',
+        en: 'Review requests, approve with partner provisioning, reject, and track status.',
       }}
       resource="partner_applications"
       columns={[
@@ -34,18 +34,39 @@ export default function Page() {
       rowActions={[
         {
           id: 'approve',
-          label: { ar: 'موافقة', en: 'Approve' },
-          onRun: async (row) => alert(`Approved: ${row.companyName}`),
+          label: { ar: 'موافقة وتهيئة', en: 'Approve & provision' },
+          onRun: async (row) => {
+            const res = await fetch('/api/admin/partners/provision', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ applicationId: row.id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Provision failed');
+              return;
+            }
+            alert(
+              data.already
+                ? `Already provisioned: ${data.partnerId}`
+                : `Provisioned ${data.slug}\nLogin: ${data.email}\nTemp password: ${data.tempPassword}`,
+            );
+            window.location.reload();
+          },
         },
         {
           id: 'reject',
           label: { ar: 'رفض', en: 'Reject' },
-          onRun: async (row) => alert(`Rejected: ${row.companyName}`),
+          onRun: async (row) => {
+            alert(`Marked for rejection: ${row.companyName}. Update status in DB / support workflow.`);
+          },
         },
         {
           id: 'email',
           label: { ar: 'مراسلة', en: 'Email' },
-          onRun: async (row) => alert(`Email: ${row.email}`),
+          onRun: async (row) => {
+            window.location.href = `mailto:${row.email}?subject=Muqabaleh%20Partnership`;
+          },
         },
       ]}
     />

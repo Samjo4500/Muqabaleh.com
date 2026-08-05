@@ -24,7 +24,7 @@ function statusColor(status: string) {
   if (status === 'OPEN') return 'border-emerald/30 bg-emerald/10 text-emerald';
   if (status === 'CLOSED') return 'border-white/20 bg-white/5 text-[var(--text-muted)]';
   if (status === 'PAUSED') return 'border-amber-400/30 bg-amber-500/10 text-amber-200';
-  return 'border-indigo-400/30 bg-indigo-500/10 text-[var(--aurora-2)]';
+  return 'border-teal-300/30 bg-teal-400/10 text-teal-300';
 }
 
 export default function JobsListPage() {
@@ -108,7 +108,7 @@ export default function JobsListPage() {
                     <td className="px-4 py-3">
                       <Link
                         href={`/b2b/jobs/${job.id}`}
-                        className="font-medium text-[var(--text-primary)] hover:text-[var(--aurora-2)] transition-colors"
+                        className="font-medium text-[var(--text-primary)] hover:text-teal-300 transition-colors"
                       >
                         {job.title}
                       </Link>

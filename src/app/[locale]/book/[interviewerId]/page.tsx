@@ -5,8 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { ArrowRight, ArrowLeft, Video, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { BookingPayPalButton } from '@/components/BookingPayPalButton';
 
 /* ------------------------------------------------------------------ */
@@ -182,168 +181,142 @@ function BookPageContent() {
 
   /* ── Render ── */
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
-      <Navbar />
+    <AtelierShell>
+      <div className="mq-wrap mx-auto max-w-2xl py-10 md:py-14">
+        <a
+          href={`/${locale}/interviewer/${interviewerId}`}
+          className="inline-flex items-center gap-1.5 text-sm text-white/55 transition-colors hover:text-teal-300"
+        >
+          <BackArrow size={16} />
+          {tc('back')}
+        </a>
 
-      <main className="flex-1 pt-20">
-        <div className="mx-auto max-w-2xl px-4 mt-8 mb-16">
-          {/* Back link */}
-          <a
-            href={`/${locale}/interviewer/${interviewerId}`}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-[var(--gold)]"
-          >
-            <BackArrow size={16} />
-            {tc('back')}
-          </a>
+        <h1 className="mq-display mt-4 text-3xl font-bold text-white">
+          {t('confirmTitle')}
+        </h1>
 
-          {/* Title */}
-          <h1 className="mt-4 text-3xl font-bold text-[var(--gold)]">
-            {t('confirmTitle')}
-          </h1>
-
-          {/* Booking summary card */}
-          <div className="mt-6 rounded-xl border border-[rgba(212,175,55,0.2)] bg-[#0B0F17] p-6">
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-[var(--gold)]" />
-              </div>
-            ) : interviewer ? (
-              <div className="space-y-5">
-                {/* Interviewer info row */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
-                    <span className="text-xs font-bold text-[var(--gold)]">
-                      {interviewer.initials}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">
-                      {interviewerName}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {locale === 'ar' && interviewer.currentTitleAr
-                        ? interviewer.currentTitleAr
-                        : interviewer.currentTitle}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-white/5" />
-
-                {/* Selected date/time */}
-                <div>
-                  <p className="text-sm text-gray-400">{t('selectedSlot')}</p>
-                  <p className="mt-1 text-white">
-                    {formatDate(date, locale)} · {formatTime(displayTime, locale)}
-                  </p>
-                </div>
-
-                {/* Duration */}
-                <div>
-                  <p className="text-sm text-gray-400">{t('duration')}</p>
-                  <p className="mt-1 text-white">
-                    {duration} {t('minutes')}
-                  </p>
-                </div>
-
-                {/* Meeting method */}
-                <div>
-                  <p className="text-sm text-gray-400">{t('method')}</p>
-                  <div className="mt-1 flex items-center gap-2 text-white">
-                    <Video size={16} className="text-[var(--gold)]" />
-                    <span>{t('jitsiBrowser')}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-white/5" />
-
-                {/* Price */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">
-                    {locale === 'ar' ? 'السعر' : 'Price'}
-                  </span>
-                  <span className="text-2xl font-bold text-[var(--gold)]">
-                    {booking
-                      ? `$${displayPrice.toFixed(2)}`
-                      : '—'
-                    }
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <p className="py-8 text-center text-gray-500">
-                {locale === 'ar' ? 'المحاور غير موجود' : 'Interviewer not found'}
-              </p>
-            )}
-          </div>
-
-          {/* Note textarea - only show when booking hasn't been created yet */}
-          {!booking && (
-            <>
-              <div className="mt-6">
-                <label className="mb-2 block text-sm text-gray-300">
-                  {t('addNote')}
-                </label>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder={t('notePlaceholder')}
-                  rows={3}
-                  className="w-full resize-none rounded-lg border border-[rgba(212,175,55,0.15)] bg-[#0B0F17] p-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-[var(--gold)]/40 focus:ring-1 focus:ring-[var(--gold)]/20 transition-colors"
-                />
-              </div>
-
-              {/* Terms checkbox */}
-              <div className="mt-6 flex items-start gap-3">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-                  className="mt-0.5 border-[var(--gold)]/40 data-[state=checked]:bg-[var(--gold)] data-[state=checked]:border-[var(--gold)]"
-                />
-                <label
-                  htmlFor="terms"
-                  className="cursor-pointer text-sm leading-relaxed text-gray-400"
-                >
-                  {t('cancellationTerms')}
-                </label>
-              </div>
-
-              {/* Error message */}
-              {bookingError && (
-                <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-center text-sm text-red-400">
-                  {bookingError}
-                </div>
-              )}
-
-              {/* Create booking button - creates the booking and then shows PayPal */}
-              <button
-                onClick={handleCreateBooking}
-                disabled={!termsAccepted || creatingBooking || !date || !startTime || !interviewer}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] py-3 text-sm font-bold text-black transition-all duration-200 hover:bg-[var(--gold)]/90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {creatingBooking && <Loader2 size={16} className="animate-spin" />}
-                {t('payAndBook')}
-              </button>
-            </>
-          )}
-
-          {/* PayPal button - show after booking is created */}
-          {booking && (
-            <div className="mt-6">
-              <BookingPayPalButton
-                bookingId={booking.id}
-                amount={displayPrice}
-                onSuccess={handlePayPalSuccess}
-                onError={handlePayPalError}
-              />
+        <div className="mq-panel mt-6 rounded-2xl p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-teal-300" />
             </div>
+          ) : interviewer ? (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-teal-300/30 bg-teal-400/10">
+                  <span className="text-xs font-bold text-teal-300">
+                    {interviewer.initials}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-white">{interviewerName}</p>
+                  <p className="text-xs text-white/50">
+                    {locale === 'ar' && interviewer.currentTitleAr
+                      ? interviewer.currentTitleAr
+                      : interviewer.currentTitle}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10" />
+
+              <div>
+                <p className="text-sm text-white/50">{t('selectedSlot')}</p>
+                <p className="mt-1 text-white">
+                  {formatDate(date, locale)} · {formatTime(displayTime, locale)}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-white/50">{t('duration')}</p>
+                <p className="mt-1 text-white">
+                  {duration} {t('minutes')}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-white/50">{t('method')}</p>
+                <div className="mt-1 flex items-center gap-2 text-white">
+                  <Video size={16} className="text-teal-300" />
+                  <span>{t('jitsiBrowser')}</span>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/50">
+                  {locale === 'ar' ? 'السعر' : 'Price'}
+                </span>
+                <span className="text-2xl font-bold text-[var(--mq-sand)]">
+                  {booking ? `$${displayPrice.toFixed(2)}` : '—'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className="py-8 text-center text-white/40">
+              {locale === 'ar' ? 'المحاور غير موجود' : 'Interviewer not found'}
+            </p>
           )}
         </div>
-      </main>
 
-      <Footer />
-    </div>
+        {!booking && (
+          <>
+            <div className="mt-6">
+              <label className="mb-2 block text-sm text-white/70">{t('addNote')}</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={t('notePlaceholder')}
+                rows={3}
+                className="glass-input w-full resize-none rounded-xl p-3 text-sm"
+              />
+            </div>
+
+            <div className="mt-6 flex items-start gap-3">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                className="mt-0.5 border-teal-300/40 data-[state=checked]:border-teal-300 data-[state=checked]:bg-teal-300 data-[state=checked]:text-[#070b14]"
+              />
+              <label
+                htmlFor="terms"
+                className="cursor-pointer text-sm leading-relaxed text-white/55"
+              >
+                {t('cancellationTerms')}
+              </label>
+            </div>
+
+            {bookingError && (
+              <div className="mt-4 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-center text-sm text-rose-300">
+                {bookingError}
+              </div>
+            )}
+
+            <button
+              onClick={handleCreateBooking}
+              disabled={!termsAccepted || creatingBooking || !date || !startTime || !interviewer}
+              className="mq-btn mq-btn-primary mt-6 flex w-full items-center justify-center gap-2 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {creatingBooking && <Loader2 size={16} className="animate-spin" />}
+              {t('payAndBook')}
+            </button>
+          </>
+        )}
+
+        {booking && (
+          <div className="mt-6">
+            <BookingPayPalButton
+              bookingId={booking.id}
+              amount={displayPrice}
+              onSuccess={handlePayPalSuccess}
+              onError={handlePayPalError}
+            />
+          </div>
+        )}
+      </div>
+    </AtelierShell>
   );
 }
 

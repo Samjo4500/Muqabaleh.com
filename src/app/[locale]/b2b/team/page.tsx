@@ -31,7 +31,7 @@ const MEMBERS = [
 
 function roleBadge(role: string) {
   if (role === 'roleAdmin' || role === 'مدير' || role === 'Admin') {
-    return 'border-indigo-400/30 bg-indigo-500/10 text-[var(--aurora-2)]';
+    return 'border-teal-300/30 bg-teal-400/10 text-teal-300';
   }
   return 'border-white/20 bg-white/5 text-[var(--text-muted)]';
 }
@@ -166,7 +166,7 @@ export default function TeamPage() {
             <Button
               variant="ghost"
               onClick={() => setInviteOpen(false)}
-              className="text-[var(--text-muted)] hover:text-[var(--aurora-2)] cursor-pointer"
+              className="text-[var(--text-muted)] hover:text-teal-300 cursor-pointer"
             >
               {tCommon('cancel')}
             </Button>

@@ -5,10 +5,10 @@ import { Users, CheckCircle2, BarChart3, Clock, AlertTriangle, Activity } from '
 import { GlowCard } from '@/components/brand';
 
 const KPIS = [
-  { key: 'kpiCandidates', value: 47, icon: Users, color: 'text-[var(--aurora-2)]' },
+  { key: 'kpiCandidates', value: 47, icon: Users, color: 'text-teal-300' },
   { key: 'kpiCompleted', value: 23, icon: CheckCircle2, color: 'text-emerald' },
   { key: 'kpiAvgScore', value: 78, icon: BarChart3, color: 'text-cyan' },
-  { key: 'kpiSessionsLeft', value: 15, icon: Clock, color: 'text-[var(--aurora-2)]' },
+  { key: 'kpiSessionsLeft', value: 15, icon: Clock, color: 'text-teal-300' },
   { key: 'kpiSlaBreached', value: 3, icon: AlertTriangle, color: 'text-red-500' },
 ] as const;
 
@@ -47,7 +47,7 @@ export default function B2BDashboardPage() {
       {/* Recent Activity */}
       <GlowCard className="p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Activity size={20} strokeWidth={1.75} className="text-[var(--aurora-2)]" />
+          <Activity size={20} strokeWidth={1.75} className="text-teal-300" />
           <h2 className="text-lg font-bold text-[var(--text-primary)]">
             {t('recentActivity')}
           </h2>
@@ -59,7 +59,7 @@ export default function B2BDashboardPage() {
               className="flex items-start justify-between gap-4 border-b border-white/[0.04] pb-4 last:border-0 last:pb-0"
             >
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
+                <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-teal-500" />
                 <span className="text-sm text-[var(--text-muted)]">{t(act)}</span>
               </div>
               <span className="shrink-0 text-xs text-[var(--text-faint)]">

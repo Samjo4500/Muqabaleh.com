@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { localePath } from '@/i18n/navigation';
-import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
+import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import {
   DURATION_OPTIONS,
   INDUSTRY_OPTIONS,
@@ -164,27 +164,19 @@ export function PrequalClient({ email }: { email: string }) {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -left-16 top-10 h-72 w-72 rounded-full bg-teal-400/20 blur-[110px]" />
-        <div className="absolute right-0 top-32 h-80 w-80 rounded-full bg-cyan-300/15 blur-[120px]" />
-      </div>
-
-      <AppChromeHeader
-        trailing={
-          <div className="hidden truncate text-xs text-[var(--text-secondary)] sm:block sm:max-w-[200px] sm:text-sm">
-            {email}
-          </div>
-        }
-      />
-
-      <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 md:px-6">
+    <AtelierFlowShell
+      trailing={
+        <div className="hidden truncate text-xs text-white/55 sm:block sm:max-w-[200px] sm:text-sm">
+          {email}
+        </div>
+      }
+    >
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
         <div className="mb-8">
-          <p className="font-display text-3xl tracking-tight md:text-4xl">Muqabaleh</p>
-          <h1 className="mt-2 text-xl font-medium md:text-2xl">
+          <h1 className="mq-display text-xl font-medium text-white md:text-2xl">
             {isAr ? 'خصّص مقابلتك' : 'Personalize your interview'}
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-[var(--text-secondary)]">
+          <p className="mt-2 max-w-xl text-sm text-white/55">
             {isAr
               ? 'أجب عن بضعة أسئلة لنجهّز جلسة تناسب دورك ومستواك.'
               : 'Answer a few questions so we can tailor a session to your role and level.'}
@@ -380,6 +372,6 @@ export function PrequalClient({ email }: { email: string }) {
           ) : null}
         </div>
       </main>
-    </div>
+    </AtelierFlowShell>
   );
 }

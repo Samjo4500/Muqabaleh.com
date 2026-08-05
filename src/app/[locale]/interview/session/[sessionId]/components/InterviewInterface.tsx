@@ -146,7 +146,11 @@ export function InterviewInterface({ sessionId }: { sessionId: string }) {
 
   if (booting) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-deep)] text-[var(--text-secondary)]">
+      <div className="mq-atelier flex min-h-screen items-center justify-center text-white/55">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="mq-orb mq-orb-a" />
+          <div className="mq-orb mq-orb-b" />
+        </div>
         <Loader2 className="me-2 h-5 w-5 animate-spin" />
         {isAr ? 'جارٍ تجهيز المقابلة…' : 'Preparing interview…'}
       </div>
@@ -155,7 +159,11 @@ export function InterviewInterface({ sessionId }: { sessionId: string }) {
 
   if (!plan || !question) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--bg-deep)] text-[var(--text-primary)]">
+      <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center gap-4 text-white">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+          <div className="mq-orb mq-orb-a" />
+          <div className="mq-orb mq-orb-b" />
+        </div>
         <p>{error || (isAr ? 'الجلسة غير موجودة' : 'Session not found')}</p>
         <Link href={localePath('/interview/prequal', locale)} className="text-teal-300">
           {isAr ? 'ابدأ من التأهيل' : 'Start from pre-qual'}
@@ -171,9 +179,15 @@ export function InterviewInterface({ sessionId }: { sessionId: string }) {
       : question.questionText;
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -right-10 top-20 h-72 w-72 rounded-full bg-cyan-400/15 blur-[120px]" />
+    <div
+      className="mq-atelier relative min-h-screen text-white"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-b" />
+        <div className="mq-orb mq-orb-c" />
       </div>
 
       <header className="relative z-20 border-b border-white/10 px-4 py-3 md:px-6">
@@ -181,7 +195,7 @@ export function InterviewInterface({ sessionId }: { sessionId: string }) {
           <Link href={localePath('/', locale)} aria-label="Muqabaleh">
             <BrandLogo size="nav" priority />
           </Link>
-          <div className="text-sm text-[var(--text-secondary)]">{progressLabel}</div>
+          <div className="text-sm text-white/55">{progressLabel}</div>
           <Timer key={timerKey} seconds={question.timeLimit} warnAt={30} />
         </div>
       </header>

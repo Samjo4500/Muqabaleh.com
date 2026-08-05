@@ -3,7 +3,6 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import {
   LayoutDashboard,
@@ -18,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { BackButton } from '@/components/navigation';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { localePath } from '@/i18n/navigation';
 
 const navItems = [
   { key: 'navOverview', icon: LayoutDashboard, href: '/b2b' },
@@ -45,8 +46,8 @@ function SidebarNav({
         const fullPath = `/${locale}${item.href}`;
         const isActive =
           item.href === '/b2b'
-            ? pathname === fullPath
-            : pathname.startsWith(fullPath);
+            ? pathname === fullPath || pathname === item.href
+            : pathname.startsWith(fullPath) || pathname.startsWith(item.href);
         const Icon = item.icon;
         return (
           <Link
@@ -55,8 +56,8 @@ function SidebarNav({
             onClick={onNavigate}
             className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               isActive
-                ? 'border-s-indigo-400 text-[var(--aurora-2)] bg-indigo-500/10'
-                : 'border-s-transparent text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
+                ? 'border-s-teal-300 bg-teal-400/10 text-teal-300'
+                : 'border-s-transparent text-white/50 hover:bg-white/5 hover:text-white'
             }`}
           >
             <Icon size={20} strokeWidth={1.75} />
@@ -70,54 +71,52 @@ function SidebarNav({
 
 export default function B2BLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('b2b');
-  const tCommon = useTranslations('common');
   const locale = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isAr = locale === 'ar';
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-deep)]">
-      {/* Desktop sidebar — RTL: fixed right */}
-      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-s border-white/[0.08] bg-[var(--bg-surface)]/80 backdrop-blur-xl">
-        {/* Top: logo + title */}
+    <div
+      className="mq-atelier relative flex min-h-screen overflow-x-hidden"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-c" />
+      </div>
+
+      <aside className="relative z-10 hidden w-[260px] shrink-0 flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl lg:flex">
         <div className="p-4 pb-2">
           <div className="flex items-center gap-3">
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={32}
-              height={32}
-              className="h-8 w-8"
-            />
-            <span className="text-sm font-bold text-[var(--text-primary)]">
-              {t('sidebarTitle')}
-            </span>
+            <BrandLogo size="sm" priority />
+            <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
           </div>
         </div>
 
-        {/* Home link */}
-        <Link href={`/${locale}`} className='flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors'>
+        <Link
+          href={localePath('/', locale)}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-white/50 transition-colors hover:text-white"
+        >
           <Home size={16} strokeWidth={1.75} />
           <span>{locale === 'ar' ? 'الرئيسية' : 'Home'}</span>
         </Link>
 
         <SidebarNav pathname={pathname} locale={locale} t={t} />
 
-        {/* Bottom: sessions badge, company name, sign out */}
-        <div className="mt-auto border-t border-white/[0.08] p-4 space-y-3">
+        <div className="mt-auto space-y-3 border-t border-white/10 p-4">
           <div className="flex justify-center">
-            <span className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-[var(--aurora-2)]">
+            <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-300">
               {t('sessionsBadge', { count: 15 })}
             </span>
           </div>
           <div className="px-1">
-            <p className="truncate text-sm font-medium text-[var(--text-primary)]">
-              {t('companyName')}
-            </p>
+            <p className="truncate text-sm font-medium text-white">{t('companyName')}</p>
           </div>
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
             aria-label={t('signOut')}
           >
             <LogOut size={18} strokeWidth={1.75} />
@@ -126,14 +125,13 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile top bar */}
-      <div className="flex flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-surface)]/80 px-4 backdrop-blur-md lg:hidden">
+      <div className="relative z-10 flex flex-1 flex-col">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/10 bg-[#070b14]/80 px-4 backdrop-blur-md lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5"
+                className="rounded-lg p-2 text-white/50 hover:bg-white/5"
                 aria-label="Menu"
               >
                 <Menu size={20} strokeWidth={1.75} />
@@ -141,21 +139,13 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent
               side={locale === 'ar' ? 'left' : 'right'}
-              className="w-[260px] border-s border-white/[0.08] bg-[var(--bg-deep)]/95 backdrop-blur-xl p-0"
+              className="w-[260px] border-s border-white/10 bg-[#070b14]/95 p-0 backdrop-blur-xl"
             >
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="p-4 pb-2">
                 <div className="flex items-center gap-3">
-                  <Image
-                    src="/images/logos/v2-balanced-a-T.webp"
-                    alt="Muqabaleh"
-                    width={32}
-                    height={32}
-                    className="h-8 w-8"
-                  />
-                  <span className="text-sm font-bold text-[var(--text-primary)]">
-                    {t('sidebarTitle')}
-                  </span>
+                  <BrandLogo size="sm" />
+                  <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
                 </div>
               </div>
               <SidebarNav
@@ -164,18 +154,16 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
                 t={t}
                 onNavigate={() => setOpen(false)}
               />
-              <div className="mt-auto border-t border-white/[0.08] p-4 space-y-3">
+              <div className="mt-auto space-y-3 border-t border-white/10 p-4">
                 <div className="flex justify-center">
-                  <span className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-[var(--aurora-2)]">
+                  <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-300">
                     {t('sessionsBadge', { count: 15 })}
                   </span>
                 </div>
-                <p className="truncate px-1 text-sm font-medium text-[var(--text-primary)]">
-                  {t('companyName')}
-                </p>
+                <p className="truncate px-1 text-sm font-medium text-white">{t('companyName')}</p>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
                   aria-label={t('signOut')}
                 >
                   <LogOut size={18} strokeWidth={1.75} />
@@ -184,21 +172,12 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
               </div>
             </SheetContent>
           </Sheet>
-          <Image
-            src="/images/logos/v2-balanced-a-T.webp"
-            alt="Muqabaleh"
-            width={28}
-            height={28}
-            className="h-7 w-7"
-          />
-          <span className="text-sm font-bold text-[var(--text-primary)]">
-            {t('sidebarTitle')}
-          </span>
+          <BrandLogo size="sm" />
+          <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
         </header>
 
-        {/* Main content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className='mb-4'>
+          <div className="mb-4">
             <BackButton href={`/${locale}`} />
           </div>
           {children}

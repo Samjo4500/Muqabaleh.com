@@ -6,30 +6,35 @@ import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
 import { PWAInstallPrompt } from '@/components/pwa/InstallPrompt';
+import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
 function isLocale(value: string): value is Locale {
   return (routing.locales as readonly string[]).includes(value);
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
 const META: Record<string, { title: string; description: string }> = {
   ar: {
     title: 'مقابلة | Muqabaleh — التدرّب على المقابلات الوظيفية بالذكاء الاصطناعي',
-    description: 'المنصة العربية الأولى للتدرّب على المقابلات الوظيفية بالذكاء الاصطناعي. محاور ذكي يقيّمك بأربعة معايير ويمنحك شهادة موثّقة بشارة QR.',
+    description:
+      'المنصة العربية الأولى للتدرّب على المقابلات الوظيفية بالذكاء الاصطناعي. محاور ذكي يقيّمك بأربعة معايير ويمنحك شهادة موثّقة بشارة QR.',
   },
   en: {
     title: 'Muqabaleh — AI-Powered Job Interview Practice',
-    description: 'The first Arabic platform for AI-powered job interview practice. Get evaluated on 4 criteria and receive a QR-verified certificate.',
+    description:
+      'The first Arabic platform for AI-powered job interview practice. Get evaluated on 4 criteria and receive a QR-verified certificate.',
   },
 };
-
-export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -40,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: {
       default: meta.title,
-      template: `%s | مقابلة`,
+      template: locale === 'ar' ? `%s | مقابلة` : `%s | Muqabaleh`,
     },
     description: meta.description,
     metadataBase: new URL(SITE_URL),
@@ -49,6 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       languages: {
         'ar-SA': SITE_URL,
         'en-US': `${SITE_URL}/en`,
+        'x-default': SITE_URL,
       },
     },
     openGraph: {
@@ -60,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       images: [
         {
-          url: '/og-image.png',
+          url: '/og-image.jpg',
           width: 1200,
           height: 630,
           alt: 'مقابلة | Muqabaleh — AI Interview Practice',
@@ -71,10 +77,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title: meta.title,
       description: meta.description,
-      images: ['/og-image.png'],
+      images: ['/og-image.jpg'],
     },
     other: {
-      'theme-color': '#D4A853',
+      'theme-color': '#0a1220',
     },
   };
 }
@@ -94,32 +100,25 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
-  const displayFont = locale === 'ar' ? 'Cairo' : 'Space Grotesk';
-  const bodyFont = locale === 'ar' ? 'Tajawal' : 'Inter';
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning className={fontVariables}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="theme-color" content="#D4A853" />
+        <meta name="theme-color" content="#0a1220" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Muqabaleh" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body
-        className={`${dir === 'rtl' ? 'font-cairo' : 'font-grotesk'} min-h-screen bg-void text-[var(--text-primary)] antialiased`}
-        style={{ fontFamily: `"${displayFont}", "${bodyFont}", sans-serif` }}
-      >
+      <body className="min-h-screen bg-void text-[var(--text-primary)] antialiased">
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
             <MobileTabBar />
             <PWAInstallPrompt />
+            <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
-          <Toaster />
         </Providers>
       </body>
     </html>

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { getAllSlugs } from '@/content/blog';
+import { getAllPosts, getAllSlugs } from '@/content/blog';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
 const PUBLIC_ROUTES = [
   '',
@@ -16,41 +16,47 @@ const PUBLIC_ROUTES = [
   '/refund',
   '/join-as-interviewer',
   '/interviewers',
-  '/jobs',
-  '/business',
   '/blog',
-];
+  '/partners',
+  '/human-interviews',
+] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
   const now = new Date().toISOString();
 
-  // Static pages
   for (const route of PUBLIC_ROUTES) {
-    // Arabic (default)
+    const priority =
+      route === '' ? 1 : route === '/blog' || route === '/demo' ? 0.9 : route === '/pricing' ? 0.85 : 0.75;
+
     entries.push({
       url: `${SITE_URL}${route || '/'}`,
       lastModified: now,
-      changeFrequency: route === '' ? 'weekly' : route === '/blog' ? 'weekly' : 'monthly',
-      priority: route === '' ? 1 : route === '/blog' ? 0.9 : 0.8,
+      changeFrequency: route === '' || route === '/blog' ? 'weekly' : 'monthly',
+      priority,
     });
-    // English
     entries.push({
       url: `${SITE_URL}/en${route}`,
       lastModified: now,
-      changeFrequency: route === '' ? 'weekly' : route === '/blog' ? 'weekly' : 'monthly',
-      priority: route === '' ? 0.9 : 0.7,
+      changeFrequency: route === '' || route === '/blog' ? 'weekly' : 'monthly',
+      priority: Math.max(0.5, priority - 0.1),
     });
   }
 
-  // Blog articles
+  const postsBySlug = new Map<string, string>();
+  for (const post of [...getAllPosts('en'), ...getAllPosts('ar')]) {
+    if (!postsBySlug.has(post.slug) || post.date > (postsBySlug.get(post.slug) || '')) {
+      postsBySlug.set(post.slug, post.date);
+    }
+  }
+
   for (const { locale, slug } of getAllSlugs()) {
     const prefix = locale === 'en' ? '/en' : '';
     entries.push({
       url: `${SITE_URL}${prefix}/blog/${slug}`,
-      lastModified: '2026-08-03',
+      lastModified: postsBySlug.get(slug) || now,
       changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.7,
     });
   }
 

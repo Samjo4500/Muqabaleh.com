@@ -1,19 +1,48 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
-import { CrystalTrust } from './Trust';
-import { CrystalServices } from './Services';
-import { CrystalHowItWorks } from './HowItWorks';
-import { CrystalForCompanies } from './ForCompanies';
-import { CrystalPricing } from './Pricing';
-import { CrystalTestimonials } from './Testimonials';
-import { CrystalFAQ } from './FAQ';
-import { CrystalFinalCta } from './FinalCta';
-import { CrystalFooter } from './CrystalFooter';
+
+const CrystalTrust = dynamic(
+  () => import('./Trust').then((m) => m.CrystalTrust),
+  { ssr: true },
+);
+const CrystalServices = dynamic(
+  () => import('./Services').then((m) => m.CrystalServices),
+  { ssr: true },
+);
+const CrystalHowItWorks = dynamic(
+  () => import('./HowItWorks').then((m) => m.CrystalHowItWorks),
+  { ssr: true },
+);
+const CrystalForCompanies = dynamic(
+  () => import('./ForCompanies').then((m) => m.CrystalForCompanies),
+  { ssr: true },
+);
+const CrystalPricing = dynamic(
+  () => import('./Pricing').then((m) => m.CrystalPricing),
+  { ssr: true },
+);
+const CrystalTestimonials = dynamic(
+  () => import('./Testimonials').then((m) => m.CrystalTestimonials),
+  { ssr: true },
+);
+const CrystalFAQ = dynamic(
+  () => import('./FAQ').then((m) => m.CrystalFAQ),
+  { ssr: true },
+);
+const CrystalFinalCta = dynamic(
+  () => import('./FinalCta').then((m) => m.CrystalFinalCta),
+  { ssr: true },
+);
+const CrystalFooter = dynamic(
+  () => import('./CrystalFooter').then((m) => m.CrystalFooter),
+  { ssr: true },
+);
 
 function LanguageSwitcherFixed() {
   const locale = useLocale();

@@ -21,7 +21,7 @@ import { CrystalNavbar } from '@/components/landing/crystal/CrystalNavbar';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { cn } from '@/lib/utils';
-import { InterviewLaptop } from './InterviewLaptop';
+import { HiringCommandCenter } from './HiringCommandCenter';
 
 const FEATURE_ICONS = [Users, ListChecks, FileDown, LayoutDashboard, UserCheck, Lock] as const;
 const FEATURE_FACETS = [
@@ -177,7 +177,7 @@ export default function BusinessContent() {
               transition={{ duration: 0.9, delay: 0.25, ease: easeCrystal }}
               className="relative"
             >
-              <InterviewLaptop />
+              <HiringCommandCenter />
             </motion.div>
           </div>
         </section>

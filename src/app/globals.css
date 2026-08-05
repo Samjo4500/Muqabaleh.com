@@ -926,3 +926,37 @@
   background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.55), transparent);
   animation: mq-pulse-soft 3.2s ease-in-out infinite;
 }
+.mq-atelier .mq-logo-glow {
+  filter: drop-shadow(0 0 24px rgba(45, 212, 191, 0.25));
+}
+.mq-atelier .mq-btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.mq-atelier .mq-btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: mq-btn-shimmer 3.8s ease-in-out infinite;
+}
+@keyframes mq-btn-shimmer {
+  0%, 55% { transform: translateX(-120%); }
+  75%, 100% { transform: translateX(120%); }
+}
+.mq-atelier[dir='rtl'] .mq-btn-shimmer::after {
+  animation-name: mq-btn-shimmer-rtl;
+}
+@keyframes mq-btn-shimmer-rtl {
+  0%, 55% { transform: translateX(120%); }
+  75%, 100% { transform: translateX(-120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-atelier .mq-orb,
+  .mq-atelier .mq-marquee,
+  .mq-atelier .mq-shine-line,
+  .mq-atelier .mq-btn-shimmer::after {
+    animation: none !important;
+  }
+}

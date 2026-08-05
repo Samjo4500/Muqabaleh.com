@@ -118,6 +118,8 @@ model User {
   adminAuditLogs         AdminAuditLog[]      @relation("AdminAuditActor")
   supportTicketsAssigned SupportTicket[]      @relation("TicketAssignee")
   supportTicketsCreated  SupportTicket[]      @relation("TicketCreator")
+  interviewPrequals      InterviewPrequal[]
+  interviewSessions      InterviewSession[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -881,4 +883,122 @@ model AdminSetting {
   createdAt DateTime @default(now())
 
   @@map("admin_settings")
+}
+
+// ─── AI Mock Interview Engine (pre-qual → plan → session → report) ───
+
+model InterviewPrequal {
+  id                    String    @id @default(uuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Client tracking id for the pre-qual wizard (before InterviewSession exists)
+  sessionId             String    @unique
+  /// Snapshot of registered email at pre-qual time (required capture)
+  userEmail             String
+  targetRole            String
+  targetRoleAr          String?
+  seniorityLevel        String
+  questionTypes         String[]
+  interviewRound        String
+  languagePreference    String
+  targetIndustry        String?
+  targetIndustryAr      String?
+  weaknessFocus         String?
+  weaknessFocusAr       String?
+  durationPreset        String
+  numQuestions          Int
+  estimatedDurationMin  Int
+  generatedPlan         Json?
+  createdAt             DateTime  @default(now())
+  completedAt           DateTime?
+  interviewSession      InterviewSession?
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("interview_prequal")
+}
+
+model InterviewQuestion {
+  id                String   @id @default(uuid())
+  questionText      String   @db.Text
+  questionTextAr    String?  @db.Text
+  answerTemplate    String?  @db.Text
+  answerTemplateAr  String?  @db.Text
+  roleCategory      String
+  seniorityLevel    String
+  questionType      String
+  interviewRound    String
+  difficulty        String
+  tags              String[]
+  industryContext   String?
+  followUpQuestions Json?
+  evaluationRubric  Json?
+  timeLimitSeconds  Int
+  coachingTips      String[]
+  usageCount        Int      @default(0)
+  avgScore          Float?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([roleCategory, seniorityLevel, questionType, interviewRound])
+  @@index([difficulty])
+  @@index([tags])
+  @@map("interview_questions")
+}
+
+model InterviewSession {
+  id                   String              @id @default(uuid())
+  userId               String
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prequalId            String              @unique
+  prequal              InterviewPrequal    @relation(fields: [prequalId], references: [id], onDelete: Cascade)
+  status               String              @default("pending")
+  language             String
+  numQuestionsTotal    Int
+  numQuestionsAnswered Int                 @default(0)
+  currentQuestionIndex Int                 @default(0)
+  startedAt            DateTime?
+  completedAt          DateTime?
+  totalDurationSeconds Int?
+  overallScore         Float?
+  strengths            String[]            @default([])
+  weaknesses           String[]            @default([])
+  actionItems          Json?
+  fullReport           Json?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  responses            InterviewResponse[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("interview_sessions")
+}
+
+model InterviewResponse {
+  id                 String           @id @default(uuid())
+  sessionId          String
+  session            InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId         String
+  questionOrder      Int              @default(0)
+  userAnswer         String           @db.Text
+  userAnswerAr       String?          @db.Text
+  contentScore       Float?
+  structureScore     Float?
+  confidenceScore    Float?
+  overallScore       Float?
+  feedbackText       String?          @db.Text
+  feedbackTextAr     String?          @db.Text
+  improvementTip     String?          @db.Text
+  improvementTipAr   String?          @db.Text
+  rawAiResponse      Json?
+  timeTakenSeconds   Int
+  startedAt          DateTime
+  completedAt        DateTime
+  followUpCount      Int              @default(0)
+  followUpResponses  Json?
+  createdAt          DateTime         @default(now())
+
+  @@index([sessionId])
+  @@index([questionId])
+  @@map("interview_responses")
 }

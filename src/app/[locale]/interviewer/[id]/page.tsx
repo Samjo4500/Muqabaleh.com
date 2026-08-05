@@ -8,8 +8,7 @@ import { Star, Play, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { useSession } from 'next-auth/react';
 
 /* ------------------------------------------------------------------ */
@@ -279,7 +278,7 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
           size={size}
           className={
             star <= Math.round(rating)
-              ? 'fill-[var(--gold)] text-[var(--gold)]'
+              ? 'fill-teal-300 text-[#2dd4bf]'
               : 'text-gray-600'
           }
         />
@@ -388,14 +387,12 @@ export default function InterviewerProfilePage() {
 
   /* ── Render ── */
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
-      <Navbar />
-
-      <main className="flex-1 pt-20">
+    <AtelierShell>
+      <main className="mq-wrap pb-20 pt-8">
         {loading && <LoadingSkeleton />}
 
         {!loading && profile && (
-          <div className="mx-auto mt-8 mb-16 grid max-w-7xl grid-cols-1 gap-8 px-4 md:grid-cols-5">
+          <div className="mx-auto mt-4 mb-16 grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-5">
 
             <motion.div
               className="md:col-span-2"
@@ -404,10 +401,10 @@ export default function InterviewerProfilePage() {
               custom={0}
               variants={fadeInUp}
             >
-              <div className="sticky top-24 rounded-xl border border-[rgba(212,175,55,0.2)] bg-[#0B0F17] p-6 text-center">
+              <div className="mq-panel sticky top-24 rounded-2xl p-6 text-center">
                 {/* Avatar */}
                 <div className="mx-auto relative h-[200px] w-[200px]">
-                  <div className="relative h-full w-full overflow-hidden rounded-full border-[3px] border-[var(--gold)] bg-[#0B0F17]">
+                  <div className="relative h-full w-full overflow-hidden rounded-full border-[3px] border-teal-300/70 bg-[#070b14]">
                     {profile.photoUrl ? (
                       <Image
                         src={profile.photoUrl}
@@ -419,7 +416,7 @@ export default function InterviewerProfilePage() {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center [background-image:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(212,175,55,0.05))]">
-                        <span className="text-5xl font-bold text-[var(--gold)]">
+                        <span className="text-5xl font-bold text-[#2dd4bf]">
                           {profile.initials}
                         </span>
                       </div>
@@ -447,7 +444,7 @@ export default function InterviewerProfilePage() {
 
                 {/* Rating */}
                 <div className="mt-3 flex items-center justify-center gap-1.5">
-                  <Star size={16} className="fill-[var(--gold)] text-[var(--gold)]" />
+                  <Star size={16} className="fill-teal-300 text-[#2dd4bf]" />
                   <span className="font-semibold text-white">
                     {profile.rating.toFixed(1)} / 5.0
                   </span>
@@ -457,12 +454,12 @@ export default function InterviewerProfilePage() {
                 </div>
 
                 {/* Certified badge */}
-                <div className="mt-3 inline-flex items-center rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/5 px-3 py-1 text-xs text-[var(--gold)]">
+                <div className="mt-3 inline-flex items-center rounded-full border border-[#2dd4bf]/40 bg-[#2dd4bf]/5 px-3 py-1 text-xs text-[#2dd4bf]">
                   {tHI('certified')}
                 </div>
 
                 {/* Price */}
-                <p className="mt-4 text-2xl font-bold text-[var(--gold)]">
+                <p className="mt-4 text-2xl font-bold text-[#2dd4bf]">
                   ${profile.price}{' '}
                   <span className="text-sm font-normal text-gray-400">
                     / {tHI('perSession')}
@@ -479,7 +476,7 @@ export default function InterviewerProfilePage() {
                   {profile.specialties.map((spec) => (
                     <Badge
                       key={spec}
-                      className="border-0 bg-[var(--gold)]/10 text-[var(--gold)]"
+                      className="border-0 bg-[#2dd4bf]/10 text-[#2dd4bf]"
                     >
                       {spec}
                     </Badge>
@@ -492,7 +489,7 @@ export default function InterviewerProfilePage() {
                   disabled={!selectedSlot}
                   className={`mt-6 w-full rounded-xl py-3 text-sm font-bold transition-all duration-200 ${
                     selectedSlot
-                      ? 'bg-[var(--gold)] text-black hover:bg-[var(--gold)]/90'
+                      ? 'bg-[#2dd4bf] text-black hover:bg-[#2dd4bf]/90'
                       : 'cursor-not-allowed bg-gray-700 text-gray-500'
                   }`}
                 >
@@ -512,7 +509,7 @@ export default function InterviewerProfilePage() {
                 <div className="relative aspect-video overflow-hidden rounded-xl bg-[#0B0F17]">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#0B0F17] to-[#1a1f2e]">
                     <div className="absolute inset-0 opacity-5" style={{
-                      backgroundImage: 'radial-gradient(circle at 25% 25%, var(--gold) 1px, transparent 1px)',
+                      backgroundImage: 'radial-gradient(circle at 25% 25%, #2dd4bf 1px, transparent 1px)',
                       backgroundSize: '32px 32px',
                     }} />
                   </div>
@@ -526,7 +523,7 @@ export default function InterviewerProfilePage() {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <button
-                        className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--gold)]/80 text-white opacity-80 transition-all duration-200 hover:scale-110 hover:opacity-100"
+                        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2dd4bf]/80 text-white opacity-80 transition-all duration-200 hover:scale-110 hover:opacity-100"
                         aria-label="Play video"
                       >
                         <Play size={28} className="ml-1" fill="white" />
@@ -534,7 +531,7 @@ export default function InterviewerProfilePage() {
                     </div>
                   )}
                   <div className="absolute top-3 start-3">
-                    <span className="rounded-full bg-[var(--gold)]/10 px-3 py-1 text-xs font-medium text-[var(--gold)]">
+                    <span className="rounded-full bg-[#2dd4bf]/10 px-3 py-1 text-xs font-medium text-[#2dd4bf]">
                       {t('introVideo')}
                     </span>
                   </div>
@@ -549,14 +546,14 @@ export default function InterviewerProfilePage() {
                 custom={2}
                 variants={fadeInUp}
               >
-                <h2 className="text-xl font-bold text-[var(--gold)]">{t('bio')}</h2>
+                <h2 className="text-xl font-bold text-[#2dd4bf]">{t('bio')}</h2>
                 <p className="mt-3 leading-relaxed text-gray-300">
                   {bioTruncated}
                 </p>
                 {shouldShowReadMore && (
                   <button
                     onClick={() => setBioExpanded(!bioExpanded)}
-                    className="mt-2 flex items-center gap-1 text-sm font-medium text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80"
+                    className="mt-2 flex items-center gap-1 text-sm font-medium text-[#2dd4bf] transition-colors hover:text-[#2dd4bf]/80"
                   >
                     {t('readMore')}
                     {locale === 'ar' ? (
@@ -579,10 +576,10 @@ export default function InterviewerProfilePage() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-white">{t('reviewsTitle')}</h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-[var(--gold)]">
+                    <span className="text-2xl font-bold text-[#2dd4bf]">
                       {profile.rating.toFixed(1)}
                     </span>
-                    <Star size={20} className="fill-[var(--gold)] text-[var(--gold)]" />
+                    <Star size={20} className="fill-teal-300 text-[#2dd4bf]" />
                   </div>
                 </div>
 
@@ -594,8 +591,8 @@ export default function InterviewerProfilePage() {
                         className="rounded-xl border border-white/5 bg-[#0B0F17] p-4"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
-                            <span className="text-xs font-bold text-[var(--gold)]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#2dd4bf]/30 bg-[#2dd4bf]/10">
+                            <span className="text-xs font-bold text-[#2dd4bf]">
                               {review.initials}
                             </span>
                           </div>
@@ -617,7 +614,7 @@ export default function InterviewerProfilePage() {
                     {profile.reviews.length > 2 && (
                       <button
                         onClick={() => setShowAllReviews(!showAllReviews)}
-                        className="mx-auto flex items-center gap-1 px-4 py-2 text-sm font-medium text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80"
+                        className="mx-auto flex items-center gap-1 px-4 py-2 text-sm font-medium text-[#2dd4bf] transition-colors hover:text-[#2dd4bf]/80"
                       >
                         {showAllReviews
                           ? (locale === 'ar' ? 'عرض التقييمات الأخيرة' : 'Show fewer reviews')
@@ -690,7 +687,7 @@ export default function InterviewerProfilePage() {
                                     isSelected
                                       ? 'bg-[#d4af37] font-bold text-black'
                                       : isAvailable
-                                        ? 'cursor-pointer border border-[var(--gold)]/30 text-gray-300 hover:bg-[var(--gold)]/10 hover:text-white'
+                                        ? 'cursor-pointer border border-[#2dd4bf]/30 text-gray-300 hover:bg-[#2dd4bf]/10 hover:text-white'
                                         : 'cursor-not-allowed bg-gray-800/50 text-gray-600 line-through'
                                   }`}
                                 >
@@ -726,7 +723,7 @@ export default function InterviewerProfilePage() {
             <div className="mx-auto max-w-lg">
               <button
                 onClick={handleBookSlot}
-                className="w-full rounded-xl bg-[var(--gold)] py-3 text-sm font-bold text-black shadow-lg shadow-gold/20 transition-all duration-200 hover:bg-[var(--gold)]/90 active:scale-[0.98]"
+                className="mq-btn mq-btn-primary w-full py-3 text-sm active:scale-[0.98]"
               >
                 {t('bookSlot')}
               </button>
@@ -734,9 +731,7 @@ export default function InterviewerProfilePage() {
           </div>
         )}
       </main>
-
-      <Footer />
-    </div>
+    </AtelierShell>
   );
 }
 

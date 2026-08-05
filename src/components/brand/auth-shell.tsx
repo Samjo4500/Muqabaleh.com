@@ -1,9 +1,12 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { localePath } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -22,62 +25,52 @@ export function AuthShell({
 }: AuthShellProps) {
   const router = useRouter();
   const locale = useLocale();
-  const BackArrow = locale === "ar" ? ArrowRight : ArrowLeft;
+  const isAr = locale === 'ar';
+  const BackArrow = isAr ? ArrowRight : ArrowLeft;
+
+  const goHome = () => router.push(localePath('/', locale));
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    goHome();
+  };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void px-4 py-12">
-      <div className="aurora-bg pointer-events-none absolute inset-0" aria-hidden="true" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-deep)] px-4 py-12">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -left-16 top-10 h-72 w-72 rounded-full bg-teal-400/20 blur-[110px]" />
+        <div className="absolute right-0 top-24 h-80 w-80 rounded-full bg-amber-300/10 blur-[120px]" />
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Back button */}
         {showBack && (
           <button
-            onClick={() => router.back()}
-            className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] cursor-pointer"
+            type="button"
+            onClick={goBack}
+            className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
           >
             <BackArrow size={16} strokeWidth={1.75} />
+            {isAr ? 'رجوع' : 'Back'}
           </button>
         )}
 
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 28 28"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M14 2L26 8v12l-12 6-12-6V8l12-6z"
-                stroke="#D4A843"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <path
-                d="M14 8l6 3v6l-6 3-6-3v-6l6-3z"
-                fill="#D4A843"
-                opacity="0.2"
-              />
-              <circle cx="14" cy="14" r="2" fill="#D4A843" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-2 text-center text-sm text-[var(--text-muted)]">
-              {subtitle}
-            </p>
-          )}
+          <Link
+            href={localePath('/', locale)}
+            className="mb-5 inline-flex"
+            aria-label={isAr ? 'الرئيسية' : 'Home'}
+          >
+            <BrandLogo size="nav" priority />
+          </Link>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{title}</h1>
+          {subtitle ? (
+            <p className="mt-2 text-center text-sm text-[var(--text-secondary)]">{subtitle}</p>
+          ) : null}
         </div>
 
-        <div
-          className={cn(
-            "glass-card rounded-2xl p-4 md:p-6",
-            className
-          )}
-        >
+        <div className={cn('glass-card rounded-2xl border border-white/10 p-4 md:p-6', className)}>
           {children}
         </div>
       </div>

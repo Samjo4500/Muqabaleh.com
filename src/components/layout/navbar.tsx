@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Menu, Globe } from 'lucide-react';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { getLocaleSwitchPath, localePath } from '@/i18n/navigation';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 
 const NAV_LINKS = [
   { key: 'why', href: '#why' },
@@ -70,15 +70,8 @@ export function Navbar() {
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo — RTL: right, LTR: left */}
-        <Link href={homeHref} className="shrink-0">
-          <Image
-            src="/images/logos/v2-balanced-a-T.webp"
-            alt="مقابلة | Muqabaleh"
-            width={200}
-            height={56}
-            className="h-14 w-auto"
-            priority
-          />
+        <Link href={homeHref} className="shrink-0" aria-label="Muqabaleh">
+          <BrandLogo size="nav" priority />
         </Link>
 
         {/* Desktop nav links — center */}

@@ -288,7 +288,9 @@ export function JobsBoardClient() {
               className="mx-auto max-w-3xl text-center"
             >
               <motion.div variants={fadeUp} className="mb-7 flex justify-center">
-                <BrandLogo size="hero" priority className="mq-logo-glow" />
+                <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="inline-flex">
+                  <BrandLogo size="hero" priority className="mq-logo-glow" />
+                </Link>
               </motion.div>
 
               <motion.p variants={fadeUp} className="mq-kicker mb-3">

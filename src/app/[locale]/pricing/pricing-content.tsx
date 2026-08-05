@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { GlowCard, SectionHeading } from '@/components/brand';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Comparison table configuration                                     */
@@ -93,7 +94,7 @@ export default function PricingContent() {
                   <FeatureItem text={t('freeBadge')} included={false} />
                 </ul>
 
-                <Link href="/demo" className="mt-8 w-full">
+                <Link href={localePath('/demo', locale)} className="mt-8 w-full">
                   <Button variant="outline" className="w-full border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10">
                     {t('freeCta')}
                   </Button>

@@ -44,7 +44,9 @@ export function CrystalFooter() {
       <div className="mq-wrap grid gap-10 py-14 md:grid-cols-4">
         <div>
           <div className="mb-4">
-            <BrandLogo size="md" />
+            <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="inline-flex">
+              <BrandLogo size="md" />
+            </Link>
           </div>
           <T bi={C.footer.tagline} className="text-sm leading-relaxed text-white/55" />
         </div>

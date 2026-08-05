@@ -107,7 +107,14 @@ export function CrystalNavbar() {
             >
               <SheetHeader>
                 <SheetTitle className="text-start">
-                  <BrandLogo size="nav" />
+                  <Link
+                    href={localePath('/', locale)}
+                    aria-label="Muqabaleh"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex"
+                  >
+                    <BrandLogo size="nav" />
+                  </Link>
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-1 px-2 pb-6">

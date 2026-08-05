@@ -1,14 +1,14 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { easeCrystal } from '@/components/landing/crystal/motion';
+import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
 import { localePath } from '@/i18n/navigation';
 
 export default function DemoContent({
@@ -29,17 +29,6 @@ export default function DemoContent({
   const [error, setError] = useState<string | null>(null);
 
   const prequalPath = localePath('/interview/prequal', locale);
-
-  const goHome = () => router.push(localePath('/', locale));
-  const goBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back();
-      return;
-    }
-    goHome();
-  };
-
-  const BackIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
   const startAsAuthenticated = () => {
     router.push(prequalPath);
@@ -82,7 +71,6 @@ export default function DemoContent({
       const data = await res.json().catch(() => ({}));
 
       if (res.status === 409) {
-        // Existing account — sign in with same credentials
         const login = await signIn('credentials', {
           email: trimmedEmail,
           password,
@@ -127,43 +115,18 @@ export default function DemoContent({
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <motion.div
-          className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-[var(--aurora-1)]/35 blur-[100px] will-change-transform"
+          className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-teal-400/25 blur-[100px] will-change-transform"
           animate={{ x: [0, 40, -20, 0], y: [0, 30, -10, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute right-0 top-24 h-80 w-80 rounded-full bg-[var(--aurora-2)]/30 blur-[110px] will-change-transform"
+          className="absolute right-0 top-24 h-80 w-80 rounded-full bg-amber-300/15 blur-[110px] will-change-transform"
           animate={{ x: [0, -50, 20, 0], y: [0, -25, 35, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
-      <header className="relative z-20 px-4 pt-4 md:px-6">
-        <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 rounded-2xl px-3 sm:px-4">
-          <Link
-            href={localePath('/', locale)}
-            className="group inline-flex min-w-0 items-center gap-2.5 rounded-xl py-1 pe-2 transition hover:bg-white/[0.04]"
-            aria-label={isAr ? 'الرئيسية' : 'Home'}
-          >
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={160}
-              height={44}
-              className="h-10 w-auto sm:h-11"
-              priority
-            />
-          </Link>
-          <button
-            type="button"
-            onClick={goBack}
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-white/[0.04]"
-          >
-            <BackIcon className="h-4 w-4" />
-            {isAr ? 'رجوع' : 'Back'}
-          </button>
-        </div>
-      </header>
+      <AppChromeHeader />
 
       <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-10 md:px-6">
         <motion.div

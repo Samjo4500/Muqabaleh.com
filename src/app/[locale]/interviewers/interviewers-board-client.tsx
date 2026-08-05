@@ -334,7 +334,13 @@ export function InterviewersBoardClient() {
                 </motion.div>
 
                 <motion.div variants={fadeUp} className="mb-5">
-                  <BrandLogo size="lg" priority className="mq-logo-glow" />
+                  <Link
+                    href={localePath('/', locale)}
+                    aria-label="Muqabaleh"
+                    className="inline-flex"
+                  >
+                    <BrandLogo size="hero" priority className="mq-logo-glow" />
+                  </Link>
                 </motion.div>
 
                 <motion.h1

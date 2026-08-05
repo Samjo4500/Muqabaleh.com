@@ -22,6 +22,7 @@ import {
   Webhook,
   X,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import type { PartnerRecord } from '@/lib/partner/types';
@@ -78,6 +79,11 @@ export function PartnerShell({ children }: { children: ReactNode }) {
     return pathname.replace(/^\/(ar|en)/, '') || '/';
   }, [pathname]);
 
+  const homeHref = localePath('/', locale);
+  const hasCustomLogo = Boolean(
+    partner?.logoUrl && !partner.logoUrl.includes('/images/logos/v2-balanced'),
+  );
+
   const Nav = (
     <nav className="flex flex-1 flex-col gap-0.5 px-3 py-2">
       {NAV.map((item) => {
@@ -109,6 +115,34 @@ export function PartnerShell({ children }: { children: ReactNode }) {
     </nav>
   );
 
+  const LogoBlock = (
+    <Link
+      href={homeHref}
+      className="block border-b border-white/10 px-4 py-4 transition hover:bg-white/[0.03]"
+      aria-label="Muqabaleh"
+      onClick={() => setOpen(false)}
+    >
+      {hasCustomLogo ? (
+        <div className="flex items-center gap-3">
+          <div className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-xl border border-white/15 bg-white/5 md:h-[56px] md:w-[56px]">
+            <Image
+              src={partner!.logoUrl!}
+              alt={partner?.name || 'Partner'}
+              fill
+              className="object-contain p-1.5"
+            />
+          </div>
+          <BrandLogo size="nav" priority className="min-w-0" />
+        </div>
+      ) : (
+        <BrandLogo size="nav" priority />
+      )}
+      <div className="mt-2 truncate text-[11px] uppercase tracking-[0.16em] text-white/40">
+        {partner?.name || t('sidebarTitle')} · {t('whiteLabelBadge')}
+      </div>
+    </Link>
+  );
+
   return (
     <div className="pc-shell min-h-screen bg-[var(--pc-bg)] text-white">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden>
@@ -116,28 +150,13 @@ export function PartnerShell({ children }: { children: ReactNode }) {
         <div className="pc-orb absolute -right-20 top-40 h-[24rem] w-[24rem] rounded-full bg-[var(--pc-accent)]/15 blur-3xl" />
       </div>
 
-      <aside className="fixed inset-y-0 start-0 z-40 hidden w-[272px] flex-col border-e border-white/10 bg-[#070b12]/90 backdrop-blur-2xl lg:flex">
-        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/15 bg-white/5">
-            <Image
-              src={partner?.logoUrl || '/images/logos/v2-balanced-a-T.webp'}
-              alt={partner?.name || 'Partner'}
-              fill
-              className="object-contain p-1"
-            />
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-bold tracking-tight">{partner?.name || t('sidebarTitle')}</div>
-            <div className="truncate text-[11px] uppercase tracking-[0.16em] text-white/40">
-              {t('whiteLabelBadge')}
-            </div>
-          </div>
-        </div>
+      <aside className="fixed inset-y-0 start-0 z-40 hidden w-[300px] flex-col border-e border-white/10 bg-[#070b12]/90 backdrop-blur-2xl lg:flex">
+        {LogoBlock}
         {Nav}
         <div className="border-t border-white/10 p-3">
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: localePath('/partners', locale) })}
+            onClick={() => signOut({ callbackUrl: localePath('/', locale) })}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/50 transition hover:bg-white/[0.04] hover:text-white"
           >
             <LogOut size={18} />
@@ -146,21 +165,26 @@ export function PartnerShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="lg:ps-[272px]">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-white/10 bg-[#070b12]/75 px-4 py-3 backdrop-blur-xl sm:px-6">
-          <button
-            type="button"
-            className="rounded-xl border border-white/10 p-2 text-white/70 lg:hidden"
-            onClick={() => setOpen(true)}
-          >
-            <Menu size={18} />
-          </button>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-white/90">
-              {partner?.name || t('sidebarTitle')}
-            </div>
-            <div className="truncate text-xs text-white/40">
-              {partner?.customDomain || `${partner?.slug || 'partner'}.muqabaleh.com`}
+      <div className="lg:ps-[300px]">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-white/10 bg-[#070b12]/75 px-4 py-2.5 backdrop-blur-xl sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              className="rounded-xl border border-white/10 p-2 text-white/70 lg:hidden"
+              onClick={() => setOpen(true)}
+            >
+              <Menu size={18} />
+            </button>
+            <Link href={homeHref} className="lg:hidden" aria-label="Muqabaleh">
+              <BrandLogo size="nav" />
+            </Link>
+            <div className="hidden min-w-0 lg:block">
+              <div className="truncate text-sm font-semibold text-white/90">
+                {partner?.name || t('sidebarTitle')}
+              </div>
+              <div className="truncate text-xs text-white/40">
+                {partner?.customDomain || `${partner?.slug || 'partner'}.muqabaleh.com`}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -187,10 +211,14 @@ export function PartnerShell({ children }: { children: ReactNode }) {
             aria-label="Close"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute inset-y-0 start-0 flex w-[288px] flex-col bg-[#070b12] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-              <span className="font-semibold">{partner?.name || t('sidebarTitle')}</span>
-              <button type="button" onClick={() => setOpen(false)} className="p-2 text-white/60">
+          <aside className="absolute inset-y-0 start-0 flex w-[300px] flex-col bg-[#070b12] shadow-2xl">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">{LogoBlock}</div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="m-3 rounded-lg p-2 text-white/60"
+              >
                 <X size={18} />
               </button>
             </div>

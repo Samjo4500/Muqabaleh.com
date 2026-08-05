@@ -3,7 +3,6 @@
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
-import { ArabesqueBackdrop, ArabesqueCorners } from './ArabesqueBackdrop';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
 import { CrystalTrust } from './Trust';
@@ -44,30 +43,31 @@ export function CrystalLanding() {
   const isAr = locale === 'ar';
 
   return (
-    <div className="mq-atelier" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
-      {/* viewport-fixed ornaments — outside overflow clipping */}
-      <ArabesqueCorners />
-
-      <div className="relative min-h-screen overflow-x-hidden">
-        <ArabesqueBackdrop />
-
-        <div className="relative z-10">
-          <LanguageSwitcherFixed />
-          <CrystalNavbar />
-          <main>
-            <CrystalHero />
-            <CrystalTrust />
-            <CrystalServices />
-            <CrystalHowItWorks />
-            <CrystalForCompanies />
-            <CrystalPricing />
-            <CrystalTestimonials />
-            <CrystalFAQ />
-            <CrystalFinalCta />
-          </main>
-          <CrystalFooter />
-        </div>
+    <div
+      className="mq-atelier relative min-h-screen overflow-x-hidden"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-b" />
+        <div className="mq-orb mq-orb-c" />
       </div>
+
+      <LanguageSwitcherFixed />
+      <CrystalNavbar />
+      <main>
+        <CrystalHero />
+        <CrystalTrust />
+        <CrystalServices />
+        <CrystalHowItWorks />
+        <CrystalForCompanies />
+        <CrystalPricing />
+        <CrystalTestimonials />
+        <CrystalFAQ />
+        <CrystalFinalCta />
+      </main>
+      <CrystalFooter />
     </div>
   );
 }

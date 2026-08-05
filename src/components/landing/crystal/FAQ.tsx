@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { T } from './BiText';
+import { BoxOrnament, ORNAMENT_PRESETS } from './BoxOrnament';
 import { C } from './copy';
 import { fadeUp } from './motion';
 
@@ -36,20 +37,29 @@ export function CrystalFAQ() {
           viewport={{ once: true, margin: '-60px' }}
         >
           <Accordion type="single" collapsible className="space-y-3">
-            {C.faq.items.map((item, i) => (
-              <AccordionItem
-                key={item.q.en}
-                value={`faq-${i}`}
-                className="mq-panel border-none px-5"
-              >
-                <AccordionTrigger className="py-5 text-start text-white hover:no-underline">
-                  <T bi={item.q} className="text-sm font-semibold md:text-base" />
-                </AccordionTrigger>
-                <AccordionContent className="pb-5">
-                  <T bi={item.a} className="text-sm leading-relaxed text-white/65" />
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            {C.faq.items.map((item, i) => {
+              const ornament = ORNAMENT_PRESETS[i % ORNAMENT_PRESETS.length];
+              return (
+                <AccordionItem
+                  key={item.q.en}
+                  value={`faq-${i}`}
+                  className="mq-panel relative overflow-hidden border-none px-5"
+                >
+                  <BoxOrnament
+                    shape={ornament.shape}
+                    tone={ornament.tone}
+                    corners={['tl']}
+                    size="sm"
+                  />
+                  <AccordionTrigger className="relative py-5 text-start text-white hover:no-underline">
+                    <T bi={item.q} className="text-sm font-semibold md:text-base" />
+                  </AccordionTrigger>
+                  <AccordionContent className="relative pb-5">
+                    <T bi={item.a} className="text-sm leading-relaxed text-white/65" />
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </motion.div>
       </div>

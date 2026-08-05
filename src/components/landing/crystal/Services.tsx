@@ -6,8 +6,16 @@ import { useLocale } from 'next-intl';
 import { ArrowUpLeft, ArrowUpRight } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { BiInline, T } from './BiText';
+import { BoxOrnament, ORNAMENT_PRESETS } from './BoxOrnament';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
+
+const SERVICE_ACCENTS = [
+  'border-teal-300/30 hover:border-teal-300/50',
+  'border-amber-200/30 hover:border-amber-200/50',
+  'border-cyan-300/30 hover:border-cyan-300/50',
+  'border-rose-300/25 hover:border-rose-300/45',
+] as const;
 
 function ServiceVisual({ index, locale }: { index: number; locale: string }) {
   const isAr = locale === 'ar';
@@ -199,14 +207,21 @@ export function CrystalServices() {
           viewport={{ once: true, margin: '-60px' }}
           className="grid gap-5 md:grid-cols-2"
         >
-          {C.services.cards.map((card, i) => (
+          {C.services.cards.map((card, i) => {
+            const ornament = ORNAMENT_PRESETS[i % ORNAMENT_PRESETS.length];
+            return (
             <motion.article
               key={card.title.en}
               variants={fadeUp}
               whileHover={{ y: -6 }}
               transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-              className="mq-panel mq-service-card group relative flex flex-col overflow-hidden p-6 md:p-8"
+              className={`mq-panel mq-service-card group relative flex flex-col overflow-hidden p-6 md:p-8 ${SERVICE_ACCENTS[i]}`}
             >
+              <BoxOrnament
+                shape={ornament.shape}
+                tone={ornament.tone}
+                corners={i % 2 === 0 ? ['tl', 'br'] : ['tr', 'bl']}
+              />
               <motion.div
                 className="pointer-events-none absolute -end-10 -top-10 h-36 w-36 rounded-full bg-teal-400/10 blur-2xl"
                 animate={{ opacity: [0.2, 0.55, 0.2], scale: [0.9, 1.15, 0.9] }}
@@ -268,7 +283,8 @@ export function CrystalServices() {
                 </motion.span>
               </Link>
             </motion.article>
-          ))}
+          );
+          })}
         </motion.div>
       </div>
     </section>

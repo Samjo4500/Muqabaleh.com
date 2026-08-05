@@ -6,8 +6,16 @@ import { useLocale } from 'next-intl';
 import { Check } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { BiInline, T } from './BiText';
+import { BoxOrnament, ORNAMENT_PRESETS } from './BoxOrnament';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
+
+const PLAN_ACCENTS = [
+  'border-white/15',
+  'border-teal-300/45',
+  'border-amber-200/30',
+  'border-cyan-300/30',
+] as const;
 
 function PlanVisual({ index, popular }: { index: number; popular: boolean }) {
   if (index === 0) {
@@ -129,18 +137,26 @@ export function CrystalPricing() {
           viewport={{ once: true, margin: '-60px' }}
           className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
         >
-          {C.pricing.plans.map((plan, index) => (
+          {C.pricing.plans.map((plan, index) => {
+            const ornament = ORNAMENT_PRESETS[index % ORNAMENT_PRESETS.length];
+            return (
             <motion.article
               key={plan.name.en}
               variants={fadeUp}
               whileHover={{ y: -8 }}
               transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-              className={`mq-panel group relative flex flex-col overflow-hidden p-6 ${
+              className={`mq-panel group relative flex flex-col overflow-hidden p-6 ${PLAN_ACCENTS[index]} ${
                 plan.popular
-                  ? '!border-teal-300/45 ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] xl:-translate-y-2'
+                  ? 'ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] xl:-translate-y-2'
                   : ''
               }`}
             >
+              <BoxOrnament
+                shape={ornament.shape}
+                tone={plan.popular ? 'teal' : ornament.tone}
+                corners={['tl', 'br']}
+                size="sm"
+              />
               {plan.popular ? (
                 <motion.div
                   className="pointer-events-none absolute inset-0 bg-gradient-to-b from-teal-300/10 via-transparent to-transparent"
@@ -222,7 +238,8 @@ export function CrystalPricing() {
                 <BiInline bi={plan.cta} />
               </Link>
             </motion.article>
-          ))}
+          );
+          })}
         </motion.div>
       </div>
     </section>

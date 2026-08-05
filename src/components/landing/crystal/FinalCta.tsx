@@ -7,6 +7,7 @@ import { ArrowUpLeft, ArrowUpRight, BriefcaseBusiness, Sparkles } from 'lucide-r
 import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
+import { BoxOrnament } from './BoxOrnament';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
@@ -47,22 +48,14 @@ export function CrystalFinalCta() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-80px' }}
-          className="relative overflow-hidden rounded-[2.25rem] border border-white/12 px-6 py-16 text-center shadow-[0_40px_120px_rgba(0,0,0,0.45)] md:px-12 md:py-24"
+          className="relative overflow-hidden rounded-[2.25rem] border border-teal-300/25 px-6 py-16 text-center shadow-[0_40px_120px_rgba(0,0,0,0.45)] md:px-12 md:py-24"
           style={{
             background:
               'radial-gradient(ellipse 80% 70% at 50% 20%, rgba(45,212,191,0.18), transparent 55%), radial-gradient(ellipse 60% 50% at 15% 85%, rgba(232,201,122,0.12), transparent 50%), radial-gradient(ellipse 55% 45% at 90% 80%, rgba(56,189,248,0.1), transparent 50%), linear-gradient(180deg, rgba(8,14,26,0.95) 0%, rgba(5,8,15,0.98) 100%)',
           }}
         >
-          {/* grid veil */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-              maskImage: 'radial-gradient(ellipse at center, black 20%, transparent 72%)',
-            }}
-          />
+          <BoxOrnament shape="najma" tone="teal" corners={['tl', 'tr']} size="lg" />
+          <BoxOrnament shape="vine" tone="gold" corners={['bl', 'br']} size="lg" />
 
           {/* sweeping spotlight */}
           <motion.div

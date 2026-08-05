@@ -494,6 +494,14 @@ async function seed() {
   }
 
   console.log(`  ✓ Demo company: ${demoCompany.name} (${demoCandidates.length} candidates)`);
+
+  try {
+    const { seedInterviewQuestions } = await import('./seed-interview-questions');
+    await seedInterviewQuestions(db as never);
+  } catch (err) {
+    console.warn('  ⚠ Interview question seed skipped:', err);
+  }
+
   console.log('\n✅ Seed complete!');
   console.log('\nCredentials:');
   console.log('  Admin:      admin@muqabaleh.com / admin123');

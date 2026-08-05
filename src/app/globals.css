@@ -956,7 +956,79 @@
   .mq-atelier .mq-orb,
   .mq-atelier .mq-marquee,
   .mq-atelier .mq-shine-line,
-  .mq-atelier .mq-btn-shimmer::after {
+  .mq-atelier .mq-btn-shimmer::after,
+  .mq-atelier .mq-arabesque-layer-a,
+  .mq-atelier .mq-arabesque-layer-b {
     animation: none !important;
   }
+}
+
+/* ─── Tasteful Arabian geometric backdrop (landing only) ─── */
+.mq-atelier .mq-arabesque {
+  z-index: -10;
+}
+.mq-atelier .mq-arabesque-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+}
+.mq-atelier .mq-arabesque-layer-a {
+  background-image: url('/images/patterns/arabesque-geom.svg');
+  background-size: 260px 260px;
+  opacity: 0.16;
+  animation: mq-arabesque-drift 80s linear infinite;
+}
+.mq-atelier .mq-arabesque-layer-b {
+  background-image: url('/images/patterns/arabesque-mesh.svg');
+  background-size: 120px 120px;
+  opacity: 0.1;
+  animation: mq-arabesque-drift-rev 110s linear infinite;
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, transparent 15%, black 80%);
+}
+.mq-atelier .mq-arabesque-corner {
+  position: absolute;
+  width: min(48vw, 380px);
+  height: min(48vw, 380px);
+  background-image: url('/images/patterns/arabesque-geom.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  filter: drop-shadow(0 0 36px rgba(232, 201, 122, 0.12));
+}
+.mq-atelier .mq-arabesque-corner-tl {
+  top: -4%;
+  left: -3%;
+  transform: rotate(0deg);
+}
+.mq-atelier .mq-arabesque-corner-tr {
+  top: -4%;
+  right: -3%;
+  transform: scaleX(-1);
+}
+.mq-atelier .mq-arabesque-corner-bl {
+  bottom: -2%;
+  left: -3%;
+  transform: scaleY(-1);
+  opacity: 0.1;
+}
+.mq-atelier .mq-arabesque-corner-br {
+  bottom: -2%;
+  right: -3%;
+  transform: scale(-1);
+  opacity: 0.1;
+}
+.mq-atelier .mq-arabesque-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%, transparent 45%, rgba(5, 8, 15, 0.35) 100%),
+    linear-gradient(180deg, rgba(5, 8, 15, 0.1) 0%, transparent 18%, transparent 80%, rgba(5, 8, 15, 0.3) 100%);
+}
+@keyframes mq-arabesque-drift {
+  from { background-position: 0 0; }
+  to { background-position: 280px 140px; }
+}
+@keyframes mq-arabesque-drift-rev {
+  from { background-position: 0 0; }
+  to { background-position: -140px 280px; }
 }

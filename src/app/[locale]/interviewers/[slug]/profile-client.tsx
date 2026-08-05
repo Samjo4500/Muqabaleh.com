@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight, Star, Quote, Clock, CalendarCheck, ThumbsUp } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GlowCard, VerifiedBadge } from '@/components/brand';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -137,7 +138,7 @@ export function InterviewerProfileClient({ slug, locale }: { slug: string; local
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
       {/* ── Back + Header ── */}
       <Link
-        href="/interviewers"
+        href={localePath('/interviewers', locale)}
         className="mb-6 inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
       >
         <ArrowRight size={16} strokeWidth={1.75} className={isRTL ? 'rotate-180' : ''} />

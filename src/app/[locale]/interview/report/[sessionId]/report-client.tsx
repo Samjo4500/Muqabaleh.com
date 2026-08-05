@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
+import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
 import type { FinalReport } from '@/lib/ai/report-generator';
 import { ScoreCircle } from './components/ScoreCircle';
 import { StrengthCard } from './components/StrengthCard';
@@ -65,17 +65,8 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
         <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-300/10 blur-[120px]" />
       </div>
 
-      <header className="relative z-20 px-4 pt-4 md:px-6">
-        <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between rounded-2xl px-4">
-          <Link href={localePath('/', locale)}>
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={140}
-              height={40}
-              className="h-9 w-auto"
-            />
-          </Link>
+      <AppChromeHeader
+        trailing={
           <button
             type="button"
             onClick={() => setLangToggle((v) => (v === 'en' ? 'ar' : 'en'))}
@@ -83,8 +74,8 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
           >
             {langToggle === 'en' ? 'العربية' : 'English'}
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="relative z-10 mx-auto max-w-3xl space-y-10 px-4 py-10 md:px-6">
         <div className="text-center">

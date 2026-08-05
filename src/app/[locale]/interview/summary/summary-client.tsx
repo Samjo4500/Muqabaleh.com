@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { localePath } from '@/i18n/navigation';
+import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
 import type { InterviewPlan } from '@/lib/interview/plan-generator';
 
 type Stored = {
@@ -80,20 +80,13 @@ export function SummaryClient({
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-teal-400/15 blur-[120px]" />
       </div>
-      <header className="relative z-20 px-4 pt-4 md:px-6">
-        <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between rounded-2xl px-4">
-          <Link href={localePath('/', locale)}>
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={140}
-              height={40}
-              className="h-9 w-auto"
-            />
-          </Link>
-          <span className="text-xs text-[var(--text-secondary)]">{email}</span>
-        </div>
-      </header>
+      <AppChromeHeader
+        trailing={
+          <span className="hidden truncate text-xs text-[var(--text-secondary)] sm:block sm:max-w-[200px]">
+            {email}
+          </span>
+        }
+      />
 
       <main className="relative z-10 mx-auto max-w-3xl px-4 py-10">
         <p className="text-sm uppercase tracking-[0.18em] text-teal-300/80">Muqabaleh</p>

@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import type { InterviewPlan, PlanQuestion } from '@/lib/interview/plan-generator';
 import { Timer } from './Timer';
 import { QuestionDisplay } from './QuestionDisplay';
@@ -178,21 +178,11 @@ export function InterviewInterface({ sessionId }: { sessionId: string }) {
 
       <header className="relative z-20 border-b border-white/10 px-4 py-3 md:px-6">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <Link href={localePath('/', locale)}>
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={130}
-              height={36}
-              className="h-8 w-auto"
-            />
+          <Link href={localePath('/', locale)} aria-label="Muqabaleh">
+            <BrandLogo size="nav" priority />
           </Link>
           <div className="text-sm text-[var(--text-secondary)]">{progressLabel}</div>
-          <Timer
-            key={timerKey}
-            seconds={question.timeLimit}
-            warnAt={30}
-          />
+          <Timer key={timerKey} seconds={question.timeLimit} warnAt={30} />
         </div>
       </header>
 

@@ -82,7 +82,9 @@ export function CrystalHero() {
                 animate={{ opacity: [0.35, 0.85, 0.35], scale: [0.92, 1.08, 0.92] }}
                 transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
               />
-              <BrandLogo size="hero" priority className="relative drop-shadow-[0_12px_40px_rgba(45,212,191,0.35)]" />
+              <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="relative inline-flex">
+                <BrandLogo size="hero" priority className="drop-shadow-[0_12px_40px_rgba(45,212,191,0.35)]" />
+              </Link>
             </motion.div>
           </motion.div>
 

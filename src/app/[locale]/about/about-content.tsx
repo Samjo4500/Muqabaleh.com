@@ -1,8 +1,10 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
+import Link from 'next/link';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { localePath } from '@/i18n/navigation';
 import {
   Target,
   Eye,
@@ -25,6 +27,7 @@ const VALUES = [
 export default function AboutContent() {
   const t = useTranslations('about');
   const tc = useTranslations('common');
+  const locale = useLocale();
 
   return (
     <div className="flex min-h-screen flex-col bg-void">
@@ -127,9 +130,9 @@ export default function AboutContent() {
             <p className="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
               {t('ctaSub')}
             </p>
-            <a href="/demo" className="btn-gold mt-8 inline-block">
+            <Link href={localePath('/demo', locale)} className="btn-gold mt-8 inline-block">
               {tc('startFree')}
-            </a>
+            </Link>
           </div>
         </section>
       </main>

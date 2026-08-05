@@ -3,9 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
 import { localePath } from '@/i18n/navigation';
+import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
 import {
   DURATION_OPTIONS,
   INDUSTRY_OPTIONS,
@@ -171,23 +170,13 @@ export function PrequalClient({ email }: { email: string }) {
         <div className="absolute right-0 top-32 h-80 w-80 rounded-full bg-cyan-300/15 blur-[120px]" />
       </div>
 
-      <header className="relative z-20 px-4 pt-4 md:px-6">
-        <div className="glass mx-auto flex h-16 max-w-3xl items-center justify-between rounded-2xl px-3 sm:px-4">
-          <Link href={localePath('/', locale)} className="inline-flex items-center gap-2">
-            <Image
-              src="/images/logos/v2-balanced-a-T.webp"
-              alt="Muqabaleh"
-              width={150}
-              height={40}
-              className="h-9 w-auto sm:h-10"
-              priority
-            />
-          </Link>
-          <div className="truncate text-xs text-[var(--text-secondary)] sm:text-sm">
+      <AppChromeHeader
+        trailing={
+          <div className="hidden truncate text-xs text-[var(--text-secondary)] sm:block sm:max-w-[200px] sm:text-sm">
             {email}
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 md:px-6">
         <div className="mb-8">

@@ -57,7 +57,7 @@ export default function DemoContent() {
       }
 
       const data = await res.json();
-      router.push(`/interview/guest/${data.token}/room`);
+      router.push(localePath(`/interview/guest/${data.token}/room`, locale));
     } catch {
       setLoading(false);
     }

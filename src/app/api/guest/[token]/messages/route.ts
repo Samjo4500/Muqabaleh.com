@@ -12,6 +12,11 @@ const guestMessageSchema = z.object({
   content: z.string().min(1).max(5000),
 });
 
+function isBootContent(content: string) {
+  const normalized = content.trim().toLowerCase();
+  return normalized === 'start' || normalized === '__boot__';
+}
+
 // POST /api/guest/[token]/messages — guest candidate message flow
 export async function POST(
   req: NextRequest,
@@ -44,6 +49,10 @@ export async function POST(
       return NextResponse.json({ error: { ar: 'تم تجاوز الحد. انتظر قليلاً.', en: 'Rate limit exceeded.' } }, { status: 429 });
     }
 
+    const body = await req.json().catch(() => ({ content: '' }));
+    const parsedEarly = guestMessageSchema.safeParse(body);
+    const content = parsedEarly.success ? parsedEarly.data.content : '';
+
     // PENDING → start
     if (interview.status === 'PENDING') {
       await db.interview.update({ where: { id: interview.id }, data: { status: 'IN_PROGRESS' } });
@@ -64,9 +73,28 @@ export async function POST(
       });
     }
 
-    // IN_PROGRESS → generate response
+    // IN_PROGRESS → generate response (boot content is idempotent)
     if (interview.status === 'IN_PROGRESS') {
-      const body = await req.json();
+      if (isBootContent(content)) {
+        const messages = await db.message.findMany({
+          where: { interviewId: interview.id },
+          orderBy: { sequence: 'asc' },
+        });
+        const interviewerMsgs = messages.filter((m) => m.role === 'INTERVIEWER');
+        const lastInterviewer = interviewerMsgs[interviewerMsgs.length - 1];
+        return NextResponse.json({
+          question: lastInterviewer?.content || '',
+          questionNumber: Math.max(1, interviewerMsgs.length),
+          totalQuestions: 5,
+          done: false,
+          resumed: true,
+          history: messages.map((m) => ({
+            role: m.role === 'INTERVIEWER' ? 'interviewer' : 'candidate',
+            text: m.content,
+          })),
+        });
+      }
+
       const parsed = guestMessageSchema.safeParse(body);
       if (!parsed.success) {
         return NextResponse.json({ error: { ar: 'الرسالة مطلوبة', en: 'Message required' } }, { status: 400 });
@@ -146,6 +174,10 @@ async function handleDemoMessage(req: NextRequest, token: string) {
     return NextResponse.json({ error: { ar: 'المقابلة مكتملة', en: 'Interview completed' } }, { status: 400 });
   }
 
+  const body = await req.json().catch(() => ({ content: '' }));
+  const parsed = guestMessageSchema.safeParse(body);
+  const content = parsed.success ? parsed.data.content : '';
+
   // PENDING → first question
   if (state.status === 'PENDING') {
     state.status = 'IN_PROGRESS';
@@ -159,13 +191,24 @@ async function handleDemoMessage(req: NextRequest, token: string) {
     });
   }
 
-  // IN_PROGRESS → next question
-  const body = await req.json().catch(() => ({ content: '' }));
-  const parsed = guestMessageSchema.safeParse(body);
+  // Idempotent boot while already in progress
+  if (isBootContent(content)) {
+    const idx = Math.max(0, Math.min(state.messageCount - 1, totalQuestions - 1));
+    return NextResponse.json({
+      question: questions[idx] || questions[0],
+      questionNumber: idx + 1,
+      totalQuestions,
+      done: false,
+      demoMode: true,
+      resumed: true,
+    });
+  }
+
   if (!parsed.success) {
     return NextResponse.json({ error: { ar: 'الرسالة مطلوبة', en: 'Message required' } }, { status: 400 });
   }
 
+  // IN_PROGRESS → next question
   state.messageCount++;
   const nextQIdx = Math.min(state.messageCount - 1, totalQuestions - 1);
   const isLast = nextQIdx === totalQuestions - 1;

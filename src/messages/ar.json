@@ -864,7 +864,19 @@
       "endInterview": "إنهاء المقابلة",
       "endConfirm": "هل أنت متأكد من إنهاء المقابلة مبكراً؟",
       "endYes": "نعم، إنهاء",
-      "endNo": "إلغاء"
+      "endNo": "إلغاء",
+      "guestKicker": "مقابلة ذكاء اصطناعي مباشرة",
+      "guestPreparing": "جارٍ توصيلك بالمحاور…",
+      "guestCompleteTitle": "أنهيت المقابلة",
+      "guestCompleteBody": "أداء قوي. أنشئ حساباً مجانياً لحفظ تقدّمك، وفتح بطاقات التقييم الكاملة، والتقديم بإثبات.",
+      "guestCreateAccount": "إنشاء حساب مجاني",
+      "guestBackHome": "العودة للرئيسية",
+      "guestTryAgain": "تدرّب مجدداً",
+      "guestTip": "أجب بجمل واضحة — المحاور يتابع بناءً على ما تقوله.",
+      "fahdName": "فهد",
+      "nooraName": "نورة",
+      "listening": "يستمع",
+      "speaking": "يتحدث"
     },
     "report": {
       "backToInterviews": "العودة للمقابلات",

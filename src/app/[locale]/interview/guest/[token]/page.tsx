@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { localePath } from '@/i18n/navigation';
 
 export default function GuestInterviewPage({
   params,
@@ -17,6 +19,8 @@ export default function GuestInterviewPage({
   params: Promise<{ token: string }>;
 }) {
   const t = useTranslations('guest');
+  const locale = useLocale();
+  const isAr = locale === 'ar';
   const router = useRouter();
   const [token, setToken] = useState('');
   const [name, setName] = useState('');
@@ -26,9 +30,7 @@ export default function GuestInterviewPage({
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    params.then(({ token: tkn }) => {
-      setToken(tkn);
-    });
+    params.then(({ token: tkn }) => setToken(tkn));
   }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,16 +45,30 @@ export default function GuestInterviewPage({
         body: JSON.stringify({ content: 'start', guestName: name, guestEmail: email }),
       });
 
-      if (res.ok) {
-        setConfirmed(true);
-        // Redirect to guest interview room
-        setTimeout(() => {
-          router.push(`/interview/guest/${token}/room`);
-        }, 1500);
+      if (!res.ok) {
+        toast.error(t('startError'));
         return;
       }
 
-      toast.error(t('startError'));
+      const data = await res.json();
+      try {
+        sessionStorage.setItem(
+          `mq-guest-start:${token}`,
+          JSON.stringify({
+            question: data.question,
+            questionNumber: data.questionNumber,
+            totalQuestions: data.totalQuestions,
+            guestName: name,
+          }),
+        );
+      } catch {
+        // storage unavailable — room will attempt start (may no-op if already IN_PROGRESS)
+      }
+
+      setConfirmed(true);
+      window.setTimeout(() => {
+        router.push(localePath(`/interview/guest/${token}/room`, locale));
+      }, 900);
     } catch {
       toast.error(t('startError'));
     } finally {
@@ -61,58 +77,58 @@ export default function GuestInterviewPage({
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-void px-4 py-12">
-      <div className="aurora-bg pointer-events-none absolute inset-0" aria-hidden="true" />
+    <div
+      className="mq-atelier relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-b" />
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo + Company Info */}
-        <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <path d="M14 2L26 8v12l-12 6-12-6V8l12-6z" stroke="#D4A843" strokeWidth="1.5" fill="none" />
-              <path d="M14 8l6 3v6l-6 3-6-3v-6l6-3z" fill="#D4A843" opacity="0.2" />
-              <circle cx="14" cy="14" r="2" fill="#D4A843" />
-            </svg>
-          </div>
-          <p className="text-sm font-medium text-gold">{t('companyName')}</p>
-          <p className="mt-1 text-lg font-bold text-[var(--text-primary)]">{t('position')}</p>
-          <div className="mt-2">
-            <Badge variant="outline" className="border-cyan/30 bg-cyan/10 text-cyan">
-              {t('typeAI')}
-            </Badge>
-          </div>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <Link href={localePath('/', locale)} className="mb-5" aria-label="Muqabaleh">
+            <BrandLogo size="lg" />
+          </Link>
+          <p className="mq-kicker mb-2">{t('companyName')}</p>
+          <p className="mq-display text-xl font-bold text-white">{t('position')}</p>
+          <span className="mt-3 inline-flex rounded-lg border border-teal-300/25 bg-teal-400/10 px-2.5 py-1 text-[11px] font-bold text-teal-300">
+            {t('typeAI')}
+          </span>
         </div>
 
         {confirmed ? (
-          <div className="glass-card rounded-2xl p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald/10">
-              <CheckCircle2 size={32} strokeWidth={1.75} className="text-emerald" />
+          <div className="mq-panel mq-facet mq-facet-teal mq-facet-shape-soft p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-teal-300/30 bg-teal-400/15">
+              <CheckCircle2 size={32} className="text-teal-300" />
             </div>
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('confirmed')}</h2>
-            <p className="mt-2 text-sm text-[var(--text-muted)]">{t('confirmedSub')}</p>
+            <h2 className="mq-display text-xl font-bold text-white">{t('confirmed')}</h2>
+            <p className="mt-2 text-sm text-white/60">{t('confirmedSub')}</p>
           </div>
         ) : (
-          <div className="glass-card rounded-2xl p-6">
+          <div className="mq-panel mq-facet mq-facet-gold mq-facet-shape-soft p-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label className="text-sm text-[var(--text-muted)]">{t('name')}</Label>
+                <Label className="text-sm text-white/55">{t('name')}</Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('namePlaceholder')}
-                  className="glass-input"
+                  className="border-white/12 bg-white/[0.05] text-white placeholder:text-white/35"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm text-[var(--text-muted)]">{t('email')}</Label>
+                <Label className="text-sm text-white/55">{t('email')}</Label>
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t('emailPlaceholder')}
-                  className="glass-input"
+                  className="border-white/12 bg-white/[0.05] text-white placeholder:text-white/35"
                   required
                 />
               </div>
@@ -122,16 +138,16 @@ export default function GuestInterviewPage({
                   id="consent"
                   checked={consent}
                   onCheckedChange={(v) => setConsent(v === true)}
-                  className="mt-0.5 border-white/20 data-[state=checked]:border-gold data-[state=checked]:bg-gold"
+                  className="mt-0.5 border-white/20 data-[state=checked]:border-teal-300 data-[state=checked]:bg-teal-400"
                 />
-                <Label htmlFor="consent" className="cursor-pointer text-sm text-[var(--text-muted)] leading-relaxed">
+                <Label htmlFor="consent" className="cursor-pointer text-sm leading-relaxed text-white/55">
                   {t('consent')}
                 </Label>
               </div>
 
               <Button
                 type="submit"
-                className="btn-gold w-full cursor-pointer"
+                className="mq-btn mq-btn-primary w-full"
                 disabled={!consent || loading}
               >
                 {loading ? (

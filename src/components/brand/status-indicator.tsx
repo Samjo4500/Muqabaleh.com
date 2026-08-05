@@ -63,7 +63,8 @@ export function StatusIndicator({ status, className }: StatusIndicatorProps) {
             status === 'analyzing' && 'animate-pulse bg-violet-400',
             status === 'completed' && 'bg-emerald'
           )}
-        />\n        <span
+        />
+        <span
           className={cn(
             'relative inline-flex h-2 w-2 rounded-full',
             status === 'online' && 'bg-emerald',

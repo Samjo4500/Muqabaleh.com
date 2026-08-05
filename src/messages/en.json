@@ -864,7 +864,19 @@
       "endInterview": "End Interview",
       "endConfirm": "Are you sure you want to end the interview early?",
       "endYes": "Yes, end",
-      "endNo": "Cancel"
+      "endNo": "Cancel",
+      "guestKicker": "Live AI interview",
+      "guestPreparing": "Connecting you with your interviewer…",
+      "guestCompleteTitle": "You finished the interview",
+      "guestCompleteBody": "Strong work. Create a free account to save progress, unlock full scorecards, and apply with proof.",
+      "guestCreateAccount": "Create free account",
+      "guestBackHome": "Back to home",
+      "guestTryAgain": "Practice again",
+      "guestTip": "Answer in clear sentences — the interviewer follows up on what you say.",
+      "fahdName": "Fahd",
+      "nooraName": "Noora",
+      "listening": "Listening",
+      "speaking": "Speaking"
     },
     "report": {
       "backToInterviews": "Back to Interviews",

@@ -1,101 +1,230 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Speaker, VolumeX, Volume2, Mic, MicOff, Send, ChevronRight, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { InterviewAvatar, LiveBadge, SkeletonBlock } from '@/components/brand';
-import { AudioWaveform } from '@/components/audio-waveform';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  use,
+} from 'react';
+import {
+  VolumeX,
+  Volume2,
+  Send,
+  Loader2,
+  ArrowUpLeft,
+  ArrowUpRight,
+  Sparkles,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import {
+  InterviewAvatar,
+  StatusIndicator,
+  AudioReactBars,
+  ScoreRing,
+} from '@/components/brand';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { easeCrystal } from '@/components/landing/crystal/motion';
+import { localePath } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                               */
-/* ------------------------------------------------------------------ */
+type InterviewerWho = 'fahd' | 'noora';
+type Phase = 'booting' | 'live' | 'sending' | 'done';
 
-interface ChatMessage {
+type ChatMessage = {
+  id: string;
   role: 'interviewer' | 'candidate';
   text: string;
   typing?: boolean;
-  audioUrl?: string | null;
+};
+
+function stripDoneTag(text: string) {
+  return text.replace(/\[INTERVIEW_DONE\]/gi, '').trim();
 }
 
-/* ------------------------------------------------------------------ */
-/*  Guest Interview Room                                               */
-/* ------------------------------------------------------------------ */
+function formatTime(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function estimatedScore(questionNumber: number, totalQuestions: number) {
+  if (questionNumber <= 0) return 0;
+  const progress = Math.min(1, questionNumber / Math.max(1, totalQuestions));
+  return Math.min(10, Math.round((5.4 + progress * 3.8) * 10) / 10);
+}
 
 export default function GuestInterviewRoom({
   params,
 }: {
   params: Promise<{ token: string; locale: string }>;
 }) {
+  const { token } = use(params);
   const t = useTranslations('app.room');
-  const tCommon = useTranslations('common');
   const locale = useLocale();
-  const router = useRouter();
+  const isAr = locale === 'ar';
+  const Arrow = isAr ? ArrowUpLeft : ArrowUpRight;
 
-  const [token, setToken] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [message, setMessage] = useState('');
+  const [draft, setDraft] = useState('');
   const [seconds, setSeconds] = useState(0);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showComplete, setShowComplete] = useState(false);
-  const [progressPct, setProgressPct] = useState(0);
-  const [showReportLink, setShowReportLink] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [timerOn, setTimerOn] = useState(false);
+  const [phase, setPhase] = useState<Phase>('booting');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(5);
-  const [interviewerWho, setInterviewerWho] = useState<'fahd' | 'noora'>('fahd');
-  const [voice, setVoice] = useState<'fahd' | 'noora'>('fahd');
-  const [isStarted, setIsStarted] = useState(false);
-  const [playingMsgIdx, setPlayingMsgIdx] = useState<number | null>(null);
+  const [who] = useState<InterviewerWho>('fahd');
+  const [isMuted, setIsMuted] = useState(false);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const startedRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Resolve params
+  // Timer only after interview is live
   useEffect(() => {
-    params.then(({ token: tkn }) => {
-      setToken(tkn);
-    });
-  }, [params]);
+    if (!timerOn || phase === 'done') return;
+    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [timerOn, phase]);
 
-  // Timer
-  useEffect(() => {
-    const interval = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Auto-scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Check if interview was already started (first message already sent from form page)
+  const playTTS = useCallback(
+    async (text: string, msgId: string) => {
+      if (isMuted || !text || !token) return;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setSpeakingId(msgId);
+      try {
+        const res = await fetch(`/api/guest/${token}/tts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voice: who }),
+        });
+        if (!res.ok) {
+          setSpeakingId(null);
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play().catch(() => setSpeakingId(null));
+        audio.onended = () => {
+          setSpeakingId(null);
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+        };
+      } catch {
+        setSpeakingId(null);
+      }
+    },
+    [isMuted, token, who],
+  );
+
+  // Boot: hydrate from join handoff OR start interview
   useEffect(() => {
-    if (!token) return;
-    setIsLoading(false);
-    setIsStarted(true);
-  }, [token]);
+    if (!token || startedRef.current) return;
+    startedRef.current = true;
+
+    const boot = async () => {
+      const storageKey = `mq-guest-start:${token}`;
+      try {
+        const cached = sessionStorage.getItem(storageKey);
+        if (cached) {
+          const data = JSON.parse(cached) as {
+            question?: string;
+            questionNumber?: number;
+            totalQuestions?: number;
+          };
+          sessionStorage.removeItem(storageKey);
+          if (data.question) {
+            const clean = stripDoneTag(data.question);
+            setMessages([{ id: 'q1', role: 'interviewer', text: clean }]);
+            setCurrentQuestion(data.questionNumber || 1);
+            setTotalQuestions(data.totalQuestions || 5);
+            setPhase('live');
+            setTimerOn(true);
+            setTimeout(() => playTTS(clean, 'q1'), 400);
+            return;
+          }
+        }
+      } catch {
+        // ignore storage errors
+      }
+
+      try {
+        const res = await fetch(`/api/guest/${token}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: 'start' }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const errMsg = data.error?.[locale] || data.error?.ar || t('errorLoading');
+          toast.error(errMsg);
+          setPhase('live');
+          return;
+        }
+        const data = await res.json();
+        const history = Array.isArray(data.history)
+          ? (data.history as Array<{ role: 'interviewer' | 'candidate'; text: string }>)
+          : null;
+
+        if (history && history.length > 0) {
+          const hydrated = history.map((m, i) => ({
+            id: `h-${i}`,
+            role: m.role,
+            text: stripDoneTag(m.text),
+          }));
+          setMessages(hydrated);
+          setCurrentQuestion(data.questionNumber || 1);
+          setTotalQuestions(data.totalQuestions || 5);
+          setPhase(data.done ? 'done' : 'live');
+          setTimerOn(true);
+          const lastIv = [...hydrated].reverse().find((m) => m.role === 'interviewer');
+          if (lastIv) setTimeout(() => playTTS(lastIv.text, lastIv.id), 400);
+        } else {
+          const clean = stripDoneTag(data.question || '');
+          const firstId = 'q1';
+          setMessages(clean ? [{ id: firstId, role: 'interviewer', text: clean }] : []);
+          setCurrentQuestion(data.questionNumber || 1);
+          setTotalQuestions(data.totalQuestions || 5);
+          setPhase(data.done ? 'done' : 'live');
+          setTimerOn(true);
+          if (clean) setTimeout(() => playTTS(clean, firstId), 400);
+        }
+      } catch {
+        toast.error(t('errorLoading'));
+        setPhase('live');
+      }
+    };
+
+    void boot();
+  }, [token, locale, t, playTTS]);
 
   const handleSend = async () => {
-    const trimmed = message.trim();
-    if (!trimmed || isSending || !token) return;
+    const trimmed = draft.trim();
+    if (!trimmed || phase !== 'live' || !token) return;
 
-    setMessage('');
-    setIsSending(true);
+    setDraft('');
+    setPhase('sending');
+    const candidateId = `c-${Date.now()}`;
+    const typingId = `t-${Date.now()}`;
 
-    // Add candidate message immediately
-    setMessages((prev) => [...prev, { role: 'candidate', text: trimmed }]);
-
-    // Add typing indicator for interviewer
-    setMessages((prev) => [...prev, { role: 'interviewer', text: '', typing: true }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: candidateId, role: 'candidate', text: trimmed },
+      { id: typingId, role: 'interviewer', text: '', typing: true },
+    ]);
 
     try {
       const res = await fetch(`/api/guest/${token}/messages`, {
@@ -108,358 +237,309 @@ export default function GuestInterviewRoom({
         const data = await res.json().catch(() => ({}));
         const errMsg = data.error?.[locale] || data.error?.ar || t('errorSending');
         toast.error(errMsg);
-        setMessages((prev) => prev.filter((m) => !m.typing));
-        setIsSending(false);
+        setMessages((prev) => prev.filter((m) => m.id !== typingId));
+        setPhase('live');
         return;
       }
 
       const data = await res.json();
+      const clean = stripDoneTag(data.question || '');
       setCurrentQuestion(data.questionNumber || currentQuestion);
       setTotalQuestions(data.totalQuestions || totalQuestions);
 
-      // Set interviewer avatar from first response
-      if (messages.length === 0) {
-        setInterviewerWho('fahd');
-        setVoice('fahd');
-      }
-
-      // Replace typing indicator with actual response
+      const replyId = `i-${Date.now()}`;
       setMessages((prev) => {
-        const withoutTyping = prev.filter((m) => !m.typing);
-        return [...withoutTyping, { role: 'interviewer', text: data.question }];
+        const withoutTyping = prev.filter((m) => m.id !== typingId);
+        return clean
+          ? [...withoutTyping, { id: replyId, role: 'interviewer', text: clean }]
+          : withoutTyping;
       });
 
-      // If done, show completion overlay
       if (data.done) {
-        handleComplete();
+        setPhase('done');
+      } else {
+        setPhase('live');
+        if (clean) setTimeout(() => playTTS(clean, replyId), 250);
       }
     } catch {
       toast.error(t('errorSending'));
-      setMessages((prev) => prev.filter((m) => !m.typing));
+      setMessages((prev) => prev.filter((m) => m.id !== typingId));
+      setPhase('live');
     } finally {
-      setIsSending(false);
       inputRef.current?.focus();
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   };
 
-  const handleComplete = () => {
-    setShowComplete(true);
-    setProgressPct(0);
-    const interval = setInterval(() => {
-      setProgressPct((p) => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setShowReportLink(true);
-          return 100;
-        }
-        return p + 1;
-      });
-    }, 30);
-  };
+  const status =
+    phase === 'done'
+      ? 'completed'
+      : phase === 'sending'
+        ? 'analyzing'
+        : phase === 'booting'
+          ? 'preparing'
+          : 'online';
 
-  // TTS with waveform
-  const playTTS = useCallback(
-    async (text: string, msgIdx: number) => {
-      if (isMuted || !text) return;
-      // Stop any current audio
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
-      }
-      setPlayingMsgIdx(msgIdx);
-      try {
-        const res = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, voice }),
-        });
-        if (!res.ok) { setPlayingMsgIdx(null); return; }
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        // Store audio URL on the message
-        setMessages((prev) =>
-          prev.map((m, i) => (i === msgIdx ? { ...m, audioUrl: url } : m))
-        );
-        const audio = new Audio(url);
-        currentAudioRef.current = audio;
-        audio.play().catch(() => {});
-        audio.onended = () => {
-          setPlayingMsgIdx(null);
-          setMessages((prev) =>
-            prev.map((m, i) => (i === msgIdx ? { ...m, audioUrl: null } : m))
-          );
-          URL.revokeObjectURL(url);
-          currentAudioRef.current = null;
-        };
-      } catch {
-        setPlayingMsgIdx(null);
-      }
-    },
-    [isMuted, voice],
-  );
-
-  // ASR
-  const toggleRecording = useCallback(async () => {
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        if (audioChunksRef.current.length === 0) return;
-        setIsTranscribing(true);
-        try {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
-          const res = await fetch(`/api/interviews/${token}/transcribe`, {
-            method: 'POST',
-            body: formData,
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.text) {
-              setMessage(data.text);
-              inputRef.current?.focus();
-            }
-          } else {
-            toast.error(t('transcriptionError'));
-          }
-        } catch {
-          toast.error(t('transcriptionError'));
-        } finally {
-          setIsTranscribing(false);
-        }
-      };
-      mediaRecorder.start();
-      mediaRecorderRef.current = mediaRecorder;
-      setIsRecording(true);
-    } catch {
-      toast.error(t('micError'));
-    }
-  }, [isRecording, token, t]);
-
-  const formatTime = useCallback((s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  }, []);
-
-  // Loading
-  if (isLoading) {
-    return (
-      <div className="flex h-screen flex-col">
-        <div className="flex items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 py-3">
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-          <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
-        </div>
-        <div className="flex-1 p-4 md:p-6">
-          <div className="mx-auto max-w-3xl space-y-4">
-            <SkeletonBlock lines={3} />
-            <SkeletonBlock lines={2} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const score = estimatedScore(currentQuestion, totalQuestions);
+  const interviewerName = who === 'fahd' ? t('fahdName') : t('nooraName');
 
   return (
-    <div className="flex h-screen flex-col">
-      {/* Completion overlay */}
-      {showComplete && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--bg-void)]/90 backdrop-blur-sm">
-          <div className="mx-4 max-w-sm text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-emerald bg-emerald/10">
-              <span className="text-3xl font-bold text-emerald">100%</span>
-            </div>
-            <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">
-              {t('interviewComplete')}
-            </h2>
-            <div className="mb-6 flex justify-center">
-              <LiveBadge />
-            </div>
-            <p className="mb-6 text-sm text-[var(--text-muted)]">
-              {t('generatingReport')}
-            </p>
-            <div className="mx-auto mb-6 h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/5">
-              <div
-                className="h-full rounded-full bg-gold transition-all duration-100"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            {showReportLink && (
-              <Button
-                onClick={() => router.push('/')}
-                className="btn-gold cursor-pointer"
-              >
-                {t('viewReport')}
-                <ChevronRight size={16} strokeWidth={1.75} className="ms-1 inline" />
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+    <div
+      className="mq-atelier relative flex h-[100dvh] flex-col overflow-hidden"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-b" />
+        <div className="mq-orb mq-orb-c" />
+      </div>
+
+      {/* Completion */}
+      <AnimatePresence>
+        {phase === 'done' ? (
+          <motion.div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-[#05080f]/88 px-4 backdrop-blur-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="mq-panel mq-facet mq-facet-teal mq-facet-shape-soft w-full max-w-md p-8 text-center"
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, ease: easeCrystal }}
+            >
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-teal-300/30 bg-teal-400/15">
+                <Sparkles className="text-teal-300" size={28} />
+              </div>
+              <h2 className="mq-display mb-2 text-2xl font-bold text-white">
+                {t('guestCompleteTitle')}
+              </h2>
+              <p className="mb-7 text-sm leading-relaxed text-white/60">
+                {t('guestCompleteBody')}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href={localePath('/register', locale)}
+                  className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
+                >
+                  {t('guestCreateAccount')}
+                  <Arrow size={16} />
+                </Link>
+                <Link
+                  href={localePath('/demo', locale)}
+                  className="mq-btn mq-btn-ghost inline-flex min-h-[44px] items-center justify-center px-5 text-sm font-bold"
+                >
+                  {t('guestTryAgain')}
+                </Link>
+                <Link
+                  href={localePath('/', locale)}
+                  className="text-xs font-semibold text-white/40 transition hover:text-teal-300"
+                >
+                  {t('guestBackHome')}
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {/* Top bar */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 py-3 backdrop-blur-md">
-        <InterviewAvatar who={interviewerWho} size="sm" />
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-[var(--text-primary)]">
-            {interviewerWho === 'fahd' ? '\u0641\u0647\u062F' : '\u0646\u0648\u0631\u0629'}
-          </span>
-          <span className="text-xs text-emerald">{t('connected')}</span>
+      <header className="relative z-20 shrink-0 border-b border-white/10 bg-[rgba(8,12,22,0.72)] px-3 py-3 backdrop-blur-xl md:px-5">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <Link href={localePath('/', locale)} className="shrink-0" aria-label="Muqabaleh">
+            <BrandLogo size="nav" />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] font-bold uppercase tracking-[0.14em] text-teal-300/90">
+              {t('guestKicker')}
+            </p>
+            <p className="truncate text-xs text-white/45 md:text-sm">
+              {t('questionOf', {
+                current: Math.min(Math.max(currentQuestion, 1), totalQuestions),
+                total: totalQuestions,
+              })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 md:gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/30 bg-rose-400/10 px-2 py-1 text-[10px] font-bold tracking-wide text-rose-300">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-400" />
+              </span>
+              LIVE
+            </span>
+            <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-xs tabular-nums text-white/70">
+              {formatTime(seconds)}
+            </span>
+          </div>
         </div>
-        <div className="ms-auto flex items-center gap-3">
-          <LiveBadge />
-          <span className="font-mono text-sm font-medium text-[var(--text-muted)]">
-            {formatTime(seconds)}
-          </span>
-          <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-[var(--text-muted)]">
-            {t('questionOf', {
-              current: Math.min(currentQuestion || 1, totalQuestions),
-              total: totalQuestions,
-            })}
-          </span>
-        </div>
-      </div>
+      </header>
 
-      {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <div className="mx-auto max-w-3xl space-y-4">
-          {messages.length === 0 && isStarted && (
-            <div className="py-12 text-center">
-              <p className="text-sm text-[var(--text-muted)]">{t('typeAnswer')}</p>
+      {/* Stage */}
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 min-h-0 flex-col gap-4 p-3 md:flex-row md:gap-5 md:p-5">
+        {/* Presence panel */}
+        <aside className="mq-panel mq-facet mq-facet-teal mq-facet-shape-soft relative hidden w-[280px] shrink-0 flex-col items-center justify-between overflow-hidden p-6 lg:flex">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <InterviewAvatar who={who} size="xl" pro />
+            <div>
+              <h2 className="mq-display text-xl font-bold text-white">{interviewerName}</h2>
+              <p className="mt-1 text-xs text-white/45">{t('interviewerName')}</p>
             </div>
-          )}
+            <StatusIndicator status={status} />
+            <p className="text-[11px] text-white/40">
+              {speakingId ? t('speaking') : t('listening')}
+            </p>
+          </div>
 
-          {messages.map((msg, i) => {
-            const isInterviewer = msg.role === 'interviewer';
-            return (
-              <div
-                key={i}
-                className={`flex gap-3 ${isInterviewer ? 'flex-row-reverse' : 'flex-row'}`}
-              >
-                {isInterviewer && <InterviewAvatar who={interviewerWho} size="sm" />}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-white/35">
+              {t('interviewScore')}
+            </p>
+            <ScoreRing value={score} size={96} />
+          </div>
+
+          <p className="text-center text-[11px] leading-relaxed text-white/40">{t('guestTip')}</p>
+        </aside>
+
+        {/* Chat column */}
+        <section className="mq-panel relative flex min-h-0 flex-1 flex-col overflow-hidden border-teal-300/15">
+          {/* Mobile interviewer strip */}
+          <div className="flex items-center gap-3 border-b border-white/8 px-4 py-3 lg:hidden">
+            <InterviewAvatar who={who} size="md" pro />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-white">{interviewerName}</p>
+              <StatusIndicator status={status} className="mt-1" />
+            </div>
+            <ScoreRing value={score} size={52} strokeWidth={4} />
+          </div>
+
+          <div className="flex-1 space-y-4 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
+            {phase === 'booting' ? (
+              <div className="flex h-full flex-col items-center justify-center gap-4 py-16 text-center">
+                <Loader2 className="animate-spin text-teal-300" size={28} />
+                <p className="text-sm text-white/55">{t('guestPreparing')}</p>
+              </div>
+            ) : null}
+
+            {messages.map((msg) => {
+              const isInterviewer = msg.role === 'interviewer';
+              if (msg.typing) {
+                return (
+                  <div
+                    key={msg.id}
+                    className={cn('flex', isAr ? 'justify-start' : 'justify-end')}
+                  >
+                    <div className="rounded-2xl border border-teal-300/20 bg-teal-400/8 px-5 py-4">
+                      <div className="flex gap-1.5">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-teal-300/70" />
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-teal-300/70 [animation-delay:150ms]" />
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-teal-300/70 [animation-delay:300ms]" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: easeCrystal }}
+                  className={cn(
+                    'flex gap-3',
                     isInterviewer
-                      ? 'border border-gold/10 bg-gold/[0.06] text-[var(--text-primary)]'
-                      : 'border border-white/10 bg-white/[0.04] text-[var(--text-primary)]'
-                  }`}
+                      ? isAr
+                        ? 'justify-start'
+                        : 'justify-end'
+                      : isAr
+                        ? 'justify-end'
+                        : 'justify-start',
+                  )}
                 >
-                  {msg.typing ? (
-                    <div className="flex items-center gap-1.5 py-1">
-                      <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--text-muted)]" />
-                      <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--text-muted)] [animation-delay:150ms]" />
-                      <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--text-muted)] [animation-delay:300ms]" />
+                  {isInterviewer ? (
+                    <div className="max-w-[88%] md:max-w-[75%]">
+                      <div className="rounded-2xl border border-teal-300/20 bg-gradient-to-br from-teal-400/12 to-transparent px-4 py-3.5 text-sm leading-relaxed text-white md:px-5">
+                        {msg.text}
+                        {speakingId === msg.id ? (
+                          <div className="mt-3 border-t border-white/10 pt-2">
+                            <AudioReactBars
+                              audioElement={null}
+                              isPlaying
+                              barCount={18}
+                              className="h-6"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => playTTS(msg.text, msg.id)}
+                        className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/40 transition hover:text-teal-300"
+                      >
+                        <Volume2 size={13} />
+                        {t('replay')}
+                      </button>
                     </div>
                   ) : (
-                    msg.text
+                    <div className="max-w-[88%] rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-sm leading-relaxed text-white/90 md:max-w-[75%] md:px-5">
+                      {msg.text}
+                    </div>
                   )}
-                </div>
-                {isInterviewer && !msg.typing && (
-                  <div className="flex flex-col items-end gap-1.5 self-end">
-                    <button
-                      type="button"
-                      onClick={() => playTTS(msg.text, i)}
-                      className="rounded-lg p-1.5 text-[var(--text-faint)] transition-colors hover:bg-white/5 hover:text-[var(--text-muted)] cursor-pointer"
-                      aria-label={t('replay')}
-                    >
-                      <Speaker size={16} strokeWidth={1.75} />
-                    </button>
-                    <AudioWaveform
-                      audioUrl={msg.audioUrl ?? null}
-                      isPlaying={playingMsgIdx === i}
-                      onPlayPause={() => {
-                        if (playingMsgIdx === i) {
-                          currentAudioRef.current?.pause();
-                          setPlayingMsgIdx(null);
-                        } else {
-                          playTTS(msg.text, i);
-                        }
-                      }}
-                      className="w-48"
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <div ref={chatEndRef} />
-        </div>
-      </div>
+                </motion.div>
+              );
+            })}
+            <div ref={chatEndRef} />
+          </div>
 
-      {/* Bottom input area */}
-      <div className="shrink-0 border-t border-white/[0.08] bg-[var(--bg-panel)]/80 p-4 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <input
-            ref={inputRef}
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              isRecording
-                ? t('recording')
-                : isTranscribing
-                  ? t('transcribing')
-                  : t('typeAnswer')
-            }
-            disabled={isSending || isRecording || isTranscribing}
-            className="glass-input flex-1 px-4 py-3 text-sm"
-          />
-          <button
-            type="button"
-            onClick={toggleRecording}
-            disabled={isSending || isTranscribing}
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer ${
-              isRecording
-                ? 'bg-red-500/20 text-red-400 animate-pulse'
-                : 'bg-white/5 text-[var(--text-muted)] hover:bg-white/10 hover:text-gold'
-            }`}
-            aria-label={isRecording ? t('transcribing') : 'Microphone'}
-          >
-            {isRecording ? <MicOff size={20} strokeWidth={1.75} /> : <Mic size={20} strokeWidth={1.75} />}
-          </button>
-          <Button
-            size="icon"
-            onClick={handleSend}
-            disabled={isSending || !message.trim()}
-            className="h-11 w-11 shrink-0 rounded-xl bg-gold text-[var(--bg-void)] hover:bg-gold-hover cursor-pointer disabled:opacity-40"
-          >
-            {isSending ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Send size={18} strokeWidth={1.75} />
-            )}
-          </Button>
-        </div>
-        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-end">
-          <button
-            type="button"
-            onClick={() => setIsMuted(!isMuted)}
-            className="flex items-center gap-1.5 text-xs text-[var(--text-faint)] transition-colors hover:text-[var(--text-muted)] cursor-pointer"
-            aria-label={isMuted ? t('unmute') : t('mute')}
-          >
-            {isMuted ? <VolumeX size={14} strokeWidth={1.75} /> : <Volume2 size={14} strokeWidth={1.75} />}
-            {isMuted ? t('unmute') : t('mute')}
-          </button>
-        </div>
+          {/* Composer */}
+          <div className="shrink-0 border-t border-white/10 bg-black/20 p-3 md:p-4">
+            <div className="flex items-end gap-2 md:gap-3">
+              <textarea
+                ref={inputRef}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={onKeyDown}
+                rows={2}
+                placeholder={t('typeAnswer')}
+                disabled={phase !== 'live'}
+                className="min-h-[52px] flex-1 resize-none rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-white outline-none backdrop-blur-xl transition placeholder:text-white/35 focus:border-teal-300/40 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => void handleSend()}
+                disabled={phase !== 'live' || !draft.trim()}
+                className="mq-btn mq-btn-primary inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center disabled:opacity-40"
+                aria-label={t('send')}
+              >
+                {phase === 'sending' ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Send size={18} />
+                )}
+              </button>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 px-1">
+              <p className="text-[11px] text-white/35 md:hidden">{t('guestTip')}</p>
+              <button
+                type="button"
+                onClick={() => setIsMuted((m) => !m)}
+                className="ms-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/40 transition hover:text-teal-300"
+              >
+                {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                {isMuted ? t('unmute') : t('mute')}
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

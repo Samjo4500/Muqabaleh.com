@@ -170,7 +170,7 @@ export function CrystalFinalCta() {
             <motion.div whileHover={{ y: -6, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href={localePath('/business', locale)}
-                className="group relative flex h-full flex-col items-start overflow-hidden rounded-2xl border border-amber-200/25 bg-gradient-to-br from-amber-200/15 via-white/[0.03] to-transparent p-5 text-start backdrop-blur-xl transition hover:border-amber-200/45"
+                className="mq-facet mq-facet-gold mq-facet-shape-wave group relative flex h-full flex-col items-start overflow-hidden border border-amber-200/25 bg-gradient-to-br from-amber-200/15 via-white/[0.03] to-transparent p-5 text-start backdrop-blur-xl transition hover:border-amber-200/45"
               >
                 <motion.div
                   className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/10 to-transparent"

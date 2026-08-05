@@ -3,7 +3,7 @@
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
-import { ArabesqueBackdrop } from './ArabesqueBackdrop';
+import { ArabesqueBackdrop, ArabesqueCorners } from './ArabesqueBackdrop';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
 import { CrystalTrust } from './Trust';
@@ -44,27 +44,30 @@ export function CrystalLanding() {
   const isAr = locale === 'ar';
 
   return (
-    <div
-      className="mq-atelier relative min-h-screen overflow-x-hidden"
-      dir={isAr ? 'rtl' : 'ltr'}
-      lang={isAr ? 'ar' : 'en'}
-    >
-      <ArabesqueBackdrop />
+    <div className="mq-atelier" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
+      {/* viewport-fixed ornaments — outside overflow clipping */}
+      <ArabesqueCorners />
 
-      <LanguageSwitcherFixed />
-      <CrystalNavbar />
-      <main>
-        <CrystalHero />
-        <CrystalTrust />
-        <CrystalServices />
-        <CrystalHowItWorks />
-        <CrystalForCompanies />
-        <CrystalPricing />
-        <CrystalTestimonials />
-        <CrystalFAQ />
-        <CrystalFinalCta />
-      </main>
-      <CrystalFooter />
+      <div className="relative min-h-screen overflow-x-hidden">
+        <ArabesqueBackdrop />
+
+        <div className="relative z-10">
+          <LanguageSwitcherFixed />
+          <CrystalNavbar />
+          <main>
+            <CrystalHero />
+            <CrystalTrust />
+            <CrystalServices />
+            <CrystalHowItWorks />
+            <CrystalForCompanies />
+            <CrystalPricing />
+            <CrystalTestimonials />
+            <CrystalFAQ />
+            <CrystalFinalCta />
+          </main>
+          <CrystalFooter />
+        </div>
+      </div>
     </div>
   );
 }

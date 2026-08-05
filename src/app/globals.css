@@ -963,7 +963,14 @@
   }
 }
 
-/* ─── Tasteful Arabian geometric backdrop (landing only) ─── */
+/* ensure absolute arabesque fills tall landing pages */
+.mq-atelier > .mq-arabesque {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+}
+
+/* ─── Tasteful Arabian abstract backdrop (landing only) ─── */
 .mq-atelier .mq-arabesque {
   z-index: -10;
 }
@@ -973,62 +980,90 @@
   background-repeat: repeat;
 }
 .mq-atelier .mq-arabesque-layer-a {
-  background-image: url('/images/patterns/arabesque-geom.svg');
-  background-size: 260px 260px;
-  opacity: 0.16;
-  animation: mq-arabesque-drift 80s linear infinite;
+  background-image: url('/images/patterns/arabesque-najma.svg');
+  background-size: 200px 200px;
+  opacity: 0.17;
+  animation: mq-arabesque-drift 90s linear infinite;
 }
 .mq-atelier .mq-arabesque-layer-b {
   background-image: url('/images/patterns/arabesque-mesh.svg');
-  background-size: 120px 120px;
+  background-size: 100px 100px;
   opacity: 0.1;
-  animation: mq-arabesque-drift-rev 110s linear infinite;
-  mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, transparent 15%, black 80%);
+  animation: mq-arabesque-drift-rev 120s linear infinite;
+  mask-image: radial-gradient(ellipse 78% 68% at 50% 42%, transparent 12%, black 85%);
+}
+.mq-atelier .mq-arabesque-fixed {
+  z-index: 5;
 }
 .mq-atelier .mq-arabesque-corner {
   position: absolute;
-  width: min(48vw, 380px);
-  height: min(48vw, 380px);
-  background-image: url('/images/patterns/arabesque-geom.svg');
+  width: min(46vw, 360px);
+  height: min(46vw, 360px);
+  background-image: url('/images/patterns/arabesque-corner.svg');
   background-size: contain;
   background-repeat: no-repeat;
-  opacity: 0.22;
-  filter: drop-shadow(0 0 36px rgba(232, 201, 122, 0.12));
+  opacity: 0.38;
+  filter: drop-shadow(0 0 42px rgba(232, 201, 122, 0.16));
 }
 .mq-atelier .mq-arabesque-corner-tl {
-  top: -4%;
-  left: -3%;
-  transform: rotate(0deg);
+  top: 0;
+  left: 0;
 }
 .mq-atelier .mq-arabesque-corner-tr {
-  top: -4%;
-  right: -3%;
+  top: 0;
+  right: 0;
   transform: scaleX(-1);
 }
 .mq-atelier .mq-arabesque-corner-bl {
-  bottom: -2%;
-  left: -3%;
+  bottom: 0;
+  left: 0;
   transform: scaleY(-1);
-  opacity: 0.1;
+  opacity: 0.24;
 }
 .mq-atelier .mq-arabesque-corner-br {
-  bottom: -2%;
-  right: -3%;
+  bottom: 0;
+  right: 0;
   transform: scale(-1);
+  opacity: 0.24;
+}
+.mq-atelier .mq-arabesque-arch {
+  position: absolute;
+  width: min(28vw, 280px);
+  height: min(16vw, 160px);
+  background-image: url('/images/patterns/arabesque-arch.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.16;
+}
+.mq-atelier .mq-arabesque-arch-l {
+  top: 38%;
+  left: -1%;
+}
+.mq-atelier .mq-arabesque-arch-r {
+  top: 58%;
+  right: -1%;
+  transform: scaleX(-1);
+}
+.mq-atelier .mq-arabesque-arch-mid {
+  top: 78%;
+  left: 50%;
+  width: min(36vw, 320px);
+  height: min(18vw, 170px);
+  transform: translateX(-50%);
   opacity: 0.1;
 }
 .mq-atelier .mq-arabesque-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 70% at 50% 40%, transparent 45%, rgba(5, 8, 15, 0.35) 100%),
-    linear-gradient(180deg, rgba(5, 8, 15, 0.1) 0%, transparent 18%, transparent 80%, rgba(5, 8, 15, 0.3) 100%);
+    radial-gradient(ellipse 78% 68% at 50% 40%, transparent 48%, rgba(5, 8, 15, 0.32) 100%),
+    linear-gradient(180deg, rgba(5, 8, 15, 0.12) 0%, transparent 16%, transparent 82%, rgba(5, 8, 15, 0.28) 100%);
 }
 @keyframes mq-arabesque-drift {
   from { background-position: 0 0; }
-  to { background-position: 280px 140px; }
+  to { background-position: 220px 110px; }
 }
 @keyframes mq-arabesque-drift-rev {
   from { background-position: 0 0; }
-  to { background-position: -140px 280px; }
+  to { background-position: -110px 220px; }
 }

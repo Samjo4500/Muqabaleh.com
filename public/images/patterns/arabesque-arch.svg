@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" fill="none">
+  <!-- Soft mosque-window arch motif for mid-page accents -->
+  <g stroke="#E8C97A" stroke-width="1.2" stroke-linecap="round">
+    <path d="M40 170 V78 C40 30 80 12 160 12 C240 12 280 30 280 78 V170"/>
+    <path d="M58 170 V82 C58 44 92 28 160 28 C228 28 262 44 262 82 V170" opacity="0.65"/>
+    <path d="M100 170 V100 C100 68 124 54 160 54 C196 54 220 68 220 100 V170" opacity="0.5"/>
+  </g>
+  <g stroke="#2DD4BF" stroke-width="0.8" opacity="0.7">
+    <path d="M160 40 L176 64 L204 64 L182 82 L190 110 L160 94 L130 110 L138 82 L116 64 L144 64 Z"/>
+    <circle cx="160" cy="78" r="10"/>
+  </g>
+</svg>

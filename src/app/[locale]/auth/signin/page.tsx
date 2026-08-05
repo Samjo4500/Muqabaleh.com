@@ -104,12 +104,12 @@ export default function SignInPage() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="signin-email" className="text-[var(--text-muted)]">
+          <Label htmlFor="signin-email" className="text-white/60">
             {t('email')}
           </Label>
           <div className="relative">
             <Mail
-              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
               size={18}
               strokeWidth={1.75}
             />
@@ -149,7 +149,7 @@ export default function SignInPage() {
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)]">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-white/60">
             <Checkbox
               checked={rememberMe}
               onCheckedChange={(v) => setRememberMe(v === true)}
@@ -159,14 +159,14 @@ export default function SignInPage() {
           </label>
           <Link
             href={`/${locale}/auth/forgot-password`}
-            className="text-sm text-[var(--gold)] transition hover:text-[var(--gold-hover)]"
+            className="text-sm text-teal-300 transition hover:text-teal-200"
           >
             {t('forgotLink')}
           </Link>
         </div>
 
         <details className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-          <summary className="cursor-pointer text-xs text-[var(--text-muted)]">
+          <summary className="cursor-pointer text-xs text-white/60">
             {locale === 'ar' ? 'رمز التحقق الثنائي (اختياري للمشرف)' : '2FA code (optional for admin)'}
           </summary>
           <div className="mt-2">
@@ -186,7 +186,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-gold flex w-full cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
+          className="mq-btn mq-btn-primary flex w-full min-h-[48px] cursor-pointer items-center justify-center gap-2 text-sm disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : null}
           {t('login')}
@@ -194,15 +194,15 @@ export default function SignInPage() {
 
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
-          <span className="text-xs text-[var(--text-faint)]">{t('or')}</span>
+          <span className="text-xs text-white/40">{t('or')}</span>
           <Separator className="flex-1" />
         </div>
 
-        <p className="text-center text-sm text-[var(--text-muted)]">
+        <p className="text-center text-sm text-white/60">
           {t('noAccount')}{' '}
           <Link
             href={`/${locale}/auth/register`}
-            className="font-semibold text-[var(--gold)] transition-colors hover:text-[var(--gold-hover)]"
+            className="font-semibold text-teal-300 transition-colors hover:text-teal-200"
           >
             {t('createAccount')}
           </Link>

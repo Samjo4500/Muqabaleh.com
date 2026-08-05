@@ -46,12 +46,12 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           {/* Email */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="forgot-email" className="text-[var(--text-muted)]">
+            <Label htmlFor="forgot-email" className="text-white/60">
               {t("email")}
             </Label>
             <div className="relative">
               <Mail
-                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
                 size={18}
                 strokeWidth={1.75}
               />
@@ -90,16 +90,16 @@ export default function ForgotPasswordPage() {
             <Mail className="text-emerald-500" size={28} strokeWidth={1.75} />
           </div>
           <div className="flex flex-col items-center gap-2">
-            <h3 className="text-lg font-bold text-[var(--text-primary)]">
+            <h3 className="text-lg font-bold text-white">
               {t("forgotSent")}
             </h3>
-            <p className="text-center text-sm text-[var(--text-muted)]">
+            <p className="text-center text-sm text-white/60">
               {t("forgotSentSub")}
             </p>
           </div>
           <Link
             href={`/${locale}/auth/signin`}
-            className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-[var(--gold)] hover:text-[var(--gold-hover)] transition-colors"
+            className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-teal-300 hover:text-teal-200 transition-colors"
           >
             {isRTL ? (
               <ArrowRight size={16} strokeWidth={1.75} />

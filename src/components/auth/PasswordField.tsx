@@ -51,7 +51,7 @@ export function PasswordStrengthMeter({
   return (
     <div className="flex flex-col gap-1.5 pt-0.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-[var(--text-muted)]">{label}</span>
+        <span className="text-xs text-white/55">{label}</span>
         <span className={cn('text-xs font-semibold', textColor)}>{text}</span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
@@ -92,12 +92,12 @@ export function PasswordField({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <Label htmlFor={id} className="text-[var(--text-muted)]">
+      <Label htmlFor={id} className="text-white/60">
         {label}
       </Label>
       <div className="relative">
         <Lock
-          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/40"
           size={18}
           strokeWidth={1.75}
         />
@@ -110,7 +110,7 @@ export function PasswordField({
           onBlur={onBlur}
           aria-invalid={!!error}
           className={cn(
-            'glass-input h-11 ps-10 pe-11',
+            'glass-input h-11 ps-10 pe-11 text-white placeholder:text-white/35',
             error && '!border-red-500 focus-visible:!border-red-500',
           )}
           autoComplete={autoComplete}
@@ -118,7 +118,7 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute end-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-[var(--text-muted)] transition hover:bg-white/10 hover:text-[var(--text-primary)]"
+          className="absolute end-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-white/55 transition hover:bg-white/10 hover:text-white"
           aria-label={visible ? hideLabel : showLabel}
           tabIndex={0}
         >

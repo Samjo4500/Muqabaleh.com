@@ -320,6 +320,8 @@ model B2BJob {
   country            String?
   department         String?
   employmentType     String           @default("fulltime")
+  /// JUNIOR | MID | SENIOR | LEAD | EXECUTIVE
+  careerLevel        String?
   salaryRange        String?
   tags               String?
   isPublic           Boolean          @default(false)
@@ -339,6 +341,9 @@ model B2BJob {
   @@index([city])
   @@index([country])
   @@index([department])
+  @@index([careerLevel])
+  @@index([industry])
+  @@index([employmentType])
 }
 
 // ─── Media uploads (CV / photo) stored in Postgres for portability ───

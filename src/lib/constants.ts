@@ -44,3 +44,34 @@ export const INDUSTRIES = [
 export const EXPERIENCES = [
   'JUNIOR', 'MID', 'SENIOR', 'EXECUTIVE',
 ] as const;
+
+/** Public Available Vacancies facets */
+export const CAREER_LEVELS = [
+  { code: 'JUNIOR', en: 'Junior', ar: 'مبتدئ' },
+  { code: 'MID', en: 'Mid', ar: 'متوسط' },
+  { code: 'SENIOR', en: 'Senior', ar: 'خبير' },
+  { code: 'LEAD', en: 'Lead', ar: 'قيادي' },
+  { code: 'EXECUTIVE', en: 'Executive', ar: 'تنفيذي' },
+] as const;
+
+export const EMPLOYMENT_TYPES = [
+  { code: 'fulltime', en: 'Full-time', ar: 'دوام كامل' },
+  { code: 'contract', en: 'Contract', ar: 'تعاقد' },
+  { code: 'hybrid', en: 'Hybrid', ar: 'هجين' },
+  { code: 'remote', en: 'Remote', ar: 'عن بُعد' },
+] as const;
+
+export const VACANCY_INDUSTRIES = [
+  { code: 'IT', en: 'IT / Technology', ar: 'تقنية المعلومات' },
+  { code: 'FINANCE', en: 'Finance', ar: 'مالية' },
+  { code: 'HEALTHCARE', en: 'Healthcare', ar: 'رعاية صحية' },
+  { code: 'ENGINEERING', en: 'Engineering', ar: 'هندسة' },
+  { code: 'EDUCATION', en: 'Education', ar: 'تعليم' },
+  { code: 'MARKETING', en: 'Marketing', ar: 'تسويق' },
+  { code: 'SALES', en: 'Sales', ar: 'مبيعات' },
+  { code: 'HR', en: 'HR / People', ar: 'موارد بشرية' },
+  { code: 'ENERGY', en: 'Oil & Gas / Energy', ar: 'نفط وغاز وطاقة' },
+  { code: 'HOSPITALITY', en: 'Hospitality', ar: 'ضيافة' },
+  { code: 'GOVERNMENT', en: 'Government', ar: 'قطاع حكومي' },
+  { code: 'OTHER', en: 'Other', ar: 'أخرى' },
+] as const;

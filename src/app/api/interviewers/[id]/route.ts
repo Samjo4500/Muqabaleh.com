@@ -1,5 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const PHOTO_BY_ID: Record<string, string> = {
+  'int-001': '/images/interviewers/fahd.webp',
+  'int-002': '/images/interviewers/int-f1.webp',
+  'int-003': '/images/interviewers/int-m2.webp',
+  'int-004': '/images/interviewers/int-f3.webp',
+  'int-005': '/images/interviewers/int-m3.webp',
+  'int-006': '/images/interviewers/noora.webp',
+  'int-007': '/images/interviewers/int-m1.webp',
+  'int-008': '/images/interviewers/int-f2.webp',
+  'int-009': '/images/interviewers/int-m4.webp',
+  'int-010': '/images/interviewers/int-f4.webp',
+  'int-011': '/images/interviewers/int-m2.webp',
+  'int-012': '/images/interviewers/int-f1.webp',
+};
+
 // ── Mock interviewer profiles keyed by ID ──
 const MOCK_PROFILES: Record<string, Record<string, unknown>> = {
   'int-001': {
@@ -19,7 +34,8 @@ const MOCK_PROFILES: Record<string, Record<string, unknown>> = {
     priceTier: 'ELITE',
     hourlyRate: 5900,
     videoIntroUrl: null,
-    avatar: null,
+    photoUrl: PHOTO_BY_ID['int-001'],
+    avatar: PHOTO_BY_ID['int-001'],
     initials: 'FR',
     linkedInUrl: 'https://linkedin.com/in/fahd-alrashed',
     reviews: [
@@ -90,7 +106,8 @@ const MOCK_PROFILES: Record<string, Record<string, unknown>> = {
     priceTier: 'PREMIUM',
     hourlyRate: 3900,
     videoIntroUrl: null,
-    avatar: null,
+    photoUrl: PHOTO_BY_ID['int-002'],
+    avatar: PHOTO_BY_ID['int-002'],
     initials: 'MO',
     linkedInUrl: 'https://linkedin.com/in/maryam-alotaibi',
     reviews: [
@@ -172,7 +189,8 @@ function getMockProfile(id: string): Record<string, unknown> {
     priceTier: d.priceTier,
     hourlyRate: d.hourlyRate,
     videoIntroUrl: null,
-    avatar: null,
+    photoUrl: PHOTO_BY_ID[id] || null,
+    avatar: PHOTO_BY_ID[id] || null,
     initials: d.initials,
     linkedInUrl: null,
     reviews: [

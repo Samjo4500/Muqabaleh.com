@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="btn-gold w-full cursor-pointer text-sm"
+            className="mq-btn mq-btn-primary flex w-full min-h-[48px] cursor-pointer items-center justify-center text-sm"
           >
             {tCommon("submit")}
           </button>

@@ -7,7 +7,6 @@ import { ArrowUpLeft, ArrowUpRight, BriefcaseBusiness, Sparkles } from 'lucide-r
 import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
-import { BoxOrnament } from './BoxOrnament';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
@@ -48,15 +47,12 @@ export function CrystalFinalCta() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-80px' }}
-          className="relative overflow-hidden rounded-[2.25rem] border border-teal-300/25 px-6 py-16 text-center shadow-[0_40px_120px_rgba(0,0,0,0.45)] md:px-12 md:py-24"
+          className="mq-facet mq-facet-teal relative overflow-hidden rounded-[2.25rem] border border-teal-300/25 px-6 py-16 text-center shadow-[0_40px_120px_rgba(0,0,0,0.45)] md:px-12 md:py-24"
           style={{
             background:
               'radial-gradient(ellipse 80% 70% at 50% 20%, rgba(45,212,191,0.18), transparent 55%), radial-gradient(ellipse 60% 50% at 15% 85%, rgba(232,201,122,0.12), transparent 50%), radial-gradient(ellipse 55% 45% at 90% 80%, rgba(56,189,248,0.1), transparent 50%), linear-gradient(180deg, rgba(8,14,26,0.95) 0%, rgba(5,8,15,0.98) 100%)',
           }}
         >
-          <BoxOrnament shape="najma" tone="teal" corners={['tl', 'tr']} size="lg" />
-          <BoxOrnament shape="vine" tone="gold" corners={['bl', 'br']} size="lg" />
-
           {/* sweeping spotlight */}
           <motion.div
             className="pointer-events-none absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/8 to-transparent"
@@ -142,7 +138,7 @@ export function CrystalFinalCta() {
             <motion.div whileHover={{ y: -6, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href={localePath('/register', locale)}
-                className="group relative flex h-full flex-col items-start overflow-hidden rounded-2xl border border-teal-300/35 bg-gradient-to-br from-teal-400/20 via-teal-400/5 to-transparent p-5 text-start shadow-[0_0_40px_rgba(45,212,191,0.12)] backdrop-blur-xl transition hover:border-teal-300/60"
+                className="mq-facet mq-facet-teal mq-facet-shape-soft group relative flex h-full flex-col items-start overflow-hidden border border-teal-300/35 bg-gradient-to-br from-teal-400/20 via-teal-400/5 to-transparent p-5 text-start shadow-[0_0_40px_rgba(45,212,191,0.12)] backdrop-blur-xl transition hover:border-teal-300/60"
               >
                 <motion.div
                   className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"

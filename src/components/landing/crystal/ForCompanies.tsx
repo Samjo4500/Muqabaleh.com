@@ -7,7 +7,6 @@ import { useLocale } from 'next-intl';
 import { Check } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { BiInline, T } from './BiText';
-import { BoxOrnament } from './BoxOrnament';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
@@ -241,8 +240,7 @@ export function CrystalForCompanies() {
   return (
     <section id="for-companies" className="mq-section scroll-mt-28">
       <div className="mq-wrap">
-        <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/25 bg-[rgba(7,12,22,0.78)] shadow-[0_40px_100px_rgba(0,0,0,0.35)]">
-          <BoxOrnament shape="arch" tone="gold" corners={['tl', 'tr', 'bl', 'br']} size="lg" />
+        <div className="mq-facet mq-facet-gold relative overflow-hidden rounded-[2rem] border border-amber-200/25 bg-[rgba(7,12,22,0.78)] shadow-[0_40px_100px_rgba(0,0,0,0.35)]">
           {/* atmospheric layers */}
           <div className="pointer-events-none absolute inset-0" aria-hidden>
             <motion.div

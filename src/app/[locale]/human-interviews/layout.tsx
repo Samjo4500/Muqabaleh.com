@@ -7,11 +7,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata({
     locale,
-    path: '/human-interviews',
-    titleAr: 'مقابلات بشرية — مقابلة',
-    titleEn: 'Human Interviews — Muqabaleh',
-    descAr: 'احجز مقابلة تجريبية مع محاور بشري خبير عبر مقابلة.',
-    descEn: 'Book a live mock interview with an expert human interviewer on Muqabaleh.',
+    path: '/interviewers',
+    titleAr: 'المحاورون — مقابلة',
+    titleEn: 'Interviewers — Muqabaleh',
+    descAr: 'احجز جلسة مع محاور بشري معتمد من مجال تخصصك.',
+    descEn: 'Book a live session with a certified human interviewer from your field.',
   });
 }
 

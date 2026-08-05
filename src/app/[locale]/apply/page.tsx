@@ -24,8 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { cn } from '@/lib/utils';
 
 /* ------------------------------------------------------------------ */
@@ -145,9 +144,9 @@ function FileUploadZone({
       className={cn(
         'cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all',
         isDragging
-          ? 'border-[var(--gold)] bg-[var(--gold)]/5'
+          ? 'border-teal-300 bg-teal-300/5'
           : 'border-white/10 hover:border-white/20 hover:bg-white/[0.02]',
-        file && 'border-[var(--gold)]/30 bg-[var(--gold)]/5'
+        file && 'border-teal-300/30 bg-teal-300/5'
       )}
     >
       <input
@@ -159,7 +158,7 @@ function FileUploadZone({
       />
       {file ? (
         <div className="flex flex-col items-center gap-2">
-          <CheckCircle2 size={32} className="text-[var(--gold)]" />
+          <CheckCircle2 size={32} className="text-teal-300" />
           <p className="text-sm text-[var(--text-primary)]">{file.name}</p>
           <button
             onClick={removeFile}
@@ -175,7 +174,7 @@ function FileUploadZone({
             <p className="text-sm text-[var(--text-muted)]">{helpText}</p>
             <p className="mt-1 text-xs text-[var(--text-faint)]">{formatsText}</p>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-[var(--gold)]">
+          <div className="flex items-center gap-1.5 text-xs text-teal-300">
             <Upload size={14} />
             <span>Browse</span>
           </div>
@@ -325,29 +324,23 @@ export default function ApplyPage() {
   /* ── Success View ── */
   if (submitted) {
     return (
-      <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
-        <Navbar />
-        <main className="flex flex-1 items-center justify-center px-4 pt-16">
+      <AtelierShell>
+        <div className="mq-wrap flex flex-1 items-center justify-center py-20">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: 'easeOut' as const }}
             className="flex flex-col items-center text-center"
           >
-            <CheckCircle2
-              size={64}
-              strokeWidth={1.5}
-              className="text-[var(--gold)]"
-            />
-            <h1 className="mt-6 text-3xl font-bold text-[var(--gold)]">
+            <CheckCircle2 size={64} strokeWidth={1.5} className="text-teal-300" />
+            <h1 className="mq-display mt-6 text-3xl font-bold text-white">
               {t('successTitle')}
             </h1>
-            <p className="mt-3 text-lg text-white">{t('successSubtext')}</p>
+            <p className="mt-3 text-lg text-white/70">{t('successSubtext')}</p>
             <Link
               href="/"
               className={cn(
-                'btn-gold mt-8 inline-flex items-center gap-2 text-base',
-                'px-8 py-3'
+                'mq-btn mq-btn-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-base',
               )}
             >
               {t('backHome')}
@@ -357,26 +350,23 @@ export default function ApplyPage() {
               />
             </Link>
           </motion.div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </AtelierShell>
     );
   }
 
   /* ── Form View ── */
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
-      <Navbar />
-      <main className="flex-1 pt-16">
+    <AtelierShell showHeroLogo>
+      <div className="mq-wrap mx-auto max-w-2xl pb-20 pt-4">
         <motion.div
-          className="mx-auto max-w-2xl px-4 pt-8 pb-16 sm:px-6"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.h1
             variants={itemVariants}
-            className="mb-8 text-center text-3xl font-bold text-[var(--gold)]"
+            className="mq-display mb-8 text-center text-3xl font-bold text-white"
           >
             {t('title')}
           </motion.h1>
@@ -466,7 +456,7 @@ export default function ApplyPage() {
                     <SelectItem
                       key={opt.value}
                       value={opt.value}
-                      className="text-[var(--text-primary)] focus:bg-white/5 focus:text-[var(--gold)]"
+                      className="text-[var(--text-primary)] focus:bg-white/5 focus:text-teal-300"
                     >
                       {opt.label}
                     </SelectItem>
@@ -491,7 +481,7 @@ export default function ApplyPage() {
                       className={cn(
                         'flex items-center gap-2 rounded-lg border px-3 py-2.5 text-start text-sm transition-all',
                         selected
-                          ? 'border-[var(--gold)]/50 bg-[var(--gold)]/10 text-[var(--gold)]'
+                          ? 'border-teal-300/50 bg-teal-300/10 text-teal-300'
                           : 'border-white/10 bg-transparent text-[var(--text-muted)] hover:border-white/20 hover:bg-white/[0.02]'
                       )}
                     >
@@ -499,7 +489,7 @@ export default function ApplyPage() {
                         className={cn(
                           'flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors',
                           selected
-                            ? 'border-[var(--gold)] bg-[var(--gold)]'
+                            ? 'border-teal-300 bg-teal-300'
                             : 'border-white/20'
                         )}
                       >
@@ -528,7 +518,7 @@ export default function ApplyPage() {
                       className={cn(
                         'flex items-center gap-2 rounded-lg border px-3 py-2.5 text-start text-sm transition-all',
                         selected
-                          ? 'border-[var(--gold)]/50 bg-[var(--gold)]/10 text-[var(--gold)]'
+                          ? 'border-teal-300/50 bg-teal-300/10 text-teal-300'
                           : 'border-white/10 bg-transparent text-[var(--text-muted)] hover:border-white/20 hover:bg-white/[0.02]'
                       )}
                     >
@@ -536,7 +526,7 @@ export default function ApplyPage() {
                         className={cn(
                           'flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors',
                           selected
-                            ? 'border-[var(--gold)] bg-[var(--gold)]'
+                            ? 'border-teal-300 bg-teal-300'
                             : 'border-white/20'
                         )}
                       >
@@ -565,7 +555,7 @@ export default function ApplyPage() {
                       className={cn(
                         'rounded-full border px-5 py-2 text-sm font-medium transition-all',
                         selected
-                          ? 'border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]'
+                          ? 'border-teal-300 bg-teal-300/15 text-teal-300'
                           : 'border-white/15 bg-transparent text-[var(--text-muted)] hover:border-white/25 hover:text-[var(--text-primary)]'
                       )}
                     >
@@ -592,14 +582,14 @@ export default function ApplyPage() {
                       className={cn(
                         'flex flex-col items-center gap-1 rounded-xl border px-4 py-4 text-center transition-all',
                         selected
-                          ? 'border-[var(--gold)] bg-[var(--gold)]/10'
+                          ? 'border-teal-300 bg-teal-300/10'
                           : 'border-white/10 bg-transparent hover:border-white/20 hover:bg-white/[0.02]'
                       )}
                     >
                       <span
                         className={cn(
                           'text-lg font-bold',
-                          selected ? 'text-[var(--gold)]' : 'text-[var(--text-primary)]'
+                          selected ? 'text-teal-300' : 'text-[var(--text-primary)]'
                         )}
                       >
                         {tier.price}
@@ -607,7 +597,7 @@ export default function ApplyPage() {
                       <span
                         className={cn(
                           'text-xs',
-                          selected ? 'text-[var(--gold)]' : 'text-[var(--text-muted)]'
+                          selected ? 'text-teal-300' : 'text-[var(--text-muted)]'
                         )}
                       >
                         {t(tier.labelKey as Parameters<typeof t>[0])}
@@ -615,7 +605,7 @@ export default function ApplyPage() {
                       {selected && (
                         <CheckCircle2
                           size={16}
-                          className="mt-1 text-[var(--gold)]"
+                          className="mt-1 text-teal-300"
                         />
                       )}
                     </button>
@@ -668,11 +658,11 @@ export default function ApplyPage() {
                 id="terms"
                 checked={terms}
                 onCheckedChange={(checked) => setTerms(checked === true)}
-                className="mt-0.5 border-white/20 data-[state=checked]:border-[var(--gold)] data-[state=checked]:bg-[var(--gold)] data-[state=checked]:text-black"
+                className="mt-0.5 border-white/20 data-[state=checked]:border-teal-300 data-[state=checked]:bg-teal-300 data-[state=checked]:text-[#070b14]"
               />
               <Label
                 htmlFor="terms"
-                className="cursor-pointer text-sm leading-relaxed text-[var(--text-muted)]"
+                className="cursor-pointer text-sm leading-relaxed text-white/55"
               >
                 {t('terms')}
               </Label>
@@ -684,8 +674,7 @@ export default function ApplyPage() {
                 type="submit"
                 disabled={!isValid || loading}
                 className={cn(
-                  'h-12 w-full rounded-xl bg-[var(--gold)] text-base font-bold text-black',
-                  'transition-all hover:bg-[var(--gold-hover)] hover:brightness-110',
+                  'mq-btn mq-btn-primary h-12 w-full text-base',
                   'disabled:cursor-not-allowed disabled:opacity-40'
                 )}
               >
@@ -701,8 +690,7 @@ export default function ApplyPage() {
             </motion.div>
           </form>
         </motion.div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </AtelierShell>
   );
 }

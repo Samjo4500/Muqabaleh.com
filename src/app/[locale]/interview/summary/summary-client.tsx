@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { localePath } from '@/i18n/navigation';
-import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
+import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import type { InterviewPlan } from '@/lib/interview/plan-generator';
 
 type Stored = {
@@ -67,33 +67,29 @@ export function SummaryClient({
 
   if (!stored) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-deep)] text-[var(--text-secondary)]">
-        {isAr ? 'جارٍ التحميل…' : 'Loading…'}
-      </div>
+      <AtelierFlowShell showBack={false}>
+        <div className="flex flex-1 items-center justify-center text-white/55">
+          {isAr ? 'جارٍ التحميل…' : 'Loading…'}
+        </div>
+      </AtelierFlowShell>
     );
   }
 
   const plan = stored.plan;
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-teal-400/15 blur-[120px]" />
-      </div>
-      <AppChromeHeader
-        trailing={
-          <span className="hidden truncate text-xs text-[var(--text-secondary)] sm:block sm:max-w-[200px]">
-            {email}
-          </span>
-        }
-      />
-
-      <main className="relative z-10 mx-auto max-w-3xl px-4 py-10">
-        <p className="text-sm uppercase tracking-[0.18em] text-teal-300/80">Muqabaleh</p>
-        <h1 className="mt-2 font-display text-3xl md:text-4xl">
+    <AtelierFlowShell
+      trailing={
+        <span className="hidden truncate text-xs text-white/55 sm:block sm:max-w-[200px]">
+          {email}
+        </span>
+      }
+    >
+      <main className="mx-auto w-full max-w-3xl px-4 py-10">
+        <h1 className="mq-display text-3xl text-white md:text-4xl">
           {isAr ? 'خطة مقابلتك' : 'Your Interview Plan'}
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">{plan.title}</p>
+        <p className="mt-2 text-sm text-white/55">{plan.title}</p>
 
         <div className="mt-8 space-y-3">
           {[
@@ -105,12 +101,9 @@ export function SummaryClient({
             [isAr ? 'عدد الأسئلة' : 'Questions', String(plan.numQuestions)],
             [isAr ? 'محاور التركيز' : 'Focus areas', plan.focusAreas.join(' · ')],
           ].map(([label, value]) => (
-            <div
-              key={String(label)}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
-            >
-              <div className="text-xs text-[var(--text-secondary)]">{label}</div>
-              <div className="mt-1">{value}</div>
+            <div key={String(label)} className="mq-panel rounded-2xl px-4 py-3">
+              <div className="text-xs text-white/50">{label}</div>
+              <div className="mt-1 text-white">{value}</div>
             </div>
           ))}
         </div>
@@ -120,7 +113,7 @@ export function SummaryClient({
             <div className="text-sm font-medium text-teal-200">
               {isAr ? 'نصائح تدريب' : 'Coaching tips'}
             </div>
-            <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-[var(--text-secondary)]">
+            <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-white/55">
               {plan.coachingTips.slice(0, 4).map((t) => (
                 <li key={t}>{t}</li>
               ))}
@@ -131,7 +124,7 @@ export function SummaryClient({
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             href={localePath('/interview/prequal', locale)}
-            className="rounded-xl border border-white/15 px-5 py-3 text-center text-sm"
+            className="mq-btn mq-btn-ghost px-5 py-3 text-center text-sm"
           >
             {isAr ? 'رجوع للتعديل' : 'Go Back'}
           </Link>
@@ -139,7 +132,7 @@ export function SummaryClient({
             type="button"
             disabled={loading}
             onClick={start}
-            className="flex-1 rounded-xl bg-[var(--text-primary)] px-5 py-3 text-sm font-semibold text-[var(--bg-deep)] disabled:opacity-60"
+            className="mq-btn mq-btn-primary flex-1 px-5 py-3 text-sm disabled:opacity-60"
           >
             {loading
               ? isAr
@@ -152,6 +145,6 @@ export function SummaryClient({
         </div>
         {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
       </main>
-    </div>
+    </AtelierFlowShell>
   );
 }

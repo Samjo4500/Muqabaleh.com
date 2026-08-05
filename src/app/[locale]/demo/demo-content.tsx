@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { easeCrystal } from '@/components/landing/crystal/motion';
-import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
+import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 
 export default function DemoContent({
@@ -112,36 +113,21 @@ export default function DemoContent({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <motion.div
-          className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-teal-400/25 blur-[100px] will-change-transform"
-          animate={{ x: [0, 40, -20, 0], y: [0, 30, -10, 0] }}
-          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute right-0 top-24 h-80 w-80 rounded-full bg-amber-300/15 blur-[110px] will-change-transform"
-          animate={{ x: [0, -50, 20, 0], y: [0, -25, 35, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
-
-      <AppChromeHeader />
-
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-10 md:px-6">
+    <AtelierFlowShell>
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-10 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: easeCrystal }}
-          className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur md:p-10"
+          className="mq-panel rounded-3xl p-6 md:p-10"
         >
-          <p className="font-display text-4xl tracking-tight text-[var(--text-primary)] md:text-5xl">
-            Muqabaleh
-          </p>
-          <h1 className="mt-3 text-xl font-medium text-[var(--text-primary)] md:text-2xl">
+          <div className="flex justify-center">
+            <BrandLogo size="md" priority className="mq-logo-glow" />
+          </div>
+          <h1 className="mq-display mt-5 text-center text-xl font-medium text-white md:text-2xl">
             {isAr ? 'مقابلة تجريبية بالذكاء الاصطناعي' : 'AI mock interview practice'}
           </h1>
-          <p className="mt-3 max-w-xl text-[var(--text-secondary)]">
+          <p className="mx-auto mt-3 max-w-xl text-center text-white/60">
             {isAr
               ? 'خصّص جلستك حسب دورك ومستواك، ثم احصل على ملاحظات فورية.'
               : 'Personalize a session for your role and level, then get instant feedback.'}
@@ -150,15 +136,15 @@ export default function DemoContent({
           {isAuthenticated ? (
             <div className="mt-8 space-y-4">
               {userEmail ? (
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-center text-sm text-white/55">
                   {isAr ? 'متصل باسم ' : 'Signed in as '}
-                  <span className="text-[var(--text-primary)]">{userEmail}</span>
+                  <span className="text-white">{userEmail}</span>
                 </p>
               ) : null}
               <button
                 type="button"
                 onClick={startAsAuthenticated}
-                className="w-full rounded-xl bg-teal-300 px-5 py-3.5 text-sm font-semibold text-[var(--bg-deep)]"
+                className="mq-btn mq-btn-primary w-full py-3.5 text-sm"
               >
                 {isAr ? 'ابدأ مقابلتك' : 'Start your interview'}
               </button>
@@ -166,7 +152,7 @@ export default function DemoContent({
           ) : (
             <form onSubmit={handleCapture} className="mt-8 space-y-4" noValidate>
               <div>
-                <label htmlFor="demo-name" className="mb-1.5 block text-sm text-[var(--text-secondary)]">
+                <label htmlFor="demo-name" className="mb-1.5 block text-sm text-white/60">
                   {isAr ? 'الاسم' : 'Name'}
                 </label>
                 <input
@@ -176,12 +162,12 @@ export default function DemoContent({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  className="glass-input w-full rounded-xl px-4 py-3 text-sm"
                   placeholder={isAr ? 'اسمك الكامل' : 'Your full name'}
                 />
               </div>
               <div>
-                <label htmlFor="demo-email" className="mb-1.5 block text-sm text-[var(--text-secondary)]">
+                <label htmlFor="demo-email" className="mb-1.5 block text-sm text-white/60">
                   {isAr ? 'البريد الإلكتروني' : 'Email'}
                 </label>
                 <input
@@ -193,15 +179,12 @@ export default function DemoContent({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  className="glass-input w-full rounded-xl px-4 py-3 text-sm"
                   placeholder="you@example.com"
                 />
               </div>
               <div>
-                <label
-                  htmlFor="demo-password"
-                  className="mb-1.5 block text-sm text-[var(--text-secondary)]"
-                >
+                <label htmlFor="demo-password" className="mb-1.5 block text-sm text-white/60">
                   {isAr ? 'كلمة المرور' : 'Password'}
                 </label>
                 <input
@@ -213,7 +196,7 @@ export default function DemoContent({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
-                  className="w-full rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm outline-none focus:border-teal-400/50"
+                  className="glass-input w-full rounded-xl px-4 py-3 text-sm"
                   placeholder={isAr ? '٨ أحرف على الأقل' : 'At least 8 characters'}
                 />
               </div>
@@ -224,7 +207,7 @@ export default function DemoContent({
                   {error.toLowerCase().includes('registered') || error.includes('مسجّل') ? (
                     <Link
                       href={`${localePath('/auth/signin', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`}
-                      className="underline text-teal-200"
+                      className="text-teal-200 underline"
                     >
                       {isAr ? 'تسجيل الدخول' : 'Sign in'}
                     </Link>
@@ -235,13 +218,13 @@ export default function DemoContent({
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-300 px-5 py-3.5 text-sm font-semibold text-[var(--bg-deep)] disabled:opacity-60"
+                className="mq-btn mq-btn-primary inline-flex w-full items-center justify-center gap-2 py-3.5 text-sm disabled:opacity-60"
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {isAr ? 'متابعة إلى مقابلتك' : 'Continue to your interview'}
               </button>
 
-              <p className="text-center text-xs text-[var(--text-secondary)]">
+              <p className="text-center text-xs text-white/50">
                 {isAr ? 'لديك حساب؟ ' : 'Already have an account? '}
                 <Link
                   href={`${localePath('/auth/signin', locale)}?callbackUrl=${encodeURIComponent(prequalPath)}`}
@@ -254,6 +237,6 @@ export default function DemoContent({
           )}
         </motion.div>
       </main>
-    </div>
+    </AtelierFlowShell>
   );
 }

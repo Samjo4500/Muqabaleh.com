@@ -13,8 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -275,160 +274,138 @@ function BookingConfirmationContent() {
 
   /* ── Render ── */
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-void)]">
-      <Navbar />
+    <AtelierShell>
+      <div className="mq-wrap mx-auto max-w-2xl py-14 text-center md:py-20">
+        <motion.div
+          className="inline-flex"
+          initial={{ scale: 0 }}
+          animate={{ scale: [0, 1.2, 1] }}
+          transition={{ duration: 1, ease: 'easeOut' as const }}
+        >
+          <CheckCircle size={64} className="text-teal-300" strokeWidth={1.5} />
+        </motion.div>
 
-      <main className="flex-1 pt-20">
-        <div className="mx-auto max-w-2xl px-4 mt-16 mb-16 text-center">
-          {/* Success animation */}
-          <motion.div
-            className="inline-flex"
-            initial={{ scale: 0 }}
-            animate={{ scale: [0, 1.2, 1] }}
-            transition={{ duration: 1, ease: 'easeOut' as const }}
-          >
-            <CheckCircle size={64} className="text-[var(--gold)]" strokeWidth={1.5} />
-          </motion.div>
+        <h1 className="mq-display mt-6 text-3xl font-bold text-white">
+          {t('confirmTitle2')}
+        </h1>
 
-          {/* Title */}
-          <h1 className="mt-6 text-3xl font-bold text-[var(--gold)]">
-            {t('confirmTitle2')}
-          </h1>
-
-          {/* Booking summary card */}
-          <div className="mt-8 rounded-xl border border-[rgba(212,175,55,0.2)] bg-[#0B0F17] p-6 text-start">
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-[var(--gold)]" />
+        <div className="mq-panel mt-8 rounded-2xl p-6 text-start">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-teal-300" />
+            </div>
+          ) : fetchError ? (
+            <div className="py-8 text-center">
+              <p className="text-white/55">
+                {locale === 'ar'
+                  ? 'لم يتم العثور على بيانات الحجز'
+                  : 'Booking data not found'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-teal-300/30 bg-teal-400/10">
+                  <span className="text-xs font-bold text-teal-300">{initials}</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-white">
+                    {interviewerName || (locale === 'ar' ? 'محاور' : 'Interviewer')}
+                  </p>
+                  {hasRealData && booking.interviewer.rating > 0 && (
+                    <p className="text-xs text-white/50">
+                      {locale === 'ar' ? 'تقييم' : 'Rating'}:{' '}
+                      {booking.interviewer.rating.toFixed(1)} / 5.0
+                    </p>
+                  )}
+                </div>
               </div>
-            ) : fetchError ? (
-              <div className="py-8 text-center">
-                <p className="text-gray-400">
-                  {locale === 'ar'
-                    ? 'لم يتم العثور على بيانات الحجز'
-                    : 'Booking data not found'}
+
+              <div className="border-t border-white/10" />
+
+              <div>
+                <p className="text-sm text-white/50">{t('selectedSlot')}</p>
+                <p className="mt-1 text-white">
+                  {displayDate} · {displayTime}
+                </p>
+                <p className="mt-1 text-xs text-white/40">
+                  {durationMinutes} {t('minutes')}
                 </p>
               </div>
-            ) : (
-              <div className="space-y-5">
-                {/* Interviewer row */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10">
-                    <span className="text-xs font-bold text-[var(--gold)]">
-                      {initials}
+
+              {hasRealData && (
+                <>
+                  <div className="border-t border-white/10" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white/50">
+                      {locale === 'ar' ? 'السعر المدفوع' : 'Amount Paid'}
+                    </span>
+                    <span className="text-lg font-bold text-[var(--mq-sand)]">
+                      ${(booking.priceTotal / 100).toFixed(2)} USD
                     </span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">
-                      {interviewerName ||
-                        (locale === 'ar' ? 'محاور' : 'Interviewer')}
-                    </p>
-                    {hasRealData && booking.interviewer.rating > 0 && (
-                      <p className="text-xs text-gray-400">
-                        {locale === 'ar' ? 'تقييم' : 'Rating'}:{' '}
-                        {booking.interviewer.rating.toFixed(1)} / 5.0
-                      </p>
-                    )}
-                  </div>
+                </>
+              )}
+
+              <div className="border-t border-white/10" />
+
+              <div>
+                <p className="mb-2 text-sm text-white/50">{t('joinMeeting')}</p>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={meetingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 break-all text-sm text-teal-300 transition-colors hover:text-teal-200"
+                  >
+                    <ExternalLink size={14} className="shrink-0" />
+                    <span className="truncate">{meetingUrl}</span>
+                  </a>
                 </div>
 
-                <div className="border-t border-white/5" />
-
-                {/* Date/time */}
-                <div>
-                  <p className="text-sm text-gray-400">{t('selectedSlot')}</p>
-                  <p className="mt-1 text-white">
-                    {displayDate} · {displayTime}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {durationMinutes} {t('minutes')}
-                  </p>
-                </div>
-
-                {/* Price - only show for real booking data */}
-                {hasRealData && (
-                  <>
-                    <div className="border-t border-white/5" />
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">
-                        {locale === 'ar' ? 'السعر المدفوع' : 'Amount Paid'}
-                      </span>
-                      <span className="text-lg font-bold text-[var(--gold)]">
-                        ${(booking.priceTotal / 100).toFixed(2)} USD
-                      </span>
-                    </div>
-                  </>
-                )}
-
-                <div className="border-t border-white/5" />
-
-                {/* Meeting link */}
-                <div>
-                  <p className="mb-2 text-sm text-gray-400">{t('joinMeeting')}</p>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={meetingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80 break-all"
-                    >
-                      <ExternalLink size={14} className="shrink-0" />
-                      <span className="truncate">{meetingUrl}</span>
-                    </a>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <button
-                      onClick={handleCopyLink}
-                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition-colors hover:border-[var(--gold)]/40 hover:bg-[var(--gold)]/10 hover:text-[var(--gold)]"
-                    >
-                      <Copy size={14} />
-                      {t('copyLink')}
-                    </button>
-                    <button
-                      onClick={handleAddToCalendar}
-                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition-colors hover:border-[var(--gold)]/40 hover:bg-[var(--gold)]/10 hover:text-[var(--gold)]"
-                    >
-                      <CalendarPlus size={14} />
-                      {t('addToCalendar')}
-                    </button>
-                  </div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    onClick={handleCopyLink}
+                    className="mq-btn mq-btn-ghost inline-flex items-center gap-2 px-4 py-2 text-sm"
+                  >
+                    <Copy size={14} />
+                    {t('copyLink')}
+                  </button>
+                  <button
+                    onClick={handleAddToCalendar}
+                    className="mq-btn mq-btn-ghost inline-flex items-center gap-2 px-4 py-2 text-sm"
+                  >
+                    <CalendarPlus size={14} />
+                    {t('addToCalendar')}
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Preparation checklist */}
-          <div className="mt-8 rounded-xl border border-white/5 bg-[#0B0F17] p-6 text-start">
-            <h3 className="mb-4 text-base font-semibold text-white">
-              {locale === 'ar' ? 'قائمة التحضير' : 'Preparation Checklist'}
-            </h3>
-            <ul className="space-y-3">
-              {(['checklist1', 'checklist2', 'checklist3'] as const).map((key) => (
-                <li key={key} className="flex items-start gap-3">
-                  <CheckCircle2
-                    size={18}
-                    className="mt-0.5 shrink-0 text-emerald-500"
-                  />
-                  <span className="text-sm text-gray-300">{t(key)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Back to home */}
-          <a
-            href={`/${locale}`}
-            className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--gold)] transition-colors hover:text-[var(--gold)]/80"
-          >
-            {t('backToHome')}
-          </a>
+            </div>
+          )}
         </div>
-      </main>
 
-      <Footer />
-    </div>
+        <div className="mq-panel mt-8 rounded-2xl p-6 text-start">
+          <h3 className="mb-4 text-base font-semibold text-white">
+            {locale === 'ar' ? 'قائمة التحضير' : 'Preparation Checklist'}
+          </h3>
+          <ul className="space-y-3">
+            {(['checklist1', 'checklist2', 'checklist3'] as const).map((key) => (
+              <li key={key} className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-teal-300" />
+                <span className="text-sm text-white/70">{t(key)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <a
+          href={`/${locale}`}
+          className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-teal-300 transition-colors hover:text-teal-200"
+        >
+          {t('backToHome')}
+        </a>
+      </div>
+    </AtelierShell>
   );
 }
 

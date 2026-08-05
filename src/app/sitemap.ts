@@ -18,7 +18,6 @@ const PUBLIC_ROUTES = [
   '/interviewers',
   '/blog',
   '/partners',
-  '/human-interviews',
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

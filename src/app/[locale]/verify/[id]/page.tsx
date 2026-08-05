@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { AlertCircle, Clock, Search, Loader2 } from 'lucide-react';
 import { GlowCard, VerifiedBadge } from '@/components/brand';
-import { Navbar } from '@/components/layout/navbar';
-import { Footer } from '@/components/layout/footer';
+import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -85,123 +84,106 @@ export default function VerifyPage({
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-void">
-      <Navbar />
-      <main className="flex-1 pt-16">
-        <section className="py-24">
-          <div className="mx-auto max-w-lg px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-extrabold md:text-4xl">
-                <span className="gold-gradient-text">{t('title')}</span>
-              </h1>
-              <p className="mt-4 text-[var(--text-muted)]">{t('sub')}</p>
-            </div>
+    <AtelierShell>
+      <section className="mq-wrap py-16 md:py-24">
+        <div className="mx-auto max-w-lg">
+          <div className="text-center">
+            <h1 className="mq-display text-3xl font-extrabold text-white md:text-4xl">
+              {t('title')}
+            </h1>
+            <p className="mt-4 text-white/55">{t('sub')}</p>
+          </div>
 
-            {/* Input Card */}
-            <GlowCard className="mt-10 p-6" style={{ transform: 'none' }}>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder={t('inputPlaceholder')}
-                  className="glass-input flex-1 px-4 py-3 text-sm"
-                  onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-                  disabled={result === 'loading'}
-                />
-                <button
-                  onClick={handleVerify}
-                  disabled={result === 'loading' || !inputValue.trim()}
-                  className="btn-gold flex items-center gap-2 px-6 py-3 text-sm disabled:opacity-50 cursor-pointer"
-                >
-                  {result === 'loading' ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Search size={16} strokeWidth={1.75} />
+          <GlowCard className="mt-10 p-6" style={{ transform: 'none' }}>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={t('inputPlaceholder')}
+                className="glass-input flex-1 px-4 py-3 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+                disabled={result === 'loading'}
+              />
+              <button
+                onClick={handleVerify}
+                disabled={result === 'loading' || !inputValue.trim()}
+                className="mq-btn mq-btn-primary flex items-center gap-2 px-6 py-3 text-sm disabled:opacity-50"
+              >
+                {result === 'loading' ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Search size={16} strokeWidth={1.75} />
+                )}
+                {t('verifyBtn')}
+              </button>
+            </div>
+          </GlowCard>
+
+          {result === 'valid' && data && (
+            <GlowCard className="mt-6 border-teal-300/30 p-6" style={{ transform: 'none' }}>
+              <div className="flex flex-col items-center gap-4 text-center">
+                <VerifiedBadge size="lg" />
+                <p className="text-lg font-bold text-emerald-400">{t('valid')}</p>
+                <div className="w-full border-t border-white/10 pt-4 text-start">
+                  <InfoRow label={t('name')} value={data.name || '—'} />
+                  <InfoRow
+                    label={t('score')}
+                    value={data.score != null ? `${data.score}/100` : '—'}
+                  />
+                  <InfoRow label={t('issuedAt')} value={formatDate(data.issuedAt)} />
+                  <InfoRow label={t('expiresAt')} value={formatDate(data.expiresAt)} />
+                  {data.industry && (
+                    <InfoRow label={t('industry')} value={data.industry} />
                   )}
-                  {t('verifyBtn')}
-                </button>
+                  {data.type && <InfoRow label={t('type')} value={data.type} />}
+                </div>
               </div>
             </GlowCard>
+          )}
 
-            {/* Valid result */}
-            {result === 'valid' && data && (
-              <GlowCard className="mt-6 border-cyan/30 p-6" style={{ transform: 'none' }}>
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <VerifiedBadge size="lg" />
-                  <p className="text-lg font-bold text-emerald">{t('valid')}</p>
-                  <div className="w-full border-t border-white/5 pt-4 text-start">
-                    <InfoRow label={t('name')} value={data.name || '—'} />
-                    <InfoRow
-                      label={t('score')}
-                      value={data.score != null ? `${data.score}/100` : '—'}
-                    />
-                    <InfoRow label={t('issuedAt')} value={formatDate(data.issuedAt)} />
-                    <InfoRow label={t('expiresAt')} value={formatDate(data.expiresAt)} />
-                    {data.industry && (
-                      <InfoRow label={t('industry')} value={data.industry} />
-                    )}
-                    {data.type && (
-                      <InfoRow label={t('type')} value={data.type} />
-                    )}
-                  </div>
+          {result === 'expired' && (
+            <GlowCard className="mt-6 border-amber-400/30 p-6" style={{ transform: 'none' }}>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/10">
+                  <Clock size={24} strokeWidth={1.75} className="text-amber-300" />
                 </div>
-              </GlowCard>
-            )}
+                <p className="text-lg font-bold text-amber-300">{t('expired')}</p>
+                {data?.name && <p className="text-sm text-white/55">{data.name}</p>}
+              </div>
+            </GlowCard>
+          )}
 
-            {/* Expired result */}
-            {result === 'expired' && (
-              <GlowCard className="mt-6 border-[var(--status-amber)]/30 p-6" style={{ transform: 'none' }}>
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--status-amber)]/10">
-                    <Clock size={24} strokeWidth={1.75} className="text-[var(--status-amber)]" />
-                  </div>
-                  <p className="text-lg font-bold text-[var(--status-amber)]">{t('expired')}</p>
-                  {data?.name && (
-                    <p className="text-sm text-[var(--text-muted)]">{data.name}</p>
-                  )}
+          {result === 'notFound' && (
+            <GlowCard className="mt-6 border-rose-400/30 p-6" style={{ transform: 'none' }}>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-400/10">
+                  <AlertCircle size={24} strokeWidth={1.75} className="text-rose-300" />
                 </div>
-              </GlowCard>
-            )}
+                <p className="text-lg font-bold text-rose-300">{t('notFound')}</p>
+              </div>
+            </GlowCard>
+          )}
 
-            {/* Not found result */}
-            {result === 'notFound' && (
-              <GlowCard className="mt-6 border-[var(--status-red)]/30 p-6" style={{ transform: 'none' }}>
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--status-red)]/10">
-                    <AlertCircle size={24} strokeWidth={1.75} className="text-[var(--status-red)]" />
-                  </div>
-                  <p className="text-lg font-bold text-[var(--status-red)]">{t('notFound')}</p>
-                </div>
-              </GlowCard>
-            )}
-
-            {/* Error result */}
-            {result === 'error' && (
-              <GlowCard className="mt-6 border-[var(--status-red)]/30 p-6" style={{ transform: 'none' }}>
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <AlertCircle size={24} strokeWidth={1.75} className="text-[var(--status-red)]" />
-                  <p className="text-sm text-[var(--text-muted)]">{t('verifyError')}</p>
-                </div>
-              </GlowCard>
-            )}
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+          {result === 'error' && (
+            <GlowCard className="mt-6 border-rose-400/30 p-6" style={{ transform: 'none' }}>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <AlertCircle size={24} strokeWidth={1.75} className="text-rose-300" />
+                <p className="text-sm text-white/55">{t('verifyError')}</p>
+              </div>
+            </GlowCard>
+          )}
+        </div>
+      </section>
+    </AtelierShell>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  Sub-components                                                     */
-/* ------------------------------------------------------------------ */
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-sm text-[var(--text-muted)]">{label}</span>
-      <span className="text-sm font-semibold text-[var(--text-primary)]">{value}</span>
+      <span className="text-sm text-white/55">{label}</span>
+      <span className="text-sm font-semibold text-white">{value}</span>
     </div>
   );
 }

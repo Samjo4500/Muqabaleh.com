@@ -34,11 +34,11 @@ export function AppChromeHeader({
   return (
     <header className="relative z-20 px-4 pt-4 md:px-6">
       <div
-        className={`glass mx-auto flex h-16 items-center justify-between gap-3 rounded-2xl px-3 sm:px-4 ${maxWidthClass}`}
+        className={`mx-auto flex h-16 items-center justify-between gap-3 rounded-2xl border border-white/12 bg-white/[0.06] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-4 ${maxWidthClass}`}
       >
         <Link
           href={localePath('/', locale)}
-          className="inline-flex min-w-0 items-center rounded-xl py-1 pe-2 transition hover:bg-white/[0.04]"
+          className="inline-flex min-w-0 items-center rounded-xl py-1 pe-2 transition hover:bg-white/[0.06]"
           aria-label={isAr ? 'الرئيسية' : 'Home'}
         >
           <BrandLogo size="nav" priority />
@@ -49,7 +49,7 @@ export function AppChromeHeader({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-white/[0.04]"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/60 transition hover:bg-white/[0.06] hover:text-teal-300"
             >
               <BackIcon className="h-4 w-4" />
               {isAr ? 'رجوع' : 'Back'}

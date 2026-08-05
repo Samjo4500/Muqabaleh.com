@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
-import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
+import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import type { FinalReport } from '@/lib/ai/report-generator';
 import { ScoreCircle } from './components/ScoreCircle';
 import { StrengthCard } from './components/StrengthCard';
@@ -36,21 +36,25 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[var(--bg-deep)] text-[var(--text-primary)]">
-        <p className="text-rose-300">{error}</p>
-        <Link href={localePath('/interview/prequal', locale)} className="text-teal-300">
-          {isAr ? 'تدرّب مجدداً' : 'Practice again'}
-        </Link>
-      </div>
+      <AtelierFlowShell>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-white">
+          <p className="text-rose-300">{error}</p>
+          <Link href={localePath('/interview/prequal', locale)} className="text-teal-300">
+            {isAr ? 'تدرّب مجدداً' : 'Practice again'}
+          </Link>
+        </div>
+      </AtelierFlowShell>
     );
   }
 
   if (!report) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-deep)] text-[var(--text-secondary)]">
-        <Loader2 className="me-2 h-5 w-5 animate-spin" />
-        {isAr ? 'جارٍ إنشاء التقرير…' : 'Generating report…'}
-      </div>
+      <AtelierFlowShell showBack={false}>
+        <div className="flex flex-1 items-center justify-center text-white/55">
+          <Loader2 className="me-2 h-5 w-5 animate-spin" />
+          {isAr ? 'جارٍ إنشاء التقرير…' : 'Generating report…'}
+        </div>
+      </AtelierFlowShell>
     );
   }
 
@@ -59,37 +63,29 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
   const weaknesses = langToggle === 'ar' ? report.weaknessesAr : report.weaknesses;
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute left-0 top-10 h-80 w-80 rounded-full bg-teal-400/15 blur-[130px]" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-300/10 blur-[120px]" />
-      </div>
-
-      <AppChromeHeader
-        trailing={
-          <button
-            type="button"
-            onClick={() => setLangToggle((v) => (v === 'en' ? 'ar' : 'en'))}
-            className="rounded-full border border-white/15 px-3 py-1 text-xs"
-          >
-            {langToggle === 'en' ? 'العربية' : 'English'}
-          </button>
-        }
-      />
-
-      <main className="relative z-10 mx-auto max-w-3xl space-y-10 px-4 py-10 md:px-6">
+    <AtelierFlowShell
+      trailing={
+        <button
+          type="button"
+          onClick={() => setLangToggle((v) => (v === 'en' ? 'ar' : 'en'))}
+          className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/70 transition hover:border-teal-300/40 hover:text-teal-300"
+        >
+          {langToggle === 'en' ? 'العربية' : 'English'}
+        </button>
+      }
+    >
+      <main className="mx-auto w-full max-w-3xl space-y-10 px-4 py-10 md:px-6">
         <div className="text-center">
-          <p className="text-sm uppercase tracking-[0.18em] text-teal-300/80">Muqabaleh</p>
-          <h1 className="mt-2 font-display text-3xl md:text-4xl">
+          <h1 className="mq-display text-3xl text-white md:text-4xl">
             {isAr ? 'تقرير المقابلة' : 'Interview Report'}
           </h1>
         </div>
 
         <ScoreCircle score={report.overallScore} grade={report.grade} isAr={isAr} />
 
-        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <h2 className="text-lg font-medium">{isAr ? 'الملخص' : 'Summary'}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">{summary}</p>
+        <section className="mq-panel rounded-2xl p-5">
+          <h2 className="text-lg font-medium text-white">{isAr ? 'الملخص' : 'Summary'}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/60">{summary}</p>
           <p className="mt-4 text-sm text-teal-200">
             {langToggle === 'ar'
               ? report.benchmarkComparison.messageAr
@@ -98,7 +94,9 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-medium">{isAr ? 'نقاط القوة' : 'Strengths'}</h2>
+          <h2 className="mb-3 text-lg font-medium text-white">
+            {isAr ? 'نقاط القوة' : 'Strengths'}
+          </h2>
           <div className="grid gap-3 sm:grid-cols-3">
             {strengths.map((s) => (
               <StrengthCard key={s} title={s} />
@@ -107,7 +105,9 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-medium">{isAr ? 'نقاط التحسين' : 'Weaknesses'}</h2>
+          <h2 className="mb-3 text-lg font-medium text-white">
+            {isAr ? 'نقاط التحسين' : 'Weaknesses'}
+          </h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {weaknesses.map((w) => (
               <WeaknessCard key={w} title={w} />
@@ -116,7 +116,9 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-medium">{isAr ? 'خطوات العمل' : 'Action items'}</h2>
+          <h2 className="mb-3 text-lg font-medium text-white">
+            {isAr ? 'خطوات العمل' : 'Action items'}
+          </h2>
           <div className="grid gap-3">
             {report.actionItems.map((a) => (
               <ActionItemCard
@@ -130,30 +132,29 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-medium">
+          <h2 className="mb-3 text-lg font-medium text-white">
             {isAr ? 'تفصيل الأسئلة' : 'Question breakdown'}
           </h2>
           <QuestionBreakdown items={report.questionBreakdown} isAr={langToggle === 'ar'} />
         </section>
 
-        {/* Required post-interview CTAs: jobs listing + registration */}
         <section className="rounded-3xl border border-teal-300/25 bg-gradient-to-br from-teal-400/10 to-transparent p-6">
-          <h2 className="font-display text-2xl">
+          <h2 className="mq-display text-2xl text-white">
             {isAr ? 'الخطوة التالية' : 'Next step'}
           </h2>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          <p className="mt-2 text-sm text-white/55">
             {langToggle === 'ar' ? report.nextStepsAr : report.nextSteps}
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Link
               href={localePath('/jobs', locale)}
-              className="flex-1 rounded-xl bg-teal-300 px-5 py-3 text-center text-sm font-semibold text-[var(--bg-deep)]"
+              className="mq-btn mq-btn-primary flex-1 px-5 py-3 text-center text-sm"
             >
               {isAr ? 'تصفّح قائمة الوظائف' : 'Browse job listings'}
             </Link>
             <Link
               href={localePath('/auth/register', locale)}
-              className="flex-1 rounded-xl border border-white/20 px-5 py-3 text-center text-sm"
+              className="mq-btn mq-btn-ghost flex-1 px-5 py-3 text-center text-sm"
             >
               {isAr ? 'سجّل / ادعُ صديقاً' : 'Register / invite a friend'}
             </Link>
@@ -166,6 +167,6 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
           </Link>
         </section>
       </main>
-    </div>
+    </AtelierFlowShell>
   );
 }

@@ -92,7 +92,7 @@ export default function NewJobPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/b2b/jobs"
-          className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--aurora-2)]"
+          className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-teal-300"
         >
           <ArrowRight size={20} strokeWidth={1.75} />
         </Link>

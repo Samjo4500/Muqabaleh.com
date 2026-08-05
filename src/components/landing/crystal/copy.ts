@@ -317,6 +317,7 @@ export const C = {
     company: { en: 'Company', ar: 'الشركة' },
     legal: { en: 'Legal', ar: 'قانوني' },
     about: { en: 'About', ar: 'من نحن' },
+    becomeInterviewer: { en: 'Become interviewer', ar: 'انضم كمحاور' },
     support: { en: 'Support', ar: 'الدعم' },
     privacy: { en: 'Privacy', ar: 'الخصوصية' },
     terms: { en: 'Terms', ar: 'الشروط' },

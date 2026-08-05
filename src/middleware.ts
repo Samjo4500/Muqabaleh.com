@@ -11,11 +11,15 @@ const ROUTE_ROLES: Record<string, string[]> = {
   '/app': [UserRole.USER, UserRole.SUPER_ADMIN],
   '/interviewer': [UserRole.INTERVIEWER, UserRole.SUPER_ADMIN],
   '/b2b': [UserRole.COMPANY_ADMIN, UserRole.SUPER_ADMIN],
+  '/partner': ['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN],
   '/admin': [UserRole.SUPER_ADMIN],
 };
 
 /** Public interviewer paths that do not require INTERVIEWER role */
 const INTERVIEWER_PUBLIC_SUFFIXES = ['/apply', '/login'];
+
+/** Public partner marketing/apply (console lives under /partner) */
+const PARTNER_PUBLIC_PREFIXES = ['/partners'];
 
 function getLocaleFromPath(pathname: string): string {
   return pathname.startsWith('/en') ? 'en' : 'ar';
@@ -33,6 +37,10 @@ function isInterviewerPublicPath(bare: string): boolean {
 
 function getProtectedRoute(pathname: string): { route: string; roles: string[] } | null {
   const bare = stripLocale(pathname);
+  // Public partner marketing pages
+  if (PARTNER_PUBLIC_PREFIXES.some((p) => bare === p || bare.startsWith(`${p}/`))) {
+    return null;
+  }
   for (const [route, roles] of Object.entries(ROUTE_ROLES)) {
     if (bare === route || bare.startsWith(route + '/')) {
       // Only /interviewer/apply and /interviewer/login are public under /interviewer/*
@@ -79,6 +87,13 @@ async function getRoleFromRequest(request: NextRequest): Promise<string | null> 
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestHeaders = new Headers(request.headers);
+
+  // Resolve white-label partner from host (custom domain / subdomain)
+  const host = request.headers.get('host') || '';
+  if (host && !host.includes('localhost') && !host.includes('muqabaleh.com')) {
+    requestHeaders.set('x-partner-host', host.split(':')[0]);
+  }
 
   // Protect admin APIs explicitly (matcher includes /api/admin)
   if (pathname.startsWith('/api/admin')) {
@@ -89,7 +104,19 @@ export default async function middleware(request: NextRequest) {
     if (role !== UserRole.SUPER_ADMIN) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Partner APIs — require partner roles (handlers also verify)
+  if (pathname.startsWith('/api/partner') && !pathname.startsWith('/api/partner/apply') && !pathname.startsWith('/api/partner/resolve')) {
+    const role = await getRoleFromRequest(request);
+    if (!role) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN].includes(role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Check if this is a protected page route
@@ -101,19 +128,30 @@ export default async function middleware(request: NextRequest) {
 
     // No valid session → redirect to signin
     if (!role) {
-      const signinUrl = new URL(`/${locale}/auth/signin`, request.url);
+      const signinUrl = new URL(
+        locale === 'ar' ? '/auth/signin' : `/${locale}/auth/signin`,
+        request.url,
+      );
       signinUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(signinUrl);
     }
 
     // Valid session but wrong role → redirect to forbidden
     if (!protectedRoute.roles.includes(role)) {
-      const forbiddenUrl = new URL(`/${locale}/forbidden`, request.url);
+      const forbiddenUrl = new URL(
+        locale === 'ar' ? '/forbidden' : `/${locale}/forbidden`,
+        request.url,
+      );
       return NextResponse.redirect(forbiddenUrl);
     }
   }
 
-  return intlMiddleware(request);
+  const res = intlMiddleware(request);
+  // Preserve partner host header through intl rewrite when possible
+  if (requestHeaders.get('x-partner-host')) {
+    res.headers.set('x-partner-host', requestHeaders.get('x-partner-host')!);
+  }
+  return res;
 }
 
 export const config = {
@@ -121,6 +159,7 @@ export const config = {
     '/',
     '/(ar|en)/:path*',
     '/api/admin/:path*',
+    '/api/partner/:path*',
     '/((?!api|_next|_vercel|.*\\..*).*)',
   ],
 };

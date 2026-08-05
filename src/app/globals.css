@@ -1041,3 +1041,92 @@
     animation: none !important;
   }
 }
+
+/* ─── Partner Console (white-label) ─── */
+.pc-shell {
+  --pc-bg: #05080f;
+  --pc-primary: #0d9488;
+  --pc-accent: #e8c97a;
+  font-family: Manrope, "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+.pc-shell h1,
+.pc-shell h2,
+.pc-shell .pc-display {
+  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+}
+.pc-orb {
+  animation: pc-float 14s ease-in-out infinite alternate;
+}
+@keyframes pc-float {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(24px, 18px, 0) scale(1.08); }
+}
+.pc-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 60px -40px rgba(0, 0, 0, 0.8);
+}
+.pc-card-glow {
+  box-shadow:
+    0 20px 60px -40px rgba(0, 0, 0, 0.8),
+    0 0 0 1px color-mix(in srgb, var(--pc-primary) 25%, transparent),
+    0 0 40px -16px color-mix(in srgb, var(--pc-primary) 45%, transparent);
+}
+.pc-input {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  padding: 0.75rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pc-input:focus {
+  border-color: color-mix(in srgb, var(--pc-primary) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc-primary) 18%, transparent);
+}
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: transform 0.15s, filter 0.15s, background 0.15s;
+}
+.pc-btn:hover { transform: translateY(-1px); }
+.pc-btn-primary {
+  background: linear-gradient(135deg, var(--pc-primary), color-mix(in srgb, var(--pc-primary) 60%, #67e8f9));
+  color: #041016;
+}
+.pc-btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+}
+.pc-kpi {
+  position: relative;
+  overflow: hidden;
+}
+.pc-kpi::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -40% auto;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pc-primary) 18%, transparent);
+  filter: blur(18px);
+}
+.pc-preview-frame {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0b1220;
+  overflow: hidden;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}

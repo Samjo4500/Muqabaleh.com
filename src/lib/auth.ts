@@ -95,6 +95,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             accountType: user.accountType,
             companyId: user.companyId ?? undefined,
+            partnerId: (user as { partnerId?: string | null }).partnerId ?? undefined,
             sessionsLeft: user.sessionsLeft,
             language: user.language,
             tier: user.tier,
@@ -130,6 +131,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.accountType = user.accountType;
         token.companyId = user.companyId;
+        token.partnerId = (user as { partnerId?: string }).partnerId;
         token.sessionsLeft = user.sessionsLeft;
         token.tier = user.tier;
         const rememberMe = Boolean((user as { rememberMe?: boolean }).rememberMe);
@@ -152,6 +154,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as Record<string, unknown>).role = token.role;
         (session.user as Record<string, unknown>).accountType = token.accountType;
         (session.user as Record<string, unknown>).companyId = token.companyId;
+        (session.user as Record<string, unknown>).partnerId = token.partnerId;
         (session.user as Record<string, unknown>).sessionsLeft = token.sessionsLeft;
         (session.user as Record<string, unknown>).language = token.language;
         (session.user as Record<string, unknown>).tier = token.tier;
@@ -175,6 +178,7 @@ declare module 'next-auth' {
       role: string;
       accountType: string;
       companyId?: string;
+      partnerId?: string;
       sessionsLeft: number;
       language: string;
       tier: string;
@@ -184,6 +188,7 @@ declare module 'next-auth' {
     role: string;
     accountType: string;
     companyId?: string;
+    partnerId?: string;
     sessionsLeft: number;
     language: string;
     tier: string;
@@ -197,6 +202,7 @@ declare module 'next-auth/jwt' {
     role: string;
     accountType: string;
     companyId?: string;
+    partnerId?: string;
     sessionsLeft: number;
     language: string;
     tier: string;

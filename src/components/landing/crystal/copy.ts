@@ -10,6 +10,7 @@ export const C = {
     forCompanies: { en: 'For companies', ar: 'للشركات' },
     pricing: { en: 'Pricing', ar: 'الأسعار' },
     jobs: { en: 'Jobs', ar: 'الوظائف' },
+    partners: { en: 'Partners', ar: 'الشركاء' },
     blog: { en: 'Blog', ar: 'المدونة' },
     login: { en: 'Log in', ar: 'تسجيل الدخول' },
     getStarted: { en: 'Get started', ar: 'ابدأ الآن' },

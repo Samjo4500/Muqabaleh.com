@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { bi: C.nav.forCompanies, href: '#for-companies' },
   { bi: C.nav.pricing, href: '#pricing' },
   { bi: C.nav.jobs, href: '/jobs' },
+  { bi: C.nav.partners, href: '/partners' },
   { bi: C.nav.blog, href: '/blog' },
 ] as const;
 

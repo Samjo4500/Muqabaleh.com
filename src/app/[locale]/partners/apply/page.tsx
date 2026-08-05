@@ -45,7 +45,13 @@ export default function PartnerApplyPage() {
       <CrystalNavbar />
       <main className="mq-wrap py-12 md:py-16">
         <div className="mx-auto max-w-xl">
-          <BrandLogo size="md" className="mb-6 mq-logo-glow" />
+          <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="mb-6 inline-block">
+            <BrandLogo
+              size="hero"
+              priority
+              className="mq-logo-glow relative drop-shadow-[0_12px_40px_rgba(45,212,191,0.35)]"
+            />
+          </Link>
           <h1 className="mq-display mb-2 text-3xl font-bold text-white md:text-4xl">
             {t('applyTitle')}
           </h1>

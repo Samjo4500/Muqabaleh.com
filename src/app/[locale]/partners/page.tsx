@@ -54,7 +54,13 @@ export default function PartnersLandingPage() {
             className="mx-auto max-w-4xl text-center"
           >
             <div className="mb-6 flex justify-center">
-              <BrandLogo size="lg" priority className="mq-logo-glow" />
+              <Link href={localePath('/', locale)} aria-label="Muqabaleh">
+                <BrandLogo
+                  size="hero"
+                  priority
+                  className="mq-logo-glow relative drop-shadow-[0_12px_40px_rgba(45,212,191,0.35)]"
+                />
+              </Link>
             </div>
             <p className="mq-kicker mb-3">{t('eyebrow')}</p>
             <h1 className="mq-display mb-5 text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">

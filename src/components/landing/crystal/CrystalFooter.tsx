@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
+import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 
@@ -42,9 +43,9 @@ export function CrystalFooter() {
     <footer className="border-t border-white/10 bg-black/20">
       <div className="mq-wrap grid gap-10 py-14 md:grid-cols-4">
         <div>
-          <p className="mq-display mb-3 text-xl font-bold text-white">
-            <BiInline bi={C.brand} />
-          </p>
+          <div className="mb-4">
+            <BrandLogo size="md" />
+          </div>
           <T bi={C.footer.tagline} className="text-sm leading-relaxed text-white/55" />
         </div>
 

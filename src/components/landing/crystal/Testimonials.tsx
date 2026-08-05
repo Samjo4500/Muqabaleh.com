@@ -19,7 +19,7 @@ export function CrystalTestimonials() {
           <T
             as="h2"
             bi={C.testimonials.title}
-            className="mq-display text-3xl font-bold tracking-tight md:text-5xl"
+            className="mq-display text-3xl font-bold tracking-tight text-white md:text-5xl"
           />
         </motion.div>
 
@@ -32,16 +32,16 @@ export function CrystalTestimonials() {
         >
           {C.testimonials.items.map((item) => (
             <motion.blockquote key={item.name.en} variants={fadeUp} className="mq-panel flex flex-col p-6 md:p-7">
-              <div className="mb-4 text-[var(--mq-accent)]" aria-label="5 stars">
+              <div className="mb-4 text-[var(--mq-sand)]" aria-label="5 stars">
                 {'★★★★★'}
               </div>
               <T
                 as="p"
                 bi={item.quote}
-                className="mb-6 flex-1 text-sm leading-relaxed text-[var(--mq-ink-soft)] md:text-[0.95rem]"
+                className="mb-6 flex-1 text-sm leading-relaxed text-white/70 md:text-[0.95rem]"
               />
-              <T bi={item.name} className="text-sm font-bold text-[var(--mq-ink)]" />
-              <T bi={item.role} className="mt-1 text-xs text-[var(--mq-mute)]" />
+              <T bi={item.name} className="text-sm font-bold text-white" />
+              <T bi={item.role} className="mt-1 text-xs text-white/45" />
             </motion.blockquote>
           ))}
         </motion.div>

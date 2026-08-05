@@ -18,13 +18,13 @@ export function CrystalTrust() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="mb-10 grid gap-6 border-b border-[var(--mq-line)] pb-10 sm:grid-cols-3"
+          className="mb-10 grid gap-6 border-b border-white/10 pb-10 sm:grid-cols-3"
         >
           {stats.map((stat) => (
             <T
               key={stat.en}
               bi={stat}
-              className="mq-display text-xl font-bold text-[var(--mq-ink)] md:text-2xl"
+              className="mq-display text-xl font-bold text-white md:text-2xl"
             />
           ))}
         </motion.div>
@@ -38,7 +38,7 @@ export function CrystalTrust() {
         >
           <T
             bi={C.trust.text}
-            className="text-center text-sm font-medium text-[var(--mq-mute)] md:text-base"
+            className="text-center text-sm font-medium text-white/50 md:text-base"
           />
         </motion.div>
 
@@ -49,7 +49,7 @@ export function CrystalTrust() {
             {[...LOGOS, ...LOGOS].map((name, i) => (
               <div
                 key={`${name}-${i}`}
-                className="flex h-12 min-w-[120px] shrink-0 items-center justify-center text-sm font-bold tracking-[0.14em] text-[var(--mq-mute)]"
+                className="flex h-12 min-w-[120px] shrink-0 items-center justify-center text-sm font-bold tracking-[0.14em] text-white/35"
               >
                 {name}
               </div>

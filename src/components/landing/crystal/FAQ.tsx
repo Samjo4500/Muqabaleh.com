@@ -25,7 +25,7 @@ export function CrystalFAQ() {
           <T
             as="h2"
             bi={C.faq.title}
-            className="mq-display text-3xl font-bold tracking-tight md:text-5xl"
+            className="mq-display text-3xl font-bold tracking-tight text-white md:text-5xl"
           />
         </motion.div>
 
@@ -42,11 +42,11 @@ export function CrystalFAQ() {
                 value={`faq-${i}`}
                 className="mq-panel border-none px-5"
               >
-                <AccordionTrigger className="py-5 text-start hover:no-underline">
+                <AccordionTrigger className="py-5 text-start text-white hover:no-underline">
                   <T bi={item.q} className="text-sm font-semibold md:text-base" />
                 </AccordionTrigger>
                 <AccordionContent className="pb-5">
-                  <T bi={item.a} className="text-sm leading-relaxed text-[var(--mq-ink-soft)]" />
+                  <T bi={item.a} className="text-sm leading-relaxed text-white/65" />
                 </AccordionContent>
               </AccordionItem>
             ))}

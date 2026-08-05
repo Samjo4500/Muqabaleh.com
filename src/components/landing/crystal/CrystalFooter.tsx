@@ -39,13 +39,13 @@ export function CrystalFooter() {
   };
 
   return (
-    <footer className="border-t border-[var(--mq-line)] bg-white/50">
+    <footer className="border-t border-white/10 bg-black/20">
       <div className="mq-wrap grid gap-10 py-14 md:grid-cols-4">
         <div>
-          <p className="mq-display mb-3 text-xl font-bold">
+          <p className="mq-display mb-3 text-xl font-bold text-white">
             <BiInline bi={C.brand} />
           </p>
-          <T bi={C.footer.tagline} className="text-sm leading-relaxed text-[var(--mq-ink-soft)]" />
+          <T bi={C.footer.tagline} className="text-sm leading-relaxed text-white/55" />
         </div>
 
         {(
@@ -56,13 +56,13 @@ export function CrystalFooter() {
           ] as const
         ).map(([title, links]) => (
           <div key={title.en}>
-            <T bi={title} className="mb-4 text-sm font-bold" />
+            <T bi={title} className="mb-4 text-sm font-bold text-white" />
             <ul className="space-y-3">
               {links.map((l) => (
                 <li key={l.href + l.bi.en}>
                   <Link
                     href={footerHref(l.href, locale)}
-                    className="text-sm text-[var(--mq-mute)] transition-colors hover:text-[var(--mq-accent)]"
+                    className="text-sm text-white/45 transition-colors hover:text-teal-300"
                   >
                     <BiInline bi={l.bi} />
                   </Link>
@@ -73,14 +73,14 @@ export function CrystalFooter() {
         ))}
       </div>
 
-      <div className="border-t border-[var(--mq-line)]">
+      <div className="border-t border-white/10">
         <div className="mq-wrap flex flex-col items-start justify-between gap-4 py-6 sm:flex-row sm:items-center">
-          <T bi={C.footer.copyright} className="text-xs text-[var(--mq-mute)]" />
+          <T bi={C.footer.copyright} className="text-xs text-white/40" />
           <div className="flex flex-wrap gap-2">
             {['PayPal', 'Visa', 'Mastercard'].map((badge) => (
               <span
                 key={badge}
-                className="rounded-md border border-[var(--mq-line)] bg-white px-2.5 py-1 text-[11px] font-medium text-[var(--mq-mute)]"
+                className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white/45 backdrop-blur-md"
               >
                 {badge}
               </span>

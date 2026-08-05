@@ -27,9 +27,9 @@ export function CrystalPricing() {
           <T
             as="h2"
             bi={C.pricing.title}
-            className="mq-display mb-3 text-3xl font-bold tracking-tight md:text-5xl"
+            className="mq-display mb-3 text-3xl font-bold tracking-tight text-white md:text-5xl"
           />
-          <T as="p" bi={C.pricing.subtitle} className="text-base text-[var(--mq-ink-soft)] md:text-lg" />
+          <T as="p" bi={C.pricing.subtitle} className="text-base text-white/65 md:text-lg" />
         </motion.div>
 
         <motion.div
@@ -44,26 +44,26 @@ export function CrystalPricing() {
               key={plan.name.en}
               variants={fadeUp}
               className={`mq-panel flex flex-col p-6 ${
-                plan.popular ? 'border-[rgba(15,110,86,0.35)] ring-1 ring-[rgba(15,110,86,0.25)]' : ''
+                plan.popular ? '!border-teal-300/40 ring-1 ring-teal-300/25' : ''
               }`}
             >
               {plan.popular ? (
-                <span className="mb-3 inline-flex w-fit rounded-lg bg-[var(--mq-accent-soft)] px-2.5 py-1 text-[11px] font-bold text-[var(--mq-accent)]">
+                <span className="mb-3 inline-flex w-fit rounded-lg bg-teal-400/15 px-2.5 py-1 text-[11px] font-bold text-teal-300">
                   {locale === 'ar' ? 'الأكثر طلباً' : 'Most popular'}
                 </span>
               ) : (
                 <span className="mb-3 inline-block h-6" />
               )}
-              <T as="h3" bi={plan.name} className="mq-display mb-3 text-xl font-bold" />
-              <p className="mq-display mb-5 text-4xl font-bold">
+              <T as="h3" bi={plan.name} className="mq-display mb-3 text-xl font-bold text-white" />
+              <p className="mq-display mb-5 text-4xl font-bold text-white">
                 {locale === 'ar' ? plan.price.ar : plan.price.en}
-                <span className="text-base font-medium text-[var(--mq-mute)]">
+                <span className="text-base font-medium text-white/45">
                   {locale === 'ar' ? plan.period.ar : plan.period.en}
                 </span>
               </p>
               <ul className="mb-6 flex flex-1 flex-col gap-2.5">
                 {plan.features.map((f) => (
-                  <li key={f.en} className="text-sm text-[var(--mq-ink-soft)]">
+                  <li key={f.en} className="text-sm text-white/65">
                     <BiInline bi={f} />
                   </li>
                 ))}

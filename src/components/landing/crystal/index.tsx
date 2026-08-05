@@ -22,10 +22,10 @@ function LanguageSwitcherFixed() {
   const href = getLocaleSwitchPath(pathname, locale, nextLocale);
 
   return (
-    <div className="fixed top-4 end-4 z-[70]">
+    <div className="fixed top-4 right-4 z-[70]">
       <a
         href={href}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-[rgba(16,35,58,0.12)] bg-white/85 px-3 py-2 text-[11px] font-bold tracking-wide text-[var(--mq-ink,#10233a)] shadow-sm backdrop-blur-md transition hover:border-[rgba(15,110,86,0.35)]"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-[rgba(16,35,58,0.12)] bg-white/90 px-3 py-2 text-[11px] font-bold tracking-wide text-[var(--mq-ink,#10233a)] shadow-sm backdrop-blur-md transition hover:border-[rgba(15,110,86,0.35)]"
         aria-label={locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
       >
         <span className={locale === 'en' ? 'text-[var(--mq-accent,#0f6e56)]' : 'text-[var(--mq-mute,#6b7c8f)]'}>

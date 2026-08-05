@@ -53,13 +53,13 @@ export function CrystalNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full px-3 pt-3 md:px-5">
+    <header className="sticky top-0 z-50 w-full px-3 pt-3 pe-20 md:px-5 md:pe-24">
       <nav
         className={cn(
           'mq-wrap mx-auto flex h-[68px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:px-6',
           scrolled
             ? 'border border-[rgba(16,35,58,0.1)] bg-white/90 shadow-[0_10px_40px_rgba(16,35,58,0.08)] backdrop-blur-xl'
-            : 'border border-transparent bg-white/40 backdrop-blur-md',
+            : 'border border-transparent bg-white/55 backdrop-blur-md',
         )}
       >
         <Link href={homeHref} className="mq-display text-xl font-bold tracking-tight text-[var(--mq-ink)] md:text-2xl">

@@ -26,12 +26,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        cairo: ["Cairo", "sans-serif"],
-        tajawal: ["Tajawal", "sans-serif"],
-        noto: ["Noto Sans Arabic", "sans-serif"],
-        grotesk: ["Space Grotesk", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
-        display: ["Space Grotesk", "Tajawal", "sans-serif"],
+        cairo: ["var(--font-body-ar)", "sans-serif"],
+        tajawal: ["var(--font-body-ar)", "sans-serif"],
+        noto: ["var(--font-body-ar)", "sans-serif"],
+        grotesk: ["var(--font-display-en)", "sans-serif"],
+        inter: ["var(--font-body-en)", "sans-serif"],
+        display: ["var(--font-display-en)", "var(--font-display-ar)", "sans-serif"],
       },
       borderRadius: {
         "2xl": "1rem",

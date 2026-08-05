@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/seo';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
@@ -9,9 +10,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: locale === 'ar' ? 'شروط الاستخدام — مقابلة | Muqabaleh' : 'Terms of Service — Muqabaleh',
-  };
+  return pageMetadata({
+    locale,
+    path: '/terms',
+    titleAr: 'الشروط — مقابلة',
+    titleEn: 'Terms — Muqabaleh',
+    descAr: 'شروط استخدام منصة مقابلة للتدرّب على المقابلات الوظيفية.',
+    descEn: 'Terms of use for the Muqabaleh interview practice platform.',
+  });
 }
 
 export default async function TermsPage({ params }: Props) {

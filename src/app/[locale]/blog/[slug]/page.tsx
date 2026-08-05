@@ -2,9 +2,10 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { getPost, getRelatedPosts, getAllSlugs } from '@/content/blog';
 import ArticleClient from './article-client';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/json-ld';
 import type { Metadata } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh-com.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -20,12 +21,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
 
   const url = `${SITE_URL}${locale === 'en' ? '/en' : ''}/blog/${slug}`;
+  const arUrl = `${SITE_URL}/blog/${slug}`;
+  const enUrl = `${SITE_URL}/en/blog/${slug}`;
 
   return {
-    title: post.metaTitle,
+    title: { absolute: post.metaTitle },
     description: post.metaDescription,
+    keywords: post.keywords,
+    authors: [{ name: 'Muqabaleh' }],
     alternates: {
       canonical: url,
+      languages: {
+        'ar-SA': arUrl,
+        'en-US': enUrl,
+        'x-default': arUrl,
+      },
     },
     openGraph: {
       title: post.metaTitle,
@@ -33,7 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       type: 'article',
       publishedTime: post.date,
-      authors: ['Muqabaleh Team'],
+      modifiedTime: post.date,
+      authors: ['Muqabaleh'],
       images: [{ url: post.image, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
@@ -53,6 +64,27 @@ export default async function ArticlePage({ params }: Props) {
   if (!post) notFound();
 
   const related = getRelatedPosts(locale, slug);
+  const url = `${SITE_URL}${locale === 'en' ? '/en' : ''}/blog/${slug}`;
+  const blogIndex = `${SITE_URL}${locale === 'en' ? '/en' : ''}/blog`;
 
-  return <ArticleClient post={post} related={related} locale={locale} />;
+  return (
+    <>
+      <ArticleJsonLd
+        title={post.title}
+        description={post.metaDescription}
+        url={url}
+        image={post.image}
+        datePublished={post.date}
+        locale={locale}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Muqabaleh', url: locale === 'en' ? `${SITE_URL}/en` : SITE_URL },
+          { name: locale === 'ar' ? 'المدونة' : 'Blog', url: blogIndex },
+          { name: post.title, url },
+        ]}
+      />
+      <ArticleClient post={post} related={related} locale={locale} />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/seo';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
@@ -9,9 +10,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: locale === 'ar' ? 'سياسة الخصوصية — مقابلة | Muqabaleh' : 'Privacy Policy — Muqabaleh',
-  };
+  return pageMetadata({
+    locale,
+    path: '/privacy',
+    titleAr: 'الخصوصية — مقابلة',
+    titleEn: 'Privacy — Muqabaleh',
+    descAr: 'سياسة خصوصية مقابلة وكيفية حماية بيانات المرشّحين والشركات.',
+    descEn: 'Muqabaleh privacy policy and how we protect candidate and company data.',
+  });
 }
 
 export default async function PrivacyPage({ params }: Props) {

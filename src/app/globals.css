@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Syne:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config";
 
@@ -97,20 +96,20 @@
   }
 
   [dir="ltr"] body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body-en), system-ui, sans-serif;
   }
 
   [dir="ltr"] .font-display {
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-family: var(--font-display-en), var(--font-body-en), system-ui, sans-serif;
   }
 
   [dir="rtl"] body,
   [dir="rtl"] .font-body {
-    font-family: 'Noto Sans Arabic', 'Tajawal', 'Cairo', sans-serif;
+    font-family: var(--font-body-ar), var(--font-display-ar), system-ui, sans-serif;
   }
 
   [dir="rtl"] .font-display {
-    font-family: 'Tajawal', 'Noto Sans Arabic', 'Cairo', sans-serif;
+    font-family: var(--font-display-ar), var(--font-body-ar), system-ui, sans-serif;
   }
 
   ::selection {
@@ -669,7 +668,7 @@
 /* Atelier blog prose — teal glass reading experience */
 .mq-atelier .prose-blog h2,
 .mq-atelier .mq-atelier-prose h2 {
-  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+  font-family: var(--font-display-en), var(--font-display-ar), system-ui, sans-serif;
   font-size: clamp(1.4rem, 2vw, 1.75rem);
   font-weight: 700;
   color: #fff;
@@ -679,7 +678,7 @@
 }
 .mq-atelier .prose-blog h3,
 .mq-atelier .mq-atelier-prose h3 {
-  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+  font-family: var(--font-display-en), var(--font-display-ar), system-ui, sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
@@ -788,18 +787,18 @@
     radial-gradient(ellipse 55% 40% at 92% 4%, rgba(232, 201, 122, 0.1), transparent 50%),
     radial-gradient(ellipse 50% 35% at 50% 100%, rgba(56, 189, 248, 0.08), transparent 55%),
     linear-gradient(180deg, #05080f 0%, #070b14 45%, #0a1220 100%);
-  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
 }
 .mq-atelier[dir='rtl'],
 .mq-atelier [lang='ar'] {
-  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Cairo', sans-serif;
+  font-family: var(--font-body-ar), var(--font-display-ar), system-ui, sans-serif;
 }
 .mq-atelier .mq-display {
-  font-family: 'Syne', 'Readex Pro', 'Cairo', sans-serif;
+  font-family: var(--font-display-en), var(--font-display-ar), system-ui, sans-serif;
   letter-spacing: -0.03em;
 }
 .mq-atelier[dir='rtl'] .mq-display {
-  font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: var(--font-display-ar), var(--font-body-ar), system-ui, sans-serif;
   letter-spacing: 0;
 }
 .mq-atelier .mq-wrap {
@@ -1108,12 +1107,12 @@
   --pc-bg: #05080f;
   --pc-primary: #0d9488;
   --pc-accent: #e8c97a;
-  font-family: Manrope, "IBM Plex Sans Arabic", system-ui, sans-serif;
+  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
 }
 .pc-shell h1,
 .pc-shell h2,
 .pc-shell .pc-display {
-  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+  font-family: var(--font-display-en), var(--font-display-ar), system-ui, sans-serif;
 }
 .pc-orb {
   animation: pc-float 14s ease-in-out infinite alternate;

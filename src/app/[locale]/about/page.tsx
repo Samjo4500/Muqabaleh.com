@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/seo';
 import PageContent from './about-content';
 
 type Props = {
@@ -8,11 +9,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: {
-      absolute: locale === 'ar' ? 'من نحن — مقابلة | Muqabaleh' : 'About — Muqabaleh',
-    },
-  };
+  return pageMetadata({
+    locale,
+    path: '/about',
+    titleAr: 'من نحن — مقابلة | Muqabaleh',
+    titleEn: 'About — Muqabaleh',
+    descAr: 'تعرّف على مقابلة، المنصة العربية للتدرّب على مقابلات العمل بالذكاء الاصطناعي.',
+    descEn: 'About Muqabaleh — the Arabic-first AI job interview practice platform.',
+  });
 }
 
 export default async function Page({ params }: Props) {

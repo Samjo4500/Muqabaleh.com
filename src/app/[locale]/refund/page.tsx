@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/seo';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 
@@ -9,9 +10,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: locale === 'ar' ? 'سياسة الاسترجاع — مقابلة | Muqabaleh' : 'Refund Policy — Muqabaleh',
-  };
+  return pageMetadata({
+    locale,
+    path: '/refund',
+    titleAr: 'الاسترداد — مقابلة',
+    titleEn: 'Refunds — Muqabaleh',
+    descAr: 'سياسة الاسترداد والإلغاء لخدمات مقابلة.',
+    descEn: 'Refund and cancellation policy for Muqabaleh services.',
+  });
 }
 
 export default async function RefundPage({ params }: Props) {

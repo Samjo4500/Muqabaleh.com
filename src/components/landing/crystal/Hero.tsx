@@ -28,12 +28,17 @@ export function CrystalHero() {
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
         >
           <Image
-            src="/images/hero-interview.png"
-            alt=""
+            src="/images/hero-interview.webp"
+            alt={
+              locale === 'ar'
+                ? 'مرشّح يتدرّب على مقابلة عمل عبر مقابلة'
+                : 'Candidate practicing a job interview on Muqabaleh'
+            }
             fill
             priority
             className="object-cover object-[center_20%]"
             sizes="100vw"
+            quality={72}
           />
         </motion.div>
         <div className="mq-hero-shade absolute inset-0" />

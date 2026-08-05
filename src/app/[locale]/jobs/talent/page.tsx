@@ -1,12 +1,11 @@
-import { setRequestLocale } from 'next-intl/server';
-import { TalentClient } from './talent-client';
+import { redirect } from 'next/navigation';
 
-export default async function TalentPage({
+/** Talent registration now lives on the unified Available Vacancies page. */
+export default async function TalentRedirectPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
-  return <TalentClient />;
+  redirect(`/${locale}/jobs?tab=candidates`);
 }

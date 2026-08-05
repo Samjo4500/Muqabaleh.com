@@ -316,6 +316,8 @@ model B2BJob {
   benefits           String?          @db.Text
   location           String?
   city               String?
+  /// ISO-ish MENA country code (SA, AE, …) or REMOTE
+  country            String?
   department         String?
   employmentType     String           @default("fulltime")
   salaryRange        String?
@@ -335,6 +337,7 @@ model B2BJob {
   @@index([companyId])
   @@index([status, isPublic])
   @@index([city])
+  @@index([country])
   @@index([department])
 }
 

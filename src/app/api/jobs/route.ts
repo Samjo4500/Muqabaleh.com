@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { serializePublicJob } from '@/lib/ats/serialize';
 
-/** Public list of open job postings. */
+/** Public list of open vacancies. */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').trim();
-    const city = searchParams.get('city') || '';
+    const country = searchParams.get('country') || '';
     const department = searchParams.get('department') || '';
     const employmentType = searchParams.get('type') || '';
 
@@ -15,7 +15,16 @@ export async function GET(req: NextRequest) {
       where: {
         isPublic: true,
         status: 'OPEN',
-        ...(city && city !== 'all' ? { city } : {}),
+        ...(country && country !== 'all'
+          ? country === 'REMOTE'
+            ? {
+                OR: [
+                  { country: 'REMOTE' },
+                  { employmentType: 'remote' },
+                ],
+              }
+            : { country }
+          : {}),
         ...(department && department !== 'all' ? { department } : {}),
         ...(employmentType && employmentType !== 'all'
           ? { employmentType }

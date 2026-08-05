@@ -233,12 +233,12 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
               )}
 
               <Link
-                href={localePath('/jobs/talent', locale)}
+                href={localePath('/jobs?tab=candidates', locale)}
                 className="block text-center text-sm font-semibold text-teal-300 hover:underline"
               >
                 {isAr
-                  ? 'أو انضم لقاعدة المواهب بدون وظيفة محددة'
-                  : 'Or join the talent pool without a specific job'}
+                  ? 'أو سجّل للشواغر المستقبلية من صفحة الشواغر'
+                  : 'Or register for future vacancies on the Vacancies page'}
               </Link>
             </aside>
           </div>

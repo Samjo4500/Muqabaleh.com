@@ -64,16 +64,16 @@ export const JOBS_COPY = {
   results: { en: 'open roles', ar: 'فرصة مفتوحة' } as Bi,
   featured: { en: 'Featured', ar: 'مميزة' } as Bi,
   match: { en: 'Match', ar: 'توافق' } as Bi,
-  apply: { en: 'Apply with score', ar: 'قدّم بالدرجة' } as Bi,
+  apply: { en: 'Apply with CV', ar: 'قدّم بالسيرة' } as Bi,
   viewPrep: { en: 'Prepare first', ar: 'تدرّب أولاً' } as Bi,
   emptyTitle: { en: 'No roles match that filter', ar: 'لا توجد وظائف مطابقة' } as Bi,
   emptyBody: {
-    en: 'Widen your search — or start a free interview while new roles land.',
-    ar: 'وسّع نطاق البحث — أو ابدأ مقابلة مجانية بينما تُضاف فرص جديدة.',
+    en: 'Widen your search — or join the talent pool so employers can find you for future roles.',
+    ar: 'وسّع نطاق البحث — أو انضم لقاعدة المواهب ليجدك أصحاب العمل للفرص المستقبلية.',
   } as Bi,
   trust: [
     { en: 'Verified employers', ar: 'أصحاب عمل موثّقون' },
-    { en: 'Score-based apply', ar: 'تقديم بدرجة المقابلة' },
+    { en: 'CV + photo talent pool', ar: 'قاعدة مواهب بسيرة وصورة' },
     { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
   ] as Bi[],
   ctaTitle: {
@@ -81,8 +81,8 @@ export const JOBS_COPY = {
     ar: 'ادخل مستعداً. ودع الشركات تكتشفك.',
   } as Bi,
   ctaBody: {
-    en: 'Practice with AI, then apply with a score employers already trust.',
-    ar: 'تدرّب مع الذكاء الاصطناعي، ثم قدّم بدرجة يثق بها أصحاب العمل.',
+    en: 'Upload your CV and photo, then get discovered by employers for open and future roles.',
+    ar: 'ارفع سيرتك وصورتك، ثم دع أصحاب العمل يكتشفونك للفرص الحالية والمستقبلية.',
   } as Bi,
   ctaInterview: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' } as Bi,
   ctaHire: { en: "I'm hiring", ar: 'أنا أوظّف' } as Bi,

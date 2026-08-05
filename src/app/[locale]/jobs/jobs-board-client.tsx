@@ -2,6 +2,7 @@
 
 import {
   useDeferredValue,
+  useEffect,
   useMemo,
   useState,
   startTransition,
@@ -180,21 +181,78 @@ function JobCard({
 
       <div className="relative mt-auto flex flex-wrap items-center gap-3">
         <Link
-          href={localePath(`/register?from=jobs&role=${job.id}`, locale)}
+          href={localePath(`/jobs/${job.id}`, locale)}
           className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[44px] items-center gap-2 px-5 text-sm"
         >
           <BiInline bi={JOBS_COPY.apply} />
           <Arrow size={15} />
         </Link>
         <Link
-          href={localePath('/demo', locale)}
+          href={localePath('/jobs/talent', locale)}
           className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-white/55 transition hover:text-teal-300"
         >
-          <BiInline bi={JOBS_COPY.viewPrep} />
+          {isAr ? 'انضم لقاعدة المواهب' : 'Join talent pool'}
         </Link>
       </div>
     </motion.article>
   );
+}
+
+function mapApiJob(raw: {
+  id: string;
+  title: string;
+  titleAr?: string | null;
+  description?: string | null;
+  descriptionAr?: string | null;
+  location?: string | null;
+  city?: string | null;
+  employmentType?: string;
+  department?: string | null;
+  salaryRange?: string | null;
+  tags?: string[];
+  isFeatured?: boolean;
+  createdAt?: string;
+  company?: { name: string } | null;
+}): JobListing {
+  const type = (['fulltime', 'contract', 'remote'].includes(raw.employmentType || '')
+    ? raw.employmentType
+    : 'fulltime') as JobType;
+  const cityKey = (['dubai', 'riyadh', 'cairo', 'doha', 'remote'].includes(raw.city || '')
+    ? raw.city
+    : 'remote') as JobListing['city'];
+  const dept = (['product', 'engineering', 'design', 'people', 'data', 'sales'].includes(
+    raw.department || '',
+  )
+    ? raw.department
+    : 'people') as JobDept;
+  const companyName = raw.company?.name || 'Muqabaleh';
+  return {
+    id: raw.id,
+    title: { en: raw.title, ar: raw.titleAr || raw.title },
+    company: { en: companyName, ar: companyName },
+    location: {
+      en: raw.location || raw.city || 'MENA',
+      ar: raw.location || raw.city || 'المنطقة',
+    },
+    city: cityKey,
+    type,
+    typeLabel: JOBS_COPY.types[type],
+    dept,
+    salary: {
+      en: raw.salaryRange || 'Competitive',
+      ar: raw.salaryRange || 'راتب تنافسي',
+    },
+    tags: (raw.tags || []).slice(0, 6).map((tag) => ({ en: tag, ar: tag })),
+    featured: Boolean(raw.isFeatured),
+    posted: { en: 'Open role', ar: 'فرصة مفتوحة' },
+    blurb: {
+      en: (raw.description || '').slice(0, 160) || 'Apply with your CV and join the employer talent pool.',
+      ar:
+        (raw.descriptionAr || raw.description || '').slice(0, 160) ||
+        'قدّم بسيرتك وانضم لقاعدة مواهب أصحاب العمل.',
+    },
+    match: 80,
+  };
 }
 
 export function JobsBoardClient() {
@@ -206,11 +264,32 @@ export function JobsBoardClient() {
   const [type, setType] = useState<JobType | 'all'>('all');
   const [city, setCity] = useState<(typeof CITY_OPTS)[number]>('all');
   const [dept, setDept] = useState<JobDept | 'all'>('all');
+  const [liveJobs, setLiveJobs] = useState<JobListing[] | null>(null);
   const deferredQuery = useDeferredValue(query);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/jobs')
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        const mapped = Array.isArray(d.jobs) ? d.jobs.map(mapApiJob) : [];
+        setLiveJobs(mapped.length ? mapped : []);
+      })
+      .catch(() => {
+        if (!cancelled) setLiveJobs([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Prefer live ATS jobs. Fall back to sample listings only while loading.
+  const sourceJobs = liveJobs === null ? JOBS : liveJobs;
 
   const filtered = useMemo(() => {
     const q = deferredQuery.trim().toLowerCase();
-    return JOBS.filter((job) => {
+    return sourceJobs.filter((job) => {
       if (type !== 'all' && job.type !== type) return false;
       if (city !== 'all' && job.city !== city) return false;
       if (dept !== 'all' && job.dept !== dept) return false;
@@ -228,7 +307,7 @@ export function JobsBoardClient() {
         .toLowerCase();
       return hay.includes(q);
     }).sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || b.match - a.match);
-  }, [deferredQuery, type, city, dept]);
+  }, [sourceJobs, deferredQuery, type, city, dept]);
 
   const hasFilters = type !== 'all' || city !== 'all' || dept !== 'all' || query.trim().length > 0;
 
@@ -356,6 +435,18 @@ export function JobsBoardClient() {
                   </li>
                 ))}
               </motion.ul>
+
+              <motion.div variants={fadeUp} className="mt-8 flex justify-center">
+                <Link
+                  href={localePath('/jobs/talent', locale)}
+                  className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center gap-2 px-6 text-sm font-bold"
+                >
+                  {isAr
+                    ? 'سجّل لفرص مستقبلية — ارفع سيرتك وصورتك'
+                    : 'Register for future roles — upload CV & photo'}
+                  <Arrow size={16} />
+                </Link>
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -449,10 +540,10 @@ export function JobsBoardClient() {
                       {isAr ? 'عرض الكل' : 'Show all roles'}
                     </button>
                     <Link
-                      href={localePath('/demo', locale)}
+                      href={localePath('/jobs/talent', locale)}
                       className="mq-btn mq-btn-primary inline-flex min-h-[44px] items-center px-5 text-sm"
                     >
-                      <BiInline bi={JOBS_COPY.ctaInterview} />
+                      {isAr ? 'انضم لقاعدة المواهب' : 'Join talent pool'}
                     </Link>
                   </div>
                 </motion.div>
@@ -505,10 +596,10 @@ export function JobsBoardClient() {
               />
               <div className="relative flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
                 <Link
-                  href={localePath('/demo', locale)}
+                  href={localePath('/jobs/talent', locale)}
                   className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-6 text-sm font-bold"
                 >
-                  <BiInline bi={JOBS_COPY.ctaInterview} />
+                  {isAr ? 'انضم لقاعدة المواهب' : 'Join the talent pool'}
                   <Arrow size={16} />
                 </Link>
                 <Link

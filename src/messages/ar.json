@@ -1185,8 +1185,8 @@
       "time5": "منذ ٦ ساعات"
     },
     "jobs": {
-      "title": "مقابلات التوظيف",
-      "createJob": "إنشاء مقابلة",
+      "title": "الوظائف ونظام التوظيف",
+      "createJob": "إنشاء وظيفة",
       "jobTitle": "المسمى الوظيفي",
       "industry": "القطاع",
       "candidatesCount": "المرشحون",
@@ -1214,7 +1214,7 @@
       "job3Completed": "١٠",
       "job3Status": "مكتمل",
       "job3Date": "2026-07-10",
-      "newTitle": "إنشاء مقابلة جديدة",
+      "newTitle": "إنشاء إعلان وظيفة",
       "jobTitlePlaceholder": "مثال: مهندس برمجيات أول",
       "industryPlaceholder": "اختر القطاع",
       "type": "نوع المقابلة",
@@ -1408,7 +1408,8 @@
       "slaCustomText": "نص SLA مخصص",
       "slaCustomPlaceholder": "أدخل نص SLA المخصص...",
       "save": "حفظ الإعدادات"
-    }
+    },
+    "navTalent": "قاعدة المواهب"
   },
   "interviewerApp": {
     "dashboard": {
@@ -2579,7 +2580,8 @@
     "onboardingDnsHint": "وجّه CNAME لنطاقك إلى partners.muqabaleh.com ثم اطلب التحقق من الدعم.",
     "back": "رجوع",
     "continue": "متابعة",
-    "launchConsole": "دخول اللوحة"
+    "launchConsole": "دخول اللوحة",
+    "navAts": "نظام التوظيف"
   },
   "partnersMarketing": {
     "eyebrow": "شركاء مقابلة",

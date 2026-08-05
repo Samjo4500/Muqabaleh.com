@@ -23,8 +23,8 @@ export type JobListing = {
 export const JOBS_COPY = {
   kicker: { en: 'Muqabaleh Jobs', ar: 'وظائف مقابلة' } as Bi,
   title: {
-    en: 'Roles worth walking in ready for.',
-    ar: 'وظائف تستحق أن تدخلها مستعداً.',
+    en: 'Browse roles. Apply with proof.',
+    ar: 'تصفح الوظائف. وقدّم بإثبات.',
   } as Bi,
   subtitle: {
     en: 'Verified openings across MENA. Apply with your interview score — not just a CV.',

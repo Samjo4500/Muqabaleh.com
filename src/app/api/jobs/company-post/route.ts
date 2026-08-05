@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { getAtsSession } from '@/lib/ats/auth';
 import { serializePublicJob } from '@/lib/ats/serialize';
+import { b2bPreviewWriteBlocked } from '@/lib/b2b-preview';
 import { MENA_COUNTRIES } from '@/lib/constants';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp, sanitizeObject } from '@/lib/security';
@@ -47,6 +48,17 @@ const schema = z.object({
  * Public: companies register (or use existing company session) and post a vacancy.
  */
 export async function POST(req: NextRequest) {
+  const previewBlock = b2bPreviewWriteBlocked();
+  if (previewBlock) {
+    return NextResponse.json(
+      {
+        ...previewBlock,
+        redirectTo: '/request-demo?from=company-post',
+      },
+      { status: 403 },
+    );
+  }
+
   const ip = await getClientIp();
   const rl = checkRateLimit(ip, '/api/jobs/company-post', 8);
   if (!rl.allowed) {

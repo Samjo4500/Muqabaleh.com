@@ -119,6 +119,12 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { b2bPreviewWriteBlocked } = await import('@/lib/b2b-preview');
+  const previewBlock = b2bPreviewWriteBlocked();
+  if (previewBlock) {
+    return NextResponse.json(previewBlock, { status: 403 });
+  }
+
   const user = await getAtsSession();
   if (!user) return unauthorized();
   const { id } = await params;

@@ -71,11 +71,11 @@ type FeaturedEmployer = {
 };
 
 const COPY = {
-  kicker: { en: 'Muqabaleh Vacancies', ar: 'شواغر مقابلة' },
+  kicker: { en: 'Job Portal', ar: 'بوابة الوظائف' },
   title: { en: 'Available Vacancies', ar: 'الشواغر المتاحة' },
   subtitle: {
-    en: 'Browse open roles across 20 countries. Candidates register once. Companies register and post vacancies — all on this page.',
-    ar: 'تصفّح الشواغر عبر ٢٠ دولة. المرشّحون يسجّلون مرة واحدة. الشركات تسجّل وتنشر الشواغر — كل ذلك في هذه الصفحة.',
+    en: 'Browse open roles across 20 countries. Candidates join the talent pool. Employers request a demo to post authorized vacancies.',
+    ar: 'تصفّح الشواغر عبر ٢٠ دولة. المرشّحون ينضمون لقاعدة المواهب. الشركات تطلب عرضاً لنشر شواغر مصرّحة.',
   },
   tabs: {
     vacancies: { en: 'Available Vacancies', ar: 'الشواغر المتاحة' },
@@ -111,12 +111,12 @@ const COPY = {
     ar: 'أنشئ حسابك، ارفع سيرتك وصورتك، ودع أصحاب العمل في المنطقة يجدونك.',
   },
   companyTitle: {
-    en: 'Companies: register and post a vacancy',
-    ar: 'الشركات: سجّلوا وانشروا شاغراً',
+    en: 'Companies: hire on Muqabaleh',
+    ar: 'الشركات: وظّفوا عبر مقابلة',
   },
   companyBody: {
-    en: 'Create a company account and publish an open vacancy on this board. Manage applicants later in your business dashboard.',
-    ar: 'أنشئ حساب شركة وانشر شاغراً مفتوحاً على هذه اللوحة. أدِر المتقدمين لاحقاً من لوحة الأعمال.',
+    en: 'Post authorized vacancies and screen with AI. Request a demo to unlock the business console — self-serve posting is paused while we onboard employers.',
+    ar: 'انشر شواغر مصرّحة وفرز بالذكاء الاصطناعي. اطلب عرضاً لتفعيل لوحة الأعمال — النشر الذاتي متوقف مؤقتاً أثناء تفعيل الشركات.',
   },
 };
 
@@ -209,7 +209,7 @@ export function VacanciesClient() {
 
   function switchTab(next: Tab) {
     setTab(next);
-    const url = localePath(next === 'vacancies' ? '/jobs' : `/jobs?tab=${next}`, locale);
+    const url = localePath(next === 'vacancies' ? '/portal/jobs' : `/portal/jobs?tab=${next}`, locale);
     router.replace(url, { scroll: false });
   }
 
@@ -727,7 +727,7 @@ function VacanciesPanel({
                 </div>
                 <div className="mt-auto">
                   <Link
-                    href={localePath(`/jobs/${job.id}`, locale)}
+                    href={localePath(`/portal/jobs/${job.id}`, locale)}
                     className="mq-btn mq-btn-primary inline-flex min-h-[44px] items-center gap-2 px-5 text-sm"
                   >
                     {t(locale, COPY.apply)}
@@ -851,7 +851,7 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
       setDone(true);
       if (data.createdAccount) {
         window.location.href = localePath(
-          '/auth/signin?callbackUrl=/jobs?tab=candidates&from=talent',
+          '/auth/signin?callbackUrl=/portal/jobs?tab=candidates&from=talent',
           locale,
         );
       }
@@ -1011,73 +1011,11 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
 function CompanyPanel({
   locale,
   isAr,
-  onPosted,
 }: {
   locale: string;
   isAr: boolean;
   onPosted: () => void;
 }) {
-  const { status } = useSession();
-  const companySession = status === 'authenticated';
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [done, setDone] = useState(false);
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setDone(false);
-    const fd = new FormData(e.currentTarget);
-    const payload = {
-      contactName: String(fd.get('contactName') || ''),
-      email: String(fd.get('email') || ''),
-      password: String(fd.get('password') || '') || undefined,
-      companyName: String(fd.get('companyName') || ''),
-      companySize: String(fd.get('companySize') || 'SMALL'),
-      companyIndustry: String(fd.get('companyIndustry') || ''),
-      companyCountry: String(fd.get('companyCountry') || ''),
-      title: String(fd.get('title') || ''),
-      titleAr: String(fd.get('titleAr') || '') || null,
-      description: String(fd.get('description') || '') || null,
-      requirements: String(fd.get('requirements') || '') || null,
-      employmentType: String(fd.get('employmentType') || 'fulltime'),
-      careerLevel: String(fd.get('careerLevel') || 'MID') || null,
-      department: String(fd.get('department') || '') || null,
-      country: String(fd.get('country') || ''),
-      city: String(fd.get('city') || '') || null,
-      location: String(fd.get('location') || '') || null,
-      salaryRange: String(fd.get('salaryRange') || '') || null,
-      tags: String(fd.get('tags') || '') || null,
-    };
-
-    try {
-      const res = await fetch('/api/jobs/company-post', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Failed');
-        return;
-      }
-      setDone(true);
-      if (data.createdAccount) {
-        window.location.href = localePath(
-          '/auth/signin?callbackUrl=/b2b/jobs&from=vacancies',
-          locale,
-        );
-        return;
-      }
-      onPosted();
-    } catch {
-      setError(isAr ? 'فشل النشر' : 'Posting failed');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="mx-auto max-w-2xl">
       <h2 className="mq-display mb-2 text-2xl font-bold text-white md:text-3xl">
@@ -1085,180 +1023,35 @@ function CompanyPanel({
       </h2>
       <p className="mb-6 text-sm text-white/60">{t(locale, COPY.companyBody)}</p>
 
-      {done ? (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-teal-300/30 bg-teal-400/10 px-4 py-3 text-sm text-teal-100">
-          <CheckCircle2 className="mt-0.5 shrink-0" size={18} />
-          <span>
-            {isAr ? 'تم نشر الشاغر بنجاح.' : 'Vacancy published successfully.'}
-          </span>
+      <div className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5 md:p-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-400/15 text-teal-300">
+          <Building2 size={22} strokeWidth={1.75} />
         </div>
-      ) : null}
-
-      <form
-        onSubmit={onSubmit}
-        className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5 md:p-8"
-      >
-        <h3 className="text-sm font-bold text-white">
-          {isAr ? 'بيانات الشركة' : 'Company details'}
-        </h3>
-        <Field
-          label={isAr ? 'اسم جهة الاتصال' : 'Contact name'}
-          name="contactName"
-          required
-        />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field
-            label={isAr ? 'البريد الإلكتروني للعمل' : 'Work email'}
-            name="email"
-            type="email"
-            required
-          />
-          {!companySession ? (
-            <Field
-              label={isAr ? 'كلمة المرور (٨+)' : 'Password (8+)'}
-              name="password"
-              type="password"
-              required
-              minLength={8}
-            />
-          ) : (
-            <p className="self-end text-xs text-white/45">
-              {isAr
-                ? 'أنت مسجّل الدخول — سيتم ربط الشاغر بحساب شركتك إن أمكن.'
-                : 'Signed in — vacancy will attach to your company account when possible.'}
-            </p>
-          )}
-        </div>
-        <Field
-          label={isAr ? 'اسم الشركة' : 'Company name'}
-          name="companyName"
-          required
-        />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <CountrySelect
-            name="companyCountry"
-            locale={locale}
-            label={isAr ? 'دولة الشركة' : 'Company country'}
-            required
-          />
-          <label className="block space-y-1.5 text-sm">
-            <span className="text-white/60">{isAr ? 'حجم الشركة' : 'Company size'}</span>
-            <select
-              name="companySize"
-              defaultValue="SMALL"
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-            >
-              <option value="SMALL">{isAr ? 'صغيرة (١–٥٠)' : 'Small (1–50)'}</option>
-              <option value="MEDIUM">{isAr ? 'متوسطة (٥١–٢٠٠)' : 'Medium (51–200)'}</option>
-              <option value="LARGE">{isAr ? 'كبيرة (٢٠٠+)' : 'Large (200+)'}</option>
-            </select>
-          </label>
-        </div>
-        <label className="block space-y-1.5 text-sm">
-          <span className="text-white/60">{isAr ? 'قطاع الشركة' : 'Industry'}</span>
-          <select
-            name="companyIndustry"
-            defaultValue="IT"
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-          >
-            {VACANCY_INDUSTRIES.map((ind) => (
-              <option key={ind.code} value={ind.code}>
-                {isAr ? ind.ar : ind.en}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <hr className="border-white/10" />
-        <h3 className="text-sm font-bold text-white">
-          {isAr ? 'تفاصيل الشاغر' : 'Vacancy details'}
-        </h3>
-        <Field label={isAr ? 'عنوان الوظيفة (إنجليزي)' : 'Job title (English)'} name="title" required />
-        <Field label={isAr ? 'عنوان الوظيفة (عربي)' : 'Job title (Arabic)'} name="titleAr" />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <CountrySelect
-            name="country"
-            locale={locale}
-            label={isAr ? 'دولة الشاغر' : 'Vacancy country'}
-            required
-          />
-          <Field label={isAr ? 'المدينة' : 'City'} name="city" />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block space-y-1.5 text-sm">
-            <span className="text-white/60">{isAr ? 'نوع الدوام' : 'Employment type'}</span>
-            <select
-              name="employmentType"
-              defaultValue="fulltime"
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-            >
-              {EMPLOYMENT_TYPES.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {isAr ? opt.ar : opt.en}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block space-y-1.5 text-sm">
-            <span className="text-white/60">{isAr ? 'المستوى' : 'Career level'}</span>
-            <select
-              name="careerLevel"
-              defaultValue="MID"
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-            >
-              {CAREER_LEVELS.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {isAr ? opt.ar : opt.en}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <Field label={isAr ? 'القسم' : 'Department'} name="department" />
-        <Field label={isAr ? 'نطاق الراتب' : 'Salary range'} name="salaryRange" />
-        <label className="block space-y-1.5 text-sm">
-          <span className="text-white/60">{isAr ? 'الوصف' : 'Description'}</span>
-          <textarea
-            name="description"
-            rows={4}
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-          />
-        </label>
-        <label className="block space-y-1.5 text-sm">
-          <span className="text-white/60">{isAr ? 'المتطلبات' : 'Requirements'}</span>
-          <textarea
-            name="requirements"
-            rows={3}
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white"
-          />
-        </label>
-        <Field label={isAr ? 'وسوم (فواصل)' : 'Tags (comma-separated)'} name="tags" />
-
-        {error ? (
-          <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
-            {error}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="mq-btn mq-btn-primary flex w-full min-h-[48px] items-center justify-center gap-2 text-sm font-bold"
-        >
-          {loading ? <Loader2 className="animate-spin" size={18} /> : null}
-          {isAr ? 'سجّل الشركة وانشر الشاغر' : 'Register company & post vacancy'}
-        </button>
-
-        <p className="text-center text-xs text-white/40">
-          {isAr ? 'لديك حساب شركة؟' : 'Already have a company account?'}{' '}
+        <p className="text-sm text-white/70">
+          {isAr
+            ? 'لوحة الأعمال متاحة للمعاينة ببيانات تجريبية. لنشر شواغر حقيقية وإدارة المرشحين، اطلب عرضاً توضيحياً.'
+            : 'The business console is available as a sample-data preview. To post real vacancies and manage candidates, request a demo.'}
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            href={localePath('/auth/signin?callbackUrl=/b2b/jobs/new', locale)}
-            className="text-teal-300 hover:underline"
+            href={localePath('/request-demo?from=portal-companies', locale)}
+            className="mq-btn mq-btn-primary inline-flex min-h-[48px] flex-1 items-center justify-center text-sm font-bold"
           >
-            {isAr ? 'تسجيل الدخول' : 'Sign in'}
+            {isAr ? 'اطلب عرضاً توضيحياً' : 'Request a demo'}
+          </Link>
+          <Link
+            href={localePath('/b2b', locale)}
+            className="mq-btn mq-btn-ghost inline-flex min-h-[48px] flex-1 items-center justify-center text-sm font-bold"
+          >
+            {isAr ? 'معاينة اللوحة' : 'Preview console'}
+          </Link>
+        </div>
+        <p className="text-center text-xs text-white/40">
+          <Link href={localePath('/business', locale)} className="text-teal-300 hover:underline">
+            {isAr ? 'تعرّف على مقابلة للأعمال' : 'Learn about Muqabaleh for Business'}
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

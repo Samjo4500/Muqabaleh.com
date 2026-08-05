@@ -11,14 +11,14 @@ import {
   UserSearch,
   Receipt,
   Settings,
-  LogOut,
   Menu,
   Home,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { BackButton } from '@/components/navigation';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { B2BPreviewBanner, B2BPreviewContent } from '@/components/b2b/B2BPreviewGate';
 import { localePath } from '@/i18n/navigation';
+import { B2B_CONSOLE_PREVIEW } from '@/lib/b2b-preview';
 
 const navItems = [
   { key: 'navOverview', icon: LayoutDashboard, href: '/b2b' },
@@ -75,10 +75,11 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isAr = locale === 'ar';
+  const preview = B2B_CONSOLE_PREVIEW;
 
   return (
     <div
-      className="mq-atelier relative flex min-h-screen overflow-x-hidden"
+      className="mq-atelier relative flex min-h-screen flex-col overflow-x-hidden"
       dir={isAr ? 'rtl' : 'ltr'}
       lang={isAr ? 'ar' : 'en'}
     >
@@ -87,101 +88,94 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
         <div className="mq-orb mq-orb-c" />
       </div>
 
-      <aside className="relative z-10 hidden w-[260px] shrink-0 flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl lg:flex">
-        <div className="p-4 pb-2">
-          <div className="flex items-center gap-3">
-            <BrandLogo size="sm" priority />
-            <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
-          </div>
-        </div>
+      {preview ? <B2BPreviewBanner /> : null}
 
-        <Link
-          href={localePath('/', locale)}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-white/50 transition-colors hover:text-white"
-        >
-          <Home size={16} strokeWidth={1.75} />
-          <span>{locale === 'ar' ? 'الرئيسية' : 'Home'}</span>
-        </Link>
-
-        <SidebarNav pathname={pathname} locale={locale} t={t} />
-
-        <div className="mt-auto space-y-3 border-t border-white/10 p-4">
-          <div className="flex justify-center">
-            <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-300">
-              {t('sessionsBadge', { count: 15 })}
-            </span>
-          </div>
-          <div className="px-1">
-            <p className="truncate text-sm font-medium text-white">{t('companyName')}</p>
-          </div>
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
-            aria-label={t('signOut')}
-          >
-            <LogOut size={18} strokeWidth={1.75} />
-            <span>{t('signOut')}</span>
-          </button>
-        </div>
-      </aside>
-
-      <div className="relative z-10 flex flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/10 bg-[#070b14]/80 px-4 backdrop-blur-md lg:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-white/50 hover:bg-white/5"
-                aria-label="Menu"
-              >
-                <Menu size={20} strokeWidth={1.75} />
-              </button>
-            </SheetTrigger>
-            <SheetContent
-              side={locale === 'ar' ? 'left' : 'right'}
-              className="w-[260px] border-s border-white/10 bg-[#070b14]/95 p-0 backdrop-blur-xl"
-            >
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <div className="p-4 pb-2">
-                <div className="flex items-center gap-3">
-                  <BrandLogo size="sm" />
-                  <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
-                </div>
-              </div>
-              <SidebarNav
-                pathname={pathname}
-                locale={locale}
-                t={t}
-                onNavigate={() => setOpen(false)}
-              />
-              <div className="mt-auto space-y-3 border-t border-white/10 p-4">
-                <div className="flex justify-center">
-                  <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-300">
-                    {t('sessionsBadge', { count: 15 })}
+      <div className="relative z-10 flex flex-1">
+        <aside className="hidden w-[260px] shrink-0 flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl lg:flex">
+          <div className="p-4 pb-2">
+            <div className="flex items-center gap-3">
+              <BrandLogo size="sm" priority />
+              <div>
+                <span className="block text-sm font-bold text-white">{t('sidebarTitle')}</span>
+                {preview ? (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-300/80">
+                    {isAr ? 'معاينة' : 'Preview'}
                   </span>
-                </div>
-                <p className="truncate px-1 text-sm font-medium text-white">{t('companyName')}</p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href={localePath('/', locale)}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white/50 transition-colors hover:text-white"
+          >
+            <Home size={16} strokeWidth={1.75} />
+            <span>{isAr ? 'الرئيسية' : 'Home'}</span>
+          </Link>
+
+          <SidebarNav pathname={pathname} locale={locale} t={t} />
+
+          <div className="mt-auto space-y-3 border-t border-white/10 p-4">
+            <p className="truncate px-1 text-sm font-medium text-white/80">{t('companyName')}</p>
+            {preview ? (
+              <Link
+                href={localePath('/request-demo?from=b2b-sidebar', locale)}
+                className="mq-btn mq-btn-primary flex w-full items-center justify-center py-2 text-sm"
+              >
+                {isAr ? 'اطلب عرضاً' : 'Request demo'}
+              </Link>
+            ) : null}
+          </div>
+        </aside>
+
+        <div className="flex flex-1 flex-col">
+          <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/10 bg-[#070b14]/80 px-4 backdrop-blur-md lg:hidden">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
-                  aria-label={t('signOut')}
+                  className="rounded-lg p-2 text-white/50 hover:bg-white/5"
+                  aria-label="Menu"
                 >
-                  <LogOut size={18} strokeWidth={1.75} />
-                  <span>{t('signOut')}</span>
+                  <Menu size={20} strokeWidth={1.75} />
                 </button>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <BrandLogo size="sm" />
-          <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
-        </header>
+              </SheetTrigger>
+              <SheetContent
+                side={isAr ? 'left' : 'right'}
+                className="w-[260px] border-s border-white/10 bg-[#070b14]/95 p-0 backdrop-blur-xl"
+              >
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <div className="p-4 pb-2">
+                  <BrandLogo size="sm" />
+                </div>
+                <SidebarNav
+                  pathname={pathname}
+                  locale={locale}
+                  t={t}
+                  onNavigate={() => setOpen(false)}
+                />
+                {preview ? (
+                  <div className="border-t border-white/10 p-4">
+                    <Link
+                      href={localePath('/request-demo?from=b2b-mobile', locale)}
+                      className="mq-btn mq-btn-primary flex w-full items-center justify-center py-2 text-sm"
+                      onClick={() => setOpen(false)}
+                    >
+                      {isAr ? 'اطلب عرضاً' : 'Request demo'}
+                    </Link>
+                  </div>
+                ) : null}
+              </SheetContent>
+            </Sheet>
+            <BrandLogo size="sm" />
+            <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
+          </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="mb-4">
-            <BackButton href={`/${locale}`} />
-          </div>
-          {children}
-        </main>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            {preview ? <B2BPreviewContent>{children}</B2BPreviewContent> : children}
+          </main>
+        </div>
       </div>
     </div>
   );

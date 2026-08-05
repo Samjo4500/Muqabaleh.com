@@ -111,7 +111,7 @@ export function CrystalHero() {
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href={localePath('/jobs', locale)} className="mq-btn mq-btn-on-dark-ghost">
+              <Link href={localePath('/portal', locale)} className="mq-btn mq-btn-on-dark-ghost">
                 <BiInline bi={C.hero.ctaJobs} />
               </Link>
             </motion.div>

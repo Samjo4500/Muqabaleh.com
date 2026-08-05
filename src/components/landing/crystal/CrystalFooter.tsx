@@ -24,11 +24,11 @@ export function CrystalFooter() {
       { bi: C.nav.services, href: '/#services' },
       { bi: C.nav.howItWorks, href: '/#how-it-works' },
       { bi: C.nav.pricing, href: '/#pricing' },
-      { bi: C.nav.jobs, href: '/jobs' },
+      { bi: C.nav.jobs, href: '/portal' },
     ],
     company: [
       { bi: C.footer.about, href: '/about' },
-      { bi: C.nav.forCompanies, href: '/#for-companies' },
+      { bi: C.nav.forCompanies, href: '/business' },
       { bi: C.footer.becomeInterviewer, href: '/join-as-interviewer' },
       { bi: C.nav.partners, href: '/partners' },
       { bi: C.nav.blog, href: '/blog' },

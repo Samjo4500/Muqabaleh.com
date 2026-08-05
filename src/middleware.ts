@@ -10,7 +10,7 @@ const intlMiddleware = createMiddleware(routing);
 const ROUTE_ROLES: Record<string, string[]> = {
   '/app': [UserRole.USER, UserRole.SUPER_ADMIN],
   '/interviewer': [UserRole.INTERVIEWER, UserRole.SUPER_ADMIN],
-  '/b2b': [UserRole.COMPANY_ADMIN, UserRole.SUPER_ADMIN],
+  // /b2b is a public preview console — writes stay locked in app/API layer
   '/partner': ['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN],
   '/admin': [UserRole.SUPER_ADMIN],
   // Gated AI mock interview engine — any authenticated role with email session

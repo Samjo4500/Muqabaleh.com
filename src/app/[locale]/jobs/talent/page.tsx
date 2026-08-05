@@ -1,11 +1,9 @@
 import { redirect } from 'next/navigation';
+import { localePath } from '@/i18n/navigation';
 
-/** Talent registration now lives on the unified Available Vacancies page. */
-export default async function TalentRedirectPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+type Props = { params: Promise<{ locale: string }> };
+
+export default async function JobsTalentRedirect({ params }: Props) {
   const { locale } = await params;
-  redirect(`/${locale}/jobs?tab=candidates`);
+  redirect(localePath('/portal/jobs?tab=candidates', locale));
 }

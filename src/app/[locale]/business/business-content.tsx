@@ -42,7 +42,7 @@ const PRICING_PLANS = [
     badge: null,
     features: ['starterF1', 'starterF2', 'starterF3'] as const,
     ctaKey: 'chooseStarter' as const,
-    href: '/demo',
+    href: '/request-demo',
     facet: 'mq-facet mq-facet-cyan mq-facet-shape-soft',
   },
   {
@@ -53,7 +53,7 @@ const PRICING_PLANS = [
     badge: 'businessBadge' as const,
     features: ['businessF1', 'businessF2', 'businessF3', 'businessF4', 'businessF5', 'businessF6'] as const,
     ctaKey: 'chooseBusiness' as const,
-    href: '/demo',
+    href: '/request-demo',
     popular: true,
     facet: 'mq-facet mq-facet-teal mq-facet-shape-soft',
   },
@@ -65,7 +65,7 @@ const PRICING_PLANS = [
     badge: null,
     features: ['enterpriseF1', 'enterpriseF2', 'enterpriseF3', 'enterpriseF4', 'enterpriseF5', 'enterpriseF6'] as const,
     ctaKey: 'chooseEnterprise' as const,
-    href: '/support',
+    href: '/request-demo',
     facet: 'mq-facet mq-facet-gold mq-facet-shape-wave',
   },
 ];
@@ -158,7 +158,7 @@ export default function BusinessContent() {
                 className="mb-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
               >
                 <Link
-                  href={localePath('/demo', locale)}
+                  href={localePath('/request-demo', locale)}
                   className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-6 text-sm font-bold"
                 >
                   {t('ctaTitle')}
@@ -393,13 +393,21 @@ export default function BusinessContent() {
                 {t('ctaTitle')}
               </h2>
               <p className="relative mx-auto mt-4 max-w-xl text-base text-white/55">{t('ctaSub')}</p>
-              <Link
-                href={localePath('/demo', locale)}
-                className="mq-btn mq-btn-primary mq-btn-shimmer relative mt-8 inline-flex min-h-[48px] items-center gap-2 px-7 text-sm font-bold"
-              >
-                {t('ctaTitle')}
-                <Arrow size={16} />
-              </Link>
+              <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  href={localePath('/request-demo', locale)}
+                  className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center gap-2 px-7 text-sm font-bold"
+                >
+                  {t('ctaTitle')}
+                  <Arrow size={16} />
+                </Link>
+                <Link
+                  href={localePath('/b2b', locale)}
+                  className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center px-7 text-sm font-bold"
+                >
+                  {locale === 'ar' ? 'معاينة اللوحة' : 'Preview console'}
+                </Link>
+              </div>
             </motion.div>
           </div>
         </section>

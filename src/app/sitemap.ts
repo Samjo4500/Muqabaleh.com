@@ -7,6 +7,7 @@ const PUBLIC_ROUTES = [
   '',
   '/pricing',
   '/business',
+  '/jobs',
   '/demo',
   '/about',
   '/support',

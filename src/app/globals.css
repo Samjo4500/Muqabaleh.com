@@ -666,6 +666,67 @@
 .prose-blog a:hover { opacity: 0.8; }
 .prose-blog blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; margin-bottom: 1.25rem; font-style: italic; color: var(--text-faint); }
 
+/* Atelier blog prose — teal glass reading experience */
+.mq-atelier .prose-blog h2,
+.mq-atelier .mq-atelier-prose h2 {
+  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2.75rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+.mq-atelier .prose-blog h3,
+.mq-atelier .mq-atelier-prose h3 {
+  font-family: Syne, "Readex Pro", Manrope, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.mq-atelier .prose-blog p,
+.mq-atelier .mq-atelier-prose p {
+  margin-bottom: 1.35rem;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.62);
+}
+.mq-atelier .prose-blog ul,
+.mq-atelier .prose-blog ol,
+.mq-atelier .mq-atelier-prose ul,
+.mq-atelier .mq-atelier-prose ol {
+  margin-bottom: 1.35rem;
+  padding-inline-start: 1.35rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+.mq-atelier .prose-blog li::marker,
+.mq-atelier .mq-atelier-prose li::marker {
+  color: #2dd4bf;
+}
+.mq-atelier .prose-blog strong,
+.mq-atelier .mq-atelier-prose strong {
+  color: #fff;
+  font-weight: 650;
+}
+.mq-atelier .prose-blog a,
+.mq-atelier .mq-atelier-prose a {
+  color: #5eead4;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.mq-atelier .prose-blog blockquote,
+.mq-atelier .mq-atelier-prose blockquote {
+  border-inline-start: 3px solid rgba(45, 212, 191, 0.55);
+  padding-inline-start: 1rem;
+  margin-bottom: 1.35rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.45);
+  background: linear-gradient(90deg, rgba(45, 212, 191, 0.08), transparent 70%);
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding-block: 0.75rem;
+}
+
 /* Mobile touch targets */
 @media (max-width: 767px) {
   /* Prevent iOS zoom on input focus */

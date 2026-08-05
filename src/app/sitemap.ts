@@ -16,6 +16,8 @@ const PUBLIC_ROUTES = [
   '/refund',
   '/join-as-interviewer',
   '/interviewers',
+  '/jobs',
+  '/business',
   '/blog',
 ];
 

@@ -212,21 +212,25 @@ const MOCK_INTERVIEWERS = [
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const role = searchParams.get('role') || '';
+    const industry = searchParams.get('industry') || searchParams.get('role') || '';
     const experience = searchParams.get('experience') || '';
     const language = searchParams.get('language') || '';
     const price = searchParams.get('price') || '';
     const rating = searchParams.get('rating') || '';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(20, Math.max(1, parseInt(searchParams.get('limit') || '12', 10)));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '12', 10)));
 
     // ── Try DB first ──
     try {
       const { db } = await import('@/lib/db');
       const where: Record<string, unknown> = { status: 'ACTIVE' };
 
-      if (role) {
-        where.specialties = { contains: role };
+      if (industry) {
+        // Match industry tags (preferred) or specialty keys stored as JSON strings
+        where.OR = [
+          { industries: { contains: industry } },
+          { specialties: { contains: industry } },
+        ];
       }
       if (language) {
         where.languages = { contains: language };
@@ -289,8 +293,10 @@ export async function GET(req: NextRequest) {
     // ── Mock mode ──
     let filtered = [...MOCK_INTERVIEWERS];
 
-    if (role) {
-      filtered = filtered.filter((i) => i.specialties.includes(role));
+    if (industry) {
+      filtered = filtered.filter(
+        (i) => i.industries.includes(industry) || i.specialties.includes(industry),
+      );
     }
     if (language) {
       filtered = filtered.filter((i) => i.languages.includes(language));

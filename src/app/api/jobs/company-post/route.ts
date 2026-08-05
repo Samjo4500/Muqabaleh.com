@@ -28,7 +28,13 @@ const schema = z.object({
   titleAr: z.string().max(160).optional().nullable(),
   description: z.string().max(20000).optional().nullable(),
   requirements: z.string().max(10000).optional().nullable(),
-  employmentType: z.enum(['fulltime', 'contract', 'remote']).default('fulltime'),
+  employmentType: z
+    .enum(['fulltime', 'contract', 'remote', 'hybrid'])
+    .default('fulltime'),
+  careerLevel: z
+    .enum(['JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'])
+    .optional()
+    .nullable(),
   department: z.string().max(80).optional().nullable(),
   country: z.string().max(8),
   city: z.string().max(80).optional().nullable(),
@@ -141,6 +147,7 @@ export async function POST(req: NextRequest) {
         description: body.description || null,
         requirements: body.requirements || null,
         employmentType: body.employmentType,
+        careerLevel: body.careerLevel || null,
         department: body.department || null,
         country: body.country,
         city: body.city || null,

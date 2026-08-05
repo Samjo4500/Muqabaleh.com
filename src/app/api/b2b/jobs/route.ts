@@ -21,7 +21,13 @@ const createSchema = z.object({
   city: z.string().max(80).optional().nullable(),
   country: z.string().max(8).optional().nullable(),
   department: z.string().max(80).optional().nullable(),
-  employmentType: z.enum(['fulltime', 'contract', 'remote']).default('fulltime'),
+  employmentType: z
+    .enum(['fulltime', 'contract', 'remote', 'hybrid'])
+    .default('fulltime'),
+  careerLevel: z
+    .enum(['JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'])
+    .optional()
+    .nullable(),
   salaryRange: z.string().max(80).optional().nullable(),
   tags: z.string().max(400).optional().nullable(),
   isPublic: z.boolean().default(true),
@@ -107,6 +113,7 @@ export async function POST(req: NextRequest) {
         country: body.country || null,
         department: body.department || null,
         employmentType: body.employmentType,
+        careerLevel: body.careerLevel || null,
         salaryRange: body.salaryRange || null,
         tags: body.tags || null,
         isPublic: body.isPublic,

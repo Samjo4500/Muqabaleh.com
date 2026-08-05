@@ -17,18 +17,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { MENA_COUNTRIES } from '@/lib/constants';
-
-const INDUSTRIES = [
-  'Technology',
-  'Finance',
-  'Healthcare',
-  'Education',
-  'Engineering',
-  'Marketing',
-  'HR',
-  'Other',
-] as const;
+import {
+  CAREER_LEVELS,
+  EMPLOYMENT_TYPES,
+  MENA_COUNTRIES,
+  VACANCY_INDUSTRIES,
+} from '@/lib/constants';
 
 export default function NewJobPage() {
   const t = useTranslations('b2b.jobs');
@@ -36,8 +30,9 @@ export default function NewJobPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState('');
-  const [industry, setIndustry] = useState('Technology');
+  const [industry, setIndustry] = useState('IT');
   const [employmentType, setEmploymentType] = useState('fulltime');
+  const [careerLevel, setCareerLevel] = useState('MID');
   const [department, setDepartment] = useState('engineering');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('SA');
@@ -65,6 +60,7 @@ export default function NewJobPage() {
           type: 'behavioral',
           mode: 'AI',
           employmentType,
+          careerLevel,
           department,
           country,
           city,
@@ -122,9 +118,9 @@ export default function NewJobPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {INDUSTRIES.map((ind) => (
-                  <SelectItem key={ind} value={ind}>
-                    {ind}
+                {VACANCY_INDUSTRIES.map((ind) => (
+                  <SelectItem key={ind.code} value={ind.code}>
+                    {locale === 'ar' ? ind.ar : ind.en}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -139,12 +135,32 @@ export default function NewJobPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="fulltime">{locale === 'ar' ? 'دوام كامل' : 'Full-time'}</SelectItem>
-                <SelectItem value="contract">{locale === 'ar' ? 'تعاقد' : 'Contract'}</SelectItem>
-                <SelectItem value="remote">{locale === 'ar' ? 'عن بُعد' : 'Remote'}</SelectItem>
+                {EMPLOYMENT_TYPES.map((opt) => (
+                  <SelectItem key={opt.code} value={opt.code}>
+                    {locale === 'ar' ? opt.ar : opt.en}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm text-[var(--text-muted)]">
+            {locale === 'ar' ? 'المستوى' : 'Career level'}
+          </Label>
+          <Select value={careerLevel} onValueChange={setCareerLevel}>
+            <SelectTrigger className="glass-input">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CAREER_LEVELS.map((opt) => (
+                <SelectItem key={opt.code} value={opt.code}>
+                  {locale === 'ar' ? opt.ar : opt.en}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

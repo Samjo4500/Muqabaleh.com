@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { localePath } from '@/i18n/navigation';
 
 type JobRow = {
   id: string;
@@ -57,12 +58,12 @@ export default function JobsListPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/b2b/talent">
+          <Link href={localePath("/b2b/talent", locale)}>
             <Button variant="outline" className="cursor-pointer">
               {locale === 'ar' ? 'قاعدة المواهب' : 'Talent pool'}
             </Button>
           </Link>
-          <Link href="/b2b/jobs/new">
+          <Link href={localePath("/b2b/jobs/new", locale)}>
             <Button className="glass-button flex items-center gap-2 cursor-pointer">
               <Plus size={18} strokeWidth={1.75} />
               {t('createJob')}
@@ -82,7 +83,7 @@ export default function JobsListPage() {
           <p className="mb-4 text-[var(--text-muted)]">
             {locale === 'ar' ? 'لا توجد وظائف بعد.' : 'No jobs yet.'}
           </p>
-          <Link href="/b2b/jobs/new">
+          <Link href={localePath("/b2b/jobs/new", locale)}>
             <Button className="glass-button cursor-pointer">{t('createJob')}</Button>
           </Link>
         </div>
@@ -107,7 +108,7 @@ export default function JobsListPage() {
                   >
                     <td className="px-4 py-3">
                       <Link
-                        href={`/b2b/jobs/${job.id}`}
+                        href={localePath(`/b2b/jobs/${job.id}`, locale)}
                         className="font-medium text-[var(--text-primary)] hover:text-teal-300 transition-colors"
                       >
                         {job.title}
@@ -140,7 +141,7 @@ export default function JobsListPage() {
             {jobs.map((job) => (
               <Link
                 key={job.id}
-                href={`/b2b/jobs/${job.id}`}
+                href={localePath(`/b2b/jobs/${job.id}`, locale)}
                 className="block rounded-xl border border-white/[0.08] p-4 transition hover:bg-white/[0.02]"
               >
                 <div className="mb-2 flex items-center justify-between gap-2">

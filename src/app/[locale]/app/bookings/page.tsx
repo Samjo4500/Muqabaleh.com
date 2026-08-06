@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { toast } from 'sonner';
+import { localePath } from '@/i18n/navigation';
 
 interface BookingInterviewer {
   id: string;
@@ -73,6 +74,7 @@ function formatDateTime(iso: string, locale: string) {
 // ─── Join Call Button (disabled until 15 min before session) ───
 function JoinCallButton({ bookingId, scheduledAt }: { bookingId: string; scheduledAt: string }) {
   const tc = useTranslations('call');
+  const locale = useLocale();
   const router = useRouter();
   const [now, setNow] = useState(Date.now());
 
@@ -102,7 +104,7 @@ function JoinCallButton({ bookingId, scheduledAt }: { bookingId: string; schedul
     <Button
       size="sm"
       disabled={!isJoinable}
-      onClick={() => router.push(`/call/${bookingId}`)}
+      onClick={() => router.push(localePath(`/call/${bookingId}`, locale))}
       className={
         isJoinable
           ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer text-xs'

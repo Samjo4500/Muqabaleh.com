@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useLocale } from 'next-intl';
+import { localePath } from '@/i18n/navigation';
 
 const candidateMap: Record<string, string> = {
   '1': 'cand1Name',
@@ -46,14 +47,20 @@ export default function EvaluatePage() {
   return (
     <div className="space-y-6">
       <Link
-        href="/interviewer/bookings"
-        className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+        href={localePath('/interviewer/bookings', locale)}
+        className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-teal-300"
       >
         <BackArrow size={18} strokeWidth={1.75} />
         {tCommon('back')}
       </Link>
 
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+      <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-100/90">
+        {locale === 'ar'
+          ? 'واجهة تقييم تجريبية ببيانات عيّنة. الربط الكامل بحجوزات حقيقية قادم.'
+          : 'Sample evaluation UI with demo candidate data. Full booking wiring comes next.'}
+      </div>
+
+      <h1 className="text-2xl font-bold text-white">
         {t('evalTitle')} — {t(candidateKey)}
       </h1>
 

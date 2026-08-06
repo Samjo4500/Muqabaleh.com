@@ -31,6 +31,7 @@ import {
 } from '@/components/brand';
 import { BackButton } from '@/components/navigation';
 import { toast } from 'sonner';
+import { localePath } from '@/i18n/navigation';
 import { useRouter as useRouterNext } from 'next/navigation';
 import Link from 'next/link';
 
@@ -314,7 +315,7 @@ export default function InterviewRoomPage({
         const res = await fetch(`/api/interviews/${interviewId}`);
         if (!res.ok) {
           toast.error(t('errorLoading'));
-          router.push('/app/interviews');
+          router.push(localePath('/app/interviews', locale));
           return;
         }
 
@@ -372,12 +373,12 @@ export default function InterviewRoomPage({
           }
         } else if (interview.status === 'COMPLETED') {
           setPhase('completed');
-          router.push(`/app/interview/${interviewId}/report`);
+          router.push(localePath(`/app/interview/${interviewId}/report`, locale));
           return;
         }
       } catch {
         toast.error(t('errorLoading'));
-        router.push('/app/interviews');
+        router.push(localePath('/app/interviews', locale));
       } finally {
         setIsLoading(false);
       }
@@ -687,7 +688,7 @@ export default function InterviewRoomPage({
               <Button
                 onClick={() => {
                   hasLeftRef.current = true;
-                  router.push(`/app/interview/${interviewId}/report`);
+                  router.push(localePath(`/app/interview/${interviewId}/report`, locale));
                 }}
                 className="btn-gold cursor-pointer"
               >

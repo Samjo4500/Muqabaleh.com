@@ -230,7 +230,7 @@ export default function AvailabilityPage() {
           <Button
             variant="ghost"
             onClick={addRow}
-            className="w-full gap-2 text-[var(--text-muted)] hover:text-gold hover:bg-gold/5"
+            className="w-full gap-2 text-[var(--text-muted)] hover:text-teal-300 hover:bg-teal-400/5"
           >
             <Plus size={18} strokeWidth={1.75} />
             {t('addRow')}
@@ -241,7 +241,7 @@ export default function AvailabilityPage() {
       {/* Save button */}
       <div className="flex justify-end">
         <Button
-          className="btn-gold min-w-[140px]"
+          className="mq-btn mq-btn-primary min-w-[140px]"
           onClick={handleSave}
           disabled={saving}
         >

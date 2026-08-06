@@ -204,11 +204,11 @@ export default function CalendarPage() {
   function slotClass(status: SlotStatus): string {
     switch (status) {
       case 'available':
-        return 'border-gold/50 outline text-gold hover:bg-gold/10 cursor-pointer';
+        return 'border-teal-300/50 outline text-teal-300 hover:bg-teal-400/10 cursor-pointer';
       case 'blocked':
         return 'bg-gray-800 text-gray-600 line-through';
       case 'booked':
-        return 'bg-gold/20 text-gold';
+        return 'bg-teal-400/20 text-teal-300';
       case 'past':
         return 'bg-gray-900 text-gray-700';
       default:
@@ -223,7 +223,7 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6">
       {/* Page title */}
-      <h1 className="text-2xl font-bold text-gold md:text-3xl">
+      <h1 className="text-2xl font-bold text-teal-300 md:text-3xl">
         {t('calendar')}
       </h1>
 
@@ -251,7 +251,7 @@ export default function CalendarPage() {
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)]">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded border border-gold/50" />
+          <span className="inline-block h-3 w-3 rounded border border-teal-300/50" />
           {locale === 'ar' ? 'متاح' : 'Available'}
         </span>
         <span className="flex items-center gap-1.5">
@@ -259,7 +259,7 @@ export default function CalendarPage() {
           {locale === 'ar' ? 'محظور' : 'Blocked'}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded bg-gold/20" />
+          <span className="inline-block h-3 w-3 rounded bg-teal-400/20" />
           {locale === 'ar' ? 'محجوز' : 'Booked'}
         </span>
         <span className="flex items-center gap-1.5">
@@ -302,14 +302,14 @@ export default function CalendarPage() {
                       otherMonth
                         ? 'border-white/[0.03] opacity-40'
                         : today
-                          ? 'border-gold/30'
+                          ? 'border-teal-300/30'
                           : 'border-white/[0.06]'
                     }`}
                   >
                     {/* Day number */}
                     <div
                       className={`text-xs font-medium mb-1 px-1 ${
-                        today ? 'text-gold' : otherMonth ? 'text-gray-600' : 'text-[var(--text-muted)]'
+                        today ? 'text-teal-300' : otherMonth ? 'text-gray-600' : 'text-[var(--text-muted)]'
                       }`}
                     >
                       {day.getDate()}
@@ -357,7 +357,7 @@ export default function CalendarPage() {
       <div className="mt-6">
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-semibold text-[#0B0F17] transition-colors hover:bg-gold/90 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-6 py-3 text-sm font-semibold text-[#070b14] transition-colors hover:bg-teal-300/90 cursor-pointer"
         >
           <Check size={18} strokeWidth={2} />
           {tc('save')}

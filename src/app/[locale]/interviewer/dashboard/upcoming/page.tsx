@@ -104,7 +104,7 @@ export default function UpcomingPage() {
   return (
     <div className="space-y-6">
       {/* Page title */}
-      <h1 className="text-2xl font-bold text-gold md:text-3xl">
+      <h1 className="text-2xl font-bold text-teal-300 md:text-3xl">
         {t('upcoming')}
       </h1>
 
@@ -124,7 +124,7 @@ export default function UpcomingPage() {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className="bg-[#0B0F17] rounded-xl p-5 border-l-4 border-gold"
+            className="bg-[#0B0F17] rounded-xl p-5 border-l-4 border-teal-300"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {/* Info */}
@@ -149,7 +149,7 @@ export default function UpcomingPage() {
               <div className="flex items-center gap-3 shrink-0">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-semibold text-[#0B0F17] transition-colors hover:bg-gold/90 cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-5 py-2.5 text-sm font-semibold text-[#070b14] transition-colors hover:bg-teal-300/90 cursor-pointer"
                 >
                   <ExternalLink size={16} strokeWidth={2} />
                   {t('startInterview')}

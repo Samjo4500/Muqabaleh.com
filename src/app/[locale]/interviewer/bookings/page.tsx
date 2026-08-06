@@ -198,7 +198,7 @@ function BookingCard({ booking, onUpdate }: BookingCardProps) {
         {/* Evaluate link */}
         <Link
           href={`/interviewer/bookings/${booking.id}/evaluate`}
-          className="inline-flex items-center gap-1.5 text-sm text-gold transition-colors hover:text-gold/80"
+          className="inline-flex items-center gap-1.5 text-sm text-teal-300 transition-colors hover:text-teal-300/80"
         >
           <ExternalLink size={14} strokeWidth={1.75} />
           {t('evalTitle')}
@@ -312,7 +312,7 @@ export default function BookingsPage() {
           <p className="text-red-400">{error}</p>
           <button
             onClick={fetchBookings}
-            className="mt-3 text-sm text-gold hover:underline"
+            className="mt-3 text-sm text-teal-300 hover:underline"
           >
             {tc('retry')}
           </button>
@@ -331,13 +331,13 @@ export default function BookingsPage() {
         <TabsList className="bg-white/5">
           <TabsTrigger
             value="upcoming"
-            className="data-[state=active]:bg-gold data-[state=active]:text-[var(--bg-void)]"
+            className="data-[state=active]:bg-teal-400 data-[state=active]:text-[var(--bg-void)]"
           >
             {t('tabUpcoming')}
           </TabsTrigger>
           <TabsTrigger
             value="past"
-            className="data-[state=active]:bg-gold data-[state=active]:text-[var(--bg-void)]"
+            className="data-[state=active]:bg-teal-400 data-[state=active]:text-[var(--bg-void)]"
           >
             {t('tabPast')}
           </TabsTrigger>

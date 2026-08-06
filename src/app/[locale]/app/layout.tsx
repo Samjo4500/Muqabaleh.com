@@ -20,6 +20,7 @@ import {
   ClipboardList,
   Sparkles,
   Bell,
+  BadgeCheck,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { BackButton } from '@/components/navigation';
@@ -38,6 +39,7 @@ const navItems = [
   { key: 'packages', icon: Package, href: '/app/packages' },
   { key: 'payments', icon: CreditCard, href: '/app/payments' },
   { key: 'certificates', icon: FileBadge, href: '/app/certificates' },
+  { key: 'passport', icon: BadgeCheck, href: '/app/passport' },
   { key: 'profile', icon: User, href: '/app/profile' },
 ] as const;
 

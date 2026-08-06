@@ -21,7 +21,7 @@ export function CrystalFooter() {
 
   const col = {
     services: [
-      { bi: C.nav.howItWorks, href: '/#how-it-works' },
+      { bi: C.nav.howItWorks, href: '/#jeannie-magic' },
       { bi: C.nav.jeannie, href: '/#jeannie' },
       { bi: C.nav.pricing, href: '/#pricing' },
     ],

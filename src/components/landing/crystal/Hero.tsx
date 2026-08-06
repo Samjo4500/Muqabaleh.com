@@ -23,29 +23,30 @@ const HERO_FRAMES: {
 }[] = [
   {
     src: '/images/hero-interview.webp',
-    altEn: 'Candidate preparing for a job interview on Muqabaleh',
-    altAr: 'مرشّحة تستعد لمقابلة عمل عبر مقابلة',
-    objectPosition: 'center_20%',
-    badgeStatus: 'scored',
-  },
-  {
-    src: '/images/hero-interview-meeting.webp',
-    altEn: 'Candidate speaking confidently in a live interview on Muqabaleh',
-    altAr: 'مرشّحة تتحدث بثقة في مقابلة مباشرة عبر مقابلة',
-    objectPosition: 'center_25%',
+    altEn: 'Jeannie — Muqabaleh career agent ready to interview you',
+    altAr: 'جيني — وكيلة مقابلة المهنية مستعدة لإجراء مقابلتك',
+    objectPosition: 'center 18%',
     badgeStatus: 'interview',
   },
   {
+    src: '/images/hero-interview-meeting.webp',
+    altEn: 'Jeannie conducting a live bilingual interview on Muqabaleh',
+    altAr: 'جيني تُجري مقابلة ثنائية اللغة مباشرة عبر مقابلة',
+    objectPosition: 'center 20%',
+    badgeStatus: 'scored',
+  },
+  {
     src: '/images/hero-interview-hired.webp',
-    altEn: 'Candidate hired after a successful interview handshake on Muqabaleh',
-    altAr: 'مرشّحة تُقبل بعد مصافحة ناجحة عقب المقابلة عبر مقابلة',
-    objectPosition: 'center_22%',
+    altEn: 'Candidate hired after Jeannie helped land the interview',
+    altAr: 'مرشّحة تُقبل بعد أن ساعدتها جيني في الوصول للمقابلة',
+    objectPosition: 'center 22%',
     badgeStatus: 'hired',
   },
 ];
 
 export function CrystalHero() {
   const locale = useLocale();
+  const isAr = locale === 'ar';
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
@@ -59,7 +60,6 @@ export function CrystalHero() {
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
-      {/* Background with continuous slow motion + interview frame crossfade */}
       <motion.div
         className="absolute inset-0"
         initial={{ scale: 1.12, opacity: 0.55 }}
@@ -82,11 +82,11 @@ export function CrystalHero() {
             >
               <Image
                 src={current.src}
-                alt={locale === 'ar' ? current.altAr : current.altEn}
+                alt={isAr ? current.altAr : current.altEn}
                 fill
                 priority={frame === 0}
-                className="object-cover"
-                style={{ objectPosition: current.objectPosition.replace('_', ' ') }}
+                className="object-cover mq-hero-face"
+                style={{ objectPosition: current.objectPosition }}
                 sizes="100vw"
                 quality={72}
               />
@@ -96,7 +96,6 @@ export function CrystalHero() {
         <div className="mq-hero-shade absolute inset-0" />
       </motion.div>
 
-      {/* Atmospheric motion — soft orbs, not overlay cards */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <motion.div
           className="absolute -start-10 top-[18%] h-56 w-56 rounded-full bg-teal-400/15 blur-3xl"
@@ -115,8 +114,8 @@ export function CrystalHero() {
         />
       </div>
 
-      {/* Score badge — fixed anchor so every slider frame shows it in the same place */}
-      <div className="mq-hero-score-anchor">
+      {/* Desktop / tablet floating score — kept off the face */}
+      <div className="mq-hero-score-anchor" aria-hidden={false}>
         <AnimatePresence mode="wait">
           <motion.div
             key={current.badgeStatus}
@@ -142,8 +141,7 @@ export function CrystalHero() {
           animate="show"
           className="max-w-3xl text-white"
         >
-          {/* Brand logo — hero-level signal */}
-          <motion.div variants={fadeUp} className="mb-6">
+          <motion.div variants={fadeUp} className="mb-5">
             <motion.div
               className="mq-logo-glow relative inline-flex"
               animate={{ y: [0, -10, 0] }}
@@ -160,11 +158,28 @@ export function CrystalHero() {
             </motion.div>
           </motion.div>
 
+          <motion.p
+            variants={fadeUp}
+            className="mq-kicker mb-3 text-teal-200/90"
+          >
+            <BiInline bi={C.hero.eyebrow} />
+          </motion.p>
+
+          <motion.p
+            variants={fadeUp}
+            className="mq-display mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl"
+          >
+            Jeannie
+            <span className="ms-2 text-teal-200/90" dir="rtl" lang="ar">
+              جيني
+            </span>
+          </motion.p>
+
           <motion.div variants={fadeUp}>
             <T
               as="h1"
               bi={C.hero.headline}
-              className="mq-display mb-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              className="mq-display mb-5 text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
             />
           </motion.div>
 
@@ -172,18 +187,31 @@ export function CrystalHero() {
             <T
               as="p"
               bi={C.hero.sub}
-              className="mb-9 max-w-xl text-base leading-relaxed text-white/80 md:text-lg"
+              className="mb-6 max-w-xl text-base leading-relaxed text-white/80 md:mb-8 md:text-lg"
+            />
+          </motion.div>
+
+          {/* Mobile score — in content flow so it never covers Jeannie's face */}
+          <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 md:hidden">
+            <MuqabalehScoreBadge
+              score={HERO_SCORE}
+              status={current.badgeStatus}
+              locale={locale}
+              size="md"
             />
           </motion.div>
 
           <motion.div variants={fadeUp} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href={localePath('/demo', locale)} className="mq-btn mq-btn-on-dark mq-btn-shimmer">
+              <Link
+                href={localePath('/interview/prequal', locale)}
+                className="mq-btn mq-btn-on-dark mq-btn-shimmer"
+              >
                 <BiInline bi={C.hero.ctaInterview} />
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href={localePath('/#jeannie', locale)} className="mq-btn mq-btn-on-dark-ghost">
+              <Link href={localePath('/#jeannie-magic', locale)} className="mq-btn mq-btn-on-dark-ghost">
                 <BiInline bi={C.hero.ctaJeannie} />
               </Link>
             </motion.div>

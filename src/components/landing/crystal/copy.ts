@@ -6,7 +6,7 @@ export const C = {
   brand: { en: 'Muqabaleh', ar: 'مقابلة' } as Bi,
   nav: {
     services: { en: 'Services', ar: 'الخدمات' },
-    howItWorks: { en: 'Your path', ar: 'مسارك' },
+    howItWorks: { en: 'How Jeannie works', ar: 'كيف تعمل جيني' },
     jeannie: { en: 'Jeannie', ar: 'جيني' },
     forCompanies: { en: 'For companies', ar: 'للشركات' },
     pricing: { en: 'Pricing', ar: 'الأسعار' },
@@ -16,16 +16,17 @@ export const C = {
     getStarted: { en: 'Get started', ar: 'ابدأ الآن' },
   },
   hero: {
+    eyebrow: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
     headline: {
-      en: 'Get scored. Get proven. Jeannie applies.',
-      ar: 'احصل على تقييمك. أثبت جاهزيتك. جيني تقدّم عنك.',
+      en: 'Jeannie interviews you. Then she applies.',
+      ar: 'جيني تُجري مقابلتك. ثم تقدّم عنك.',
     },
     sub: {
-      en: "MENA's hire-ready interview passport — practice with AI, earn verified proof, then let Jeannie apply with your approval. Not spam.",
-      ar: 'جواز مقابلة جاهز للتوظيف في المنطقة — تدرّب مع الذكاء الاصطناعي، احصل على دليل موثّق، ثم دع جيني تقدّم بموافقتك. لا إرسال عشوائي.',
+      en: 'Your bilingual career agent for MENA — she practices with you in Arabic or English, builds your verified passport, then applies only with your approval. Not spam.',
+      ar: 'وكيلتك المهنية ثنائية اللغة للمنطقة — تتدرّب معك بالعربية أو الإنجليزية، تبني جوازك الموثّق، ثم تقدّم فقط بموافقتك. ليس عشوائياً.',
     },
-    ctaInterview: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
-    ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
+    ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+    ctaJeannie: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
   },
   trust: {
@@ -35,31 +36,31 @@ export const C = {
     },
   },
   services: {
-    title: { en: 'Three steps. One clear offer.', ar: 'ثلاث خطوات. عرض واحد واضح.' },
+    title: { en: 'Jeannie, end to end', ar: 'جيني من البداية للنهاية' },
     subtitle: {
-      en: 'Practice. Prove it. Let Jeannie apply.',
-      ar: 'تدرّب. أثبت جاهزيتك. دع جيني تقدّم.',
+      en: 'One agent. Interview, passport, apply — Arabic and English.',
+      ar: 'وكيلة واحدة. مقابلة، جواز، تقديم — بالعربية والإنجليزية.',
     },
     cards: [
       {
-        title: { en: 'AI interview', ar: 'مقابلة ذكية' },
+        title: { en: 'Jeannie interviews you', ar: 'جيني تُجري مقابلتك' },
         body: {
-          en: 'Practice with an interactive AI interviewer. Instant notes and a full scorecard in about 30 seconds.',
-          ar: 'تدرّب مع مقابل ذكاء اصطناعي تفاعلي. ملاحظات فورية وتقرير تقييم كامل خلال نحو ٣٠ ثانية.',
+          en: 'Practice with Jeannie in Arabic or English. Real-time dialogue, instant notes, and a full scorecard.',
+          ar: 'تدرّب مع جيني بالعربية أو الإنجليزية. حوار فوري، ملاحظات مباشرة، وتقرير تقييم كامل.',
         },
         features: [
+          { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
           { en: 'Real-time dialogue', ar: 'حوار فوري' },
           { en: 'Instant scoring', ar: 'تقييم فوري' },
-          { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
         ],
-        cta: { en: 'Try AI interview', ar: 'جرّب المقابلة الذكية' },
-        href: '/demo',
+        cta: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+        href: '/interview/prequal',
       },
       {
-        title: { en: 'Muqabaleh passport', ar: 'جواز مقابلة' },
+        title: { en: 'She builds your passport', ar: 'تبني جوازك' },
         body: {
-          en: 'Turn your score into a shareable, verifiable hire-ready passport — proof employers can trust.',
-          ar: 'حوّل نتيجتك إلى جواز جاهزية قابل للمشاركة والتحقق — دليل يثق به أصحاب العمل.',
+          en: 'Your score becomes a shareable, verifiable hire-ready passport — proof employers can trust.',
+          ar: 'تتحول نتيجتك إلى جواز جاهزية قابل للمشاركة والتحقق — دليل يثق به أصحاب العمل.',
         },
         features: [
           { en: 'Verified score', ar: 'نتيجة موثّقة' },
@@ -70,50 +71,43 @@ export const C = {
         href: '/app/passport',
       },
       {
-        title: { en: 'Jeannie applies', ar: 'جيني تقدّم' },
+        title: { en: 'She applies — you approve', ar: 'هي تقدّم — أنت توافق' },
         body: {
-          en: 'Your interview-verified career agent. She shortlists roles, you approve, she applies with your passport attached.',
-          ar: 'وكيلتك المهنية الموثّقة بالمقابلة. ترشّح الأدوار، أنت توافق، وهي تقدّم مع جوازك مرفقاً.',
+          en: 'Jeannie shortlists roles, waits for your OK, then applies with your passport attached. Not spam.',
+          ar: 'جيني ترشّح الأدوار، تنتظر موافقتك، ثم تقدّم مع جوازك مرفقاً. ليس عشوائياً.',
         },
         features: [
           { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
           { en: 'Passport attached', ar: 'الجواز مرفق' },
           { en: 'Application tracker', ar: 'متتبّع الطلبات' },
         ],
-        cta: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
-        href: '/#jeannie',
+        cta: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
+        href: '/#jeannie-magic',
       },
     ],
   },
   how: {
-    eyebrow: { en: 'Your path', ar: 'مسارك' },
-    title: { en: 'From interview to applied', ar: 'من المقابلة إلى التقديم' },
+    // Kept for legacy references; landing now uses Jeannie Magic as the path.
+    eyebrow: { en: 'How Jeannie works', ar: 'كيف تعمل جيني' },
+    title: { en: 'From interview to invite', ar: 'من المقابلة إلى الدعوة' },
     subtitle: {
-      en: 'One simple path: get scored, earn your passport, then Jeannie works for you.',
-      ar: 'مسار واحد بسيط: احصل على تقييمك، اكسب جوازك، ثم تعمل جيني من أجلك.',
+      en: 'Jeannie interviews you, builds your passport, then applies with your approval.',
+      ar: 'جيني تُجري مقابلتك، تبني جوازك، ثم تقدّم بموافقتك.',
     },
-    ctaInterview: { en: 'Start AI interview', ar: 'ابدأ المقابلة الذكية' },
-    ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
+    ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+    ctaJeannie: { en: 'See the live sample', ar: 'شاهِد المحاكاة الحية' },
     steps: [
       {
-        scene: 'setup' as const,
-        title: { en: 'Shape your AI interview', ar: 'شكّل مقابلتك الذكية' },
-        desc: {
-          en: 'Choose role, seniority, and language. Under a minute — then you begin.',
-          ar: 'اختر الدور والمستوى واللغة. في أقل من دقيقة — ثم تبدأ.',
-        },
-      },
-      {
         scene: 'interview' as const,
-        title: { en: 'Get scored with AI', ar: 'احصل على تقييمك بالذكاء الاصطناعي' },
+        title: { en: 'Jeannie interviews you', ar: 'جيني تُجري مقابلتك' },
         desc: {
-          en: 'Timed questions with instant feedback on content, structure, and confidence.',
-          ar: 'أسئلة موقوتة مع ملاحظات فورية على المحتوى والبنية والثقة.',
+          en: 'Arabic or English. Timed questions with instant feedback.',
+          ar: 'عربية أو إنجليزية. أسئلة موقوتة مع ملاحظات فورية.',
         },
       },
       {
         scene: 'passport' as const,
-        title: { en: 'Earn your passport', ar: 'احصل على جوازك' },
+        title: { en: 'She earns your passport', ar: 'تكسب لك جوازك' },
         desc: {
           en: 'Your score becomes a shareable, verifiable hire-ready passport.',
           ar: 'تتحول نتيجتك إلى جواز جاهزية قابل للمشاركة والتحقق.',
@@ -121,34 +115,50 @@ export const C = {
       },
       {
         scene: 'jeannie' as const,
-        title: { en: 'Jeannie shortlists roles', ar: 'جيني ترشّح الأدوار' },
+        title: { en: 'She shortlists roles', ar: 'ترشّح الأدوار' },
         desc: {
-          en: 'Tell her your targets. She finds fits based on your passport — not spam applies.',
-          ar: 'أخبرها بأهدافك. تجد ما يناسب جوازك — لا تقديمات عشوائية.',
+          en: 'Fits based on your passport and targets — not spam.',
+          ar: 'فرص تناسب جوازك وأهدافك — لا عشوائية.',
         },
       },
       {
         scene: 'apply' as const,
         title: { en: 'You approve — she applies', ar: 'أنت توافق — وهي تقدّم' },
         desc: {
-          en: 'Every application needs your OK. Jeannie sends it with your passport attached.',
-          ar: 'كل تقديم يحتاج موافقتك. جيني ترسله مع جوازك مرفقاً.',
+          en: 'Every application needs your OK, with passport attached.',
+          ar: 'كل تقديم يحتاج موافقتك، مع الجواز مرفقاً.',
         },
       },
     ],
   },
   jeannie: {
-    eyebrow: { en: 'Your career agent', ar: 'وكيلتك المهنية' },
+    eyebrow: { en: 'One agent. Full path.', ar: 'وكيلة واحدة. المسار كامل.' },
     name: { en: 'Jeannie', ar: 'جيني' },
     title: {
-      en: 'Meet Jeannie — she applies with proof',
-      ar: 'تعرّف على جيني — تقدّم ومعها الدليل',
+      en: 'Meet Jeannie — interviewer and career agent',
+      ar: 'تعرّف على جيني — المقابِلة والوكيلة المهنية',
     },
     body: {
-      en: 'Same face you see in the journey. Interview-verified. She shortlists, waits for your approval, then applies professionally with your Muqabaleh passport.',
-      ar: 'نفس الوجه الذي تراه في المسار. موثّقة بالمقابلة. ترشّح، تنتظر موافقتك، ثم تقدّم باحتراف مع جواز مقابلة.',
+      en: 'She interviews you in Arabic or English, turns your score into a Muqabaleh passport, shortlists roles, waits for your approval, then applies with proof.',
+      ar: 'تُجري مقابلتك بالعربية أو الإنجليزية، تحوّل نتيجتك إلى جواز مقابلة، ترشّح الأدوار، تنتظر موافقتك، ثم تقدّم مع الدليل.',
     },
     offers: [
+      {
+        key: 'interview',
+        title: { en: 'Interviews you', ar: 'تُجري مقابلتك' },
+        desc: {
+          en: 'Bilingual practice with instant scoring — Arabic and English.',
+          ar: 'تدريب ثنائي اللغة مع تقييم فوري — عربية وإنجليزية.',
+        },
+      },
+      {
+        key: 'passport',
+        title: { en: 'Builds your passport', ar: 'تبني جوازك' },
+        desc: {
+          en: 'Verified hire-ready proof employers can check.',
+          ar: 'دليل جاهزية موثّق يمكن لأصحاب العمل التحقق منه.',
+        },
+      },
       {
         key: 'shortlist',
         title: { en: 'Shortlists that fit', ar: 'ترشيحات مناسبة' },
@@ -167,44 +177,43 @@ export const C = {
       },
       {
         key: 'apply',
-        title: { en: 'Professional apply', ar: 'تقديم احترافي' },
+        title: { en: 'Applies with proof', ar: 'تقدّم مع الدليل' },
         desc: {
-          en: 'Jeannie applies for you with a clear, professional outreach.',
-          ar: 'جيني تقدّم عنك بتواصل واضح واحترافي.',
-        },
-      },
-      {
-        key: 'passport',
-        title: { en: 'Passport attached', ar: 'الجواز مرفق' },
-        desc: {
-          en: 'Every apply carries your verified Muqabaleh score employers can check.',
-          ar: 'كل تقديم يحمل نتيجة مقابلة موثّقة يمكن لأصحاب العمل التحقق منها.',
+          en: 'Professional apply with your passport attached.',
+          ar: 'تقديم احترافي مع جوازك مرفقاً.',
         },
       },
     ],
-    cta: { en: 'Start free — then unlock Jeannie', ar: 'ابدأ مجاناً — ثم فعّل جيني' },
+    cta: { en: 'Practice with Jeannie — free', ar: 'تدرّب مع جيني — مجاناً' },
     ctaSecondary: { en: 'Compare plans', ar: 'قارن الخطط' },
   },
   jeannieMagic: {
     eyebrow: { en: "Sample of Jeannie's magic", ar: 'عيّنة من سحر جيني' },
     title: { en: 'See how Jeannie works', ar: 'شاهِد كيف تعمل جيني' },
     body: {
-      en: 'A live sample: she reviews roles, picks a fit, asks your approval, applies with your passport — then lands the interview.',
-      ar: 'محاكاة حية: تراجع الفرص، تختار الأنسب، تطلب موافقتك، تقدّم مع جوازك — ثم تصل دعوة المقابلة.',
+      en: 'A live sample: she interviews you, builds your passport, picks a role, asks approval, applies — then lands the interview invite.',
+      ar: 'محاكاة حية: تُجري مقابلتك، تبني جوازك، تختار دوراً، تطلب موافقتك، تقدّم — ثم تصل دعوة المقابلة.',
     },
     steps: [
       {
-        title: { en: 'Reviews jobs', ar: 'تراجع الوظائف' },
+        title: { en: 'Interviews you', ar: 'تُجري مقابلتك' },
         desc: {
-          en: 'Scans MENA roles against your targets and passport signal.',
-          ar: 'تفحص أدوار المنطقة مقابل أهدافك وإشارة جوازك.',
+          en: 'Arabic or English practice with instant scoring.',
+          ar: 'تدريب بالعربية أو الإنجليزية مع تقييم فوري.',
         },
       },
       {
-        title: { en: 'Selects the fit', ar: 'تختار الأنسب' },
+        title: { en: 'Builds your passport', ar: 'تبني جوازك' },
         desc: {
-          en: 'One high-fit shortlist pick — quality over volume.',
-          ar: 'ترشيح واحد عالي التطابق — الجودة قبل الكمية.',
+          en: 'Turns your score into verified hire-ready proof.',
+          ar: 'تحوّل نتيجتك إلى دليل جاهزية موثّق.',
+        },
+      },
+      {
+        title: { en: 'Reviews & selects', ar: 'تراجع وتختار' },
+        desc: {
+          en: 'Scans MENA roles and picks a high-fit shortlist.',
+          ar: 'تفحص أدوار المنطقة وتختار ترشيحاً عالي التطابق.',
         },
       },
       {
@@ -215,22 +224,15 @@ export const C = {
         },
       },
       {
-        title: { en: 'Applies with proof', ar: 'تقدّم مع الدليل' },
+        title: { en: 'Applies & wins invite', ar: 'تقدّم وتفوز بالدعوة' },
         desc: {
-          en: 'Sends a professional packet with your verified passport.',
-          ar: 'ترسل حزمة احترافية مع جوازك الموثّق.',
-        },
-      },
-      {
-        title: { en: 'Wins the interview', ar: 'تفوز بالمقابلة' },
-        desc: {
-          en: 'The employer invites you — passport opened the door.',
-          ar: 'صاحب العمل يدعوك — الجواز فتح الباب.',
+          en: 'Passport attached — the employer invites you.',
+          ar: 'الجواز مرفق — صاحب العمل يدعوك.',
         },
       },
     ],
     cta: { en: 'Unlock Jeannie', ar: 'فعّل جيني' },
-    ctaSecondary: { en: 'Start with free practice', ar: 'ابدأ بالتدريب المجاني' },
+    ctaSecondary: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
   },
   companies: {
     headline: { en: 'Hire with verified signal', ar: 'وظّف بإشارة موثّقة' },

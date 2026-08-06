@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { useSession } from 'next-auth/react';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -142,9 +143,12 @@ function mapApiToProfile(apiData: Record<string, unknown>, locale: string): Inte
   // If API returned availability data, use it to build the weekly calendar
   const availabilityByDay = new Map<number, string[]>();
   for (const a of rawAvailability) {
-    const dow = a.weekday as number;
-    const startTime = a.startTime as string;
-    if (a.isAvailable && startTime) {
+    const dow = Number(a.weekday ?? a.dayOfWeek);
+    const startTime =
+      (a.startTime as string) ||
+      ((a.slots as { time?: string }[] | undefined)?.[0]?.time ?? '');
+    const available = a.isAvailable !== false;
+    if (Number.isFinite(dow) && available && startTime) {
       if (!availabilityByDay.has(dow)) availabilityByDay.set(dow, []);
       availabilityByDay.get(dow)!.push(startTime);
     }
@@ -194,7 +198,10 @@ function mapApiToProfile(apiData: Record<string, unknown>, locale: string): Inte
     location: 'Saudi Arabia',
     flagEmoji: '🇸🇦',
     rating: (apiData.rating as number) || 0,
-    reviewCount: mappedReviews.length || (apiData.totalInterviews as number) || 0,
+    reviewCount:
+      typeof apiData.reviewCount === 'number'
+        ? (apiData.reviewCount as number)
+        : mappedReviews.length,
     totalInterviews: (apiData.totalInterviews as number) || 0,
     price: Math.round(((apiData.hourlyRate as number) || 2900) / 100),
     pricePerMin: Math.round(((apiData.hourlyRate as number) || 2900) / 60 / 100),
@@ -303,6 +310,7 @@ export default function InterviewerProfilePage() {
   /* ── State ── */
   const [profile, setProfile] = useState<InterviewerProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<'not_found' | 'unavailable' | null>(null);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -313,18 +321,27 @@ export default function InterviewerProfilePage() {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
+      setProfile(null);
       try {
         const res = await fetch(`/api/interviewers/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
+        if (res.status === 404) {
+          if (!cancelled) setLoadError('not_found');
+          return;
+        }
+        if (!res.ok) {
+          if (!cancelled) setLoadError('unavailable');
+          return;
+        }
         if (json.interviewer) {
           const mapped = mapApiToProfile(json.interviewer, locale);
           if (!cancelled) setProfile(mapped);
-        } else {
-          throw new Error('No interviewer data');
+        } else if (!cancelled) {
+          setLoadError('not_found');
         }
       } catch {
-        if (!cancelled) setProfile(getMockProfile(id, locale));
+        if (!cancelled) setLoadError('unavailable');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -358,8 +375,13 @@ export default function InterviewerProfilePage() {
 
     // If not logged in, redirect to signin with callback
     if (authStatus !== 'authenticated') {
-      const currentPath = window.location.pathname;
-      router.push(`/${locale}/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`);
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(
+        localePath(
+          `/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`,
+          locale,
+        ),
+      );
       return;
     }
 
@@ -382,7 +404,7 @@ export default function InterviewerProfilePage() {
       endTime,
       duration: String(duration),
     });
-    router.push(`/${locale}/book/${id}?${qsParams.toString()}`);
+    router.push(localePath(`/book/${id}?${qsParams.toString()}`, locale));
   }, [selectedSlot, id, locale, router, authStatus]);
 
   /* ── Render ── */
@@ -390,6 +412,36 @@ export default function InterviewerProfilePage() {
     <AtelierShell>
       <main className="mq-wrap pb-20 pt-8">
         {loading && <LoadingSkeleton />}
+
+        {!loading && loadError && (
+          <div className="mx-auto mt-16 max-w-lg rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-12 text-center">
+            <h1 className="mq-display text-2xl font-bold text-white">
+              {loadError === 'not_found'
+                ? locale === 'ar'
+                  ? 'المحاور غير موجود'
+                  : 'Interviewer not found'
+                : locale === 'ar'
+                  ? 'تعذّر تحميل الملف'
+                  : 'Profile unavailable'}
+            </h1>
+            <p className="mt-3 text-sm text-white/55">
+              {loadError === 'not_found'
+                ? locale === 'ar'
+                  ? 'تحقق من الرابط أو تصفّح قائمة المحاورين.'
+                  : 'Check the link or browse the interviewer list.'
+                : locale === 'ar'
+                  ? 'حاول مرة أخرى بعد لحظات.'
+                  : 'Please try again in a moment.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push(localePath('/interviewers', locale))}
+              className="mq-btn mq-btn-primary mt-6 inline-flex px-5"
+            >
+              {locale === 'ar' ? 'تصفّح المحاورين' : 'Browse interviewers'}
+            </button>
+          </div>
+        )}
 
         {!loading && profile && (
           <div className="mx-auto mt-4 mb-16 grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-5">
@@ -706,17 +758,6 @@ export default function InterviewerProfilePage() {
           </div>
         )}
 
-        {!loading && !profile && (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="mb-4 rounded-2xl bg-white/5 p-5">
-              <MapPin size={40} strokeWidth={1.75} className="text-[var(--text-faint)]" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">
-              {locale === 'ar' ? 'لم يتم العثور على المحاور' : 'Interviewer not found'}
-            </h3>
-          </div>
-        )}
-
         {/* Mobile-only floating Book button bar */}
         {!loading && profile && selectedSlot && (
           <div className="fixed bottom-20 left-0 right-0 z-40 px-4 md:hidden">
@@ -733,145 +774,4 @@ export default function InterviewerProfilePage() {
       </main>
     </AtelierShell>
   );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Mock Data (used when API is unavailable)                            */
-/* ------------------------------------------------------------------ */
-
-function getMockProfile(id: string, locale: string): InterviewerProfile {
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
-
-  const days: DaySlots[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const dow = d.getDay();
-    const isWeekend = dow === 5 || dow === 6; // Fri, Sat
-    const dayName = locale === 'ar' ? DAY_NAMES_AR[dow] : DAY_NAMES_EN[dow];
-
-    const slots: Slot[] = ALL_TIME_SLOTS.map((time) => {
-      const hour = parseInt(time.split(':')[0], 10);
-      const booked = !isWeekend && Math.random() < 0.2;
-      return {
-        time,
-        available: isWeekend ? false : !booked && hour >= 10 && hour <= 15,
-      };
-    });
-
-    days.push({ date: dateStr, dayLabel: dayName, slots });
-  }
-
-  if (locale === 'ar') {
-    return {
-      id,
-      name: 'د. سارة المنصوري',
-      nameAr: 'د. سارة المنصوري',
-      initials: 'سم',
-      photoUrl: '/images/interviewers/int-f1.webp',
-      title: 'مديرة موارد بشرية — ١٢ سنة',
-      titleAr: 'مديرة موارد بشرية — ١٢ سنة',
-      location: 'الرياض',
-      flagEmoji: '🇸🇦',
-      rating: 4.8,
-      reviewCount: 127,
-      totalInterviews: 127,
-      price: 29,
-      pricePerMin: 1,
-      languages: ['AR', 'EN'],
-      languageLabels: ['العربية', 'English'],
-      specialties: ['موارد بشرية', 'تطوير تنظيمي', 'توظيف'],
-      industries: ['TECH', 'RETAIL'],
-      bio: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب. عملت مع كبرى الشركات في المنطقة العربية وأساعدت في بناء فرق عمل عالية الأداء. أسعى دائماً لتقديم تجربة مقابلة واقعية ومفيدة للمرشحين، مع التركيز على نقاط القوة والتحسين. مؤهلة من معهد CIPD البريطاني وعضو في جمعية إدارة الموارد البشرية السعودية.',
-      bioAr: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب. عملت مع كبرى الشركات في المنطقة العربية وأساعدت في بناء فرق عمل عالية الأداء. أسعى دائماً لتقديم تجربة مقابلة واقعية ومفيدة للمرشحين، مع التركيز على نقاط القوة والتحسين. مؤهلة من معهد CIPD البريطاني وعضو في جمعية إدارة الموارد البشرية السعودية.',
-      videoUrl: null,
-      videoPoster: null,
-      isOnline: true,
-      timezone: 'الرياض (GMT+3)',
-      reviews: [
-        {
-          initials: 'عأ',
-          name: 'مرشح · مبيعات',
-          role: 'Sales',
-          date: '١٥ يناير ٢٠٢٥',
-          rating: 5,
-          comment: 'مقابلة ممتازة وساعدتني كثيراً في التحضير. الأسئلة كانت واقعية والتغذية الراجعة مفصلة جداً. أنصح بها بشدة لكل من يستعد لمقابلة عمل.',
-        },
-        {
-          initials: 'نم',
-          name: 'مرشح · تقنية',
-          role: 'Tech',
-          date: '١٠ يناير ٢٠٢٥',
-          rating: 5,
-          comment: 'تجربة رائعة! د. سارة تسأل أسئلة ذكية وتعطي ملاحظات بنّاءة. أشعر بثقة أكبر الآن بعد المقابلة. سأحجز مرة أخرى بالتأكيد.',
-        },
-        {
-          initials: 'خش',
-          name: 'مرشح · مالية',
-          role: 'Finance',
-          date: '٥ يناير ٢٠٢٥',
-          rating: 4,
-          comment: 'مقابلة جيدة عامة لكن أتمنى لو كان هناك تركيز أكثر على الأسئلة التقنية المتخصصة. التغذية الراجعة كانت مفيدة.',
-        },
-      ],
-      availability: days,
-    };
-  }
-
-  return {
-    id,
-    name: 'Dr. Sarah Al-Mansouri',
-    nameAr: 'د. سارة المنصوري',
-    initials: 'SM',
-    photoUrl: '/images/interviewers/int-f1.webp',
-    title: 'HR Director — 12 years',
-    titleAr: 'مديرة موارد بشرية — ١٢ سنة',
-    location: 'Riyadh',
-    flagEmoji: '🇸🇦',
-    rating: 4.8,
-    reviewCount: 127,
-    totalInterviews: 127,
-    price: 29,
-    pricePerMin: 1,
-    languages: ['AR', 'EN'],
-    languageLabels: ['العربية', 'English'],
-    specialties: ['Human Resources', 'Org Development', 'Talent Acquisition'],
-    industries: ['TECH', 'RETAIL'],
-    bio: 'HR expert with 12+ years across tech and government sectors. Specialized in talent acquisition, organizational development, and performance management. I\'ve worked with leading organizations in the MENA region and helped build high-performing teams. My goal is to provide a realistic, insightful mock interview experience that helps candidates identify their strengths and areas for improvement. CIPD-qualified and member of the Saudi HR Management Association.',
-    bioAr: 'خبيرة في موارد بشرية مع أكثر من ١٢ عاماً من الخبرة في قطاع التقنية والحكومة. متخصصة في التوظيف والتطوير التنظيمي وإدارة المواهب.',
-    videoUrl: null,
-    videoPoster: null,
-    isOnline: true,
-    timezone: 'Riyadh (GMT+3)',
-    reviews: [
-      {
-        initials: 'OA',
-        name: 'Candidate · Sales',
-        role: 'Sales',
-        date: 'Jan 15, 2025',
-        rating: 5,
-        comment: 'Incredible interviewer! Asked very relevant behavioral questions and gave detailed, actionable feedback. Highly recommended.',
-      },
-      {
-        initials: 'NM',
-        name: 'Candidate · Tech',
-        role: 'Tech',
-        date: 'Jan 10, 2025',
-        rating: 5,
-        comment: 'Amazing experience! Dr. Sarah asks smart questions and provides constructive notes. I feel much more confident now. Will definitely book again.',
-      },
-      {
-        initials: 'KS',
-        name: 'Candidate · Finance',
-        role: 'Finance',
-        date: 'Jan 5, 2025',
-        rating: 4,
-        comment: 'Good session overall. Would have liked more technical depth but the feedback was useful.',
-      },
-    ],
-    availability: days,
-  };
 }

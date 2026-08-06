@@ -4,6 +4,7 @@ import { evaluateAnswer } from '@/lib/ai/interviewer';
 import { generateFinalReport } from '@/lib/ai/report-generator';
 import type { InterviewPlan, PlanQuestion } from './plan-generator';
 import { memoryStore } from './memory-store';
+import { syncSessionToPassportInterview } from './sync-passport-interview';
 
 export async function getSessionBundle(sessionId: string, userId: string) {
   try {
@@ -395,46 +396,87 @@ export async function finalizeReport(sessionId: string, userId: string) {
   if (!bundle?.plan) throw new Error('Session not found');
 
   if (bundle.source === 'db') {
-    if (bundle.session.fullReport) return bundle.session.fullReport;
-    const responses = bundle.session.responses.map((r) => {
-      const q = planQuestion(bundle.plan!, r.questionId);
-      return {
-        questionId: r.questionId,
-        questionText: q?.questionTextEn || q?.questionText || r.questionId,
-        questionTextAr: q?.questionTextAr,
-        userAnswer: r.userAnswer,
-        contentScore: r.contentScore,
-        structureScore: r.structureScore,
-        confidenceScore: r.confidenceScore,
-        overallScore: r.overallScore,
-        feedbackText: r.feedbackText,
-        improvementTip: r.improvementTip,
-      };
-    });
+    const prequal = bundle.session.prequal;
+    const avg = (key: 'contentScore' | 'structureScore' | 'confidenceScore') => {
+      const vals = bundle.session.responses
+        .map((r) => r[key])
+        .filter((n): n is number => typeof n === 'number');
+      if (!vals.length) return null;
+      return vals.reduce((a, b) => a + b, 0) / vals.length;
+    };
 
-    const report = await generateFinalReport({
-      role: bundle.session.prequal.targetRole,
-      level: bundle.session.prequal.seniorityLevel,
-      language: bundle.session.language,
-      responses,
-      strengthHints: bundle.session.strengths,
-      weaknessHints: bundle.session.weaknesses,
-    });
+    let report =
+      bundle.session.fullReport &&
+      typeof bundle.session.fullReport === 'object' &&
+      'overallScore' in (bundle.session.fullReport as object)
+        ? (bundle.session.fullReport as Awaited<ReturnType<typeof generateFinalReport>>)
+        : null;
 
-    const started = bundle.session.startedAt?.getTime() ?? Date.now();
-    await db.interviewSession.update({
-      where: { id: sessionId },
-      data: {
-        status: 'completed',
-        completedAt: new Date(),
-        overallScore: report.overallScore,
+    if (!report) {
+      const responses = bundle.session.responses.map((r) => {
+        const q = planQuestion(bundle.plan!, r.questionId);
+        return {
+          questionId: r.questionId,
+          questionText: q?.questionTextEn || q?.questionText || r.questionId,
+          questionTextAr: q?.questionTextAr,
+          userAnswer: r.userAnswer,
+          contentScore: r.contentScore,
+          structureScore: r.structureScore,
+          confidenceScore: r.confidenceScore,
+          overallScore: r.overallScore,
+          feedbackText: r.feedbackText,
+          improvementTip: r.improvementTip,
+        };
+      });
+
+      report = await generateFinalReport({
+        role: prequal.targetRole,
+        level: prequal.seniorityLevel,
+        language: bundle.session.language,
+        responses,
+        strengthHints: bundle.session.strengths,
+        weaknessHints: bundle.session.weaknesses,
+      });
+
+      const started = bundle.session.startedAt?.getTime() ?? Date.now();
+      await db.interviewSession.update({
+        where: { id: sessionId },
+        data: {
+          status: 'completed',
+          completedAt: new Date(),
+          overallScore: report.overallScore,
+          strengths: report.strengths,
+          weaknesses: report.weaknesses,
+          actionItems: report.actionItems as object,
+          fullReport: report as object,
+          totalDurationSeconds: Math.round((Date.now() - started) / 1000),
+        },
+      });
+    }
+
+    // Bridge into legacy Interview so passport / certificates / verify work
+    try {
+      await syncSessionToPassportInterview({
+        sessionId,
+        userId,
+        overallScore10: report.overallScore,
+        contentScore10: avg('contentScore'),
+        structureScore10: avg('structureScore'),
+        confidenceScore10: avg('confidenceScore'),
         strengths: report.strengths,
         weaknesses: report.weaknesses,
-        actionItems: report.actionItems as object,
-        fullReport: report as object,
-        totalDurationSeconds: Math.round((Date.now() - started) / 1000),
-      },
-    });
+        summary: report.summary,
+        targetRole: prequal.targetRole,
+        targetIndustry: prequal.targetIndustry,
+        seniorityLevel: prequal.seniorityLevel,
+        interviewRound: prequal.interviewRound,
+        questionTypes: prequal.questionTypes,
+        language: bundle.session.language,
+      });
+    } catch (err) {
+      console.error('[finalizeReport] passport sync failed', err);
+    }
+
     return report;
   }
 

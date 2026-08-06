@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { PassportView } from '@/components/passport/passport-view';
-import { buildPassport } from '@/lib/passport';
+import { buildPassport, type PassportPayload } from '@/lib/passport';
 import { localePath } from '@/i18n/navigation';
 
 export default async function PublicPassportPage({
@@ -12,7 +12,14 @@ export default async function PublicPassportPage({
 }) {
   const { locale, userId } = await params;
   const t = await getTranslations({ locale, namespace: 'app.passport' });
-  const passport = await buildPassport(userId, { forPublic: true });
+
+  let passport: PassportPayload | null = null;
+  try {
+    passport = await buildPassport(userId, { forPublic: true });
+  } catch (err) {
+    console.error('[public passport page]', err);
+    passport = null;
+  }
 
   if (!passport) {
     return (

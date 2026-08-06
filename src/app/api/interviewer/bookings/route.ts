@@ -43,13 +43,32 @@ export async function GET(req: NextRequest) {
           where,
           orderBy: { scheduledAt: 'desc' },
           include: {
+            user: { select: { name: true, email: true } },
             review: {
               select: { id: true, rating: true },
             },
           },
         });
 
-        return NextResponse.json({ bookings });
+        return NextResponse.json({
+          bookings: bookings.map((b) => ({
+            id: b.id,
+            candidateName: b.user?.name || b.user?.email || 'Candidate',
+            candidateEmail: b.user?.email || '',
+            scheduledAt: b.scheduledAt,
+            durationMinutes: b.durationMinutes,
+            status: b.status,
+            meetingLink: b.meetingLink,
+            interviewerPayout: b.interviewerPayout,
+            priceTotal: b.priceTotal,
+            cancelledBy: b.cancelledBy,
+            createdAt: b.createdAt,
+            updatedAt: b.updatedAt,
+            interviewerRating: b.interviewerRating,
+            hasEvaluation: Boolean(b.interviewerNotes),
+            review: b.review,
+          })),
+        });
       }
     } catch (dbErr) {
       console.warn('[GET /api/interviewer/bookings] DB unavailable:', dbErr);

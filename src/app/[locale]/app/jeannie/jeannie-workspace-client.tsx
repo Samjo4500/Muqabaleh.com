@@ -28,6 +28,14 @@ type Entitlements = {
   coverLetterUpload?: boolean;
   tracker?: 'none' | 'standard' | 'full';
   plan: { label: { en: string; ar: string }; monthlyApplies: number };
+  sla?: {
+    promised: number;
+    delivered: number;
+    remaining: number;
+    periodEnd: string | null;
+    status: string | null;
+    rolledIn: number;
+  };
 };
 
 type Profile = {
@@ -286,8 +294,8 @@ export function JeannieWorkspaceClient() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-white/55">
             {isAr
-              ? 'ترشيح → موافقة → تقديم. ليس عشوائياً.'
-              : 'Shortlist → approve → apply. NOT SPAM.'}
+              ? 'جيني تبحث عن وظائف خارجية → توافق → تقدّم بالبريد. ليس عشوائياً.'
+              : 'Jeannie finds external roles → you approve → she emails your packet. NOT SPAM.'}
           </p>
         </div>
         <div className="rounded-2xl border border-teal-300/25 bg-teal-400/10 px-4 py-3 text-sm text-teal-100">
@@ -297,9 +305,16 @@ export function JeannieWorkspaceClient() {
           </div>
           <p className="mt-1 text-xs text-teal-100/80">
             {isAr
-              ? `متبقي ${entitlements?.appliesLeft ?? 0} من ${entitlements?.plan.monthlyApplies ?? 0} تقديمات`
-              : `${entitlements?.appliesLeft ?? 0} / ${entitlements?.plan.monthlyApplies ?? 0} applies left`}
+              ? `وعد الفترة: ${entitlements?.sla?.delivered ?? 0}/${entitlements?.sla?.promised ?? entitlements?.plan.monthlyApplies ?? 0} مُسلَّم · متبقي تشغيل ${entitlements?.appliesLeft ?? 0}`
+              : `Period promise: ${entitlements?.sla?.delivered ?? 0}/${entitlements?.sla?.promised ?? entitlements?.plan.monthlyApplies ?? 0} delivered · ${entitlements?.appliesLeft ?? 0} ops left`}
           </p>
+          {(entitlements?.sla?.rolledIn ?? 0) > 0 ? (
+            <p className="mt-1 text-[11px] text-amber-100/90">
+              {isAr
+                ? `يشمل ${entitlements?.sla?.rolledIn} ترحيلات من فترة سابقة — نفي بوعدنا.`
+                : `Includes ${entitlements?.sla?.rolledIn} rolled from prior period — we keep the promise.`}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -469,7 +484,7 @@ export function JeannieWorkspaceClient() {
                               className="mq-btn mq-btn-primary inline-flex items-center gap-1.5 !min-h-[40px] px-3 text-xs"
                             >
                               <Check size={14} />
-                              {isAr ? 'موافقة' : 'Approve'}
+                              {isAr ? 'موافقة وتقديم' : 'Approve & apply'}
                             </button>
                             <button
                               type="button"

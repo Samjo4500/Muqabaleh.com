@@ -1,7 +1,8 @@
 import { db } from '@/lib/db';
 import { JeannieOpportunityStatus } from '@prisma/client';
-import { assertCanApply, getEntitlementSnapshot } from '@/lib/plans/entitlements';
+import { getEntitlementSnapshot } from '@/lib/plans/entitlements';
 import { saveMediaAsset } from '@/lib/ats/media';
+import { deliverApprovedOpportunity } from './apply-delivery';
 
 const APPROVABLE: JeannieOpportunityStatus[] = [
   JeannieOpportunityStatus.SUGGESTED,
@@ -39,7 +40,14 @@ async function latestPassportVerificationId(userId: string): Promise<string | nu
   return interview?.verificationId ?? null;
 }
 
-export async function approveOpportunity(userId: string, opportunityId: string) {
+/**
+ * Approve opportunity (NOT SPAM gate), then Jeannie auto-delivers the apply.
+ */
+export async function approveOpportunity(
+  userId: string,
+  opportunityId: string,
+  opts?: { autoApply?: boolean },
+) {
   const opp = await db.jeannieOpportunity.findFirst({
     where: { id: opportunityId, userId },
   });
@@ -48,14 +56,40 @@ export async function approveOpportunity(userId: string, opportunityId: string) 
     return { ok: false as const, error: `Cannot approve from status ${opp.status}`, status: 400 };
   }
 
+  const passportVerificationId =
+    opp.passportVerificationId || (await latestPassportVerificationId(userId));
+
   const updated = await db.jeannieOpportunity.update({
     where: { id: opp.id },
     data: {
       status: JeannieOpportunityStatus.APPROVED,
       approvedAt: new Date(),
+      passportVerificationId,
     },
   });
-  return { ok: true as const, opportunity: updated };
+
+  const autoApply = opts?.autoApply !== false;
+  if (!autoApply) {
+    return { ok: true as const, opportunity: updated };
+  }
+
+  const delivered = await deliverApprovedOpportunity(userId, opportunityId);
+  if (!delivered.ok) {
+    // Stay APPROVED so user can retry apply after fixing CV / quota
+    return {
+      ok: true as const,
+      opportunity: updated,
+      deliveryError: delivered.error,
+    };
+  }
+
+  return {
+    ok: true as const,
+    opportunity: delivered.opportunity,
+    appliesLeft: delivered.appliesLeft,
+    mode: delivered.mode,
+    sla: delivered.sla,
+  };
 }
 
 export async function rejectOpportunity(userId: string, opportunityId: string) {
@@ -75,9 +109,8 @@ export async function rejectOpportunity(userId: string, opportunityId: string) {
 }
 
 /**
- * NOT SPAM apply path: requires prior approval.
- * - Internal open jobs → create JobApplication + debit quota → APPLIED
- * - External / stub shortlists → prepare PACKET_READY (no debit until a live board connector exists)
+ * Manual/retry apply path after approval (or FAILED retry).
+ * External jobs → email / URL packet delivery with SLA debit.
  */
 export async function applyOpportunity(
   userId: string,
@@ -101,7 +134,8 @@ export async function applyOpportunity(
 
   if (
     opp.status !== JeannieOpportunityStatus.APPROVED &&
-    opp.status !== JeannieOpportunityStatus.FAILED
+    opp.status !== JeannieOpportunityStatus.FAILED &&
+    opp.status !== JeannieOpportunityStatus.PACKET_READY
   ) {
     return {
       ok: false as const,
@@ -117,11 +151,6 @@ export async function applyOpportunity(
     });
     return { ok: false as const, error: 'This opportunity has expired', status: 400 };
   }
-
-  await db.jeannieOpportunity.update({
-    where: { id: opp.id },
-    data: { status: JeannieOpportunityStatus.APPLYING, failureReason: null },
-  });
 
   try {
     let cvAssetId = opp.cvAssetId;
@@ -151,13 +180,6 @@ export async function applyOpportunity(
           cvFileName: opts.cv.filename,
         },
       });
-    } else if (!cvAssetId) {
-      const pool = await db.candidatePool.findUnique({ where: { userId } });
-      cvAssetId = pool?.cvAssetId || null;
-    }
-
-    if (!cvAssetId) {
-      throw new Error('CV required — upload a CV before Jeannie applies');
     }
 
     const coverLetter = opts?.coverLetter?.trim() || opp.coverLetter || null;
@@ -165,103 +187,31 @@ export async function applyOpportunity(
       throw new Error('Cover letter upload is not included in your plan');
     }
 
-    const passportVerificationId = await latestPassportVerificationId(userId);
+    const passportVerificationId =
+      opp.passportVerificationId || (await latestPassportVerificationId(userId));
 
-    // External / stub shortlists: prepare packet only — do not debit apply quota.
-    if (!opp.b2bJobId) {
-      const updated = await db.jeannieOpportunity.update({
-        where: { id: opp.id },
-        data: {
-          status: JeannieOpportunityStatus.PACKET_READY,
-          coverLetter,
-          cvAssetId,
-          passportVerificationId,
-          failureReason: opp.externalUrl
-            ? null
-            : 'Packet ready. Live external board submission is not connected yet — quota not charged.',
-        },
-      });
-      return {
-        ok: true as const,
-        opportunity: updated,
-        appliesLeft: snap.appliesLeft,
-        mode: 'external_packet' as const,
-      };
+    await db.jeannieOpportunity.update({
+      where: { id: opp.id },
+      data: {
+        status: JeannieOpportunityStatus.APPROVED,
+        coverLetter,
+        cvAssetId,
+        passportVerificationId,
+        failureReason: null,
+      },
+    });
+
+    const delivered = await deliverApprovedOpportunity(userId, opportunityId);
+    if (!delivered.ok) {
+      return { ok: false as const, error: delivered.error, status: delivered.status };
     }
-
-    const gate = await assertCanApply(userId);
-    if (!gate.ok) throw new Error(gate.error);
-
-    const job = await db.b2BJob.findFirst({
-      where: { id: opp.b2bJobId, isPublic: true, status: 'OPEN' },
-    });
-    if (!job) throw new Error('Job is no longer open');
-
-    const result = await db.$transaction(async (tx) => {
-      const existing = await tx.jobApplication.findUnique({
-        where: {
-          jobId_candidateId: { jobId: job.id, candidateId: userId },
-        },
-      });
-
-      let jobApplicationId = existing?.id ?? null;
-      if (!existing) {
-        const pool = await tx.candidatePool.findUnique({ where: { userId } });
-        const created = await tx.jobApplication.create({
-          data: {
-            jobId: job.id,
-            candidateId: userId,
-            stage: 'NEW',
-            source: 'JEANNIE',
-            coverLetter,
-            cvAssetId,
-            photoAssetId: pool?.photoAssetId || null,
-            score:
-              pool?.muqabalehScore != null
-                ? Math.round(pool.muqabalehScore)
-                : opp.matchScore,
-          },
-        });
-        jobApplicationId = created.id;
-      }
-
-      const debited = await tx.user.updateMany({
-        where: { id: userId, appliesLeft: { gt: 0 } },
-        data: { appliesLeft: { decrement: 1 } },
-      });
-      if (debited.count === 0) {
-        throw new Error('Monthly apply quota exhausted');
-      }
-
-      const user = await tx.user.findUnique({
-        where: { id: userId },
-        select: { appliesLeft: true },
-      });
-
-      const updated = await tx.jeannieOpportunity.update({
-        where: { id: opp.id },
-        data: {
-          status: JeannieOpportunityStatus.APPLIED,
-          appliedAt: new Date(),
-          coverLetter,
-          cvAssetId,
-          jobApplicationId,
-          passportVerificationId,
-          failureReason: null,
-        },
-      });
-
-      return {
-        opportunity: updated,
-        appliesLeft: user?.appliesLeft ?? 0,
-      };
-    });
 
     return {
       ok: true as const,
-      opportunity: result.opportunity,
-      appliesLeft: result.appliesLeft,
-      mode: 'internal' as const,
+      opportunity: delivered.opportunity,
+      appliesLeft: delivered.appliesLeft,
+      mode: delivered.mode,
+      sla: delivered.sla,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Apply failed';

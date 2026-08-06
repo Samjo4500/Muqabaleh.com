@@ -808,6 +808,9 @@
     "sidebar": {
       "dashboard": "نظرة عامة",
       "interviews": "مقابلاتي",
+      "practice": "تدريب بالذكاء الاصطناعي",
+      "applications": "طلباتي",
+      "jobs": "بوابة الوظائف",
       "packages": "الباقات",
       "payments": "الدفعات",
       "certificates": "تقاريري الموثّقة",
@@ -815,6 +818,23 @@
       "bookings": "الحجوزات",
       "sessionsLeft": "{count} جلسات متبقية",
       "signOut": "تسجيل الخروج"
+    },
+    "applications": {
+      "title": "طلباتي",
+      "subtitle": "تابع الشواغر التي تقدّمت لها وحالة كل طلب.",
+      "loading": "جارٍ تحميل الطلبات…",
+      "empty": "لم تتقدم لأي شاغر بعد.",
+      "browseJobs": "تصفّح بوابة الوظائف",
+      "stage": {
+        "NEW": "مُرسل",
+        "REVIEWING": "قيد المراجعة",
+        "SCREENING": "فرز",
+        "INTERVIEW": "مقابلة",
+        "OFFER": "عرض",
+        "HIRED": "تم التوظيف",
+        "REJECTED": "غير مختار",
+        "WITHDRAWN": "منسحب"
+      }
     },
     "dashboard": {
       "welcome": "مرحباً، {name}",

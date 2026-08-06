@@ -3,10 +3,11 @@
 import type { ReactNode } from 'react';
 import { useLocale } from 'next-intl';
 import { AppChromeHeader } from '@/components/chrome/AppChromeHeader';
+import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 
 /**
  * Lightweight atelier chrome for product flows (demo, prequal, session, report).
- * Logo + back — no marketing navbar/footer.
+ * Logo + back + language switch — no marketing navbar/footer.
  */
 export function AtelierFlowShell({
   children,
@@ -36,6 +37,7 @@ export function AtelierFlowShell({
         <div className="mq-orb mq-orb-c" />
       </div>
 
+      <LanguageSwitcherFixed />
       <AppChromeHeader trailing={trailing} showBack={showBack} maxWidthClass={maxWidthClass} />
 
       <div className="relative z-10 flex flex-1 flex-col">{children}</div>

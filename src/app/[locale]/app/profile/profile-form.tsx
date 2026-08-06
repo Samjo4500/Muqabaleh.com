@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { User, Lock, AlertTriangle, Loader2, Mail } from 'lucide-react';
+import { User, Lock, AlertTriangle, Loader2, Mail, BadgeCheck } from 'lucide-react';
+import { localePath } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -180,7 +182,16 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   /* ================================================================ */
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+        <Link
+          href={localePath('/app/passport', locale)}
+          className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-teal-300/30 bg-teal-400/10 px-3.5 text-sm font-semibold text-teal-200 transition-colors hover:bg-teal-400/15"
+        >
+          <BadgeCheck size={16} strokeWidth={1.75} />
+          {t('viewPassport')}
+        </Link>
+      </div>
 
       {/* ── Profile form ── */}
       <GlowCard className="space-y-5 p-6">

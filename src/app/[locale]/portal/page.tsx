@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { pageMetadata } from '@/lib/seo';
-import { PortalHomeClient } from './portal-home-client';
+import { PortalParked } from '@/components/portal/PortalParked';
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -10,15 +10,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/portal',
-    titleAr: 'بوابة الوظائف — مقابلة',
-    titleEn: 'Job Portal — Muqabaleh',
-    descAr: 'تصفّح الشواغر، انضم لقاعدة المواهب، أو اطلب عرضاً لنشر وظائف شركتك.',
-    descEn: 'Browse vacancies, join the talent pool, or request a demo to post company roles.',
+    titleAr: 'بوابة الوظائف قريباً — مقابلة',
+    titleEn: 'Job Portal coming soon — Muqabaleh',
+    descAr: 'السوق متوقفة مؤقتاً. احصل على جواز مقابلة ودع جيني تقدّم عنك باحتراف.',
+    descEn: 'Marketplace paused for now. Get your Muqabaleh passport and let Jeannie apply professionally for you.',
   });
 }
 
 export default async function PortalPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PortalHomeClient />;
+  return <PortalParked />;
 }

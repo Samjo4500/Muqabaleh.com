@@ -9,7 +9,6 @@ export const C = {
     howItWorks: { en: 'For job seekers', ar: 'للباحثين عن عمل' },
     forCompanies: { en: 'For companies', ar: 'للشركات' },
     pricing: { en: 'Pricing', ar: 'الأسعار' },
-    jobs: { en: 'Job Portal', ar: 'بوابة الوظائف' },
     partners: { en: 'Partners', ar: 'الشركاء' },
     blog: { en: 'Blog', ar: 'المدونة' },
     login: { en: 'Log in', ar: 'تسجيل الدخول' },
@@ -17,15 +16,15 @@ export const C = {
   },
   hero: {
     headline: {
-      en: 'Walk into every interview ready.',
-      ar: 'ادخل كل مقابلة وأنت مستعد.',
+      en: 'Get scored. Get proven. Jeannie applies.',
+      ar: 'احصل على تقييمك. أثبت جاهزيتك. جيني تقدّم عنك.',
     },
     sub: {
-      en: 'Practice with AI, book human experts by the hour, and get discovered by employers — one platform for your next offer.',
-      ar: 'تدرّب مع الذكاء الاصطناعي، احجز خبراء بشريين بالساعة، ودع الشركات تكتشفك — منصة واحدة لعرضك الوظيفي القادم.',
+      en: "MENA's hire-ready interview passport — practice with AI, verify with humans, then let Jeannie apply professionally on your behalf.",
+      ar: 'جواز مقابلة جاهز للتوظيف في المنطقة — تدرّب مع الذكاء الاصطناعي، وثّق مع خبراء بشريين، ثم دع جيني تقدّم عنك باحتراف.',
     },
     ctaInterview: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
-    ctaJobs: { en: 'Job Portal', ar: 'بوابة الوظائف' },
+    ctaJeannie: { en: 'See how Jeannie works', ar: 'تعرّف على جيني' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
     statInterviews: { en: '10,000+ interviews', ar: '+١٠٬٠٠٠ مقابلة' },
     statPartners: { en: '500+ HR partners', ar: '+٥٠٠ شريك موارد بشرية' },
@@ -33,22 +32,22 @@ export const C = {
   },
   trust: {
     text: {
-      en: 'Trusted by leading teams across MENA',
-      ar: 'موثوقة لدى الفرق الرائدة في الشرق الأوسط وشمال أفريقيا',
+      en: 'Built for candidates and hiring teams across MENA',
+      ar: 'مصمّمة للمرشحين وفرق التوظيف في الشرق الأوسط وشمال أفريقيا',
     },
   },
   services: {
-    title: { en: 'Everything you need to land the role', ar: 'كل ما تحتاجه للوصول إلى الوظيفة' },
+    title: { en: 'From practice to professional apply', ar: 'من التدريب إلى التقديم الاحترافي' },
     subtitle: {
-      en: 'Four ways Muqabaleh moves you from practice to offer.',
-      ar: 'أربع طرق تنقلك مقابلة من التدريب إلى العرض الوظيفي.',
+      en: 'Four ways Muqabaleh gets you hire-ready — then puts Jeannie to work.',
+      ar: 'أربع طرق تجعلك مقابلة جاهزاً للتوظيف — ثم تطلق جيني للعمل.',
     },
     cards: [
       {
         title: { en: 'AI mock interview', ar: 'مقابلة تجريبية بالذكاء الاصطناعي' },
         body: {
-          en: 'Unlimited practice with an interactive AI interviewer. Instant notes on your answers, body-language cues, and a full scorecard in about 30 seconds.',
-          ar: 'تدريب بلا حدود مع مقابل ذكاء اصطناعي تفاعلي. ملاحظات فورية على إجاباتك، إشارات لغة الجسد، وتقرير تقييم كامل خلال نحو ٣٠ ثانية.',
+          en: 'Practice with an interactive AI interviewer. Instant notes on your answers, confidence cues, and a full scorecard in about 30 seconds.',
+          ar: 'تدرّب مع مقابل ذكاء اصطناعي تفاعلي. ملاحظات فورية على إجاباتك وإشارات الثقة، وتقرير تقييم كامل خلال نحو ٣٠ ثانية.',
         },
         features: [
           { en: 'Real-time dialogue', ar: 'حوار فوري' },
@@ -61,51 +60,51 @@ export const C = {
         href: '/demo',
       },
       {
-        title: { en: 'Book a human expert', ar: 'احجز خبيراً بشرياً' },
+        title: { en: 'Muqabaleh passport', ar: 'جواز مقابلة' },
         body: {
-          en: 'Live video with a certified interviewer from your field. Personalized coaching, real-time corrections, and hiring-manager insight.',
-          ar: 'جلسة مرئية مباشرة مع مقابل معتمد من مجال تخصصك. توجيه شخصي، تصحيح فوري، ورؤية من مديري التوظيف.',
+          en: 'Turn your score into a shareable, verifiable hire-ready passport. Employers see proof — not just a CV claim.',
+          ar: 'حوّل نتيجتك إلى جواز جاهزية قابل للمشاركة والتحقق. يرى أصحاب العمل دليلاً — لا ادّعاءً في سيرة ذاتية.',
         },
         features: [
-          { en: 'Certified experts', ar: 'خبراء معتمدون' },
-          { en: 'Hourly booking', ar: 'حجز بالساعة' },
-          { en: 'Video, audio, or chat', ar: 'مرئي أو صوتي أو نصي' },
-          { en: 'Panel simulation', ar: 'محاكاة لجنة' },
-          { en: 'Career coaching', ar: 'استشارة مهنية' },
+          { en: 'Verified Muqabaleh score', ar: 'نتيجة مقابلة موثّقة' },
+          { en: 'Public verify link', ar: 'رابط تحقق عام' },
+          { en: 'Certificates attached', ar: 'شهادات مرفقة' },
+          { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
+          { en: 'Share anywhere', ar: 'شارك في أي مكان' },
         ],
-        cta: { en: 'Book now', ar: 'احجز الآن' },
-        href: '/interviewers',
+        cta: { en: 'View passport', ar: 'عرض الجواز' },
+        href: '/app/passport',
       },
       {
-        title: { en: 'Find your next role', ar: 'اعثر على وظيفتك التالية' },
+        title: { en: 'Jeannie — career agent', ar: 'جيني — وكيلة مهنية' },
         body: {
-          en: 'Verified openings from top employers. Apply in one click, track status, and get matched using your interview scores.',
-          ar: 'فرص موثّقة من أفضل أصحاب العمل. قدّم بنقرة واحدة، تابع حالة طلبك، واحصل على توصيات بناءً على درجات مقابلتك.',
+          en: 'Your interview-verified career agent. Jeannie shortlists roles that fit your passport, then applies professionally after you approve.',
+          ar: 'وكيلتك المهنية الموثّقة بالمقابلة. جيني ترشّح أدواراً تناسب جوازك، ثم تقدّم باحتراف بعد موافقتك.',
         },
         features: [
-          { en: 'Verified postings', ar: 'إعلانات موثّقة' },
-          { en: 'AI matching', ar: 'توصية ذكية' },
-          { en: 'One-click apply', ar: 'تقديم بنقرة واحدة' },
+          { en: 'Passport-gated matching', ar: 'مطابقة مشروطة بالجواز' },
+          { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
+          { en: 'Professional outreach', ar: 'تواصل احترافي' },
           { en: 'Application tracker', ar: 'متتبّع الطلبات' },
-          { en: 'Featured roles', ar: 'فرص مميزة' },
+          { en: 'Proof attached', ar: 'الدليل مرفق' },
         ],
-        cta: { en: 'Open Job Portal', ar: 'افتح بوابة الوظائف' },
-        href: '/portal',
+        cta: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
+        href: '/#how-it-works',
       },
       {
-        title: { en: 'HR interview platform', ar: 'منصة مقابلات للموارد البشرية' },
+        title: { en: 'Company screening', ar: 'فرز للشركات' },
         body: {
-          en: 'Launch a branded interview experience on your domain. Screen with AI, manage pipelines, and grow your talent pool — fully white-labeled.',
-          ar: 'أطلق تجربة مقابلات بعلامتك على نطاقك. فرز بالذكاء الاصطناعي، إدارة خطوط المرشحين، وبناء قاعدة مواهب — بهوية خاصة بالكامل.',
+          en: 'Screen candidates with AI, run human panels, and receive hire-ready passports — without waiting on a public job board.',
+          ar: 'افرز المرشحين بالذكاء الاصطناعي، أدِر لجاناً بشرية، واستلم جوازات جاهزة — دون انتظار لوحة وظائف عامة.',
         },
         features: [
-          { en: 'Custom subdomain', ar: 'نطاق فرعي مخصص' },
-          { en: 'AI + human options', ar: 'ذكاء اصطناعي وبشري' },
-          { en: 'Pipeline management', ar: 'إدارة خطوط المرشحين' },
-          { en: 'Team tools', ar: 'أدوات للفريق' },
-          { en: 'Deep analytics', ar: 'تحليلات مفصّلة' },
+          { en: 'AI screening credits', ar: 'رصيد فرز ذكي' },
+          { en: 'Human interview panels', ar: 'لجان مقابلات بشرية' },
+          { en: 'Verified scorecards', ar: 'بطاقات تقييم موثّقة' },
+          { en: 'Branded experience', ar: 'تجربة بعلامتك' },
+          { en: 'Team analytics', ar: 'تحليلات للفريق' },
         ],
-        cta: { en: 'Request a demo', ar: 'اطلب عرضاً توضيحياً' },
+        cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
         href: '/request-demo',
       },
     ],
@@ -114,11 +113,11 @@ export const C = {
     eyebrow: { en: 'For job seekers', ar: 'للباحثين عن عمل' },
     title: { en: 'Your path to the offer', ar: 'مسارك إلى العرض الوظيفي' },
     subtitle: {
-      en: 'Get hire-ready with AI, earn a verified passport, then use the Job Portal to apply with proof employers trust.',
-      ar: 'كن جاهزاً للتوظيف مع الذكاء الاصطناعي، احصل على جواز موثّق، ثم استخدم بوابة الوظائف للتقديم بدليل يثق به أصحاب العمل.',
+      en: 'Get hire-ready with AI, earn a verified passport, then let Jeannie apply with proof employers trust.',
+      ar: 'كن جاهزاً للتوظيف مع الذكاء الاصطناعي، احصل على جواز موثّق، ثم دع جيني تقدّم بدليل يثق به أصحاب العمل.',
     },
     ctaInterview: { en: 'Start AI interview', ar: 'ابدأ المقابلة الذكية' },
-    ctaJobs: { en: 'Open Job Portal', ar: 'افتح بوابة الوظائف' },
+    ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
     acts: [
       {
         label: { en: 'Act I · Get hire-ready', ar: 'الفصل ١ · كن جاهزاً' },
@@ -158,22 +157,38 @@ export const C = {
         ],
       },
       {
-        label: { en: 'Act II · Get hired', ar: 'الفصل ٢ · احصل على الوظيفة' },
+        label: { en: 'Act II · Let Jeannie work', ar: 'الفصل ٢ · دع جيني تعمل' },
         beats: [
           {
-            scene: 'jobs' as const,
-            title: { en: 'Browse the Job Portal', ar: 'تصفّح بوابة الوظائف' },
+            scene: 'share' as const,
+            title: { en: 'Set your targets', ar: 'حدّد أهدافك' },
             desc: {
-              en: 'Explore real openings matched to your path — not a dead CV inbox.',
-              ar: 'استكشف شواغر حقيقية تناسب مسارك — لا صندوق سيرة ميتاً.',
+              en: 'Tell Jeannie the roles, cities, and seniority you want. Your passport is the proof she carries.',
+              ar: 'أخبر جيني بالأدوار والمدن والمستوى الذي تريده. جوازك هو الدليل الذي تحمله.',
+            },
+          },
+          {
+            scene: 'jeannie' as const,
+            title: { en: 'Jeannie shortlists matches', ar: 'جيني ترشّح المطابقات' },
+            desc: {
+              en: 'She finds roles that fit your score and path — not random spam applications.',
+              ar: 'تجد أدواراً تناسب نتيجتك ومسارك — لا تقديمات عشوائية مزعجة.',
             },
           },
           {
             scene: 'apply' as const,
-            title: { en: 'Apply with proof', ar: 'قدّم ومعك الدليل' },
+            title: { en: 'You approve — she applies', ar: 'أنت توافق — وهي تقدّم' },
             desc: {
-              en: 'Send applications backed by your Muqabaleh score and certificates. Track every stage in one place.',
-              ar: 'أرسل طلباتك مدعومة بنتيجة مقابلة وشهاداتك. تابع كل مرحلة من مكان واحد.',
+              en: 'Every application needs your OK. Jeannie sends a professional apply with your passport attached.',
+              ar: 'كل تقديم يحتاج موافقتك. جيني ترسل طلباً احترافياً مع جوازك مرفقاً.',
+            },
+          },
+          {
+            scene: 'track' as const,
+            title: { en: 'Track replies in one place', ar: 'تابع الردود من مكان واحد' },
+            desc: {
+              en: 'See status, next steps, and verification links — so employers always have proof handy.',
+              ar: 'شاهد الحالة والخطوات التالية وروابط التحقق — ليبقى الدليل في متناول أصحاب العمل.',
             },
           },
         ],
@@ -181,24 +196,24 @@ export const C = {
     ],
   },
   companies: {
-    headline: { en: 'Hire smarter with Muqabaleh', ar: 'وظّف بذكاء مع مقابلة' },
+    headline: { en: 'Hire with verified signal', ar: 'وظّف بإشارة موثّقة' },
     body: {
-      en: 'Stop spending cycles on unqualified candidates. AI screening surfaces top talent automatically, while human experts deliver deep behavioral assessment.',
-      ar: 'توقّف عن إضاعة الوقت مع مرشحين غير مؤهلين. فرز الذكاء الاصطناعي يُظهر أفضل المواهب تلقائياً، ويقدّم خبراؤنا تقييماً سلوكياً عميقاً.',
+      en: 'Stop spending cycles on unqualified candidates. AI screening surfaces hire-ready talent, while human experts deliver deep assessment — passport included.',
+      ar: 'توقّف عن إضاعة الوقت مع مرشحين غير مؤهلين. فرز الذكاء الاصطناعي يُظهر مواهب جاهزة، ويقدّم خبراؤنا تقييماً عميقاً — مع الجواز.',
     },
     bullets: [
-      { en: 'Cut time-to-hire by up to 70%', ar: 'اختصر وقت التوظيف حتى ٧٠٪' },
-      { en: 'Consistent AI scoring', ar: 'تقييم ذكي موحّد' },
-      { en: 'Your brand, your domain', ar: 'علامتك، نطاقك' },
+      { en: 'Cut time-to-hire with scored shortlists', ar: 'اختصر وقت التوظيف بقوائم مقيّمة' },
+      { en: 'Consistent AI + human scoring', ar: 'تقييم ذكي وبشري موحّد' },
+      { en: 'Receive applicants with passports', ar: 'استلم متقدمين مع جوازاتهم' },
       { en: 'Real-time hiring analytics', ar: 'تحليلات توظيف فورية' },
     ],
     cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
   },
   pricing: {
-    title: { en: 'Simple pricing', ar: 'أسعار واضحة' },
+    title: { en: 'Clear offers', ar: 'عروض واضحة' },
     subtitle: {
-      en: 'Start free. Upgrade when you are ready to go further.',
-      ar: 'ابدأ مجاناً. حدّث خطتك عندما تكون مستعداً للمزيد.',
+      en: 'Start free. Subscribe when you want Jeannie applying for you — or when your team needs screening.',
+      ar: 'ابدأ مجاناً. اشترك عندما تريد جيني تقدّم عنك — أو عندما يحتاج فريقك إلى فرز.',
     },
     plans: [
       {
@@ -206,9 +221,9 @@ export const C = {
         price: { en: '$0', ar: '$0' },
         period: { en: '', ar: '' },
         features: [
-          { en: '3 AI interviews', ar: '٣ مقابلات ذكاء اصطناعي' },
-          { en: 'Basic report', ar: 'تقرير أساسي' },
-          { en: 'Job board access', ar: 'الوصول إلى لوحة الوظائف' },
+          { en: '1 AI interview', ar: 'مقابلة ذكاء اصطناعي واحدة' },
+          { en: 'Passport preview', ar: 'معاينة الجواز' },
+          { en: 'Basic scorecard', ar: 'بطاقة تقييم أساسية' },
           { en: 'Email support', ar: 'دعم عبر البريد' },
         ],
         cta: { en: 'Start free', ar: 'ابدأ مجاناً' },
@@ -216,44 +231,44 @@ export const C = {
         popular: false,
       },
       {
-        name: { en: 'Pro', ar: 'الاحترافي' },
-        price: { en: '$9.99', ar: '$9.99' },
+        name: { en: 'Pro + Jeannie', ar: 'الاحترافي + جيني' },
+        price: { en: '$19', ar: '$19' },
         period: { en: '/mo', ar: '/شهر' },
         features: [
-          { en: 'Unlimited AI interviews', ar: 'مقابلات ذكاء اصطناعي بلا حدود' },
-          { en: 'Detailed feedback', ar: 'ملاحظات مفصّلة' },
-          { en: '1 human session', ar: 'جلسة بشرية واحدة' },
+          { en: 'Unlimited AI practice', ar: 'تدريب ذكي بلا حدود' },
+          { en: 'Full verified passport', ar: 'جواز موثّق كامل' },
+          { en: 'Jeannie applies (up to 15/mo)', ar: 'جيني تقدّم (حتى ١٥/شهر)' },
+          { en: 'Application tracker', ar: 'متتبّع الطلبات' },
           { en: 'Priority matching', ar: 'مطابقة ذات أولوية' },
-          { en: 'Session recording', ar: 'تسجيل الجلسة' },
         ],
-        cta: { en: 'Get Pro', ar: 'اشترك في الاحترافي' },
+        cta: { en: 'Get Pro + Jeannie', ar: 'اشترك مع جيني' },
         href: '/app/packages',
         popular: true,
       },
       {
-        name: { en: 'Expert', ar: 'الخبير' },
-        price: { en: '$29.99', ar: '$29.99' },
+        name: { en: 'Executive', ar: 'التنفيذي' },
+        price: { en: '$49', ar: '$49' },
         period: { en: '/mo', ar: '/شهر' },
         features: [
-          { en: 'Everything in Pro', ar: 'كل مزايا الاحترافي' },
-          { en: '4 human sessions', ar: '٤ جلسات بشرية' },
-          { en: 'Career coaching', ar: 'استشارة مهنية' },
-          { en: 'Resume review', ar: 'مراجعة السيرة الذاتية' },
-          { en: 'LinkedIn optimization', ar: 'تحسين ملف LinkedIn' },
+          { en: 'Everything in Pro + Jeannie', ar: 'كل مزايا الاحترافي + جيني' },
+          { en: '2 human interview credits', ar: 'رصيدان لمقابلات بشرية' },
+          { en: 'Jeannie applies (up to 40/mo)', ar: 'جيني تقدّم (حتى ٤٠/شهر)' },
+          { en: 'Career coaching session', ar: 'جلسة استشارة مهنية' },
+          { en: 'Priority support', ar: 'دعم ذو أولوية' },
         ],
-        cta: { en: 'Go Expert', ar: 'اشترك في الخبير' },
+        cta: { en: 'Go Executive', ar: 'اشترك في التنفيذي' },
         href: '/app/packages',
         popular: false,
       },
       {
-        name: { en: 'Enterprise', ar: 'الشركات' },
+        name: { en: 'Company Screen', ar: 'فرز الشركات' },
         price: { en: 'Custom', ar: 'مخصص' },
         period: { en: '', ar: '' },
         features: [
-          { en: 'Full white-label', ar: 'علامة تجارية خاصة كاملة' },
-          { en: 'Unlimited screening', ar: 'فرز بلا حدود' },
-          { en: 'Dedicated account manager', ar: 'مدير حساب مخصص' },
-          { en: 'API access', ar: 'وصول عبر واجهة برمجية' },
+          { en: 'AI screening credits', ar: 'رصيد فرز ذكي' },
+          { en: 'Human panel interviews', ar: 'مقابلات لجان بشرية' },
+          { en: 'Verified candidate passports', ar: 'جوازات مرشحين موثّقة' },
+          { en: 'Dedicated account support', ar: 'دعم حساب مخصص' },
         ],
         cta: { en: 'Request a demo', ar: 'اطلب عرضاً توضيحياً' },
         href: '/request-demo',
@@ -295,12 +310,22 @@ export const C = {
     items: [
       {
         q: {
-          en: 'Is the AI interviewer actually effective?',
-          ar: 'هل المقابل بالذكاء الاصطناعي فعّال فعلاً؟',
+          en: 'What is a Muqabaleh passport?',
+          ar: 'ما هو جواز مقابلة؟',
         },
         a: {
-          en: 'Yes. It asks adaptive follow-ups, scores you instantly, and prepares you for real interviews.',
-          ar: 'نعم. يطرح أسئلة متابعة ذكية، يقيّمك فوراً، ويهيّئك للمقابلات الحقيقية.',
+          en: 'A shareable, verifiable hire-ready profile built from your AI (and optional human) interview scores — proof employers can trust.',
+          ar: 'ملف جاهزية قابل للمشاركة والتحقق مبني على نتائج مقابلاتك الذكية (والبشرية اختيارياً) — دليل يثق به أصحاب العمل.',
+        },
+      },
+      {
+        q: {
+          en: 'Who is Jeannie?',
+          ar: 'من هي جيني؟',
+        },
+        a: {
+          en: 'Jeannie is your interview-verified career agent. She shortlists fitting roles and applies professionally after you approve each one.',
+          ar: 'جيني وكيلتك المهنية الموثّقة بالمقابلة. ترشّح أدواراً مناسبة وتقدّم باحتراف بعد موافقتك على كل فرصة.',
         },
       },
       {
@@ -315,48 +340,38 @@ export const C = {
       },
       {
         q: {
-          en: 'How do I book a human interviewer?',
-          ar: 'كيف أحجز مقابلاً بشرياً؟',
-        },
-        a: {
-          en: 'Browse certified experts, pick a time slot, and join a live video session.',
-          ar: 'تصفّح الخبراء المعتمدين، اختر موعداً، وانضم إلى جلسة مرئية مباشرة.',
-        },
-      },
-      {
-        q: {
           en: 'Is there a free trial?',
           ar: 'هل توجد تجربة مجانية؟',
         },
         a: {
-          en: 'Yes. Start with free AI interviews and upgrade when you need more.',
-          ar: 'نعم. ابدأ بمقابلات ذكاء اصطناعي مجانية، وحدّث خطتك عند الحاجة.',
+          en: 'Yes. Start with a free AI interview and passport preview, then subscribe when you want Jeannie applying for you.',
+          ar: 'نعم. ابدأ بمقابلة ذكاء اصطناعي مجانية ومعاينة الجواز، ثم اشترك عندما تريد جيني تقدّم عنك.',
         },
       },
       {
         q: {
-          en: 'Can companies post jobs on Muqabaleh?',
-          ar: 'هل يمكن للشركات نشر وظائف على مقابلة؟',
+          en: 'Do you have a public job board today?',
+          ar: 'هل لديكم لوحة وظائف عامة الآن؟',
         },
         a: {
-          en: 'Yes. HR teams can post roles, screen with AI, and manage applicants in one place.',
-          ar: 'نعم. فرق الموارد البشرية تنشر الوظائف، تفرز بالذكاء الاصطناعي، وتدير المتقدمين من مكان واحد.',
+          en: 'The Job Portal is paused while we grow verified passports and partners. Jeannie applies via external boards with your passport attached — the marketplace returns later.',
+          ar: 'بوابة الوظائف متوقفة مؤقتاً بينما ننمّي الجوازات الموثّقة والشركاء. جيني تقدّم عبر اللوحات الخارجية مع جوازك — وتعود السوق لاحقاً.',
         },
       },
     ],
   },
   finalCta: {
     headline: {
-      en: 'Ready for your next interview?',
-      ar: 'هل أنت مستعد لمقابلتك القادمة؟',
+      en: 'Ready for your hire-ready passport?',
+      ar: 'هل أنت مستعد لجوازك الجاهز للتوظيف؟',
     },
     startFree: { en: 'Start free', ar: 'ابدأ مجاناً' },
     hiring: { en: "I'm hiring", ar: 'أبحث عن مواهب' },
   },
   footer: {
     tagline: {
-      en: 'AI practice, human experts, and jobs — one platform.',
-      ar: 'تدريب ذكي، خبراء بشريون، ووظائف — منصة واحدة.',
+      en: 'Hire-ready passports. Interview-verified career agent.',
+      ar: 'جوازات جاهزة للتوظيف. وكيلة مهنية موثّقة بالمقابلة.',
     },
     services: { en: 'Services', ar: 'الخدمات' },
     company: { en: 'Company', ar: 'الشركة' },
@@ -371,5 +386,19 @@ export const C = {
       en: '© 2026 Muqabaleh. All rights reserved.',
       ar: '© ٢٠٢٦ مقابلة. جميع الحقوق محفوظة.',
     },
+  },
+  portalParked: {
+    kicker: { en: 'Job Portal', ar: 'بوابة الوظائف' },
+    title: {
+      en: 'Marketplace paused — Jeannie is live',
+      ar: 'السوق متوقفة مؤقتاً — جيني تعمل',
+    },
+    body: {
+      en: 'We’re building a denser network of verified passports and hiring partners before reopening public listings. Meanwhile, get your passport and let Jeannie apply professionally on your behalf.',
+      ar: 'نبني شبكة أوثق من الجوازات الموثّقة وشركاء التوظيف قبل إعادة فتح الإعلانات العامة. في الأثناء، احصل على جوازك ودع جيني تقدّم عنك باحتراف.',
+    },
+    ctaPassport: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
+    ctaJeannie: { en: 'See how Jeannie works', ar: 'تعرّف على جيني' },
+    ctaHire: { en: 'Hire with screening', ar: 'وظّف بالفرز' },
   },
 } as const;

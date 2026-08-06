@@ -10,7 +10,7 @@ import { easeCrystal, fadeUp } from './motion';
 import { localePath } from '@/i18n/navigation';
 import { MuqabalehScoreBadge } from '@/components/brand';
 
-type Scene = 'setup' | 'interview' | 'passport' | 'coach' | 'jobs' | 'apply';
+type Scene = 'setup' | 'interview' | 'passport' | 'coach' | 'share' | 'jeannie' | 'apply' | 'track';
 type Beat = {
   scene: Scene;
   title: { en: string; ar: string };
@@ -80,43 +80,92 @@ function MiniScene({ kind, active }: { kind: Scene; active: boolean }) {
       </div>
     );
   }
-  if (kind === 'jobs') {
+  if (kind === 'share') {
     return (
-      <div className="mq-seeker-scene gap-2">
-        {[0, 1, 2].map((i) => (
+      <div className="mq-seeker-scene gap-2 px-3">
+        {['Role', 'City', 'Level'].map((label, i) => (
           <motion.div
-            key={i}
+            key={label}
             className="flex h-7 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2"
-            animate={active ? { x: [0, 6, 0], opacity: [0.55, 1, 0.55] } : { opacity: 0.5 }}
-            transition={{ duration: 2.2, delay: i * 0.2, repeat: Infinity }}
+            animate={active ? { opacity: [0.45, 1, 0.45], x: [0, 4, 0] } : { opacity: 0.5 }}
+            transition={{ duration: 2, delay: i * 0.18, repeat: Infinity }}
           >
-            <span className="h-2 w-2 rounded-full bg-cyan-300/80" />
+            <span className="h-1.5 w-10 rounded-full bg-amber-200/50" />
             <span className="h-1.5 flex-1 rounded-full bg-white/20" />
           </motion.div>
         ))}
       </div>
     );
   }
-  // apply
-  return (
-    <div className="mq-seeker-scene items-center justify-center gap-2">
-      <motion.div
-        className="rounded-xl border border-emerald-300/40 bg-emerald-400/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-100"
-        animate={active ? { y: [8, 0], opacity: [0, 1] } : { opacity: 0.5 }}
-        transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.8 }}
-      >
-        Applied
-      </motion.div>
-      <motion.div
-        className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10"
-        aria-hidden
-      >
+  if (kind === 'jeannie') {
+    return (
+      <div className="mq-seeker-scene flex-row items-center gap-3 px-4">
         <motion.span
-          className="block h-full w-1/2 rounded-full bg-emerald-300/80"
-          animate={active ? { x: ['-40%', '120%'] } : { x: 0 }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
+          className="relative h-12 w-12 shrink-0 rounded-full border border-teal-300/40 bg-gradient-to-br from-teal-300/25 to-cyan-400/10"
+          animate={active ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+          transition={{ duration: 1.8, repeat: Infinity }}
+        >
+          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tracking-wide text-teal-100">
+            J
+          </span>
+        </motion.span>
+        <div className="flex-1 space-y-2">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="flex items-center gap-2"
+              animate={active ? { opacity: [0.4, 1, 0.4] } : { opacity: 0.45 }}
+              transition={{ duration: 1.8, delay: i * 0.2, repeat: Infinity }}
+            >
+              <span className="h-1.5 flex-1 rounded-full bg-white/20" />
+              <span className="h-1.5 w-8 rounded-full bg-teal-300/50" />
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (kind === 'apply') {
+    return (
+      <div className="mq-seeker-scene items-center justify-center gap-2">
+        <motion.div
+          className="rounded-xl border border-emerald-300/40 bg-emerald-400/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-100"
+          animate={active ? { y: [8, 0], opacity: [0, 1] } : { opacity: 0.5 }}
+          transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.8 }}
+        >
+          Approved
+        </motion.div>
+        <motion.div
+          className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10"
+          aria-hidden
+        >
+          <motion.span
+            className="block h-full w-1/2 rounded-full bg-emerald-300/80"
+            animate={active ? { x: ['-40%', '120%'] } : { x: 0 }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
+      </div>
+    );
+  }
+  // track
+  return (
+    <div className="mq-seeker-scene gap-2 px-3">
+      {['Sent', 'Viewed', 'Reply'].map((label, i) => (
+        <motion.div
+          key={label}
+          className="flex h-7 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2"
+          animate={active ? { x: [0, 6, 0], opacity: [0.5, 1, 0.5] } : { opacity: 0.45 }}
+          transition={{ duration: 2.2, delay: i * 0.22, repeat: Infinity }}
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              i === 2 ? 'bg-emerald-300/90' : i === 1 ? 'bg-cyan-300/80' : 'bg-white/35'
+            }`}
+          />
+          <span className="h-1.5 flex-1 rounded-full bg-white/20" />
+        </motion.div>
+      ))}
     </div>
   );
 }
@@ -248,7 +297,7 @@ export function CrystalHowItWorks() {
               >
                 <MuqabalehScoreBadge
                   score={86}
-                  status={active >= 5 ? 'hired' : 'scored'}
+                  status={active >= 6 ? 'hired' : 'scored'}
                   locale={locale}
                   size="md"
                 />
@@ -331,10 +380,10 @@ export function CrystalHowItWorks() {
                   {isAr ? C.how.ctaInterview.ar : C.how.ctaInterview.en}
                 </Link>
                 <Link
-                  href={localePath('/portal/jobs', locale)}
+                  href={localePath('/#pricing', locale)}
                   className="mq-btn mq-btn-ghost inline-flex min-h-[48px] flex-1 items-center justify-center px-5 text-sm font-bold"
                 >
-                  {isAr ? C.how.ctaJobs.ar : C.how.ctaJobs.en}
+                  {isAr ? C.how.ctaJeannie.ar : C.how.ctaJeannie.en}
                 </Link>
               </div>
             </div>

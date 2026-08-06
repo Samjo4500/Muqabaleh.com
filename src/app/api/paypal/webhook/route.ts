@@ -82,14 +82,17 @@ export async function POST(req: NextRequest) {
       }
 
       case 'PAYMENT.SALE.COMPLETED': {
-        // Renewal payment succeeded — extend session balance
+        // Renewal payment succeeded — refresh practice + Jeannie apply quota
         const sub = await db.paypalSubscription.findUnique({
           where: { paypalSubscriptionId: subscriptionId },
         });
         if (sub && sub.status === 'ACTIVE') {
-          await db.user.update({
-            where: { id: sub.userId },
-            data: { sessionsLeft: 999 },
+          const { planKeyForPayPalPlanId } = await import('@/lib/paypal');
+          const { grantPlan } = await import('@/lib/plans/entitlements');
+          await grantPlan({
+            userId: sub.userId,
+            planKey: planKeyForPayPalPlanId(sub.paypalPlanId),
+            sessions: 999,
           });
           if (event.resource?.billing_info?.next_billing_time) {
             await db.paypalSubscription.update({

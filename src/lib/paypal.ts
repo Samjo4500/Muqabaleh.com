@@ -1,17 +1,47 @@
 import { db } from './db';
 import { UserTier } from './enums';
+import { grantPlan, revokeToFree, type PlanKey } from '@/lib/plans/entitlements';
 
-/** One-time checkout plan catalog (amounts must stay in sync with create-order). */
+/** Checkout plan catalog (amounts must stay in sync with create-order). */
 export const PLAN_CONFIG: Record<
   string,
-  { amount: string; currency: string; description: string; tier: string; sessions: number }
+  {
+    amount: string;
+    currency: string;
+    description: string;
+    tier: string;
+    sessions: number;
+    applies: number;
+    planKey: PlanKey;
+  }
 > = {
+  JEANNIE: {
+    amount: '19.00',
+    currency: 'USD',
+    description: 'Muqabaleh Jeannie — 10 approve-gated applies / month',
+    tier: UserTier.JEANNIE,
+    sessions: 999,
+    applies: 10,
+    planKey: 'JEANNIE',
+  },
+  JEANNIE_PRO: {
+    amount: '39.00',
+    currency: 'USD',
+    description: 'Muqabaleh Jeannie Pro — 20 applies + CV studio + cover letter AI',
+    tier: UserTier.JEANNIE_PRO,
+    sessions: 999,
+    applies: 20,
+    planKey: 'JEANNIE_PRO',
+  },
+  // Legacy packs kept for existing checkouts / receipts
   PRO: {
     amount: '9.99',
     currency: 'USD',
     description: 'Muqabaleh Pro — 3 AI Interviews + Full Reports',
     tier: UserTier.PRO,
     sessions: 3,
+    applies: 0,
+    planKey: 'PRO',
   },
   UNLIMITED: {
     amount: '29.99',
@@ -19,6 +49,8 @@ export const PLAN_CONFIG: Record<
     description: 'Muqabaleh Unlimited — Unlimited AI Interviews + All Features',
     tier: UserTier.UNLIMITED,
     sessions: 999,
+    applies: 20,
+    planKey: 'UNLIMITED',
   },
   HUMAN_STD: {
     amount: '29.00',
@@ -26,6 +58,8 @@ export const PLAN_CONFIG: Record<
     description: 'Human Interview — Standard',
     tier: 'STANDARD_HUMAN',
     sessions: 0,
+    applies: 0,
+    planKey: 'FREE',
   },
   HUMAN_PRO: {
     amount: '49.00',
@@ -33,6 +67,8 @@ export const PLAN_CONFIG: Record<
     description: 'Human Interview — Pro',
     tier: 'PRO_HUMAN',
     sessions: 0,
+    applies: 0,
+    planKey: 'FREE',
   },
 };
 
@@ -111,9 +147,20 @@ export function getAllowedPayPalPlanIds(): string[] {
     process.env.PAYPAL_PLAN_ID,
     process.env.PAYPAL_PLAN_ID_PRO,
     process.env.PAYPAL_PLAN_ID_UNLIMITED,
+    process.env.PAYPAL_PLAN_ID_JEANNIE,
+    process.env.PAYPAL_PLAN_ID_JEANNIE_PRO,
     process.env.PAYPAL_PLAN_ID_HUMAN_STD,
     process.env.PAYPAL_PLAN_ID_HUMAN_PRO,
   ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+}
+
+export function planKeyForPayPalPlanId(planId: string): PlanKey {
+  if (planId && planId === process.env.PAYPAL_PLAN_ID_JEANNIE) return 'JEANNIE';
+  if (planId && planId === process.env.PAYPAL_PLAN_ID_JEANNIE_PRO) return 'JEANNIE_PRO';
+  if (planId && planId === process.env.PAYPAL_PLAN_ID_UNLIMITED) return 'UNLIMITED';
+  if (planId && planId === process.env.PAYPAL_PLAN_ID_PRO) return 'PRO';
+  // Default legacy unlimited subscription → Jeannie Pro entitlements
+  return 'JEANNIE_PRO';
 }
 
 /** Resolve PLAN_CONFIG entry by captured USD amount string. */
@@ -241,15 +288,23 @@ export async function deactivateSubscription(paypalSubscriptionId: string) {
     data: { status: newStatus },
   });
 
-  // Only downgrade if user has no other ACTIVE subscriptions
   const activeCount = await db.paypalSubscription.count({
     where: { userId: sub.userId, status: 'ACTIVE' },
   });
 
   if (activeCount === 0) {
-    await db.user.update({
-      where: { id: sub.userId },
-      data: { tier: UserTier.FREE, sessionsLeft: 1 },
-    });
+    await revokeToFree(sub.userId);
   }
+}
+
+/** Credit entitlements for a catalog plan key after payment. */
+export async function creditPlanPurchase(userId: string, planCode: string) {
+  const config = PLAN_CONFIG[planCode.toUpperCase()];
+  if (!config) return null;
+  if (config.sessions <= 0 && config.applies <= 0) return null;
+  return grantPlan({
+    userId,
+    planKey: config.planKey,
+    sessions: config.sessions,
+  });
 }

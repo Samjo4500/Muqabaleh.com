@@ -44,9 +44,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
     const message = err instanceof Error ? err.message : 'Failed to start session';
-    return NextResponse.json(
-      { error: message },
-      { status: message.includes('not found') ? 404 : 500 },
-    );
+    const status =
+      typeof (err as { status?: number })?.status === 'number'
+        ? (err as { status: number }).status
+        : message.includes('not found')
+          ? 404
+          : message.includes('practice') || message.includes('sessions left')
+            ? 402
+            : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

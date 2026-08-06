@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { UserTier } from '@/lib/enums';
-import { verifyWebhookSignature } from '@/lib/paypal';
+import { planKeyForPayPalPlanId, verifyWebhookSignature } from '@/lib/paypal';
+import { grantPlan, revokeToFree } from '@/lib/plans/entitlements';
 
 const SUBSCRIPTION_EVENTS = new Set([
   'BILLING.SUBSCRIPTION.CANCELLED',
@@ -64,20 +64,27 @@ export async function POST(req: NextRequest) {
             where: { userId: sub.userId, status: 'ACTIVE' },
           });
           if (activeCount === 0) {
-            await db.user.update({
-              where: { id: sub.userId },
-              data: { tier: UserTier.FREE, sessionsLeft: 1 },
-            });
+            await revokeToFree(sub.userId);
           }
         }
         break;
       }
 
       case 'BILLING.SUBSCRIPTION.ACTIVATED': {
+        const sub = await db.paypalSubscription.findUnique({
+          where: { paypalSubscriptionId: subscriptionId },
+        });
         await db.paypalSubscription.updateMany({
           where: { paypalSubscriptionId: subscriptionId },
           data: { status: 'ACTIVE' },
         });
+        if (sub) {
+          await grantPlan({
+            userId: sub.userId,
+            planKey: planKeyForPayPalPlanId(sub.paypalPlanId),
+            sessions: 999,
+          });
+        }
         break;
       }
 
@@ -86,21 +93,22 @@ export async function POST(req: NextRequest) {
         const sub = await db.paypalSubscription.findUnique({
           where: { paypalSubscriptionId: subscriptionId },
         });
-        if (sub && sub.status === 'ACTIVE') {
-          const { planKeyForPayPalPlanId } = await import('@/lib/paypal');
-          const { grantPlan } = await import('@/lib/plans/entitlements');
+        if (sub && (sub.status === 'ACTIVE' || sub.status === 'APPROVAL_PENDING')) {
+          const nextBilling = event.resource?.billing_info?.next_billing_time
+            ? new Date(event.resource.billing_info.next_billing_time)
+            : undefined;
           await grantPlan({
             userId: sub.userId,
             planKey: planKeyForPayPalPlanId(sub.paypalPlanId),
             sessions: 999,
+            expiresAt: nextBilling,
           });
-          if (event.resource?.billing_info?.next_billing_time) {
+          if (nextBilling) {
             await db.paypalSubscription.update({
               where: { paypalSubscriptionId: subscriptionId },
               data: {
-                nextBillingTime: new Date(
-                  event.resource.billing_info.next_billing_time,
-                ),
+                status: 'ACTIVE',
+                nextBillingTime: nextBilling,
               },
             });
           }

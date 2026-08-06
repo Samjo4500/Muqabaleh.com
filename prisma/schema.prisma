@@ -38,6 +38,8 @@ enum JeannieOpportunityStatus {
   AWAITING_APPROVAL
   APPROVED
   APPLYING
+  /// External / partner shortlist prepared but not submitted to a live board.
+  PACKET_READY
   APPLIED
   REJECTED_BY_USER
   EXPIRED
@@ -442,17 +444,19 @@ model JeannieOpportunity {
   matchScore       Int                      @default(0)
   matchReason      String?                  @db.Text
   matchReasonAr    String?                  @db.Text
-  coverLetter      String?                  @db.Text
-  cvAssetId        String?
-  jobApplicationId String?
-  failureReason    String?
-  approvedAt       DateTime?
-  appliedAt        DateTime?
-  rejectedAt       DateTime?
-  expiresAt        DateTime?
-  idempotencyKey   String?                  @unique
-  createdAt        DateTime                 @default(now())
-  updatedAt        DateTime                 @updatedAt
+  coverLetter             String?                  @db.Text
+  cvAssetId               String?
+  jobApplicationId        String?
+  /// Snapshot of Muqabaleh passport verification id at apply/packet time.
+  passportVerificationId  String?
+  failureReason           String?
+  approvedAt              DateTime?
+  appliedAt               DateTime?
+  rejectedAt              DateTime?
+  expiresAt               DateTime?
+  idempotencyKey          String?                  @unique
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
 
   @@index([userId, status])
   @@index([userId, createdAt])
@@ -1148,6 +1152,8 @@ model InterviewSession {
   numQuestionsTotal    Int
   numQuestionsAnswered Int                 @default(0)
   currentQuestionIndex Int                 @default(0)
+  /// Practice entitlement was consumed when this session started.
+  practiceDebited      Boolean             @default(false)
   startedAt            DateTime?
   completedAt          DateTime?
   totalDurationSeconds Int?

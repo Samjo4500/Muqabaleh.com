@@ -163,6 +163,26 @@ export function planKeyForPayPalPlanId(planId: string): PlanKey {
   return 'JEANNIE_PRO';
 }
 
+/** Map checkout catalog plan codes to PayPal billing plan IDs. */
+export function paypalPlanIdForCatalogPlan(plan: string): string | null {
+  const key = plan.toUpperCase();
+  const map: Record<string, string | undefined> = {
+    JEANNIE: process.env.PAYPAL_PLAN_ID_JEANNIE,
+    JEANNIE_PRO: process.env.PAYPAL_PLAN_ID_JEANNIE_PRO,
+    UNLIMITED: process.env.PAYPAL_PLAN_ID_UNLIMITED || process.env.PAYPAL_PLAN_ID,
+    PRO: process.env.PAYPAL_PLAN_ID_PRO,
+  };
+  const id = map[key];
+  return id && id.length > 0 ? id : null;
+}
+
+/** True when Jeannie monthly billing should use PayPal Subscriptions. */
+export function hasJeannieSubscriptionPlans(): boolean {
+  return Boolean(
+    process.env.PAYPAL_PLAN_ID_JEANNIE || process.env.PAYPAL_PLAN_ID_JEANNIE_PRO,
+  );
+}
+
 /** Resolve PLAN_CONFIG entry by captured USD amount string. */
 export function findPlanByAmount(amountValue: string) {
   const normalized = Number.parseFloat(amountValue).toFixed(2);

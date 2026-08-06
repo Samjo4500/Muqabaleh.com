@@ -42,7 +42,14 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     (plan === 'unlimited' && userTier === 'UNLIMITED');
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const isSubscription = plan === 'unlimited';
+  // Prefer PayPal Subscriptions for Jeannie when plan IDs are configured;
+  // otherwise fall back to one-time Orders (still grants a 1-month period).
+  const jeannieSubConfigured =
+    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === '1' ||
+    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === 'true';
+  const isSubscription =
+    plan === 'unlimited' ||
+    ((plan === 'jeannie' || plan === 'jeannie_pro') && jeannieSubConfigured);
 
   useEffect(() => {
     if (!paypalClientId || !session || isCurrentPlan) {
@@ -72,6 +79,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
             const res = await fetch('/api/paypal/create-subscription', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ plan: PLAN_CODE[plan] }),
             });
             const data = (await res.json()) as {
               subscriptionId?: string;

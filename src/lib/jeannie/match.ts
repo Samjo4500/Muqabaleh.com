@@ -3,6 +3,15 @@ import { db } from '@/lib/db';
 import { JeannieOpportunityStatus } from '@prisma/client';
 import { getOrCreateJeannieProfile } from './profile';
 
+const TERMINAL: JeannieOpportunityStatus[] = [
+  JeannieOpportunityStatus.APPROVED,
+  JeannieOpportunityStatus.APPLYING,
+  JeannieOpportunityStatus.PACKET_READY,
+  JeannieOpportunityStatus.APPLIED,
+  JeannieOpportunityStatus.REJECTED_BY_USER,
+  JeannieOpportunityStatus.EXPIRED,
+];
+
 function scoreJob(opts: {
   title: string;
   city?: string | null;
@@ -48,9 +57,14 @@ function idempotency(userId: string, key: string) {
  * Build / refresh Jeannie shortlist.
  * Prefers public OPEN B2B jobs; supplements with target-based external stubs
  * while the marketplace is parked (NOT SPAM — still requires approval).
+ * Terminal statuses (approved / applied / packet / rejected) are preserved.
  */
 export async function generateShortlist(userId: string, limit = 8) {
   const profile = await getOrCreateJeannieProfile(userId);
+  if (!profile.isActive) {
+    return listActiveShortlist(userId, limit);
+  }
+
   const pool = await db.candidatePool.findUnique({ where: { userId } });
   const roles = profile.targetRoles.length
     ? profile.targetRoles
@@ -95,6 +109,16 @@ export async function generateShortlist(userId: string, limit = 8) {
     if (matchScore < 45) continue;
 
     const key = idempotency(userId, `job:${job.id}`);
+    const existing = await db.jeannieOpportunity.findUnique({
+      where: { idempotencyKey: key },
+    });
+
+    if (existing && TERMINAL.includes(existing.status)) {
+      created.push(existing);
+      if (created.length >= limit) break;
+      continue;
+    }
+
     const row = await db.jeannieOpportunity.upsert({
       where: { idempotencyKey: key },
       create: {
@@ -114,7 +138,18 @@ export async function generateShortlist(userId: string, limit = 8) {
       },
       update: {
         matchScore,
-        status: JeannieOpportunityStatus.AWAITING_APPROVAL,
+        companyName: job.company?.name || 'Company',
+        title: job.title,
+        titleAr: job.titleAr,
+        city: job.city,
+        country: job.country,
+        // Only reopen soft states — never clobber approved/applied history
+        ...(existing &&
+        (existing.status === JeannieOpportunityStatus.FAILED ||
+          existing.status === JeannieOpportunityStatus.SUGGESTED ||
+          existing.status === JeannieOpportunityStatus.AWAITING_APPROVAL)
+          ? { status: JeannieOpportunityStatus.AWAITING_APPROVAL, failureReason: null }
+          : {}),
       },
     });
     created.push(row);
@@ -130,6 +165,13 @@ export async function generateShortlist(userId: string, limit = 8) {
       const stubKey = `external:${role}:${city}:${i}`;
       const key = idempotency(userId, stubKey);
       const matchScore = 70 + (i % 3) * 5;
+      const existing = await db.jeannieOpportunity.findUnique({
+        where: { idempotencyKey: key },
+      });
+      if (existing && TERMINAL.includes(existing.status)) {
+        created.push(existing);
+        continue;
+      }
       const row = await db.jeannieOpportunity.upsert({
         where: { idempotencyKey: key },
         create: {
@@ -151,7 +193,12 @@ export async function generateShortlist(userId: string, limit = 8) {
         },
         update: {
           matchScore,
-          status: JeannieOpportunityStatus.AWAITING_APPROVAL,
+          ...(existing &&
+          (existing.status === JeannieOpportunityStatus.FAILED ||
+            existing.status === JeannieOpportunityStatus.SUGGESTED ||
+            existing.status === JeannieOpportunityStatus.AWAITING_APPROVAL)
+            ? { status: JeannieOpportunityStatus.AWAITING_APPROVAL }
+            : {}),
         },
       });
       created.push(row);
@@ -159,4 +206,12 @@ export async function generateShortlist(userId: string, limit = 8) {
   }
 
   return created.sort((a, b) => b.matchScore - a.matchScore);
+}
+
+async function listActiveShortlist(userId: string, limit: number) {
+  return db.jeannieOpportunity.findMany({
+    where: { userId },
+    orderBy: [{ matchScore: 'desc' }, { createdAt: 'desc' }],
+    take: limit,
+  });
 }

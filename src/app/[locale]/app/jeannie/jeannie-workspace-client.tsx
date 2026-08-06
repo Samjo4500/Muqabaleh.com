@@ -3,7 +3,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
-import { Bot, Loader2, RefreshCw, Check, X, Send, FileText, Sparkles } from 'lucide-react';
+import {
+  Bot,
+  Loader2,
+  RefreshCw,
+  Check,
+  X,
+  Send,
+  FileText,
+  Sparkles,
+  Upload,
+  Activity,
+} from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 
 type Entitlements = {
@@ -13,6 +24,9 @@ type Entitlements = {
   canApply: boolean;
   cvStudioEnabled: boolean;
   coverLetterAiEnabled: boolean;
+  cvUpload?: boolean;
+  coverLetterUpload?: boolean;
+  tracker?: 'none' | 'standard' | 'full';
   plan: { label: { en: string; ar: string }; monthlyApplies: number };
 };
 
@@ -37,6 +51,30 @@ type Opportunity = {
   matchReasonAr?: string | null;
   coverLetter?: string | null;
   failureReason?: string | null;
+  passportVerificationId?: string | null;
+};
+
+type TrackerPayload = {
+  tracker: 'none' | 'standard' | 'full';
+  items: Array<{
+    id: string;
+    kind: string;
+    status: string;
+    companyName: string;
+    title: string;
+    matchScore?: number | null;
+    source?: string | null;
+    passportVerificationId?: string | null;
+    updatedAt: string;
+  }>;
+  insights: {
+    awaitingApproval: number;
+    approved: number;
+    packetReady: number;
+    applied: number;
+    avgMatchScore: number | null;
+    conversionApproveToApply: number | null;
+  } | null;
 };
 
 export function JeannieWorkspaceClient() {
@@ -53,15 +91,20 @@ export function JeannieWorkspaceClient() {
   const [cvText, setCvText] = useState('');
   const [cvOut, setCvOut] = useState('');
   const [letterOut, setLetterOut] = useState('');
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [coverLetterDraft, setCoverLetterDraft] = useState('');
+  const [applyForId, setApplyForId] = useState<string | null>(null);
+  const [tracker, setTracker] = useState<TrackerPayload | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const [entRes, profRes, oppRes] = await Promise.all([
+      const [entRes, profRes, oppRes, trackRes] = await Promise.all([
         fetch('/api/jeannie/entitlements'),
         fetch('/api/jeannie/profile'),
         fetch('/api/jeannie/opportunities'),
+        fetch('/api/jeannie/tracker'),
       ]);
       if (!entRes.ok) throw new Error('Failed to load entitlements');
       const ent = (await entRes.json()) as Entitlements;
@@ -75,6 +118,9 @@ export function JeannieWorkspaceClient() {
       if (oppRes.ok) {
         const data = (await oppRes.json()) as { opportunities: Opportunity[] };
         setOpps(data.opportunities || []);
+      }
+      if (trackRes.ok) {
+        setTracker((await trackRes.json()) as TrackerPayload);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Load failed');
@@ -129,27 +175,41 @@ export function JeannieWorkspaceClient() {
     }
   }
 
-  async function act(id: string, action: 'approve' | 'reject' | 'apply') {
+  async function act(id: string, action: 'approve' | 'reject') {
     setBusy(`${action}:${id}`);
     setError('');
     try {
-      let res: Response;
-      if (action === 'apply') {
-        const form = new FormData();
-        res = await fetch(`/api/jeannie/opportunities/${id}/apply`, {
-          method: 'POST',
-          body: form,
-        });
-      } else {
-        res = await fetch(`/api/jeannie/opportunities/${id}/${action}`, {
-          method: 'POST',
-        });
-      }
+      const res = await fetch(`/api/jeannie/opportunities/${id}/${action}`, {
+        method: 'POST',
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Action failed');
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Action failed');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function submitApply(id: string) {
+    setBusy(`apply:${id}`);
+    setError('');
+    try {
+      const form = new FormData();
+      if (coverLetterDraft.trim()) form.set('coverLetter', coverLetterDraft.trim());
+      if (cvFile) form.set('cv', cvFile);
+      const res = await fetch(`/api/jeannie/opportunities/${id}/apply`, {
+        method: 'POST',
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Apply failed');
+      setApplyForId(null);
+      setCoverLetterDraft('');
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Apply failed');
     } finally {
       setBusy('');
     }
@@ -194,7 +254,10 @@ export function JeannieWorkspaceClient() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Cover letter failed');
-      setLetterOut(data.document?.content || '');
+      const content = data.document?.content || '';
+      setLetterOut(content);
+      setCoverLetterDraft(content);
+      setApplyForId(opp.id);
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Cover letter failed');
@@ -247,18 +310,26 @@ export function JeannieWorkspaceClient() {
       ) : null}
 
       {locked ? (
-        <div className="mq-panel rounded-2xl p-6 text-center">
+        <div className="mq-panel space-y-4 rounded-2xl p-6 text-center">
           <p className="text-white/70">
             {isAr
-              ? 'فعّل جيني لفتح الترشيحات والتقديم بموافقتك.'
-              : 'Unlock Jeannie to open approve-gated shortlists and applies.'}
+              ? 'المجاني يبني جوازك عبر التدريب. فعّل جيني لفتح الترشيحات والتقديم بموافقتك.'
+              : 'Free builds your passport through practice. Unlock Jeannie for approve-gated shortlists and applies.'}
           </p>
-          <Link
-            href={localePath('/app/packages', locale)}
-            className="mq-btn mq-btn-primary mt-4 inline-flex px-5 py-2.5 text-sm"
-          >
-            {isAr ? 'عرض الباقات' : 'See packages'}
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href={localePath('/interview/prequal', locale)}
+              className="mq-btn mq-btn-ghost inline-flex px-5 py-2.5 text-sm"
+            >
+              {isAr ? 'تدريب الجواز' : 'Practice for passport'}
+            </Link>
+            <Link
+              href={localePath('/app/packages', locale)}
+              className="mq-btn mq-btn-primary inline-flex px-5 py-2.5 text-sm"
+            >
+              {isAr ? 'عرض الباقات' : 'See packages'}
+            </Link>
+          </div>
         </div>
       ) : (
         <>
@@ -310,6 +381,44 @@ export function JeannieWorkspaceClient() {
             </div>
           </section>
 
+          <section className="mq-panel rounded-2xl p-5 md:p-6">
+            <h2 className="mq-display mb-3 flex items-center gap-2 text-lg font-bold text-white">
+              <Upload size={18} className="text-teal-200" />
+              {isAr ? 'حزمة التقديم' : 'Apply packet'}
+            </h2>
+            <p className="mb-4 text-sm text-white/50">
+              {isAr
+                ? 'ارفع سيرتك واكتب خطابك قبل أن تقدّم جيني. التقديم الخارجي يجهّز الحزمة دون خصم الحصة حتى يتصل لوح حي.'
+                : 'Upload your CV and write a cover letter before Jeannie applies. External shortlists prepare a packet without charging quota until a live board is connected.'}
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="block text-sm text-white/60">
+                {isAr ? 'ملف السيرة (PDF/DOC)' : 'CV file (PDF/DOC)'}
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf"
+                  onChange={(e) => setCvFile(e.target.files?.[0] || null)}
+                  className="mt-1.5 block w-full text-sm text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-400/20 file:px-3 file:py-2 file:text-teal-100"
+                />
+                {cvFile ? (
+                  <span className="mt-1 block text-xs text-teal-200/80">{cvFile.name}</span>
+                ) : null}
+              </label>
+              <label className="block text-sm text-white/60">
+                {isAr ? 'خطاب التغطية' : 'Cover letter'}
+                <textarea
+                  value={coverLetterDraft}
+                  onChange={(e) => setCoverLetterDraft(e.target.value)}
+                  rows={4}
+                  placeholder={
+                    isAr ? 'اكتب خطابك أو ولّده من جيني برو…' : 'Write yours or generate with Jeannie Pro…'
+                  }
+                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-teal-300/40"
+                />
+              </label>
+            </div>
+          </section>
+
           <section className="space-y-3">
             <h2 className="mq-display text-lg font-bold text-white">
               {isAr ? 'الترشيحات (بانتظار موافقتك)' : 'Shortlist (awaiting your approval)'}
@@ -324,6 +433,7 @@ export function JeannieWorkspaceClient() {
               opps.map((opp) => {
                 const title = isAr && opp.titleAr ? opp.titleAr : opp.title;
                 const reason = isAr && opp.matchReasonAr ? opp.matchReasonAr : opp.matchReason;
+                const showApplyPanel = applyForId === opp.id;
                 return (
                   <article key={opp.id} className="mq-panel rounded-2xl p-4 md:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -343,6 +453,11 @@ export function JeannieWorkspaceClient() {
                         ) : null}
                         {opp.failureReason ? (
                           <p className="mt-2 text-sm text-red-200">{opp.failureReason}</p>
+                        ) : null}
+                        {opp.passportVerificationId ? (
+                          <p className="mt-2 text-xs text-white/40">
+                            Passport · {opp.passportVerificationId}
+                          </p>
                         ) : null}
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -369,12 +484,14 @@ export function JeannieWorkspaceClient() {
                         {opp.status === 'APPROVED' || opp.status === 'FAILED' ? (
                           <button
                             type="button"
-                            onClick={() => void act(opp.id, 'apply')}
-                            disabled={!entitlements?.canApply || busy.startsWith('apply')}
+                            onClick={() =>
+                              setApplyForId((cur) => (cur === opp.id ? null : opp.id))
+                            }
+                            disabled={!entitlements?.canApply && opp.status === 'APPROVED'}
                             className="mq-btn mq-btn-primary inline-flex items-center gap-1.5 !min-h-[40px] px-3 text-xs"
                           >
                             <Send size={14} />
-                            {isAr ? 'جيني تقدّم' : 'Jeannie apply'}
+                            {isAr ? 'جهّز / قدّم' : 'Prepare / apply'}
                           </button>
                         ) : null}
                         {entitlements?.coverLetterAiEnabled ? (
@@ -389,11 +506,77 @@ export function JeannieWorkspaceClient() {
                         ) : null}
                       </div>
                     </div>
+                    {showApplyPanel ? (
+                      <div className="mt-4 border-t border-white/10 pt-4">
+                        <p className="mb-3 text-xs text-white/45">
+                          {isAr
+                            ? 'أكد الحزمة ثم اطلب من جيني التقديم أو تجهيز الحزمة.'
+                            : 'Confirm the packet, then ask Jeannie to apply or prepare it.'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void submitApply(opp.id)}
+                          disabled={busy === `apply:${opp.id}`}
+                          className="mq-btn mq-btn-primary inline-flex items-center gap-2 text-sm"
+                        >
+                          {busy === `apply:${opp.id}` ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Send size={14} />
+                          )}
+                          {isAr ? 'جيني تقدّم الآن' : 'Jeannie apply now'}
+                        </button>
+                      </div>
+                    ) : null}
                   </article>
                 );
               })
             )}
           </section>
+
+          {tracker && tracker.tracker !== 'none' ? (
+            <section className="mq-panel rounded-2xl p-5 md:p-6">
+              <h2 className="mq-display mb-3 flex items-center gap-2 text-lg font-bold text-white">
+                <Activity size={18} className="text-teal-200" />
+                {isAr ? 'متتبع جيني' : 'Jeannie tracker'}
+                {tracker.tracker === 'full' ? (
+                  <span className="text-xs font-normal text-amber-200/80">Pro</span>
+                ) : null}
+              </h2>
+              {tracker.insights ? (
+                <div className="mb-4 grid grid-cols-2 gap-2 text-xs text-white/60 md:grid-cols-4">
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    {isAr ? 'بانتظار الموافقة' : 'Awaiting'} · {tracker.insights.awaitingApproval}
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    {isAr ? 'حزم جاهزة' : 'Packets'} · {tracker.insights.packetReady}
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    {isAr ? 'مقدَّم' : 'Applied'} · {tracker.insights.applied}
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                    {isAr ? 'متوسط التطابق' : 'Avg fit'} · {tracker.insights.avgMatchScore ?? '—'}
+                  </div>
+                </div>
+              ) : null}
+              <ul className="space-y-2">
+                {(tracker.items || []).slice(0, 12).map((item) => (
+                  <li
+                    key={`${item.kind}-${item.id}`}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/8 bg-black/20 px-3 py-2 text-sm"
+                  >
+                    <span className="text-white/85">
+                      {item.title} · {item.companyName}
+                    </span>
+                    <span className="text-xs text-white/45">
+                      {item.status}
+                      {item.source ? ` · ${item.source}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           {entitlements?.cvStudioEnabled ? (
             <section className="mq-panel rounded-2xl p-5 md:p-6">

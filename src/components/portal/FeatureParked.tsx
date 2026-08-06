@@ -38,7 +38,7 @@ export function FeatureParked({ copy }: { copy: ParkedCopy }) {
           <BrandLogo size="nav" priority />
         </Link>
         <Link
-          href={localePath('/register', locale)}
+          href={localePath('/interview/prequal', locale)}
           className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm"
         >
           <BiInline bi={C.nav.getStarted} />
@@ -74,7 +74,7 @@ export function FeatureParked({ copy }: { copy: ParkedCopy }) {
             className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
           >
             <Link
-              href={localePath('/demo', locale)}
+              href={localePath('/interview/prequal', locale)}
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center"
             >
               <BiInline bi={copy.ctaPassport} />

@@ -294,8 +294,8 @@ export function JeannieWorkspaceClient() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-white/55">
             {isAr
-              ? 'جيني تبحث عن وظائف خارجية → توافق → تقدّم بالبريد. ليس عشوائياً.'
-              : 'Jeannie finds external roles → you approve → she emails your packet. NOT SPAM.'}
+              ? 'جيني ترشّح وظائف خارجية → توافق → تسلّم حزمة تقديم (بريد المسؤول أو رابط متتبّع) مع السيرة والخطاب والجواز. ليس عشوائياً ولا ملء آلي لأنظمة التتبع.'
+              : 'Jeannie shortlists external roles → you approve → she delivers your packet (recruiter email or tracked apply link) with CV, cover letter, and passport. NOT SPAM — no ATS bot-filling.'}
           </p>
         </div>
         <div className="rounded-2xl border border-teal-300/25 bg-teal-400/10 px-4 py-3 text-sm text-teal-100">

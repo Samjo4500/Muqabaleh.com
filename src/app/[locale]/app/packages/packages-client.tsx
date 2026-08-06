@@ -68,8 +68,8 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
         <h1 className="mq-display text-2xl font-bold text-white md:text-3xl">{t('title')}</h1>
         <p className="mt-2 text-sm text-white/55">
           {isAr
-            ? 'فعّل جيني عبر PayPal. كل تقديم يحتاج موافقتك — ليس عشوائياً.'
-            : 'Unlock Jeannie via PayPal. Every apply needs your approval — NOT SPAM.'}
+            ? 'فعّل جيني عبر PayPal. بعد موافقتك ترسل حزمة تقديم (سيرة + خطاب + جواز) بالبريد أو برابط متتبّع — ليس عشوائياً ولا ملء آلي لأنظمة التتبع.'
+            : 'Unlock Jeannie via PayPal. After you approve, she delivers an apply packet (CV + cover letter + passport) by recruiter email or tracked apply link — NOT SPAM, no ATS bot-filling.'}
         </p>
       </div>
 

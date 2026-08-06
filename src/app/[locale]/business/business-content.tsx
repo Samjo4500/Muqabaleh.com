@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Lock,
+  ShieldCheck,
   UserCheck,
   Users,
 } from 'lucide-react';
@@ -421,6 +422,47 @@ export default function BusinessContent() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Security & compliance — enterprise procurement signal */}
+        <section id="compliance" className="mq-section scroll-mt-28 !pt-4">
+          <div className="mq-wrap">
+            <div className="mb-8 max-w-2xl md:mb-10">
+              <p className="mq-kicker mb-3">{t('complianceKicker')}</p>
+              <h2 className="mq-display text-3xl font-bold text-white md:text-5xl">
+                {t('complianceTitle')}
+              </h2>
+              <p className="mt-3 text-base text-white/55 md:text-lg">{t('complianceSub')}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {(
+                [
+                  ['complianceItem1Title', 'complianceItem1Body'],
+                  ['complianceItem2Title', 'complianceItem2Body'],
+                  ['complianceItem3Title', 'complianceItem3Body'],
+                  ['complianceItem4Title', 'complianceItem4Body'],
+                ] as const
+              ).map(([titleKey, bodyKey], idx) => (
+                <motion.div
+                  key={titleKey}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-5"
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.06, duration: 0.4, ease: easeCrystal }}
+                >
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-teal-300/25 bg-teal-400/12">
+                    <ShieldCheck size={18} className="text-teal-300" />
+                  </div>
+                  <h3 className="mq-display text-base font-bold text-white">{t(titleKey)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/55">{t(bodyKey)}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="mt-5 max-w-3xl text-sm text-white/40">{t('complianceFootnote')}</p>
           </div>
         </section>
 

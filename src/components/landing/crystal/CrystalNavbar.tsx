@@ -12,12 +12,13 @@ import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 
+/** Product story first; Pricing always last before auth CTAs. */
 const NAV_LINKS = [
   { bi: C.nav.howItWorks, href: '#jeannie-magic' },
   { bi: C.nav.jeannie, href: '#jeannie' },
-  { bi: C.nav.pricing, href: '#pricing' },
   { bi: C.nav.forCompanies, href: '/business' },
   { bi: C.nav.partners, href: '/partners' },
+  { bi: C.nav.pricing, href: '#pricing' },
 ] as const;
 
 export function CrystalNavbar() {

@@ -533,7 +533,19 @@
     "enterpriseF6": "Custom reports",
     "chooseStarter": "Request demo",
     "chooseBusiness": "Request demo",
-    "chooseEnterprise": "Get a quote"
+    "chooseEnterprise": "Get a quote",
+    "complianceKicker": "Security & compliance",
+    "complianceTitle": "Built for enterprise procurement questions",
+    "complianceSub": "Candidate PII, transcripts, and interview artifacts are handled with encryption, access control, and deletion rights — with DPA and residency discussions available for regulated buyers.",
+    "complianceItem1Title": "Encryption",
+    "complianceItem1Body": "TLS in transit and AES-256 encryption at rest for stored platform data.",
+    "complianceItem2Title": "Access control",
+    "complianceItem2Body": "Role-based access for hiring teams. We never sell candidate data.",
+    "complianceItem3Title": "Privacy rights",
+    "complianceItem3Body": "GDPR-aligned practices. Candidates can request account and data deletion anytime.",
+    "complianceItem4Title": "Enterprise readiness",
+    "complianceItem4Body": "Data Processing Agreements and region/residency preferences available for NDMO, UAE, and other regulated procurement — request a security review.",
+    "complianceFootnote": "Hosting runs on enterprise-grade cloud infrastructure. Specific residency or in-country processing requirements are scoped per enterprise agreement — not assumed by default."
   },
   "interviewers": {
     "title": "Meet the room that hires you",
@@ -729,6 +741,7 @@
   "auth": {
     "signinTitle": "Sign In",
     "registerTitle": "Create Account",
+    "passportPrivacyNote": "Your interview scores are completely private. You decide when to lock your score, publish your passport, or share it with employers. You can always practice and retake the interview to improve.",
     "forgotTitle": "Forgot Password?",
     "forgotSub": "Enter your email and we’ll send you a password reset link.",
     "email": "Email",

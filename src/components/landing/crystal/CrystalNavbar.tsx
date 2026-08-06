@@ -88,7 +88,7 @@ export function CrystalNavbar() {
           >
             <BiInline bi={C.nav.login} />
           </Link>
-          <Link href={localePath('/register', locale)} className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm">
+          <Link href={localePath('/interview/prequal', locale)} className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm">
             <BiInline bi={C.nav.getStarted} />
           </Link>
         </div>
@@ -132,7 +132,7 @@ export function CrystalNavbar() {
                   <T bi={C.nav.login} className="text-sm font-semibold" />
                 </Link>
                 <Link
-                  href={localePath('/register', locale)}
+                  href={localePath('/interview/prequal', locale)}
                   onClick={() => setOpen(false)}
                   className="mq-btn mq-btn-primary mt-2 text-center text-sm"
                 >

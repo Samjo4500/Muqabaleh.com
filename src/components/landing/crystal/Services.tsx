@@ -189,6 +189,11 @@ export function CrystalServices() {
             className="mq-display mb-3 text-3xl font-bold tracking-tight text-white md:text-5xl"
           />
           <T as="p" bi={C.services.subtitle} className="text-base text-white/65 md:text-lg" />
+          <T
+            as="p"
+            bi={C.hero.dialectNote}
+            className="mt-3 text-sm leading-relaxed text-teal-100/70 md:text-[0.95rem]"
+          />
         </motion.div>
 
         <motion.div

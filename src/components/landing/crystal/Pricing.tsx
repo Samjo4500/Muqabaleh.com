@@ -234,6 +234,39 @@ export function CrystalPricing() {
           <T as="p" bi={C.pricing.notSpam.line} className="text-sm leading-relaxed text-white/70 md:text-[0.95rem]" />
         </motion.div>
 
+        {/* Honest apply pipeline */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="mb-10 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-5 md:px-7 md:py-6"
+        >
+          <T
+            as="h3"
+            bi={C.pricing.applyHow.title}
+            className="mq-display mb-2 text-lg font-bold text-white md:text-xl"
+          />
+          <T
+            as="p"
+            bi={C.pricing.applyHow.body}
+            className="mb-4 max-w-3xl text-sm leading-relaxed text-white/60 md:text-[0.95rem]"
+          />
+          <ol className="grid gap-2 sm:grid-cols-3">
+            {C.pricing.applyHow.steps.map((step, i) => (
+              <li
+                key={step.en}
+                className="flex items-start gap-2 rounded-xl border border-white/8 bg-white/[0.02] px-3 py-3 text-sm text-white/65"
+              >
+                <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-teal-300/30 bg-teal-400/10 text-[11px] font-bold text-teal-200">
+                  {i + 1}
+                </span>
+                <BiInline bi={step} />
+              </li>
+            ))}
+          </ol>
+        </motion.div>
+
         {/* Plan cards */}
         <motion.div
           variants={stagger}

@@ -137,7 +137,7 @@ export function CrystalFinalCta() {
           >
             <motion.div whileHover={{ y: -6, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
-                href={localePath('/register', locale)}
+                href={localePath('/interview/prequal', locale)}
                 className="mq-facet mq-facet-teal mq-facet-shape-soft group relative flex h-full flex-col items-start overflow-hidden border border-teal-300/35 bg-gradient-to-br from-teal-400/20 via-teal-400/5 to-transparent p-5 text-start shadow-[0_0_40px_rgba(45,212,191,0.12)] backdrop-blur-xl transition hover:border-teal-300/60"
               >
                 <motion.div

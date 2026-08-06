@@ -294,6 +294,9 @@ function RegisterForm() {
   return (
     <AuthShell title={t('registerTitle')} showBack>
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+        <p className="rounded-xl border border-teal-300/20 bg-teal-400/10 px-4 py-3 text-sm leading-relaxed text-teal-50/90">
+          {t('passportPrivacyNote')}
+        </p>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mx-auto flex w-full bg-white/5">
             <TabsTrigger

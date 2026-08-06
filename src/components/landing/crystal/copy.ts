@@ -26,6 +26,14 @@ export const C = {
       en: 'Your bilingual career agent for MENA — she practices with you in Arabic or English, builds your verified passport, then applies only with your approval. Not spam.',
       ar: 'وكيلتك المهنية ثنائية اللغة للمنطقة — تتدرّب معك بالعربية أو الإنجليزية، تبني جوازك الموثّق، ثم تقدّم فقط بموافقتك. ليس عشوائياً.',
     },
+    dialectNote: {
+      en: 'Jeannie understands and fairly scores Arabic regional dialects (Gulf, Levantine, Egyptian), professional English with local accents, and natural bilingual code-switching — accent is not a penalty.',
+      ar: 'جيني تفهم اللهجات العربية الإقليمية (خليجية، شامية، مصرية) والإنجليزية المهنية بلهجات محلية والتبديل الطبيعي بين اللغتين — وتقيّمك بعدل دون معاقبة اللهجة.',
+    },
+    privacyNote: {
+      en: 'Your interview scores stay private until you choose to publish or share your passport. Practice and retake anytime to improve before locking a public score.',
+      ar: 'درجات مقابلتك تبقى خاصة حتى تختار نشر جوازك أو مشاركته. تدرّب وأعد المقابلة في أي وقت لتحسين نتيجتك قبل تثبيت درجة عامة.',
+    },
     ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
     ctaJeannie: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
@@ -39,20 +47,20 @@ export const C = {
   services: {
     title: { en: 'Jeannie, end to end', ar: 'جيني من البداية للنهاية' },
     subtitle: {
-      en: 'One agent. Interview, passport, apply — Arabic and English.',
-      ar: 'وكيلة واحدة. مقابلة، جواز، تقديم — بالعربية والإنجليزية.',
+      en: 'One agent. Interview, passport, apply — Arabic and English. Dialects and accents welcome; scores stay private until you share.',
+      ar: 'وكيلة واحدة. مقابلة، جواز، تقديم — بالعربية والإنجليزية. اللهجات مرحّب بها؛ الدرجات خاصة حتى تشارك.',
     },
     cards: [
       {
         title: { en: 'Jeannie interviews you', ar: 'جيني تُجري مقابلتك' },
         body: {
-          en: 'Practice with Jeannie in Arabic or English. Real-time dialogue, instant notes, and a full scorecard.',
-          ar: 'تدرّب مع جيني بالعربية أو الإنجليزية. حوار فوري، ملاحظات مباشرة، وتقرير تقييم كامل.',
+          en: 'Practice with Jeannie in Arabic or English. Dialects and accents welcome. Real-time dialogue, instant notes, and a full scorecard — private until you share.',
+          ar: 'تدرّب مع جيني بالعربية أو الإنجليزية. اللهجات مرحّب بها. حوار فوري، ملاحظات مباشرة، وتقرير تقييم كامل — خاص حتى تشارك.',
         },
         features: [
-          { en: 'Arabic & English', ar: 'عربية وإنجليزية' },
+          { en: 'Dialects welcome', ar: 'اللهجات مرحّب بها' },
           { en: 'Real-time dialogue', ar: 'حوار فوري' },
-          { en: 'Instant scoring', ar: 'تقييم فوري' },
+          { en: 'Private until you share', ar: 'خاص حتى تشارك' },
         ],
         cta: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
         href: '/interview/prequal',
@@ -271,6 +279,27 @@ export const C = {
         en: 'Jeannie never spray-applies. Every application needs your approval — passport proof attached.',
         ar: 'جيني لا ترسل عشوائياً. كل تقديم يحتاج موافقتك — مع دليل الجواز مرفقاً.',
       },
+    },
+    applyHow: {
+      title: { en: 'How Jeannie applies', ar: 'كيف تقدّم جيني' },
+      body: {
+        en: 'After you approve, Jeannie prepares a professional apply packet — your CV, cover letter, and verified passport proof. She delivers it by recruiter email when an apply address is available, or as a tracked packet with the role’s official apply link. She does not bot-fill ATS portals or spray mass applications.',
+        ar: 'بعد موافقتك، تجهّز جيني حزمة تقديم احترافية — سيرتك وخطابك ودليل جوازك الموثّق. ترسلها ببريد المسؤول عن التوظيف عند توفر عنوان تقديم، أو كحزمة متتبّعة مع رابط التقديم الرسمي للوظيفة. لا تملأ بوابات أنظمة التتبع آلياً ولا ترسل تقديمات جماعية.',
+      },
+      steps: [
+        {
+          en: 'Shortlist roles that fit your passport and targets',
+          ar: 'ترشيح أدوار تناسب جوازك وأهدافك',
+        },
+        {
+          en: 'You approve every opportunity first',
+          ar: 'أنت توافق على كل فرصة أولاً',
+        },
+        {
+          en: 'Email packet or tracked apply-link delivery — with proof attached',
+          ar: 'تسليم بحزمة بريد أو رابط تقديم متتبّع — مع الدليل مرفقاً',
+        },
+      ],
     },
     compareTitle: { en: 'Compare plans', ar: 'قارن الخطط' },
     plans: [
@@ -491,8 +520,28 @@ export const C = {
           ar: 'هل يمكنني التدرّب بالعربية أو الإنجليزية؟',
         },
         a: {
-          en: 'Both. Jeannie interviews you in Arabic or English — choose per session.',
-          ar: 'كلاهما. جيني تُجري مقابلتك بالعربية أو الإنجليزية — اختر لغة كل جلسة.',
+          en: 'Both. Jeannie interviews you in Arabic or English — including Gulf, Levantine, and Egyptian dialects, professional English with local accents, and natural code-switching. Accent is not a penalty.',
+          ar: 'كلاهما. جيني تُجري مقابلتك بالعربية أو الإنجليزية — بما في ذلك اللهجات الخليجية والشامية والمصرية، والإنجليزية المهنية بلهجات محلية، والتبديل الطبيعي بين اللغتين. اللهجة ليست عقوبة.',
+        },
+      },
+      {
+        q: {
+          en: 'Is my passport score public after one interview?',
+          ar: 'هل تصبح درجة الجواز عامة بعد مقابلة واحدة؟',
+        },
+        a: {
+          en: 'No. Scores stay private until you decide to lock, publish, or share your passport. You can practice and retake to improve first.',
+          ar: 'لا. الدرجات تبقى خاصة حتى تقرر تثبيت جوازك أو نشره أو مشاركته. يمكنك التدرّب وإعادة المقابلة لتحسين نتيجتك أولاً.',
+        },
+      },
+      {
+        q: {
+          en: 'How does Jeannie actually apply for me?',
+          ar: 'كيف تقدّم جيني عني فعلياً؟',
+        },
+        a: {
+          en: 'She shortlists external roles, waits for your approval, then delivers a packet (CV + cover letter + passport proof) by recruiter email when possible, or as a tracked packet with the role’s apply link. No spray-applying and no ATS bot-filling.',
+          ar: 'ترشّح وظائف خارجية، تنتظر موافقتك، ثم تسلّم حزمة (سيرة + خطاب + دليل الجواز) ببريد المسؤول عن التوظيف عند الإمكان، أو كحزمة متتبّعة مع رابط التقديم. بلا إرسال عشوائي وبلا ملء آلي لأنظمة التتبع.',
         },
       },
       {

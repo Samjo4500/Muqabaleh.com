@@ -237,18 +237,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     );
   }
 
-  const priceNote =
-    plan === 'jeannie_pro'
-      ? locale === 'ar'
-        ? '٣٩ دولار — جيني برو'
-        : '$39 — Jeannie Pro'
-      : plan === 'jeannie'
-        ? locale === 'ar'
-          ? '١٩ دولار — جيني'
-          : '$19 — Jeannie'
-        : plan === 'unlimited'
-          ? t('priceNoteUnlimited')
-          : t('priceNotePro');
+  const priceNote = t('priceNote');
 
   return (
     <div className={className}>

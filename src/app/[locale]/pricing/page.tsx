@@ -1,24 +1,11 @@
-import type { Metadata } from 'next';
-import { pageMetadata } from '@/lib/seo';
-import PageContent from './pricing-content';
+import { redirect } from 'next/navigation';
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  return pageMetadata({
-    locale,
-    path: '/pricing',
-    titleAr: 'الأسعار — مقابلة | Muqabaleh',
-    titleEn: 'Pricing — Muqabaleh',
-    descAr: 'خطط أسعار مقابلة للتدرّب على المقابلات بالذكاء الاصطناعي والمحاورين البشر.',
-    descEn: 'Muqabaleh pricing for AI mock interviews and human interview coaching.',
-  });
-}
-
+/** Legacy /pricing → landing plans (prices concealed; demo/quote CTAs). */
 export default async function Page({ params }: Props) {
   const { locale } = await params;
-  return <PageContent />;
+  redirect(locale === 'en' ? '/en#pricing' : '/#pricing');
 }

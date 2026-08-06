@@ -303,25 +303,27 @@ export function CrystalPricing() {
               <T as="h3" bi={plan.name} className="mq-display relative mb-1 text-2xl font-bold text-white" />
               <T as="p" bi={plan.tagline} className="relative mb-4 text-sm text-white/50" />
 
-              <motion.p
-                className="mq-display relative mb-1 text-5xl font-bold text-white"
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.08 * index, duration: 0.45, ease: easeCrystal }}
-              >
-                {isAr ? plan.price.ar : plan.price.en}
-                <span className="ms-1 text-base font-medium text-white/45">
-                  {isAr ? plan.period.ar : plan.period.en}
-                </span>
-              </motion.p>
-
-              {plan.popular ? (
-                <p className="relative mb-5 text-xs font-semibold tracking-wide text-teal-200/80">
-                  {isAr ? plan.applies.ar : plan.applies.en}
-                </p>
+              {plan.concealPrice ? (
+                <div className="relative mb-5">
+                  <p className="mq-display text-2xl font-bold text-white md:text-3xl">
+                    <BiInline bi={C.pricing.priceHidden} />
+                  </p>
+                  <p className="mt-1 text-xs text-white/45">
+                    <BiInline bi={C.pricing.priceHint} />
+                  </p>
+                  <p className="mt-2 text-xs font-semibold tracking-wide text-teal-200/80">
+                    {isAr ? plan.applies.ar : plan.applies.en}
+                  </p>
+                </div>
               ) : (
-                <div className="mb-5" />
+                <div className="relative mb-5">
+                  <p className="mq-display text-4xl font-bold text-white md:text-5xl">
+                    {isAr ? plan.price.ar : plan.price.en}
+                  </p>
+                  <p className="mt-2 text-xs font-semibold tracking-wide text-white/45">
+                    {isAr ? plan.applies.ar : plan.applies.en}
+                  </p>
+                </div>
               )}
 
               <motion.ul
@@ -446,12 +448,26 @@ export function CrystalPricing() {
           className="mx-auto mt-10 max-w-3xl text-center"
         >
           <T as="p" bi={C.pricing.companyNote} className="mb-4 text-sm text-white/55 md:text-base" />
-          <Link
-            href={localePath('/request-demo', locale)}
-            className="mq-btn mq-btn-ghost inline-flex text-sm"
-          >
-            <BiInline bi={C.pricing.companyCta} />
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href={localePath('/request-demo?from=landing-pricing', locale)}
+              className="mq-btn mq-btn-primary inline-flex text-sm"
+            >
+              <BiInline bi={C.pricing.companyCta} />
+            </Link>
+            <Link
+              href={localePath('/request-demo?from=landing-pricing&intent=quote', locale)}
+              className="mq-btn mq-btn-ghost inline-flex text-sm"
+            >
+              <BiInline bi={C.pricing.ctaQuote} />
+            </Link>
+            <Link
+              href={localePath('/partners', locale)}
+              className="mq-btn mq-btn-ghost inline-flex text-sm"
+            >
+              <BiInline bi={C.pricing.partnerCta} />
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>

@@ -42,7 +42,7 @@ const PRICING_PLANS = [
     badge: null,
     features: ['starterF1', 'starterF2', 'starterF3'] as const,
     ctaKey: 'chooseStarter' as const,
-    href: '/request-demo',
+    href: '/request-demo?from=business-starter',
     facet: 'mq-facet mq-facet-cyan mq-facet-shape-soft',
   },
   {
@@ -53,7 +53,7 @@ const PRICING_PLANS = [
     badge: 'businessBadge' as const,
     features: ['businessF1', 'businessF2', 'businessF3', 'businessF4', 'businessF5', 'businessF6'] as const,
     ctaKey: 'chooseBusiness' as const,
-    href: '/request-demo',
+    href: '/request-demo?from=business-plan',
     popular: true,
     facet: 'mq-facet mq-facet-teal mq-facet-shape-soft',
   },
@@ -65,7 +65,7 @@ const PRICING_PLANS = [
     badge: null,
     features: ['enterpriseF1', 'enterpriseF2', 'enterpriseF3', 'enterpriseF4', 'enterpriseF5', 'enterpriseF6'] as const,
     ctaKey: 'chooseEnterprise' as const,
-    href: '/request-demo',
+    href: '/request-demo?from=business-enterprise&intent=quote',
     facet: 'mq-facet mq-facet-gold mq-facet-shape-wave',
   },
 ];
@@ -158,14 +158,14 @@ export default function BusinessContent() {
                 className="mb-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
               >
                 <Link
-                  href={localePath('/request-demo', locale)}
+                  href={localePath('/request-demo?from=business', locale)}
                   className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-6 text-sm font-bold"
                 >
                   {t('ctaTitle')}
                   <Arrow size={16} />
                 </Link>
                 <Link
-                  href="#how"
+                  href={localePath('/request-demo?from=business&intent=quote', locale)}
                   className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center justify-center px-6 text-sm font-bold"
                 >
                   {t('heroCta2')}

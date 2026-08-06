@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { localePath } from '@/i18n/navigation';
 import {
   CAREER_LEVELS,
   EMPLOYMENT_TYPES,
@@ -79,7 +80,7 @@ export function NewJobForm() {
         return;
       }
       toast.success(locale === 'ar' ? 'تم إنشاء الوظيفة' : 'Job created');
-      router.push(`/b2b/jobs/${data.job.id}`);
+      router.push(localePath(`/b2b/jobs/${data.job.id}`, locale));
     } catch {
       toast.error(locale === 'ar' ? 'فشل الإنشاء' : 'Create failed');
     } finally {
@@ -91,7 +92,7 @@ export function NewJobForm() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href="/b2b/jobs"
+          href={localePath("/b2b/jobs", locale)}
           className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-white/5 hover:text-[var(--aurora-2)]"
         >
           <ArrowRight size={20} strokeWidth={1.75} />

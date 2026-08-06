@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { MessageSquare, Eye, PlayCircle, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState, ScoreBar } from '@/components/brand';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -62,8 +63,8 @@ export function InterviewsClient({ interviews, locale }: { interviews: Interview
               onClick={() => setActiveTab(tab)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-gold/15 text-gold border border-gold/30'
-                  : 'bg-white/[0.04] text-[var(--text-muted)] border border-white/[0.08] hover:bg-white/[0.08] hover:text-[var(--text-primary)]'
+                  ? 'border border-teal-300/30 bg-teal-400/15 text-teal-300'
+                  : 'border border-white/10 bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               {tabLabel(tab)}
@@ -79,7 +80,7 @@ export function InterviewsClient({ interviews, locale }: { interviews: Interview
           title={t('emptyTitle')}
           sub={t('emptySub')}
           cta={t('startNew')}
-          ctaHref={t('startNewHref')}
+          ctaHref={localePath('/interview/prequal', locale)}
         />
       ) : (
         <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
@@ -141,16 +142,16 @@ function InterviewCard({ interview, locale }: { interview: InterviewRow; locale:
           </span>
         )}
         {interview.status === 'COMPLETED' && (
-          <Link href={`/app/interview/${interview.id}/report`}>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-[var(--text-muted)] hover:text-gold">
+          <Link href={localePath(`/app/interview/${interview.id}/report`, locale)}>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-white/50 hover:text-teal-300">
               <Eye size={16} strokeWidth={1.75} />
               {t('viewReport')}
             </Button>
           </Link>
         )}
         {interview.status === 'IN_PROGRESS' && (
-          <Link href={`/app/interview/${interview.id}`}>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-[var(--text-muted)] hover:text-gold">
+          <Link href={localePath(`/app/interview/${interview.id}`, locale)}>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-white/50 hover:text-teal-300">
               <PlayCircle size={16} strokeWidth={1.75} />
               {t('resume')}
             </Button>

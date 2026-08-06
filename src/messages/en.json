@@ -834,6 +834,7 @@
       "loading": "Loading applications…",
       "empty": "You have not applied to any vacancies yet.",
       "browseJobs": "Browse Job Portal",
+      "employerNote": "Message from employer",
       "stage": {
         "NEW": "Submitted",
         "REVIEWING": "Under review",

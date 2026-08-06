@@ -36,6 +36,7 @@ export async function GET() {
         stage: a.stage,
         score: a.score,
         source: a.source,
+        employerNote: a.employerNote,
         createdAt: a.createdAt,
         updatedAt: a.updatedAt,
         job: a.job,

@@ -9,6 +9,7 @@ import { GlowCard, ScoreBar, VerifiedBadge, QrCard, CopyLinkButton, SkeletonBloc
 import { OptInModal } from '@/components/opt-in-modal';
 import { toMuqabalehScore, toCriterionScore, getScoreColor } from '@/lib/scoring';
 import { toast } from 'sonner';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -168,7 +169,7 @@ export default function ReportPage({
     return (
       <div className="mx-auto max-w-4xl">
         <Link
-          href="/app/interviews"
+          href={localePath("/app/interviews", locale)}
           className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-gold"
         >
           <ArrowRight size={16} strokeWidth={1.75} />
@@ -216,7 +217,7 @@ export default function ReportPage({
     <div className="mx-auto max-w-4xl space-y-8">
       {/* Back button */}
       <Link
-        href="/app/interviews"
+        href={localePath("/app/interviews", locale)}
         className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-gold"
       >
         <ArrowRight size={16} strokeWidth={1.75} />
@@ -336,7 +337,7 @@ export default function ReportPage({
           {t('shareLinkedin')}
         </Button>
         {verifyId && <CopyLinkButton text={verifyUrl} />}
-        <Link href="/app" className="ms-auto">
+        <Link href={localePath("/app", locale)} className="ms-auto">
           <Button
             variant="ghost"
             className="gap-2 text-[var(--text-muted)] hover:text-gold cursor-pointer"

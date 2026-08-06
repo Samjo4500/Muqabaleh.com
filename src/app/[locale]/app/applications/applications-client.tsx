@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { Briefcase, Loader2, MapPin } from 'lucide-react';
+import { Briefcase, Loader2, MapPin, MessageSquareText } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 
 type Application = {
   id: string;
   stage: string;
   score: number | null;
+  employerNote?: string | null;
   createdAt: string;
   job: {
     id: string;
@@ -94,42 +95,54 @@ export function ApplicationsClient() {
   return (
     <ul className="mt-8 space-y-3">
       {items.map((app) => {
-        const title =
-          isAr && app.job.titleAr ? app.job.titleAr : app.job.title;
+        const title = isAr && app.job.titleAr ? app.job.titleAr : app.job.title;
         const stageClass = STAGE_STYLE[app.stage] || STAGE_STYLE.NEW;
         const place = [app.job.city, app.job.country].filter(Boolean).join(', ');
+        const note = app.employerNote?.trim();
         return (
           <li key={app.id}>
-            <Link
-              href={localePath(`/portal/jobs/${app.job.id}`, locale)}
-              className="mq-panel flex flex-col gap-3 rounded-2xl p-4 transition hover:border-teal-300/30 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-white">{title}</p>
-                <p className="mt-1 text-sm text-white/55">
-                  {app.job.company?.name || (isAr ? 'شركة' : 'Company')}
-                </p>
-                {place ? (
-                  <p className="mt-1 inline-flex items-center gap-1 text-xs text-white/40">
-                    <MapPin size={12} />
-                    {place}
+            <div className="mq-panel rounded-2xl p-4">
+              <Link
+                href={localePath(`/portal/jobs/${app.job.id}`, locale)}
+                className="flex flex-col gap-3 transition hover:opacity-95 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-white">{title}</p>
+                  <p className="mt-1 text-sm text-white/55">
+                    {app.job.company?.name || (isAr ? 'شركة' : 'Company')}
                   </p>
-                ) : null}
-              </div>
-              <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-                <span
-                  className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-bold ${stageClass}`}
-                >
-                  {t(`stage.${app.stage}` as 'stage.NEW')}
-                </span>
-                <span className="text-xs text-white/40">
-                  {new Date(app.createdAt).toLocaleDateString(
-                    isAr ? 'ar-SA' : 'en-US',
-                    { year: 'numeric', month: 'short', day: 'numeric' },
-                  )}
-                </span>
-              </div>
-            </Link>
+                  {place ? (
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-white/40">
+                      <MapPin size={12} />
+                      {place}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                  <span
+                    className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-bold ${stageClass}`}
+                  >
+                    {t(`stage.${app.stage}` as 'stage.NEW')}
+                  </span>
+                  <span className="text-xs text-white/40">
+                    {new Date(app.createdAt).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              </Link>
+              {note ? (
+                <div className="mt-3 rounded-xl border border-teal-300/20 bg-teal-400/5 px-3 py-2.5">
+                  <p className="mb-1 inline-flex items-center gap-1.5 text-xs font-semibold text-teal-300">
+                    <MessageSquareText size={13} strokeWidth={1.75} />
+                    {t('employerNote')}
+                  </p>
+                  <p className="whitespace-pre-wrap text-sm text-white/70">{note}</p>
+                </div>
+              ) : null}
+            </div>
           </li>
         );
       })}

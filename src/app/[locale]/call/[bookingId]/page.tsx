@@ -7,6 +7,7 @@ import { PhoneOff, Loader2, ArrowLeft, Clock, User, AlertCircle, ExternalLink } 
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { localePath } from '@/i18n/navigation';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -110,7 +111,7 @@ export default function CallPage({
         if (cancelled) return;
 
         if (res.status === 403) {
-          router.push('/');
+          router.push(localePath('/', locale));
           return;
         }
         if (!res.ok) {
@@ -257,7 +258,7 @@ export default function CallPage({
 
     // Optionally redirect after 3 seconds
     setTimeout(() => {
-      router.push('/app/bookings');
+      router.push(localePath('/app/bookings', locale));
     }, 3000);
   }, [bookingId, ending, router]);
 
@@ -282,7 +283,7 @@ export default function CallPage({
         <p className="text-center text-sm text-[var(--text-muted)]">{error}</p>
         <Button
           variant="outline"
-          onClick={() => router.push('/')}
+          onClick={() => router.push(localePath('/', locale))}
           className="border-white/10 text-[var(--text-primary)] hover:bg-white/5"
         >
           <ArrowLeft size={16} className="me-2" />
@@ -307,7 +308,7 @@ export default function CallPage({
         </p>
         <Button
           variant="outline"
-          onClick={() => router.push('/')}
+          onClick={() => router.push(localePath('/', locale))}
           className="border-white/10 text-[var(--text-primary)] hover:bg-white/5"
         >
           <ArrowLeft size={16} className="me-2" />
@@ -331,7 +332,7 @@ export default function CallPage({
           {t('sessionDuration')}: {formatTimer(callSeconds)}
         </p>
         <Button
-          onClick={() => router.push('/app/bookings')}
+          onClick={() => router.push(localePath('/app/bookings', locale))}
           className="btn-gold cursor-pointer"
         >
           {t('leaveReview')}

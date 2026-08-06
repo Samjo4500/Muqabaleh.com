@@ -991,27 +991,37 @@
     linear-gradient(105deg, rgba(5, 8, 15, 0.88) 0%, rgba(5, 8, 15, 0.55) 48%, rgba(5, 8, 15, 0.28) 100%),
     linear-gradient(180deg, rgba(5, 8, 15, 0.25) 0%, rgba(5, 8, 15, 0.72) 100%);
 }
-/* Fixed hero passport badge — same anchor on every slider frame */
+/* Hero face crop — keep Jeannie's face clear of overlays on small screens */
+@media (max-width: 767px) {
+  .mq-atelier .mq-hero-face {
+    object-position: center 12% !important;
+  }
+}
+
+/* Floating score: desktop only — parked mid-lower so it never covers the face */
 .mq-atelier .mq-hero-score-anchor {
-  position: absolute;
-  z-index: 30;
-  inset-inline-end: 0.85rem;
-  top: 5.25rem;
-  width: min(16.75rem, calc(100vw - 1.7rem));
+  display: none;
 }
 @media (min-width: 768px) {
   .mq-atelier .mq-hero-score-anchor {
-    inset-inline-end: 2rem;
-    top: 6.5rem;
-    width: 18.25rem;
+    display: block;
+    position: absolute;
+    z-index: 30;
+    inset-inline-end: 1.5rem;
+    top: auto;
+    bottom: 18%;
+    width: 15.5rem;
   }
 }
 @media (min-width: 1024px) {
   .mq-atelier .mq-hero-score-anchor {
-    inset-inline-end: 2.75rem;
-    top: 7.25rem;
-    width: 18.75rem;
+    inset-inline-end: 2.5rem;
+    bottom: 20%;
+    width: 17.5rem;
   }
+}
+.mq-atelier .mq-hero-score-inline {
+  width: min(14.5rem, 100%);
 }
 .mq-atelier .mq-score-badge {
   filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));

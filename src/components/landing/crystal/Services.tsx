@@ -20,35 +20,37 @@ function ServiceVisual({ index, locale }: { index: number; locale: string }) {
   const isAr = locale === 'ar';
 
   if (index === 0) {
-    // AI — orbiting nodes + pulse core
+    // Jeannie interviews — bilingual voice bars
     return (
-      <div className="mq-service-visual relative mb-6 h-28 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-teal-400/10 via-transparent to-cyan-400/5">
-        <motion.div
-          className="absolute start-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-300 shadow-[0_0_24px_rgba(45,212,191,0.8)]"
-          animate={{ scale: [1, 1.35, 1], opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        {[0, 1, 2].map((ring) => (
-          <motion.div
-            key={ring}
-            className="absolute start-1/2 top-1/2 rounded-full border border-teal-300/25"
-            style={{
-              width: 36 + ring * 28,
-              height: 36 + ring * 28,
-              marginLeft: -(18 + ring * 14),
-              marginTop: -(18 + ring * 14),
-            }}
-            animate={{ rotate: ring % 2 === 0 ? 360 : -360 }}
-            transition={{ duration: 10 + ring * 4, repeat: Infinity, ease: 'linear' }}
+      <div className="mq-service-visual relative mb-6 flex h-28 flex-col justify-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-teal-400/10 via-transparent to-cyan-400/5 px-4">
+        <div className="flex items-center gap-2">
+          <motion.span
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-teal-300/40 bg-teal-400/20 text-xs font-black text-teal-50"
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
           >
-            <span className="absolute start-0 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-teal-200/90" />
-          </motion.div>
-        ))}
-        <motion.div
-          className="absolute inset-x-6 bottom-3 h-px bg-gradient-to-r from-transparent via-teal-300/70 to-transparent"
-          animate={{ scaleX: [0.4, 1, 0.4], opacity: [0.3, 0.9, 0.3] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-        />
+            J
+          </motion.span>
+          <div className="flex gap-1.5">
+            <span className="rounded-md border border-teal-300/30 bg-teal-400/10 px-2 py-0.5 text-[10px] font-bold text-teal-100">
+              {isAr ? 'عربي' : 'AR'}
+            </span>
+            <span className="rounded-md border border-cyan-300/30 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
+              EN
+            </span>
+          </div>
+        </div>
+        <div className="flex items-end gap-1">
+          {[8, 14, 10, 18, 12, 16, 9].map((h, i) => (
+            <motion.span
+              key={i}
+              className="w-1.5 rounded-full bg-teal-300/80"
+              animate={{ height: [h * 0.4, h, h * 0.55, h * 0.85, h * 0.4] }}
+              transition={{ duration: 1.1 + i * 0.05, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ height: h }}
+            />
+          ))}
+        </div>
       </div>
     );
   }

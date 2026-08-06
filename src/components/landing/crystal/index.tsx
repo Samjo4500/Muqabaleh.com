@@ -15,10 +15,6 @@ const CrystalServices = dynamic(
   () => import('./Services').then((m) => m.CrystalServices),
   { ssr: true },
 );
-const CrystalHowItWorks = dynamic(
-  () => import('./HowItWorks').then((m) => m.CrystalHowItWorks),
-  { ssr: true },
-);
 const CrystalJeannie = dynamic(
   () => import('./Jeannie').then((m) => m.CrystalJeannie),
   { ssr: true },
@@ -97,7 +93,6 @@ export function CrystalLanding() {
         <CrystalHero />
         <CrystalTrust />
         <CrystalServices />
-        <CrystalHowItWorks />
         <CrystalJeannie />
         <CrystalJeannieMagic />
         <CrystalForCompanies />

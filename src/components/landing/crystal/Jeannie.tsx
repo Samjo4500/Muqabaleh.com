@@ -11,7 +11,7 @@ import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { easeCrystal, fadeUp } from './motion';
 
-type OfferKey = 'shortlist' | 'approve' | 'apply' | 'passport';
+type OfferKey = 'interview' | 'passport' | 'shortlist' | 'approve' | 'apply';
 
 const OFFER_META: {
   key: OfferKey;
@@ -20,30 +20,78 @@ const OFFER_META: {
   accent: string;
 }[] = [
   {
+    key: 'interview',
+    frame: '/images/hero-interview-meeting.webp',
+    objectPosition: 'center 18%',
+    accent: 'rgba(45,212,191,0.55)',
+  },
+  {
+    key: 'passport',
+    frame: '/images/hero-interview.webp',
+    objectPosition: 'center 16%',
+    accent: 'rgba(232,201,122,0.55)',
+  },
+  {
     key: 'shortlist',
     frame: '/images/hero-interview.webp',
     objectPosition: 'center 18%',
-    accent: 'rgba(45,212,191,0.55)',
+    accent: 'rgba(103,232,249,0.5)',
   },
   {
     key: 'approve',
     frame: '/images/hero-interview-meeting.webp',
     objectPosition: 'center 20%',
-    accent: 'rgba(103,232,249,0.5)',
+    accent: 'rgba(52,211,153,0.5)',
   },
   {
     key: 'apply',
     frame: '/images/hero-interview-hired.webp',
     objectPosition: 'center 22%',
-    accent: 'rgba(52,211,153,0.55)',
-  },
-  {
-    key: 'passport',
-    frame: '/images/hero-interview-meeting.webp',
-    objectPosition: 'center 16%',
-    accent: 'rgba(232,201,122,0.55)',
+    accent: 'rgba(45,212,191,0.55)',
   },
 ];
+
+function SceneInterview({ active, isAr }: { active: boolean; isAr: boolean }) {
+  const langs = isAr ? ['العربية', 'English'] : ['Arabic', 'English'];
+  return (
+    <div className="mq-jeannie-scene items-center justify-center gap-3">
+      <div className="flex items-center gap-2">
+        {langs.map((lang, i) => (
+          <motion.span
+            key={lang}
+            className="rounded-lg border border-teal-300/35 bg-teal-400/15 px-3 py-1.5 text-[11px] font-bold text-teal-50"
+            animate={
+              active
+                ? { scale: [0.94, 1.05, 1], opacity: [0.55, 1, 0.85] }
+                : { opacity: 0.45 }
+            }
+            transition={{ duration: 1.4, delay: i * 0.2, repeat: Infinity, repeatDelay: 0.4 }}
+          >
+            {lang}
+          </motion.span>
+        ))}
+      </div>
+      <div className="flex items-end justify-center gap-1.5">
+        {[10, 18, 12, 22, 14, 20, 11].map((h, i) => (
+          <motion.span
+            key={i}
+            className="w-1.5 rounded-full bg-teal-300/85"
+            animate={
+              active
+                ? { height: [h * 0.4, h, h * 0.55, h * 0.85, h * 0.4] }
+                : { height: h * 0.45 }
+            }
+            transition={{ duration: 1.1 + i * 0.05, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ height: h }}
+          />
+        ))}
+      </div>
+      <p className="text-center text-[11px] text-white/55">
+        {isAr ? 'جيني تُجري مقابلتك — تقييم فوري' : 'Jeannie interviews you — instant scoring'}
+      </p>
+    </div>
+  );
+}
 
 function SceneShortlist({ active, isAr }: { active: boolean; isAr: boolean }) {
   const roles = isAr
@@ -177,10 +225,11 @@ function OfferScene({
   isAr: boolean;
   locale: string;
 }) {
+  if (offerKey === 'interview') return <SceneInterview active={active} isAr={isAr} />;
+  if (offerKey === 'passport') return <ScenePassport active={active} locale={locale} />;
   if (offerKey === 'shortlist') return <SceneShortlist active={active} isAr={isAr} />;
   if (offerKey === 'approve') return <SceneApprove active={active} isAr={isAr} />;
-  if (offerKey === 'apply') return <SceneApply active={active} isAr={isAr} />;
-  return <ScenePassport active={active} locale={locale} />;
+  return <SceneApply active={active} isAr={isAr} />;
 }
 
 export function CrystalJeannie() {
@@ -318,7 +367,9 @@ export function CrystalJeannie() {
                     {isAr ? 'ليس عشوائياً' : 'NOT SPAM'}
                   </span>
                   <span className="text-sm font-medium text-white/70">
-                    {isAr ? 'وكيلتك المهنية الموثّقة بالمقابلة' : 'Interview-verified career agent'}
+                    {isAr
+                      ? 'المقابِلة والوكيلة — عربية وإنجليزية'
+                      : 'Interviewer & career agent — Arabic & English'}
                   </span>
                 </div>
               </motion.div>

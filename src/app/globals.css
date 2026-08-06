@@ -1017,6 +1017,42 @@
   filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
 }
 
+/* Pricing comparison */
+.mq-atelier .mq-not-spam {
+  position: relative;
+}
+.mq-atelier .mq-not-spam::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.9), rgba(103, 232, 249, 0.35));
+}
+.mq-atelier .mq-compare {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 28px 70px rgba(0, 0, 0, 0.28);
+}
+.mq-atelier .mq-compare-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.015);
+}
+.mq-atelier .mq-compare-row:hover {
+  background: rgba(45, 212, 191, 0.05);
+}
+@media (max-width: 640px) {
+  .mq-atelier .mq-compare-head,
+  .mq-atelier .mq-compare-row {
+    grid-template-columns: 1.15fr repeat(3, minmax(0, 0.85fr));
+    gap: 0.35rem;
+    padding-inline: 0.65rem;
+  }
+  .mq-atelier .mq-compare-head span,
+  .mq-atelier .mq-compare-row > span:first-child {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+}
+
 /* Jeannie avatar stage */
 .mq-atelier .mq-jeannie-stage {
   background:

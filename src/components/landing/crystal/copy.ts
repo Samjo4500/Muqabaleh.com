@@ -21,8 +21,8 @@ export const C = {
       ar: 'احصل على تقييمك. أثبت جاهزيتك. جيني تقدّم عنك.',
     },
     sub: {
-      en: "MENA's hire-ready interview passport — practice with AI, earn verified proof, then let Jeannie apply professionally on your behalf.",
-      ar: 'جواز مقابلة جاهز للتوظيف في المنطقة — تدرّب مع الذكاء الاصطناعي، احصل على دليل موثّق، ثم دع جيني تقدّم عنك باحتراف.',
+      en: "MENA's hire-ready interview passport — practice with AI, earn verified proof, then let Jeannie apply with your approval. Not spam.",
+      ar: 'جواز مقابلة جاهز للتوظيف في المنطقة — تدرّب مع الذكاء الاصطناعي، احصل على دليل موثّق، ثم دع جيني تقدّم بموافقتك. لا إرسال عشوائي.',
     },
     ctaInterview: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
     ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
@@ -183,7 +183,7 @@ export const C = {
       },
     ],
     cta: { en: 'Start free — then unlock Jeannie', ar: 'ابدأ مجاناً — ثم فعّل جيني' },
-    ctaSecondary: { en: 'See pricing', ar: 'شاهد الأسعار' },
+    ctaSecondary: { en: 'Compare plans', ar: 'قارن الخطط' },
   },
   companies: {
     headline: { en: 'Hire with verified signal', ar: 'وظّف بإشارة موثّقة' },
@@ -200,38 +200,157 @@ export const C = {
     cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
   },
   pricing: {
-    title: { en: 'Simple for individuals', ar: 'بسيط للأفراد' },
+    title: { en: 'Choose how far Jeannie goes', ar: 'اختر إلى أين تصل جيني' },
     subtitle: {
-      en: 'Start free. Subscribe when you want Jeannie applying for you.',
-      ar: 'ابدأ مجاناً. اشترك عندما تريد جيني تقدّم عنك.',
+      en: 'Three clear plans. Approve every apply. Not spam — quality over volume.',
+      ar: 'ثلاث خطط واضحة. وافق على كل تقديم. لا إرسال عشوائي — الجودة قبل الكمية.',
     },
+    notSpam: {
+      badge: { en: 'NOT SPAM', ar: 'ليس عشوائياً' },
+      line: {
+        en: 'Jeannie never spray-applies. Every application needs your approval — passport proof attached.',
+        ar: 'جيني لا ترسل عشوائياً. كل تقديم يحتاج موافقتك — مع دليل الجواز مرفقاً.',
+      },
+    },
+    compareTitle: { en: 'Compare plans', ar: 'قارن الخطط' },
     plans: [
       {
+        id: 'free' as const,
         name: { en: 'Free', ar: 'مجاني' },
         price: { en: '$0', ar: '$0' },
         period: { en: '', ar: '' },
+        tagline: {
+          en: 'Prove the product. No applies.',
+          ar: 'جرّب المنتج. بلا تقديمات.',
+        },
+        applies: { en: '0 applies', ar: '٠ تقديمات' },
         features: [
           { en: '1 AI interview', ar: 'مقابلة ذكاء اصطناعي واحدة' },
           { en: 'Passport preview', ar: 'معاينة الجواز' },
           { en: 'Basic scorecard', ar: 'بطاقة تقييم أساسية' },
+          { en: 'No Jeannie applies', ar: 'بدون تقديمات جيني' },
         ],
         cta: { en: 'Start free', ar: 'ابدأ مجاناً' },
         href: '/register',
         popular: false,
       },
       {
+        id: 'jeannie' as const,
         name: { en: 'Jeannie', ar: 'جيني' },
         price: { en: '$19', ar: '$19' },
         period: { en: '/mo', ar: '/شهر' },
+        tagline: {
+          en: 'Controlled applies. Upload your materials.',
+          ar: 'تقديمات مضبوطة. ارفع موادك.',
+        },
+        applies: { en: '10 applies / mo', ar: '١٠ تقديمات / شهر' },
         features: [
           { en: 'Unlimited AI practice', ar: 'تدريب ذكي بلا حدود' },
           { en: 'Full verified passport', ar: 'جواز موثّق كامل' },
-          { en: 'Jeannie applies (up to 15/mo)', ar: 'جيني تقدّم (حتى ١٥/شهر)' },
+          { en: 'Jeannie applies — 10 / month', ar: 'جيني تقدّم — ١٠ / شهر' },
+          { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
+          { en: 'Upload CV + cover letter', ar: 'رفع السيرة وخطاب التقديم' },
           { en: 'Application tracker', ar: 'متتبّع الطلبات' },
         ],
         cta: { en: 'Unlock Jeannie', ar: 'فعّل جيني' },
         href: '/app/packages',
         popular: true,
+      },
+      {
+        id: 'pro' as const,
+        name: { en: 'Jeannie Pro', ar: 'جيني برو' },
+        price: { en: '$39', ar: '$39' },
+        period: { en: '/mo', ar: '/شهر' },
+        tagline: {
+          en: 'Full CV studio. Stronger materials. More volume.',
+          ar: 'استوديو سيرة كامل. مواد أقوى. حجم أكبر.',
+        },
+        applies: { en: '20 applies / mo', ar: '٢٠ تقديمات / شهر' },
+        features: [
+          { en: 'Everything in Jeannie', ar: 'كل مزايا جيني' },
+          { en: 'Jeannie applies — 20 / month', ar: 'جيني تقدّم — ٢٠ / شهر' },
+          { en: 'Full CV studio', ar: 'استوديو سيرة كامل' },
+          { en: 'Cover letter generate + assist', ar: 'توليد ومساعدة خطاب التقديم' },
+          { en: 'Full tracker + insights', ar: 'متتبّع كامل مع رؤى' },
+          { en: 'Priority matching', ar: 'مطابقة ذات أولوية' },
+        ],
+        cta: { en: 'Go Jeannie Pro', ar: 'اشترك في جيني برو' },
+        href: '/app/packages',
+        popular: false,
+      },
+    ],
+    compare: [
+      {
+        label: { en: 'AI interview practice', ar: 'تدريب المقابلة الذكية' },
+        values: [
+          { en: '1 session', ar: 'جلسة واحدة' },
+          { en: 'Unlimited', ar: 'بلا حدود' },
+          { en: 'Unlimited', ar: 'بلا حدود' },
+        ],
+      },
+      {
+        label: { en: 'Muqabaleh passport', ar: 'جواز مقابلة' },
+        values: [
+          { en: 'Preview', ar: 'معاينة' },
+          { en: 'Full verified', ar: 'موثّق كامل' },
+          { en: 'Full verified', ar: 'موثّق كامل' },
+        ],
+      },
+      {
+        label: { en: 'Jeannie applies / month', ar: 'تقديمات جيني / شهر' },
+        values: [
+          { en: '0', ar: '٠' },
+          { en: '10', ar: '١٠' },
+          { en: '20', ar: '٢٠' },
+        ],
+      },
+      {
+        label: { en: 'Approve every apply (NOT SPAM)', ar: 'موافقة على كل تقديم (ليس عشوائياً)' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: 'Yes', ar: 'نعم' },
+          { en: 'Yes', ar: 'نعم' },
+        ],
+      },
+      {
+        label: { en: 'CV upload', ar: 'رفع السيرة' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: 'Yes', ar: 'نعم' },
+          { en: 'Yes', ar: 'نعم' },
+        ],
+      },
+      {
+        label: { en: 'Cover letter upload / paste', ar: 'رفع / لصق خطاب التقديم' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: 'Yes', ar: 'نعم' },
+          { en: 'Yes', ar: 'نعم' },
+        ],
+      },
+      {
+        label: { en: 'CV studio (build & improve)', ar: 'استوديو السيرة (بناء وتحسين)' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: '—', ar: '—' },
+          { en: 'Yes', ar: 'نعم' },
+        ],
+      },
+      {
+        label: { en: 'Cover letter generate + assist', ar: 'توليد ومساعدة خطاب التقديم' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: '—', ar: '—' },
+          { en: 'Yes', ar: 'نعم' },
+        ],
+      },
+      {
+        label: { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+        values: [
+          { en: '—', ar: '—' },
+          { en: 'Standard', ar: 'أساسي' },
+          { en: 'Full + insights', ar: 'كامل + رؤى' },
+        ],
       },
     ],
     companyNote: {
@@ -288,8 +407,18 @@ export const C = {
           ar: 'من هي جيني؟',
         },
         a: {
-          en: 'Jeannie is your interview-verified career agent. She shortlists fitting roles and applies professionally after you approve each one.',
-          ar: 'جيني وكيلتك المهنية الموثّقة بالمقابلة. ترشّح أدواراً مناسبة وتقدّم باحتراف بعد موافقتك على كل فرصة.',
+          en: 'Jeannie is your interview-verified career agent. She shortlists fitting roles and applies only after you approve — never spam.',
+          ar: 'جيني وكيلتك المهنية الموثّقة بالمقابلة. ترشّح أدواراً مناسبة وتقدّم فقط بعد موافقتك — بلا إرسال عشوائي.',
+        },
+      },
+      {
+        q: {
+          en: 'What is the difference between Jeannie and Jeannie Pro?',
+          ar: 'ما الفرق بين جيني وجيني برو؟',
+        },
+        a: {
+          en: 'Jeannie ($19) includes 10 approve-gated applies/month with CV and cover letter upload. Jeannie Pro ($39) raises that to 20/month and adds full CV studio plus cover letter generate/assist and richer tracking.',
+          ar: 'جيني (١٩$) تشمل ١٠ تقديمات بموافقتك شهرياً مع رفع السيرة وخطاب التقديم. جيني برو (٣٩$) ترفعها إلى ٢٠/شهر وتضيف استوديو سيرة كاملاً وتوليد/مساعدة خطاب التقديم وتتبعاً أغنى.',
         },
       },
       {

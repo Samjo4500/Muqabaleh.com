@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import {
   ArrowRight,
@@ -19,6 +18,8 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { BiInline, BiLabel } from '@/components/admin/BiLabel';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 import { L } from '@/lib/admin/labels';
 import { ADMIN_NAV, parentAdminPath } from '@/lib/admin/nav';
 import { localePath } from '@/i18n/navigation';
@@ -77,7 +78,6 @@ function SidebarNav({
         const label = L[group.label];
         const single = group.items.length === 1;
 
-        // Top-level single links (Dashboard, Notifications, Audit, Applicants)
         if (single) {
           const item = group.items[0];
           const href = localePath(item.href, locale);
@@ -91,8 +91,8 @@ function SidebarNav({
                 'mb-1 block rounded-lg px-2 py-2 transition',
                 collapsed && 'text-center',
                 isActive
-                  ? 'bg-cyan-500/15 text-cyan-200'
-                  : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]',
+                  ? 'bg-teal-400/15 text-teal-200'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white',
               )}
             >
               {!collapsed ? <BiLabel ar={label.ar} en={label.en} size="sm" /> : <span className="text-xs">•</span>}
@@ -106,7 +106,7 @@ function SidebarNav({
               type="button"
               onClick={() => setOpenGroups((p) => ({ ...p, [group.id]: !open }))}
               className={cn(
-                'flex w-full items-center justify-between rounded-lg px-2 py-2 text-start text-[var(--text-muted)] hover:bg-white/5',
+                'flex w-full items-center justify-between rounded-lg px-2 py-2 text-start text-white/50 hover:bg-white/5 hover:text-white',
                 collapsed && 'justify-center',
               )}
             >
@@ -127,8 +127,8 @@ function SidebarNav({
                       className={cn(
                         'block rounded-lg px-2 py-2 transition',
                         isActive
-                          ? 'bg-cyan-500/15 text-cyan-200'
-                          : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]',
+                          ? 'bg-teal-400/15 text-teal-200'
+                          : 'text-white/50 hover:bg-white/5 hover:text-white',
                       )}
                     >
                       <BiLabel ar={itemLabel.ar} en={itemLabel.en} size="sm" />
@@ -154,33 +154,37 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const showGlobalBack = !pathname.endsWith('/admin/dashboard') && !pathname.endsWith('/admin');
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]" dir="rtl">
+    <div className="mq-atelier relative flex min-h-screen overflow-x-hidden text-white" dir="rtl">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+        <div className="mq-orb mq-orb-a" />
+        <div className="mq-orb mq-orb-c" />
+      </div>
+
+      <LanguageSwitcherFixed />
+
       <aside
         className={cn(
-          'hidden flex-col border-s border-white/[0.08] bg-[var(--bg-panel)] transition-all lg:flex',
+          'relative z-10 hidden flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all lg:flex',
           collapsed ? 'w-[72px]' : 'w-[280px]',
         )}
       >
         <Link
           href={localePath('/', locale)}
-          className="flex items-center gap-3 p-4 transition hover:bg-white/[0.04]"
+          className="block p-4 transition hover:bg-white/[0.04]"
           aria-label={`${L.home.ar} / ${L.home.en}`}
           title={`${L.home.ar} / ${L.home.en}`}
         >
-          <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={36} height={36} className="h-9 w-9" />
+          <BrandLogo size={collapsed ? 'sm' : 'nav'} priority />
           {!collapsed ? (
-            <div>
-              <BiLabel ar={L.brand.ar} en={L.brand.en} />
-              <p className="mt-1 text-[10px] font-semibold tracking-wide text-cyan-300/90">
-                Control Panel · Spec v2
-              </p>
-            </div>
+            <p className="mt-2 text-[10px] font-semibold tracking-wide text-teal-300/90">
+              Control Panel · Spec v2
+            </p>
           ) : null}
         </Link>
         <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
-        <div className="mt-auto space-y-2 border-t border-white/[0.08] p-3">
+        <div className="mt-auto space-y-2 border-t border-white/10 p-3">
           <div className="flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-300">
               <ShieldCheck size={14} />
               {!collapsed ? <BiInline ar={L.systemAdmin.ar} en={L.systemAdmin.en} /> : null}
             </span>
@@ -188,7 +192,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={toggle}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-white/5"
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white"
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             {!collapsed ? <BiInline ar={L.theme.ar} en={L.theme.en} /> : null}
@@ -196,15 +200,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-white/5"
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white"
           >
             {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-            {!collapsed ? <BiInline ar={collapsed ? L.expand.ar : L.collapse.ar} en={collapsed ? L.expand.en : L.collapse.en} /> : null}
+            {!collapsed ? (
+              <BiInline
+                ar={collapsed ? L.expand.ar : L.collapse.ar}
+                en={collapsed ? L.expand.en : L.collapse.en}
+              />
+            ) : null}
           </button>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400"
+            onClick={() => signOut({ callbackUrl: localePath('/', locale) })}
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-rose-500/10 hover:text-rose-300"
           >
             <LogOut size={16} />
             {!collapsed ? <BiInline ar={L.signOut.ar} en={L.signOut.en} /> : null}
@@ -212,24 +221,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.08] bg-[var(--bg-panel)]/85 px-4 backdrop-blur-md lg:hidden">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/10 bg-[#070b14]/80 px-4 pe-24 backdrop-blur-md lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button type="button" className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5" aria-label="Menu">
+              <button type="button" className="rounded-lg p-2 text-white/50 hover:bg-white/5" aria-label="Menu">
                 <Menu size={20} />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] border-s border-white/[0.08] bg-[var(--bg-panel)] p-0">
+            <SheetContent side="right" className="w-[280px] border-s border-white/10 bg-[#070b14]/95 p-0">
               <SheetTitle className="sr-only">Admin Menu</SheetTitle>
               <Link
                 href={localePath('/', locale)}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 p-4 transition hover:bg-white/[0.04]"
+                className="block p-4 transition hover:bg-white/[0.04]"
                 aria-label={`${L.home.ar} / ${L.home.en}`}
               >
-                <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={32} height={32} className="h-8 w-8" />
-                <BiLabel ar={L.brand.ar} en={L.brand.en} />
+                <BrandLogo size="nav" />
+                <p className="mt-2 text-[10px] font-semibold tracking-wide text-teal-300/90">
+                  Control Panel · Spec v2
+                </p>
               </Link>
               <SidebarNav pathname={pathname} locale={locale} onNavigate={() => setOpen(false)} />
             </SheetContent>
@@ -239,10 +250,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             className="flex min-w-0 items-center gap-2"
             aria-label={`${L.home.ar} / ${L.home.en}`}
           >
-            <Image src="/images/logos/v2-balanced-a-T.webp" alt="Muqabaleh" width={28} height={28} className="h-7 w-7 shrink-0" />
-            <BiLabel ar={L.brand.ar} en={L.brand.en} size="sm" />
+            <BrandLogo size="nav" />
           </Link>
-          <button type="button" onClick={toggle} className="ms-auto rounded-lg p-2 text-[var(--text-muted)] hover:bg-white/5">
+          <button
+            type="button"
+            onClick={toggle}
+            className="ms-auto rounded-lg p-2 text-white/50 hover:bg-white/5"
+          >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         </header>
@@ -251,7 +265,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <div className="mb-4">
               <Link
                 href={backHref}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70 hover:border-teal-300/40 hover:text-teal-200"
               >
                 <ArrowRight size={16} />
                 <BiInline ar={L.back.ar} en={L.back.en} />

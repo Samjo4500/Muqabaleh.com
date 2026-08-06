@@ -54,67 +54,57 @@ function ServiceVisual({ index, locale }: { index: number; locale: string }) {
   }
 
   if (index === 1) {
-    // Human expert — live call window with waveform
+    // Passport — score seal
     return (
-      <div className="mq-service-visual relative mb-6 h-28 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-amber-300/10 via-transparent to-white/5 p-4">
-        <div className="flex h-full items-end justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <motion.div
-              className="h-10 w-10 rounded-full border border-amber-200/30 bg-amber-200/15"
-              animate={{ boxShadow: ['0 0 0 0 rgba(232,201,122,0.0)', '0 0 0 10px rgba(232,201,122,0.0)', '0 0 0 0 rgba(232,201,122,0.0)'] }}
-              transition={{ duration: 2.4, repeat: Infinity }}
-            />
-            <div className="space-y-1.5">
-              <div className="h-2 w-16 rounded-full bg-white/25" />
-              <div className="h-2 w-10 rounded-full bg-white/15" />
-            </div>
-          </div>
-          <div className="flex h-12 items-end gap-1">
-            {[8, 14, 10, 18, 12, 16, 9].map((h, i) => (
-              <motion.span
-                key={i}
-                className="w-1.5 rounded-full bg-amber-200/80"
-                animate={{ height: [h * 0.45, h, h * 0.55, h * 0.9, h * 0.45] }}
-                transition={{ duration: 1.2 + i * 0.08, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ height: h }}
-              />
-            ))}
-          </div>
-        </div>
-        <motion.span
-          className="absolute end-3 top-3 inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/15 px-2 py-0.5 text-[10px] font-bold text-red-200"
-          animate={{ opacity: [1, 0.35, 1] }}
-          transition={{ duration: 1.4, repeat: Infinity }}
+      <div className="mq-service-visual relative mb-6 flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-amber-300/10 via-transparent to-teal-400/5">
+        <motion.div
+          className="flex h-16 w-16 items-center justify-center rounded-2xl border border-teal-300/40 bg-teal-400/15 text-xl font-black text-teal-100"
+          animate={{ scale: [1, 1.08, 1], rotate: [0, -2, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          ● {isAr ? 'مباشر' : 'LIVE'}
-        </motion.span>
+          86
+        </motion.div>
+        <motion.div
+          className="absolute inset-x-8 bottom-3 h-px bg-gradient-to-r from-transparent via-amber-200/60 to-transparent"
+          animate={{ opacity: [0.25, 0.85, 0.25], scaleX: [0.6, 1, 0.6] }}
+          transition={{ duration: 2.6, repeat: Infinity }}
+        />
       </div>
     );
   }
 
   if (index === 2) {
-    // Jobs — rising match bars + sliding card
+    // Jeannie — agent shortlist
     return (
       <div className="mq-service-visual relative mb-6 h-28 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-sky-400/10 via-transparent to-teal-400/5 p-4">
-        <div className="flex h-full items-end gap-2">
-          {[40, 58, 46, 72, 54, 68].map((h, i) => (
-            <motion.div
-              key={i}
-              className="flex-1 rounded-t-md bg-gradient-to-t from-sky-400/20 to-teal-300/70"
-              initial={{ height: 8 }}
-              whileInView={{ height: h * 0.85 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 * i, ease: easeCrystal }}
-              animate={{ opacity: [0.65, 1, 0.65] }}
-            />
-          ))}
+        <div className="flex h-full items-center gap-3">
+          <motion.div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-teal-300/40 bg-gradient-to-br from-teal-300/25 to-cyan-400/10 text-xs font-bold text-teal-100"
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity }}
+          >
+            J
+          </motion.div>
+          <div className="flex-1 space-y-2">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="flex items-center gap-2"
+                animate={{ opacity: [0.45, 1, 0.45], x: [0, 4, 0] }}
+                transition={{ duration: 2, delay: i * 0.18, repeat: Infinity }}
+              >
+                <span className="h-1.5 flex-1 rounded-full bg-white/20" />
+                <span className="h-1.5 w-8 rounded-full bg-teal-300/55" />
+              </motion.div>
+            ))}
+          </div>
         </div>
         <motion.div
-          className="absolute start-4 top-4 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-bold text-teal-100 backdrop-blur-md"
-          animate={{ y: [0, -4, 0], x: [0, 6, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute end-3 top-3 rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-bold text-teal-100 backdrop-blur-md"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
         >
-          {isAr ? 'تطابق ٩٥٪' : '95% match'}
+          {isAr ? 'جيني' : 'Jeannie'}
         </motion.div>
       </div>
     );

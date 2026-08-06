@@ -24,7 +24,6 @@ export function CrystalFooter() {
       { bi: C.nav.services, href: '/#services' },
       { bi: C.nav.howItWorks, href: '/#how-it-works' },
       { bi: C.nav.pricing, href: '/#pricing' },
-      { bi: C.nav.jobs, href: '/portal' },
     ],
     company: [
       { bi: C.footer.about, href: '/about' },

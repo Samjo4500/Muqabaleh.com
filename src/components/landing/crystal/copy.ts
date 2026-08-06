@@ -185,6 +185,53 @@ export const C = {
     cta: { en: 'Start free — then unlock Jeannie', ar: 'ابدأ مجاناً — ثم فعّل جيني' },
     ctaSecondary: { en: 'Compare plans', ar: 'قارن الخطط' },
   },
+  jeannieMagic: {
+    eyebrow: { en: "Sample of Jeannie's magic", ar: 'عيّنة من سحر جيني' },
+    title: { en: 'See how Jeannie works', ar: 'شاهِد كيف تعمل جيني' },
+    body: {
+      en: 'A live sample: she reviews roles, picks a fit, asks your approval, applies with your passport — then lands the interview.',
+      ar: 'محاكاة حية: تراجع الفرص، تختار الأنسب، تطلب موافقتك، تقدّم مع جوازك — ثم تصل دعوة المقابلة.',
+    },
+    steps: [
+      {
+        title: { en: 'Reviews jobs', ar: 'تراجع الوظائف' },
+        desc: {
+          en: 'Scans MENA roles against your targets and passport signal.',
+          ar: 'تفحص أدوار المنطقة مقابل أهدافك وإشارة جوازك.',
+        },
+      },
+      {
+        title: { en: 'Selects the fit', ar: 'تختار الأنسب' },
+        desc: {
+          en: 'One high-fit shortlist pick — quality over volume.',
+          ar: 'ترشيح واحد عالي التطابق — الجودة قبل الكمية.',
+        },
+      },
+      {
+        title: { en: 'Asks your approval', ar: 'تطلب موافقتك' },
+        desc: {
+          en: 'Nothing goes out until you say yes. NOT SPAM.',
+          ar: 'لا يُرسل شيء قبل موافقتك. ليس عشوائياً.',
+        },
+      },
+      {
+        title: { en: 'Applies with proof', ar: 'تقدّم مع الدليل' },
+        desc: {
+          en: 'Sends a professional packet with your verified passport.',
+          ar: 'ترسل حزمة احترافية مع جوازك الموثّق.',
+        },
+      },
+      {
+        title: { en: 'Wins the interview', ar: 'تفوز بالمقابلة' },
+        desc: {
+          en: 'The employer invites you — passport opened the door.',
+          ar: 'صاحب العمل يدعوك — الجواز فتح الباب.',
+        },
+      },
+    ],
+    cta: { en: 'Unlock Jeannie', ar: 'فعّل جيني' },
+    ctaSecondary: { en: 'Start with free practice', ar: 'ابدأ بالتدريب المجاني' },
+  },
   companies: {
     headline: { en: 'Hire with verified signal', ar: 'وظّف بإشارة موثّقة' },
     body: {

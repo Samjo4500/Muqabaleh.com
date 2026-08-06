@@ -237,7 +237,13 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     );
   }
 
-  const priceNote = t('priceNote');
+  const priceNotes: Record<PlanType, string> = {
+    jeannie: locale === 'ar' ? '$24.99 / شهر — يمكن الإلغاء في أي وقت' : '$24.99 / month — cancel anytime',
+    jeannie_pro:
+      locale === 'ar' ? '$39.99 / شهر — يمكن الإلغاء في أي وقت' : '$39.99 / month — cancel anytime',
+    pro: locale === 'ar' ? '$9.99 دفعة واحدة' : '$9.99 one-time',
+    unlimited: locale === 'ar' ? '$29.99 / شهر — يمكن الإلغاء في أي وقت' : '$29.99 / month — cancel anytime',
+  };
 
   return (
     <div className={className}>
@@ -248,7 +254,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
         </div>
       )}
       <div ref={containerRef} className={loading ? 'invisible' : ''} />
-      <p className="mt-3 text-center text-xs text-[var(--text-faint)]">{priceNote}</p>
+      <p className="mt-3 text-center text-xs text-[var(--text-faint)]">{priceNotes[plan]}</p>
     </div>
   );
 }

@@ -319,6 +319,11 @@ export function CrystalPricing() {
                 <div className="relative mb-5">
                   <p className="mq-display text-4xl font-bold text-white md:text-5xl">
                     {isAr ? plan.price.ar : plan.price.en}
+                    {(isAr ? plan.period.ar : plan.period.en) ? (
+                      <span className="ms-1 text-base font-semibold text-white/45 md:text-lg">
+                        {isAr ? plan.period.ar : plan.period.en}
+                      </span>
+                    ) : null}
                   </p>
                   <p className="mt-2 text-xs font-semibold tracking-wide text-white/45">
                     {isAr ? plan.applies.ar : plan.applies.en}

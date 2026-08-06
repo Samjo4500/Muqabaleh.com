@@ -251,8 +251,8 @@ export const C = {
   pricing: {
     title: { en: 'Choose how far Jeannie goes', ar: 'اختر إلى أين تصل جيني' },
     subtitle: {
-      en: 'Clear plans. Pricing on request — request a demo or get a quote. Approve every apply. Not spam.',
-      ar: 'خطط واضحة. الأسعار عند الطلب — اطلب عرضاً أو احصل على عرض سعر. وافق على كل تقديم. ليس عشوائياً.',
+      en: 'Clear individual plans. Approve every apply. Not spam.',
+      ar: 'خطط فردية واضحة. وافق على كل تقديم. ليس عشوائياً.',
     },
     priceHidden: {
       en: 'Custom pricing',
@@ -275,8 +275,8 @@ export const C = {
     plans: [
       {
         id: 'free' as const,
-        name: { en: 'Free', ar: 'مجاني' },
-        price: { en: 'Free', ar: 'مجاني' },
+        name: { en: 'Basic', ar: 'أساسي' },
+        price: { en: 'FREE', ar: 'مجاني' },
         period: { en: '', ar: '' },
         tagline: {
           en: 'Prove the product. No applies.',
@@ -297,8 +297,8 @@ export const C = {
       {
         id: 'jeannie' as const,
         name: { en: 'Jeannie', ar: 'جيني' },
-        price: { en: 'Custom', ar: 'مخصّص' },
-        period: { en: '', ar: '' },
+        price: { en: '$24.99', ar: '$24.99' },
+        period: { en: '/mo', ar: '/شهر' },
         tagline: {
           en: 'Controlled applies. Upload your materials.',
           ar: 'تقديمات مضبوطة. ارفع موادك.',
@@ -312,16 +312,16 @@ export const C = {
           { en: 'Upload CV + cover letter', ar: 'رفع السيرة وخطاب التقديم' },
           { en: 'Application tracker', ar: 'متتبّع الطلبات' },
         ],
-        cta: { en: 'Request demo', ar: 'اطلب عرضاً' },
-        href: '/request-demo?from=landing-jeannie',
+        cta: { en: 'Unlock Jeannie', ar: 'فعّل جيني' },
+        href: '/app/packages',
         popular: true,
-        concealPrice: true,
+        concealPrice: false,
       },
       {
         id: 'pro' as const,
         name: { en: 'Jeannie Pro', ar: 'جيني برو' },
-        price: { en: 'Custom', ar: 'مخصّص' },
-        period: { en: '', ar: '' },
+        price: { en: '$39.99', ar: '$39.99' },
+        period: { en: '/mo', ar: '/شهر' },
         tagline: {
           en: 'Full CV studio. Stronger materials. More volume.',
           ar: 'استوديو سيرة كامل. مواد أقوى. حجم أكبر.',
@@ -335,10 +335,10 @@ export const C = {
           { en: 'Full tracker + insights', ar: 'متتبّع كامل مع رؤى' },
           { en: 'Priority matching', ar: 'مطابقة ذات أولوية' },
         ],
-        cta: { en: 'Get a quote', ar: 'احصل على عرض سعر' },
-        href: '/request-demo?from=landing-jeannie-pro&intent=quote',
+        cta: { en: 'Go Jeannie Pro', ar: 'اشترك في جيني برو' },
+        href: '/app/packages',
         popular: false,
-        concealPrice: true,
+        concealPrice: false,
       },
     ],
     compare: [
@@ -480,8 +480,8 @@ export const C = {
           ar: 'ما الفرق بين جيني وجيني برو؟',
         },
         a: {
-          en: 'Jeannie includes approve-gated applies each month with CV and cover letter upload. Jeannie Pro adds more monthly applies, full CV studio, cover letter generate/assist, and richer tracking. Pricing is on request — request a demo or get a quote.',
-          ar: 'جيني تشمل تقديمات بموافقتك شهرياً مع رفع السيرة وخطاب التقديم. جيني برو تضيف تقديمات أكثر واستوديو سيرة وتوليد/مساعدة الخطاب وتتبعاً أغنى. الأسعار عند الطلب — اطلب عرضاً أو احصل على عرض سعر.',
+          en: 'Basic is FREE. Jeannie is $24.99/mo with approve-gated applies and CV/cover letter upload. Jeannie Pro is $39.99/mo with more applies, full CV studio, cover letter generate/assist, and richer tracking.',
+          ar: 'الأساسي مجاني. جيني بـ $24.99/شهر مع تقديمات بموافقتك ورفع السيرة وخطاب التقديم. جيني برو بـ $39.99/شهر مع تقديمات أكثر واستوديو سيرة وتوليد/مساعدة الخطاب وتتبعاً أغنى.',
         },
       },
       {
@@ -500,8 +500,8 @@ export const C = {
           ar: 'هل توجد تجربة مجانية؟',
         },
         a: {
-          en: 'Yes. Start with a free practice interview and passport preview, then request a demo or get a quote when you want Jeannie applying for you.',
-          ar: 'نعم. ابدأ بمقابلة تدريب مجانية ومعاينة الجواز، ثم اطلب عرضاً أو عرض سعر عندما تريد جيني تقدّم عنك.',
+          en: 'Yes. Basic is FREE — one practice interview and passport preview. Upgrade to Jeannie ($24.99/mo) or Jeannie Pro ($39.99/mo) when you want her applying for you.',
+          ar: 'نعم. الأساسي مجاني — مقابلة تدريب واحدة ومعاينة الجواز. رقِّ إلى جيني ($24.99/شهر) أو جيني برو ($39.99/شهر) عندما تريدها تقدّم عنك.',
         },
       },
       {

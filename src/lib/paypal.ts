@@ -16,7 +16,7 @@ export const PLAN_CONFIG: Record<
   }
 > = {
   JEANNIE: {
-    amount: '19.00',
+    amount: '24.99',
     currency: 'USD',
     description: 'Muqabaleh Jeannie — 10 approve-gated applies / month',
     tier: UserTier.JEANNIE,
@@ -25,7 +25,7 @@ export const PLAN_CONFIG: Record<
     planKey: 'JEANNIE',
   },
   JEANNIE_PRO: {
-    amount: '39.00',
+    amount: '39.99',
     currency: 'USD',
     description: 'Muqabaleh Jeannie Pro — 20 applies + CV studio + cover letter AI',
     tier: UserTier.JEANNIE_PRO,

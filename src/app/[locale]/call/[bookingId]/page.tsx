@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { localePath } from '@/i18n/navigation';
+import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -269,8 +270,8 @@ export default function CallPage({
   /* ---- Loading ---- */
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-void)]">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--gold)]" />
+      <div className="mq-atelier relative flex min-h-screen items-center justify-center overflow-x-hidden">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-300" />
       </div>
     );
   }
@@ -278,7 +279,7 @@ export default function CallPage({
   /* ---- Error ---- */
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--bg-void)] p-6">
+      <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center gap-4 overflow-x-hidden p-6">
         <AlertCircle className="h-12 w-12 text-red-400" />
         <p className="text-center text-sm text-[var(--text-muted)]">{error}</p>
         <Button
@@ -296,7 +297,7 @@ export default function CallPage({
   /* ---- Cancelled ---- */
   if (isCancelled) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[var(--bg-void)] p-6">
+      <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-x-hidden p-6">
         <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-red-500/30 bg-red-500/10">
           <PhoneOff className="h-8 w-8 text-red-400" />
         </div>
@@ -321,7 +322,7 @@ export default function CallPage({
   /* ---- Session Ended ---- */
   if (ended) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[var(--bg-void)] p-6">
+      <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-x-hidden p-6">
         <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-emerald/30 bg-emerald/10">
           <PhoneOff className="h-8 w-8 text-emerald" />
         </div>
@@ -333,7 +334,7 @@ export default function CallPage({
         </p>
         <Button
           onClick={() => router.push(localePath('/app/bookings', locale))}
-          className="btn-gold cursor-pointer"
+          className="cursor-pointer bg-teal-400 text-[#070b14] hover:bg-teal-300"
         >
           {t('leaveReview')}
         </Button>
@@ -419,8 +420,8 @@ export default function CallPage({
 
         {/* ============ Desktop overlay controls (hidden on mobile) ============ */}
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 z-20 hidden shrink-0 items-center justify-between border-b border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 py-3 backdrop-blur-md md:flex">
-          <span className="text-lg font-bold text-[var(--gold)]">
+        <div className="absolute top-0 left-0 right-0 z-20 hidden shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#070b14]/80 px-4 py-3 backdrop-blur-md md:flex">
+          <span className="text-lg font-bold text-teal-300">
             Muqabaleh
           </span>
           <div className="flex items-center gap-3">
@@ -448,7 +449,7 @@ export default function CallPage({
         </div>
 
         {/* Bottom info bar */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 hidden shrink-0 items-center justify-between border-t border-white/[0.08] bg-[var(--bg-panel)]/80 px-4 py-3 backdrop-blur-md md:flex">
+        <div className="absolute bottom-0 left-0 right-0 z-20 hidden shrink-0 items-center justify-between border-t border-white/[0.08] bg-[#070b14]/80 px-4 py-3 backdrop-blur-md md:flex">
           <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
             <span className="flex items-center gap-1.5">
               <User size={14} />
@@ -474,20 +475,20 @@ export default function CallPage({
 
   /* ---- Waiting Room (pre-call) ---- */
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-void)] p-6">
+    <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden p-6">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
-        <div className="space-y-2 text-center">
-          <span className="gold-gradient-text text-3xl font-bold">Muqabaleh</span>
-          <p className="text-sm text-[var(--text-muted)]">{t('videoSession')}</p>
+        <div className="flex flex-col items-center space-y-2 text-center">
+          <BrandLogo size="nav" priority />
+          <p className="text-sm text-white/55">{t('videoSession')}</p>
         </div>
 
         {/* Session info card */}
         <div className="glass-card space-y-4 p-6">
           {/* Interviewer */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--gold)]/10">
-              <User size={20} className="text-[var(--gold)]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-400/10">
+              <User size={20} className="text-teal-300" />
             </div>
             <div>
               <p className="text-sm font-medium text-[var(--text-primary)]">
@@ -536,7 +537,7 @@ export default function CallPage({
         {isMoreThan15MinAway ? (
           <div className="space-y-3 text-center">
             <div className="flex items-center justify-center gap-2 text-[var(--text-muted)]">
-              <Clock size={16} className="text-[var(--gold)]" />
+              <Clock size={16} className="text-teal-300" />
               <span className="text-sm">{t('startsIn')}</span>
             </div>
             <p className="font-mono text-4xl font-bold tracking-wider text-[var(--text-primary)]">

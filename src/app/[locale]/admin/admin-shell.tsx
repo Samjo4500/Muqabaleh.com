@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import {
+  ArrowLeft,
   ArrowRight,
   ChevronDown,
   LogOut,
@@ -71,8 +72,14 @@ function SidebarNav({
     setOpenGroups((prev) => ({ ...prev, [activeGroup]: true }));
   }, [activeGroup]);
 
+  const isAr = locale === 'ar';
+
   return (
-    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2" dir="rtl">
+    <nav
+      className="flex flex-1 flex-col gap-1 overflow-y-auto p-2"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
       {ADMIN_NAV.map((group) => {
         const open = openGroups[group.id] ?? group.id === activeGroup;
         const label = L[group.label];
@@ -147,14 +154,21 @@ function SidebarNav({
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
+  const isAr = locale === 'ar';
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { theme, toggle } = useAdminTheme();
   const backHref = localePath(parentAdminPath(pathname), locale);
   const showGlobalBack = !pathname.endsWith('/admin/dashboard') && !pathname.endsWith('/admin');
+  const homeLabel = isAr ? L.home.ar : L.home.en;
+  const BackIcon = isAr ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="mq-atelier relative flex min-h-screen overflow-x-hidden text-white" dir="rtl">
+    <div
+      className="mq-atelier relative flex min-h-screen overflow-x-hidden text-white"
+      dir={isAr ? 'rtl' : 'ltr'}
+      lang={isAr ? 'ar' : 'en'}
+    >
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
         <div className="mq-orb mq-orb-a" />
         <div className="mq-orb mq-orb-c" />
@@ -164,15 +178,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <aside
         className={cn(
-          'relative z-10 hidden flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all lg:flex',
+          'relative z-10 hidden flex-col border-e border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all lg:flex',
           collapsed ? 'w-[72px]' : 'w-[280px]',
         )}
       >
         <Link
           href={localePath('/', locale)}
           className="block p-4 transition hover:bg-white/[0.04]"
-          aria-label={`${L.home.ar} / ${L.home.en}`}
-          title={`${L.home.ar} / ${L.home.en}`}
+          aria-label={homeLabel}
+          title={homeLabel}
         >
           <BrandLogo size={collapsed ? 'sm' : 'nav'} priority />
           {!collapsed ? (
@@ -229,13 +243,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 <Menu size={20} />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] border-s border-white/10 bg-[#070b14]/95 p-0">
+            <SheetContent
+              side={isAr ? 'right' : 'left'}
+              className="w-[280px] border-e border-white/10 bg-[#070b14]/95 p-0"
+            >
               <SheetTitle className="sr-only">Admin Menu</SheetTitle>
               <Link
                 href={localePath('/', locale)}
                 onClick={() => setOpen(false)}
                 className="block p-4 transition hover:bg-white/[0.04]"
-                aria-label={`${L.home.ar} / ${L.home.en}`}
+                aria-label={homeLabel}
               >
                 <BrandLogo size="nav" />
                 <p className="mt-2 text-[10px] font-semibold tracking-wide text-teal-300/90">
@@ -248,7 +265,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <Link
             href={localePath('/', locale)}
             className="flex min-w-0 items-center gap-2"
-            aria-label={`${L.home.ar} / ${L.home.en}`}
+            aria-label={homeLabel}
           >
             <BrandLogo size="nav" />
           </Link>
@@ -267,7 +284,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 href={backHref}
                 className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70 hover:border-teal-300/40 hover:text-teal-200"
               >
-                <ArrowRight size={16} />
+                <BackIcon size={16} />
                 <BiInline ar={L.back.ar} en={L.back.en} />
               </Link>
             </div>

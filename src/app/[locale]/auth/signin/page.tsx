@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Mail, Loader2, AlertTriangle, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 
 import { AuthShell } from '@/components/brand';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,29 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { resolvePostAuthPath } from '@/lib/auth-redirect';
+import { localePath } from '@/i18n/navigation';
 
 export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-white/60">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,7 +87,10 @@ export default function SignInPage() {
       if (result?.error) {
         toast.error(t('loginFailed') || 'البريد أو كلمة المرور غير صحيحة');
       } else {
-        router.push(`/${locale}/app`);
+        const session = await getSession();
+        const role = (session?.user as { role?: string } | undefined)?.role;
+        const dest = resolvePostAuthPath({ locale, role, callbackUrl });
+        router.push(dest);
         router.refresh();
       }
     } catch {
@@ -158,7 +179,7 @@ export default function SignInPage() {
             <span>{t('rememberMe')}</span>
           </label>
           <Link
-            href={`/${locale}/auth/forgot-password`}
+            href={localePath('/auth/forgot-password', locale)}
             className="text-sm text-teal-300 transition hover:text-teal-200"
           >
             {t('forgotLink')}
@@ -201,7 +222,12 @@ export default function SignInPage() {
         <p className="text-center text-sm text-white/60">
           {t('noAccount')}{' '}
           <Link
-            href={`/${locale}/auth/register`}
+            href={localePath(
+              callbackUrl
+                ? `/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : '/auth/register',
+              locale,
+            )}
             className="font-semibold text-teal-300 transition-colors hover:text-teal-200"
           >
             {t('createAccount')}

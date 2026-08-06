@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { DollarSign, Calendar, CreditCard, CheckCircle2 } from 'lucide-react';
@@ -12,6 +12,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
+import { localePath } from '@/i18n/navigation';
 
 const containerVariants = {
   hidden: {},
@@ -25,6 +26,7 @@ const itemVariants = {
 
 export default function JoinAsInterviewerPage() {
   const t = useTranslations('joinInterviewer');
+  const locale = useLocale();
   const [sessions, setSessions] = useState(5);
 
   const grossMonthly = sessions * 29 * 4;
@@ -172,7 +174,7 @@ export default function JoinAsInterviewerPage() {
         </section>
 
         <section className="mt-16 pb-4 text-center">
-          <Link href="/apply" className="mq-btn mq-btn-primary px-12 py-4 text-lg">
+          <Link href={localePath('/apply', locale)} className="mq-btn mq-btn-primary px-12 py-4 text-lg">
             {t('applyCta')}
           </Link>
         </section>

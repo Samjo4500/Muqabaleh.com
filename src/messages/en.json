@@ -808,6 +808,9 @@
     "sidebar": {
       "dashboard": "Dashboard",
       "interviews": "My Interviews",
+      "practice": "AI practice",
+      "applications": "My applications",
+      "jobs": "Job Portal",
       "packages": "Packages",
       "payments": "Payments",
       "certificates": "Certificates",
@@ -815,6 +818,23 @@
       "bookings": "Bookings",
       "sessionsLeft": "{count} sessions left",
       "signOut": "Sign Out"
+    },
+    "applications": {
+      "title": "My applications",
+      "subtitle": "Track vacancies you applied to and their current stage.",
+      "loading": "Loading applications…",
+      "empty": "You have not applied to any vacancies yet.",
+      "browseJobs": "Browse Job Portal",
+      "stage": {
+        "NEW": "Submitted",
+        "REVIEWING": "Under review",
+        "SCREENING": "Screening",
+        "INTERVIEW": "Interview",
+        "OFFER": "Offer",
+        "HIRED": "Hired",
+        "REJECTED": "Not selected",
+        "WITHDRAWN": "Withdrawn"
+      }
     },
     "dashboard": {
       "welcome": "Hello, {name}",

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Mail, User, Building2, Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 
 import { AuthShell } from '@/components/brand';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,8 @@ import {
   PasswordField,
   PasswordStrengthMeter,
 } from '@/components/auth/PasswordField';
+import { resolvePostAuthPath } from '@/lib/auth-redirect';
+import { localePath } from '@/i18n/navigation';
 
 type FieldErrors = Record<string, string>;
 
@@ -33,10 +35,26 @@ const SIZE_MAP: Record<string, string> = {
 };
 
 export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-white/60">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const t = useTranslations('auth');
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -116,12 +134,28 @@ export default function RegisterPage() {
       });
 
       if (login?.error) {
-        router.push(locale === 'ar' ? '/auth/signin' : `/${locale}/auth/signin`);
+        router.push(
+          localePath(
+            callbackUrl
+              ? `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : '/auth/signin',
+            locale,
+          ),
+        );
         return;
       }
 
-      const dest = data.redirectTo || '/app';
-      router.push(locale === 'ar' ? dest : `/${locale}${dest}`);
+      const session = await getSession();
+      const role =
+        (session?.user as { role?: string } | undefined)?.role || data.role;
+      // Prefer callbackUrl for candidates returning to interview/jobs;
+      // otherwise use API redirect / role home.
+      const dest = resolvePostAuthPath({
+        locale,
+        role,
+        callbackUrl: callbackUrl || data.redirectTo || null,
+      });
+      router.push(dest);
       router.refresh();
     } catch {
       toast.error(t('loginFailed'));
@@ -359,7 +393,12 @@ export default function RegisterPage() {
         <p className="text-center text-sm text-white/60">
           {t('hasAccount')}{' '}
           <Link
-            href={`/${locale}/auth/signin`}
+            href={localePath(
+              callbackUrl
+                ? `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : '/auth/signin',
+              locale,
+            )}
             className="font-semibold text-teal-300 transition-colors hover:text-teal-200"
           >
             {t('signinLink')}

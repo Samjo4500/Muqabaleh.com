@@ -75,13 +75,16 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      const { B2B_CONSOLE_PREVIEW } = await import('@/lib/b2b-preview');
       return NextResponse.json({
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
         accountType: user.accountType,
-        redirectTo: '/b2b/onboarding',
+        redirectTo: B2B_CONSOLE_PREVIEW
+          ? '/request-demo?from=register'
+          : '/b2b/onboarding',
       });
     }
 

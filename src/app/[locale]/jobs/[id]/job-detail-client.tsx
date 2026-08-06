@@ -53,7 +53,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
     e.preventDefault();
     if (status !== 'authenticated') {
       window.location.href = localePath(
-        `/auth/signin?callbackUrl=/portal/jobs/${jobId}`,
+        `/auth/signin?callbackUrl=${encodeURIComponent(`/portal/jobs/${jobId}`)}`,
         locale,
       );
       return;

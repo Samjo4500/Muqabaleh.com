@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { localePath } from '@/i18n/navigation';
 import {
   Hand,
   Flame,
@@ -107,7 +108,12 @@ export default async function DashboardPage({
   /* ---- Auth guard ---- */
   const session = await requireAuth();
   if (!session?.user?.id) {
-    redirect(`/${locale}/auth/signin`);
+    redirect(
+      localePath(
+        `/auth/signin?callbackUrl=${encodeURIComponent('/app')}`,
+        locale,
+      ),
+    );
   }
 
   /* ---- Fetch user ---- */
@@ -115,7 +121,12 @@ export default async function DashboardPage({
     where: { id: session.user.id },
   });
   if (!user) {
-    redirect(`/${locale}/auth/signin`);
+    redirect(
+      localePath(
+        `/auth/signin?callbackUrl=${encodeURIComponent('/app')}`,
+        locale,
+      ),
+    );
   }
 
   const displayName = user.name ?? session.user.email?.split('@')[0] ?? '—';
@@ -194,7 +205,7 @@ export default async function DashboardPage({
           <p className="text-sm text-[var(--text-muted)] mb-6 max-w-md">
             {t('buyPackageSub')}
           </p>
-          <Link href="/app/packages" className="btn-gold text-sm">
+          <Link href={localePath('/app/packages', locale)} className="mq-btn mq-btn-primary text-sm">
             {t('buyPackage')}
           </Link>
         </GlowCard>

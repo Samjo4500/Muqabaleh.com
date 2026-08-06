@@ -851,7 +851,7 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
       setDone(true);
       if (data.createdAccount) {
         window.location.href = localePath(
-          '/auth/signin?callbackUrl=/portal/jobs?tab=candidates&from=talent',
+          `/auth/signin?callbackUrl=${encodeURIComponent('/portal/jobs?tab=candidates&from=talent')}`,
           locale,
         );
       }

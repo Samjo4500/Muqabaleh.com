@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { B2BPreviewBanner, B2BPreviewContent } from '@/components/b2b/B2BPreviewGate';
+import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 import { localePath } from '@/i18n/navigation';
 import { B2B_CONSOLE_PREVIEW } from '@/lib/b2b-preview';
 
@@ -43,16 +44,18 @@ function SidebarNav({
   return (
     <nav className="flex flex-1 flex-col gap-1 p-3">
       {navItems.map((item) => {
-        const fullPath = `/${locale}${item.href}`;
+        const href = localePath(item.href, locale);
         const isActive =
           item.href === '/b2b'
-            ? pathname === fullPath || pathname === item.href
-            : pathname.startsWith(fullPath) || pathname.startsWith(item.href);
+            ? pathname === href || pathname === item.href || pathname === `/${locale}/b2b`
+            : pathname === href ||
+              pathname.startsWith(`${href}/`) ||
+              pathname.startsWith(item.href);
         const Icon = item.icon;
         return (
           <Link
             key={item.key}
-            href={item.href}
+            href={href}
             onClick={onNavigate}
             className={`flex items-center gap-3 rounded-xl border-s-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               isActive
@@ -88,13 +91,14 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
         <div className="mq-orb mq-orb-c" />
       </div>
 
+      <LanguageSwitcherFixed />
       {preview ? <B2BPreviewBanner /> : null}
 
       <div className="relative z-10 flex flex-1">
         <aside className="hidden w-[260px] shrink-0 flex-col border-s border-white/10 bg-white/[0.03] backdrop-blur-xl lg:flex">
           <div className="p-4 pb-2">
             <div className="flex items-center gap-3">
-              <BrandLogo size="sm" priority />
+              <BrandLogo size="nav" priority />
               <div>
                 <span className="block text-sm font-bold text-white">{t('sidebarTitle')}</span>
                 {preview ? (
@@ -147,7 +151,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
               >
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <div className="p-4 pb-2">
-                  <BrandLogo size="sm" />
+                  <BrandLogo size="nav" />
                 </div>
                 <SidebarNav
                   pathname={pathname}
@@ -168,7 +172,7 @@ export default function B2BLayout({ children }: { children: React.ReactNode }) {
                 ) : null}
               </SheetContent>
             </Sheet>
-            <BrandLogo size="sm" />
+            <BrandLogo size="nav" />
             <span className="text-sm font-bold text-white">{t('sidebarTitle')}</span>
           </header>
 

@@ -164,7 +164,7 @@ export default function EvaluatePage() {
 
       {/* Submit */}
       <div className="flex justify-end">
-        <Button className="btn-gold min-w-[140px]">{tCommon('submit')}</Button>
+        <Button className="mq-btn mq-btn-primary min-w-[140px]">{tCommon('submit')}</Button>
       </div>
     </div>
   );

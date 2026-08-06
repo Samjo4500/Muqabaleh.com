@@ -164,9 +164,9 @@ export default function InterviewerDashboardPage() {
   };
 
   const statCards = [
-    { value: formatCents(displayStats.netIncome), labelKey: 'netIncome' as const, icon: DollarSign, color: 'text-gold' },
+    { value: formatCents(displayStats.netIncome), labelKey: 'netIncome' as const, icon: DollarSign, color: 'text-teal-300' },
     { value: String(displayStats.sessionsCompleted), labelKey: 'sessionsCompleted' as const, icon: CheckCircle2, color: 'text-emerald-400' },
-    { value: displayStats.avgRating > 0 ? `${displayStats.avgRating.toFixed(1)} ⭐` : '—', labelKey: 'avgRating' as const, icon: Star, color: 'text-gold' },
+    { value: displayStats.avgRating > 0 ? `${displayStats.avgRating.toFixed(1)} ⭐` : '—', labelKey: 'avgRating' as const, icon: Star, color: 'text-teal-300' },
     { value: String(displayStats.upcomingCount), labelKey: 'upcomingCount' as const, icon: Calendar, color: 'text-blue-400' },
   ];
 
@@ -174,7 +174,7 @@ export default function InterviewerDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page title */}
-      <h1 className="text-2xl font-bold text-gold md:text-3xl">
+      <h1 className="text-2xl font-bold text-teal-300 md:text-3xl">
         {t('overview')}
       </h1>
 
@@ -199,8 +199,8 @@ export default function InterviewerDashboardPage() {
                 className="bg-[#0B0F17] border border-[rgba(212,175,55,0.1)] rounded-xl p-5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/10">
-                    <Icon size={24} strokeWidth={1.75} className="text-gold" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-400/10">
+                    <Icon size={24} strokeWidth={1.75} className="text-teal-300" />
                   </div>
                   <div>
                     <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>

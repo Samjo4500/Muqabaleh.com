@@ -108,7 +108,7 @@ export default function InterviewerDashboard() {
           <p className="text-red-400">{error}</p>
           <button
             onClick={fetchData}
-            className="mt-3 text-sm text-gold hover:underline"
+            className="mt-3 text-sm text-teal-300 hover:underline"
           >
             {tc('retry')}
           </button>
@@ -130,13 +130,13 @@ export default function InterviewerDashboard() {
       label: t('kpiEarnings'),
       value: formatCents(interviewer.stats.totalEarnings),
       icon: DollarSign,
-      color: 'text-gold',
+      color: 'text-teal-300',
     },
     {
       label: t('kpiRating'),
       value: interviewer.rating > 0 ? interviewer.rating.toFixed(1) : '—',
       icon: Star,
-      color: 'text-gold',
+      color: 'text-teal-300',
     },
     {
       label: t('kpiAccreditation'),

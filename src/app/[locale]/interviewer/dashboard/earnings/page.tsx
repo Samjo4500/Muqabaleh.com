@@ -88,7 +88,7 @@ export default function EarningsPage() {
   };
 
   const statCards = [
-    { value: formatCents(stats.totalEarnings), labelKey: 'totalEarnings' as const, icon: DollarSign, color: 'text-gold' },
+    { value: formatCents(stats.totalEarnings), labelKey: 'totalEarnings' as const, icon: DollarSign, color: 'text-teal-300' },
     { value: formatCents(stats.platformFees), labelKey: 'platformFees' as const, icon: TrendingDown, color: 'text-red-400' },
     { value: formatCents(stats.netIncome), labelKey: 'netIncome' as const, icon: Wallet, color: 'text-emerald-400' },
     { value: String(stats.sessionsCompleted), labelKey: 'sessionsCompleted' as const, icon: CheckCircle2, color: 'text-white' },
@@ -96,7 +96,7 @@ export default function EarningsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gold md:text-3xl">
+      <h1 className="text-2xl font-bold text-teal-300 md:text-3xl">
         {t('earnings')}
       </h1>
 
@@ -120,8 +120,8 @@ export default function EarningsPage() {
                 className="bg-[#0B0F17] border border-[rgba(212,175,55,0.1)] rounded-xl p-5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/10">
-                    <Icon size={24} strokeWidth={1.75} className="text-gold" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-400/10">
+                    <Icon size={24} strokeWidth={1.75} className="text-teal-300" />
                   </div>
                   <div>
                     <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -147,14 +147,14 @@ export default function EarningsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-sm text-[var(--text-muted)] mb-1">{t('currentBalance')}</p>
-              <p className="text-3xl font-bold text-gold">{formatCents(stats.currentBalance)}</p>
+              <p className="text-3xl font-bold text-teal-300">{formatCents(stats.currentBalance)}</p>
               <p className="text-sm text-[var(--text-muted)] mt-1">
                 {t('disbursedOn')} {new Date().toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', day: 'numeric' })}
               </p>
             </div>
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-gold/10 px-5 py-2.5 text-sm font-semibold text-gold transition-colors hover:bg-gold/20 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl border border-teal-300/30 bg-teal-400/10 px-5 py-2.5 text-sm font-semibold text-teal-300 transition-colors hover:bg-teal-400/20 cursor-pointer"
             >
               <ArrowUpRight size={16} strokeWidth={2} />
               {t('requestEarlyPayout')}

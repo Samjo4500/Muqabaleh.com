@@ -187,13 +187,13 @@ export default function InterviewerProfilePage() {
               {t('photoUpload')}
             </h2>
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gold/20">
-                <User size={32} strokeWidth={1.75} className="text-gold" />
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-teal-400/20">
+                <User size={32} strokeWidth={1.75} className="text-teal-300" />
               </div>
               <div className="flex-1">
                 <button
                   type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-4 py-6 text-sm text-[var(--text-muted)] transition-colors hover:border-gold/40 hover:text-gold"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-4 py-6 text-sm text-[var(--text-muted)] transition-colors hover:border-teal-300/40 hover:text-teal-300"
                 >
                   <Upload size={20} strokeWidth={1.75} />
                   {t('photoUploadHint')}
@@ -270,7 +270,7 @@ export default function InterviewerProfilePage() {
               {sectorKeys.map((key) => (
                 <label
                   key={key}
-                  className="flex items-center gap-2 rounded-lg border border-white/[0.06] px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/5 has-[[data-state=checked]]:border-gold/30 has-[[data-state=checked]]:bg-gold/5"
+                  className="flex items-center gap-2 rounded-lg border border-white/[0.06] px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/5 has-[[data-state=checked]]:border-teal-300/30 has-[[data-state=checked]]:bg-teal-400/5"
                 >
                   <Checkbox
                     checked={selectedSectors.includes(key)}
@@ -290,7 +290,7 @@ export default function InterviewerProfilePage() {
               {langKeys.map((key) => (
                 <label
                   key={key}
-                  className="flex items-center gap-2 rounded-lg border border-white/[0.06] px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/5 has-[[data-state=checked]]:border-gold/30 has-[[data-state=checked]]:bg-gold/5"
+                  className="flex items-center gap-2 rounded-lg border border-white/[0.06] px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/5 has-[[data-state=checked]]:border-teal-300/30 has-[[data-state=checked]]:bg-teal-400/5"
                 >
                   <Checkbox
                     checked={selectedLangs.includes(key)}
@@ -327,7 +327,7 @@ export default function InterviewerProfilePage() {
 
       <div className="flex justify-end">
         <Button
-          className="btn-gold min-w-[160px]"
+          className="mq-btn mq-btn-primary min-w-[160px]"
           onClick={handleSave}
           disabled={saving}
         >

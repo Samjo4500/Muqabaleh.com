@@ -289,7 +289,7 @@ export default function EarningsPage() {
           <Button
             variant="ghost"
             onClick={fetchData}
-            className="mt-4 text-gold hover:text-gold/80"
+            className="mt-4 text-teal-300 hover:text-teal-300/80"
           >
             <RefreshCw size={16} className="me-2" />
             Retry
@@ -312,9 +312,9 @@ export default function EarningsPage() {
       label: t('availableBalance'),
       value: formatCents(earnings.availableBalance, locale),
       icon: Wallet,
-      color: 'text-[var(--gold)]',
-      bgColor: 'bg-[var(--gold)]/10',
-      borderColor: 'border-[var(--gold)]/20',
+      color: 'text-teal-300',
+      bgColor: 'bg-teal-400/10',
+      borderColor: 'border-teal-300/20',
       primary: true,
     },
     {
@@ -370,7 +370,7 @@ export default function EarningsPage() {
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
                       <Button
-                        className="w-full bg-[var(--gold)] text-[var(--bg-void)] hover:bg-[var(--gold)]/85"
+                        className="w-full bg-teal-400 text-[var(--bg-void)] hover:bg-teal-300/85"
                         disabled={!canPayout}
                         onClick={openDialog}
                       >
@@ -392,7 +392,7 @@ export default function EarningsPage() {
                           <p className="text-sm text-[var(--text-muted)]">
                             {t('availableBalance')}
                           </p>
-                          <p className="text-2xl font-bold text-[var(--gold)]">
+                          <p className="text-2xl font-bold text-teal-300">
                             {formatCents(earnings.availableBalance, locale)}
                           </p>
                         </div>
@@ -458,7 +458,7 @@ export default function EarningsPage() {
                             {tp('cancel')}
                           </Button>
                           <Button
-                            className="flex-1 bg-[var(--gold)] text-[var(--bg-void)] hover:bg-[var(--gold)]/85"
+                            className="flex-1 bg-teal-400 text-[var(--bg-void)] hover:bg-teal-300/85"
                             onClick={handleRequestPayout}
                             disabled={submitting}
                           >
@@ -544,7 +544,7 @@ export default function EarningsPage() {
                       <TableCell className="text-[var(--text-primary)]">
                         {formatDate(payout.requestedAt)}
                       </TableCell>
-                      <TableCell className="font-medium text-[var(--gold)]">
+                      <TableCell className="font-medium text-teal-300">
                         {formatCents(payout.amount, locale)}
                       </TableCell>
                       <TableCell className="text-[var(--text-muted)]">

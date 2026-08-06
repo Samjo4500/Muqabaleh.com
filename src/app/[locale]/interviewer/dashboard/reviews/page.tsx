@@ -1,320 +1,169 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Star, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
+import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Star, MessageSquare, Loader2 } from 'lucide-react';
 
 type Review = {
   id: string;
-  candidate: string;
-  specialty?: string;
-  date: string;
   rating: number;
-  comment: string;
-  reply?: string;
+  comment: string | null;
+  createdAt: string;
+  candidateName: string | null;
 };
 
-type RatingBreakdown = {
-  stars: number;
-  count: number;
-};
+type Breakdown = { stars: number; count: number };
 
-/* ------------------------------------------------------------------ */
-/*  Mock data                                                          */
-/* ------------------------------------------------------------------ */
-
-const ratingBreakdown: RatingBreakdown[] = [
-  { stars: 5, count: 89 },
-  { stars: 4, count: 28 },
-  { stars: 3, count: 7 },
-  { stars: 2, count: 2 },
-  { stars: 1, count: 1 },
-];
-
-const totalReviews = ratingBreakdown.reduce((sum, r) => sum + r.count, 0);
-
-const mockReviews: Review[] = [
-  {
-    id: 'r1',
-    candidate: 'مرشح · مبيعات',
-    date: '2025-07-28',
-    rating: 5,
-    comment: 'مقابلة ممتازة جداً، المحاور كان محترف جداً وطرح أسئلة عملية وتحديات حقيقية من سوق العمل. ساعدني كثيراً في تحضيري للمقابلة الفعلية.',
-    reply: 'شكراً جزيلاً! سعيدة أن المقابلة كانت مفيدة. بالتوفيق في مقابلتك القادمة.',
-  },
-  {
-    id: 'r2',
-    candidate: 'مرشح · هندسة برمجيات',
-    date: '2025-07-25',
-    rating: 5,
-    comment: 'تجربة رائعة! الأسئلة كانت شاملة وتغطي مجالات مختلفة. التقييم المفصل ساعدني أتعرف على نقاط الضعف.',
-  },
-  {
-    id: 'r3',
-    candidate: 'مرشح · تصميم UI/UX',
-    date: '2025-07-22',
-    rating: 4,
-    comment: 'جلسة مفيدة جداً. المحاور كان متفهم وصبور. أتمنى لو كان الوقت أطول شوية.',
-    reply: 'شكراً لتقييمك! الوقت القياسي ٣٠ دقيقة، لكن يمكنك حجز جلسة إضافية إذا أحببت.',
-  },
-  {
-    id: 'r4',
-    candidate: 'مرشح · علوم البيانات',
-    date: '2025-07-20',
-    rating: 5,
-    comment: 'من أفضل التجارب اللي مرت علي. التغذية الراجعة كانت مفصلة ومباشرة. أنصح به بقوة.',
-  },
-  {
-    id: 'r5',
-    candidate: 'مرشح · إدارة مشاريع',
-    date: '2025-07-18',
-    rating: 4,
-    comment: 'المقابلة كانت جيدة لكن الأنترنت انقطع شوي في النص. بشكل عام تجربة إيجابية.',
-  },
-  {
-    id: 'r6',
-    candidate: 'مرشح · تطوير Flutter',
-    date: '2025-07-15',
-    rating: 5,
-    comment: 'محاور خبير فعلاً في المجال. أسئلة تقنية عميقة وتحديات عملية من مشاريع حقيقية.',
-  },
-  {
-    id: 'r7',
-    candidate: 'مرشح · تسويق رقمي',
-    date: '2025-07-12',
-    rating: 3,
-    comment: 'المحتوى كان جيد لكن الأسئلة كانت عامة شوية. أتمنى تكون أكثر تحديداً في التخصص.',
-  },
-  {
-    id: 'r8',
-    candidate: 'مرشح · أمن معلومات',
-    date: '2025-07-10',
-    rating: 5,
-    comment: 'أفضل محاكاة مقابلة جربتها. المحاور كان يعرف كل التفاصيل عن أمن المعلومات وساعدني أتحضر بشكل أفضل بكثير.',
-    reply: 'شكراً لك! أتمنى لك التوفيق في مشوارك المهني.',
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/*  Animation variants                                                 */
-/* ------------------------------------------------------------------ */
-
-const headerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.1, duration: 0.45, ease: 'easeOut' as const },
-  },
-};
-
-const breakdownVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.3, duration: 0.45, ease: 'easeOut' as const },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.4 + i * 0.08, duration: 0.45, ease: 'easeOut' as const },
-  }),
-};
-
-/* ------------------------------------------------------------------ */
-/*  Star visual                                                        */
-/* ------------------------------------------------------------------ */
-
-function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
+function StarRow({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5" aria-label={`${rating} / 5`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          size={size}
+          size={14}
           fill={star <= rating ? 'currentColor' : 'none'}
-          className={star <= rating ? 'text-gold' : 'text-gray-600'}
+          className={star <= rating ? 'text-teal-300' : 'text-white/20'}
         />
       ))}
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                               */
-/* ------------------------------------------------------------------ */
-
-export default function ReviewsPage() {
+export default function InterviewerReviewsPage() {
   const t = useTranslations('interviewerDash');
   const locale = useLocale();
-  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const isAr = locale === 'ar';
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [breakdown, setBreakdown] = useState<Breakdown[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  function toggleReply(id: string) {
-    setExpandedReplies((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/interviewer/reviews')
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        if (cancelled) return;
+        setAverageRating(Number(data.averageRating) || 0);
+        setTotalReviews(Number(data.totalReviews) || 0);
+        setBreakdown(data.breakdown || []);
+        setReviews(data.reviews || []);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Error');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-20 text-white/50">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {isAr ? 'جارٍ التحميل…' : 'Loading…'}
+      </div>
+    );
   }
 
+  if (error) {
+    return (
+      <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+        {error}
+      </p>
+    );
+  }
+
+  const maxCount = Math.max(1, ...breakdown.map((b) => b.count));
+
   return (
-    <div className="space-y-6">
-      {/* Page title */}
-      <h1 className="text-2xl font-bold text-gold md:text-3xl">
-        {t('reviews')}
-      </h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="mq-display text-2xl font-bold text-teal-300 md:text-3xl">
+          {t('reviews')}
+        </h1>
+        <p className="mt-2 text-sm text-white/55">
+          {isAr
+            ? 'تقييمات المرشحين الحقيقية لحجوزاتك المكتملة.'
+            : 'Real candidate ratings from your completed bookings.'}
+        </p>
+      </div>
 
-      {/* Header: Big average rating */}
-      <motion.div
-        variants={headerVariants}
-        initial="hidden"
-        animate="visible"
-        className="bg-[#0B0F17] border border-[rgba(212,175,55,0.1)] rounded-xl p-8"
-      >
-        <div className="flex flex-col md:flex-row md:items-center md:gap-10">
-          {/* Left: Big number */}
-          <div className="flex flex-col items-center md:items-start mb-6 md:mb-0">
-            <p className="text-6xl font-bold text-gold">4.8</p>
-            <div className="mt-2">
-              <StarRating rating={5} size={20} />
-            </div>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
-              {locale === 'ar'
-                ? `بناءً على ${totalReviews} تقييم`
-                : `Based on ${totalReviews} reviews`}
-            </p>
+      {totalReviews === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-16 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-400/10 text-teal-300">
+            <MessageSquare size={28} strokeWidth={1.75} />
           </div>
-
-          {/* Right: Breakdown bars */}
-          <div className="flex-1 w-full max-w-md space-y-2.5">
-            {ratingBreakdown.map((row) => {
-              const percent = (row.count / totalReviews) * 100;
-              return (
-                <div key={row.stars} className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 w-12 shrink-0">
-                    <span className="text-sm text-[var(--text-muted)]">{row.stars}</span>
-                    <Star size={12} fill="currentColor" className="text-gold" />
-                  </div>
-                  {/* Bar */}
-                  <div className="flex-1 h-2.5 rounded-full bg-gray-800 overflow-hidden">
+          <p className="text-base font-semibold text-white">
+            {isAr ? 'لا توجد تقييمات بعد' : 'No reviews yet'}
+          </p>
+          <p className="mt-2 max-w-md text-sm text-white/50">
+            {isAr
+              ? 'ستظهر هنا تقييمات المرشحين بعد إكمال الجلسات.'
+              : 'Candidate reviews will appear here after sessions are completed.'}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-6 md:grid-cols-[200px_1fr]">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-5xl font-bold text-teal-300">
+                {averageRating > 0 ? averageRating.toFixed(1) : '—'}
+              </p>
+              <div className="mt-2">
+                <StarRow rating={Math.round(averageRating)} />
+              </div>
+              <p className="mt-2 text-xs text-white/45">
+                {totalReviews} {isAr ? 'تقييم' : 'reviews'}
+              </p>
+            </div>
+            <div className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              {breakdown.map((row) => (
+                <div key={row.stars} className="flex items-center gap-3 text-sm">
+                  <span className="w-8 text-white/50">{row.stars}★</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
                     <div
-                      className="h-full rounded-full bg-gold/70 transition-all duration-700"
-                      style={{ width: `${percent}%` }}
+                      className="h-full rounded-full bg-teal-400/70 transition-all"
+                      style={{ width: `${(row.count / maxCount) * 100}%` }}
                     />
                   </div>
-                  {/* Count */}
-                  <span className="text-xs text-[var(--text-muted)] w-8 text-right">
-                    {row.count}
+                  <span className="w-8 text-end text-white/45">{row.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <ul className="space-y-3">
+            {reviews.map((review) => (
+              <li
+                key={review.id}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">
+                    {review.candidateName || (isAr ? 'مرشح' : 'Candidate')}
+                  </p>
+                  <span className="text-xs text-white/40">
+                    {new Date(review.createdAt).toLocaleDateString(isAr ? 'ar-SA' : 'en-US')}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Rating breakdown */}
-      <motion.div
-        variants={breakdownVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
-        {ratingBreakdown.map((row) => {
-          const percent = ((row.count / totalReviews) * 100).toFixed(1);
-          return (
-            <div
-              key={row.stars}
-              className="bg-[#0B0F17] border border-white/[0.06] rounded-xl p-4 text-center"
-            >
-              <p className="text-2xl font-bold text-gold">{row.count}</p>
-              <div className="flex items-center justify-center gap-0.5 mt-1">
-                <Star size={14} fill="currentColor" className="text-gold" />
-                <span className="text-xs text-[var(--text-muted)]">{row.stars}</span>
-              </div>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{percent}%</p>
-            </div>
-          );
-        })}
-      </motion.div>
-
-      {/* Review cards */}
-      <div className="space-y-4 mt-8">
-        {mockReviews.map((review, i) => (
-          <motion.div
-            key={review.id}
-            custom={i}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="bg-[#0B0F17] border border-white/[0.06] rounded-xl p-5"
-          >
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-              <div>
-                <p className="font-semibold text-white text-sm">{review.candidate}</p>
-                <p className="text-xs text-[var(--text-muted)] font-mono">{review.date}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StarRating rating={review.rating} size={14} />
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.1] px-3 py-1 text-xs text-[var(--text-muted)] transition-colors hover:bg-white/5 cursor-pointer"
-                >
-                  <MessageSquare size={12} />
-                  {locale === 'ar' ? 'رد' : 'Reply'}
-                </button>
-              </div>
-            </div>
-
-            {/* Comment */}
-            <p className="text-sm text-[var(--text-muted)] leading-relaxed">{review.comment}</p>
-
-            {/* Reply section */}
-            {review.reply && (
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => toggleReply(review.id)}
-                  className="inline-flex items-center gap-1 text-xs text-gold/70 hover:text-gold transition-colors cursor-pointer"
-                >
-                  {expandedReplies.has(review.id) ? (
-                    <ChevronUp size={14} />
-                  ) : (
-                    <ChevronDown size={14} />
-                  )}
-                  {locale === 'ar'
-                    ? `${expandedReplies.has(review.id) ? 'إخفاء' : 'عرض'} الرد`
-                    : `${expandedReplies.has(review.id) ? 'Hide' : 'Show'} reply`}
-                </button>
-
-                {expandedReplies.has(review.id) && (
-                  <div className="mt-2 bg-gray-800/50 rounded-lg p-3 border-s-2 border-gold/20">
-                    <p className="text-xs text-gold/70 mb-1">
-                      {locale === 'ar' ? 'ردك:' : 'Your reply:'}
-                    </p>
-                    <p className="text-sm text-[var(--text-muted)]">{review.reply}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
-        ))}
-      </div>
+                <div className="mt-2">
+                  <StarRow rating={review.rating} />
+                </div>
+                {review.comment ? (
+                  <p className="mt-3 whitespace-pre-wrap text-sm text-white/65">{review.comment}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

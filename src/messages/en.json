@@ -707,13 +707,13 @@
     "perMonth": "/mo"
   },
   "verify": {
-    "title": "Verify Muqabaleh Certificate",
-    "sub": "Enter the certificate ID to verify its authenticity.",
+    "title": "Verify a Muqabaleh passport",
+    "sub": "Enter the verification ID from a passport or certificate to confirm it’s authentic.",
     "inputPlaceholder": "e.g., MQBL-XXXX-XXXX-XXXX",
     "verifyBtn": "Verify",
-    "valid": "Valid Certificate",
-    "expired": "Expired Certificate",
-    "notFound": "No certificate found with this ID",
+    "valid": "Valid passport",
+    "expired": "Expired passport",
+    "notFound": "No passport found with this ID",
     "name": "Name",
     "score": "Score",
     "issuedAt": "Issued At",

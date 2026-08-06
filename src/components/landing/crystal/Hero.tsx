@@ -24,6 +24,12 @@ const HERO_FRAMES = [
     altAr: 'مرشّحة تتحدث بثقة في مقابلة مباشرة عبر مقابلة',
     objectPosition: 'center_25%',
   },
+  {
+    src: '/images/hero-interview-hired.webp',
+    altEn: 'Candidate hired after a successful interview handshake on Muqabaleh',
+    altAr: 'مرشّحة تُقبل بعد مصافحة ناجحة عقب المقابلة عبر مقابلة',
+    objectPosition: 'center_22%',
+  },
 ] as const;
 
 export function CrystalHero() {

@@ -12,7 +12,13 @@ export default async function PublicPassportPage({
 }) {
   const { locale, userId } = await params;
   const t = await getTranslations({ locale, namespace: 'app.passport' });
-  const passport = await buildPassport(userId, { forPublic: true });
+
+  let passport = null;
+  try {
+    passport = await buildPassport(userId, { forPublic: true });
+  } catch (err) {
+    console.error('[public passport page]', err);
+  }
 
   if (!passport) {
     return (

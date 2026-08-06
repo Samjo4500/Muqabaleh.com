@@ -147,24 +147,32 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Link
-              href={localePath('/jobs', locale)}
+              href={localePath('/app/passport', locale)}
               className="mq-btn mq-btn-primary flex-1 px-5 py-3 text-center text-sm"
             >
-              {isAr ? 'تصفّح قائمة الوظائف' : 'Browse job listings'}
+              {isAr ? 'عرض جواز الجاهزية' : 'View your passport'}
             </Link>
             <Link
-              href={localePath('/auth/register', locale)}
+              href={localePath('/app/certificates', locale)}
               className="mq-btn mq-btn-ghost flex-1 px-5 py-3 text-center text-sm"
             >
-              {isAr ? 'سجّل / ادعُ صديقاً' : 'Register / invite a friend'}
+              {isAr ? 'الشهادات الموثّقة' : 'Verified certificates'}
             </Link>
           </div>
-          <Link
-            href={localePath('/interview/prequal', locale)}
-            className="mt-4 inline-block text-sm text-teal-200 hover:text-teal-100"
-          >
-            {isAr ? 'تدرّب مجدداً' : 'Practice again'}
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-4 text-sm">
+            <Link
+              href={localePath('/jobs', locale)}
+              className="text-teal-200 hover:text-teal-100"
+            >
+              {isAr ? 'تصفّح الوظائف' : 'Browse jobs'}
+            </Link>
+            <Link
+              href={localePath('/interview/prequal', locale)}
+              className="text-teal-200 hover:text-teal-100"
+            >
+              {isAr ? 'تدرّب مجدداً' : 'Practice again'}
+            </Link>
+          </div>
         </section>
       </main>
     </AtelierFlowShell>

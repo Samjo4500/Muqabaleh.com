@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { bi: C.nav.jeannie, href: '#jeannie' },
   { bi: C.nav.pricing, href: '#pricing' },
   { bi: C.nav.forCompanies, href: '/business' },
+  { bi: C.nav.partners, href: '/partners' },
 ] as const;
 
 export function CrystalNavbar() {

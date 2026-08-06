@@ -13,6 +13,7 @@ function RequestDemoForm() {
   const searchParams = useSearchParams();
   const isAr = locale === 'ar';
   const source = searchParams.get('from') || 'request-demo';
+  const intent = searchParams.get('intent') || 'demo';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -32,7 +33,15 @@ function RequestDemoForm() {
       const res = await fetch('/api/demo-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, company, phone, teamSize, message, source }),
+        body: JSON.stringify({
+          name,
+          email,
+          company,
+          phone,
+          teamSize,
+          message,
+          source: intent === 'quote' ? `${source}:quote` : source,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -148,7 +157,13 @@ function RequestDemoForm() {
         className="mq-btn mq-btn-primary inline-flex w-full items-center justify-center gap-2 py-3.5 text-sm disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {isAr ? 'إرسال الطلب' : 'Submit request'}
+        {intent === 'quote'
+          ? isAr
+            ? 'اطلب عرض السعر'
+            : 'Request quote'
+          : isAr
+            ? 'اطلب العرض'
+            : 'Request demo'}
       </button>
 
       <p className="text-center text-xs text-white/40">
@@ -162,30 +177,49 @@ function RequestDemoForm() {
   );
 }
 
-export function RequestDemoClient() {
+function RequestDemoHeader() {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const searchParams = useSearchParams();
+  const isQuote = searchParams.get('intent') === 'quote';
 
+  return (
+    <>
+      <p className="text-center text-xs font-bold tracking-[0.18em] text-teal-300/80">
+        {isAr ? 'مقابلة' : 'MUQABALEH'}
+      </p>
+      <h1 className="mq-display mt-3 text-center text-3xl font-bold text-white md:text-4xl">
+        {isQuote
+          ? isAr
+            ? 'احصل على عرض سعر'
+            : 'Get a quote'
+          : isAr
+            ? 'اطلب عرضاً توضيحياً'
+            : 'Request a demo'}
+      </h1>
+      <p className="mx-auto mt-3 max-w-md text-center text-white/55">
+        {isQuote
+          ? isAr
+            ? 'أخبرنا عن احتياجك وسنرسل عرض سعر مخصّصاً — بدون أسعار عامة.'
+            : 'Tell us what you need and we’ll send tailored pricing — no public rates.'
+          : isAr
+            ? 'أخبرنا عن فريقك وسنتواصل لتفعيل معاينة كاملة.'
+            : 'Tell us about your team and we will unlock a guided walkthrough.'}
+      </p>
+    </>
+  );
+}
+
+export function RequestDemoClient() {
   return (
     <AtelierShell showHeroLogo>
       <div className="mq-wrap mx-auto max-w-xl py-10 md:py-16">
-        <p className="text-center text-xs font-bold tracking-[0.18em] text-teal-300/80">
-          {isAr ? 'مقابلة للأعمال' : 'MUQABALEH FOR BUSINESS'}
-        </p>
-        <h1 className="mq-display mt-3 text-center text-3xl font-bold text-white md:text-4xl">
-          {isAr ? 'اطلب عرضاً توضيحياً' : 'Request a demo'}
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-center text-white/55">
-          {isAr
-            ? 'أخبرنا عن فريقك وسنتواصل لتفعيل معاينة كاملة للوحة التوظيف.'
-            : 'Tell us about your team and we will unlock a guided walkthrough of the hiring console.'}
-        </p>
-
         <Suspense
           fallback={
-            <div className="mq-panel mt-10 rounded-2xl p-8 text-center text-white/50">…</div>
+            <div className="text-center text-white/50">…</div>
           }
         >
+          <RequestDemoHeader />
           <RequestDemoForm />
         </Suspense>
       </div>

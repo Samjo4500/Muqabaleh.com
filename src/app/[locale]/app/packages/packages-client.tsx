@@ -1,13 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { Check, CreditCard, Sparkles, Crown } from 'lucide-react';
 import { GlowCard } from '@/components/brand';
-import { PayPalCheckoutButton } from '@/components/PayPalCheckoutButton';
+import { localePath } from '@/i18n/navigation';
 
 export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
   const t = useTranslations('app.packages');
-  const tCommon = useTranslations('common');
   const locale = useLocale();
   const isAr = locale === 'ar';
 
@@ -17,32 +17,32 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
       popular: true,
       icon: Sparkles,
       name: isAr ? 'جيني' : 'Jeannie',
-      price: '$19',
-      period: isAr ? '/شهر' : '/mo',
       sub: isAr ? '١٠ تقديمات بموافقتك — بلا عشوائية' : '10 approve-gated applies — NOT SPAM',
       features: isAr
         ? [
-            'تدريب ذكي بلا حدود',
+            'تدريب ذكي بلا حدود مع جيني',
             'جواز موثّق كامل',
             'جيني تقدّم — ١٠ / شهر',
             'رفع السيرة وخطاب التقديم',
             'متتبّع الطلبات',
           ]
         : [
-            'Unlimited AI practice',
+            'Unlimited practice with Jeannie',
             'Full verified passport',
             'Jeannie applies — 10 / month',
             'Upload CV + cover letter',
             'Application tracker',
           ],
+      primaryHref: '/request-demo?from=packages-jeannie',
+      primaryLabel: isAr ? 'اطلب عرضاً' : 'Request demo',
+      secondaryHref: '/request-demo?from=packages-jeannie&intent=quote',
+      secondaryLabel: isAr ? 'احصل على عرض سعر' : 'Get a quote',
     },
     {
       key: 'jeannie_pro' as const,
       popular: false,
       icon: Crown,
       name: isAr ? 'جيني برو' : 'Jeannie Pro',
-      price: '$39',
-      period: isAr ? '/شهر' : '/mo',
       sub: isAr ? '٢٠ تقديماً + استوديو سيرة وخطاب' : '20 applies + CV studio & cover letter AI',
       features: isAr
         ? [
@@ -59,6 +59,10 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
             'Cover letter generate + assist',
             'Full tracker + insights',
           ],
+      primaryHref: '/request-demo?from=packages-pro&intent=quote',
+      primaryLabel: isAr ? 'احصل على عرض سعر' : 'Get a quote',
+      secondaryHref: '/request-demo?from=packages-pro',
+      secondaryLabel: isAr ? 'اطلب عرضاً' : 'Request demo',
     },
   ];
 
@@ -68,22 +72,22 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
         <h1 className="mq-display text-2xl font-bold text-white md:text-3xl">{t('title')}</h1>
         <p className="mt-2 text-sm text-white/55">
           {isAr
-            ? 'فعّل جيني عبر PayPal. كل تقديم يحتاج موافقتك — ليس عشوائياً.'
-            : 'Unlock Jeannie via PayPal. Every apply needs your approval — NOT SPAM.'}
+            ? 'الأسعار عند الطلب. اطلب عرضاً أو احصل على عرض سعر — كل تقديم يحتاج موافقتك.'
+            : 'Pricing on request. Request a demo or get a quote — every apply needs your approval.'}
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
         {isSandbox ? (
           <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-100">
-            {tCommon('paymentMock')}
+            {isAr ? 'بيئة تجريبية' : 'Sandbox'}
           </span>
         ) : null}
         <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-100">
           NOT SPAM
         </span>
         <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
-          {tCommon('currencyNote')}
+          {isAr ? 'تسعير مخصّص' : 'Custom pricing'}
         </span>
       </div>
 
@@ -119,9 +123,13 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
               </div>
               <h3 className="text-lg font-bold text-white">{plan.name}</h3>
               <p className="mb-1 text-xs text-white/45">{plan.sub}</p>
-              <div className="my-4 text-3xl font-extrabold text-teal-200">
-                {plan.price}
-                <span className="text-sm font-medium text-white/45">{plan.period}</span>
+              <div className="my-4 text-center">
+                <p className="text-2xl font-extrabold text-teal-200">
+                  {isAr ? 'تسعير مخصّص' : 'Custom pricing'}
+                </p>
+                <p className="mt-1 text-xs text-white/40">
+                  {isAr ? 'أخبرنا بأهدافك وسنجهّز العرض' : 'Tell us your goals and we’ll tailor access'}
+                </p>
               </div>
               <ul className="mb-6 w-full space-y-3">
                 {plan.features.map((f) => (
@@ -131,7 +139,20 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
                   </li>
                 ))}
               </ul>
-              <PayPalCheckoutButton plan={plan.key} className="w-full" />
+              <div className="flex w-full flex-col gap-2">
+                <Link
+                  href={localePath(plan.primaryHref, locale)}
+                  className="mq-btn mq-btn-primary w-full justify-center text-sm"
+                >
+                  {plan.primaryLabel}
+                </Link>
+                <Link
+                  href={localePath(plan.secondaryHref, locale)}
+                  className="mq-btn mq-btn-ghost w-full justify-center text-sm"
+                >
+                  {plan.secondaryLabel}
+                </Link>
+              </div>
             </GlowCard>
           );
         })}

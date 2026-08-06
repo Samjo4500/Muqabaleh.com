@@ -429,13 +429,13 @@ export function CrystalJeannieMagic() {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href={localePath('/app/packages', locale)}
+            href={localePath('/request-demo?from=jeannie-magic', locale)}
             className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex px-6 py-3 text-sm"
           >
             <BiInline bi={C.jeannieMagic.cta} />
           </Link>
           <Link
-            href={localePath('/interview/prequal', locale)}
+            href={localePath('/request-demo?from=jeannie-magic&intent=quote', locale)}
             className="mq-btn mq-btn-ghost inline-flex px-6 py-3 text-sm"
           >
             <BiInline bi={C.jeannieMagic.ctaSecondary} />

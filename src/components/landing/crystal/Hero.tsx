@@ -1,8 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
@@ -10,12 +11,37 @@ import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
+const HERO_FRAMES = [
+  {
+    src: '/images/hero-interview.webp',
+    altEn: 'Candidate preparing for a job interview on Muqabaleh',
+    altAr: 'مرشّحة تستعد لمقابلة عمل عبر مقابلة',
+    objectPosition: 'center_20%',
+  },
+  {
+    src: '/images/hero-interview-meeting.webp',
+    altEn: 'Candidate speaking confidently in a live interview on Muqabaleh',
+    altAr: 'مرشّحة تتحدث بثقة في مقابلة مباشرة عبر مقابلة',
+    objectPosition: 'center_25%',
+  },
+] as const;
+
 export function CrystalHero() {
   const locale = useLocale();
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setFrame((prev) => (prev + 1) % HERO_FRAMES.length);
+    }, 7000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const current = HERO_FRAMES[frame];
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
-      {/* Background with continuous slow motion */}
+      {/* Background with continuous slow motion + interview frame crossfade */}
       <motion.div
         className="absolute inset-0"
         initial={{ scale: 1.12, opacity: 0.55 }}
@@ -27,19 +53,27 @@ export function CrystalHero() {
           animate={{ scale: [1, 1.06, 1], x: [0, 12, 0], y: [0, -8, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <Image
-            src="/images/hero-interview.webp"
-            alt={
-              locale === 'ar'
-                ? 'مرشّح يتدرّب على مقابلة عمل عبر مقابلة'
-                : 'Candidate practicing a job interview on Muqabaleh'
-            }
-            fill
-            priority
-            className="object-cover object-[center_20%]"
-            sizes="100vw"
-            quality={72}
-          />
+          <AnimatePresence mode="sync">
+            <motion.div
+              key={current.src}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.4, ease: 'easeInOut' }}
+            >
+              <Image
+                src={current.src}
+                alt={locale === 'ar' ? current.altAr : current.altEn}
+                fill
+                priority={frame === 0}
+                className="object-cover"
+                style={{ objectPosition: current.objectPosition.replace('_', ' ') }}
+                sizes="100vw"
+                quality={72}
+              />
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
         <div className="mq-hero-shade absolute inset-0" />
       </motion.div>

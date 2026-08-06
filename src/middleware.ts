@@ -1,50 +1,64 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { UserRole } from '@/lib/enums';
 import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
+/**
+ * Edge-safe role strings — do NOT import Prisma enums here.
+ * `@prisma/client` is Node-only; on Edge those enum values become undefined
+ * and every authenticated user gets redirected to /forbidden.
+ */
+const ROLE = {
+  USER: 'USER',
+  INTERVIEWER: 'INTERVIEWER',
+  ADMIN: 'ADMIN',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  COMPANY_ADMIN: 'COMPANY_ADMIN',
+  PARTNER_ADMIN: 'PARTNER_ADMIN',
+  PARTNER_MEMBER: 'PARTNER_MEMBER',
+} as const;
+
 // ─── Route → allowed roles ─────────────────────────────────────
 const ROUTE_ROLES: Record<string, string[]> = {
-  '/app': [UserRole.USER, UserRole.SUPER_ADMIN],
-  '/interviewer': [UserRole.INTERVIEWER, UserRole.SUPER_ADMIN],
+  '/app': [ROLE.USER, ROLE.SUPER_ADMIN],
+  '/interviewer': [ROLE.INTERVIEWER, ROLE.SUPER_ADMIN],
   // /b2b is a public preview console — writes stay locked in app/API layer
-  '/partner': ['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN],
-  '/admin': [UserRole.SUPER_ADMIN],
+  '/partner': [ROLE.PARTNER_ADMIN, ROLE.PARTNER_MEMBER, ROLE.SUPER_ADMIN],
+  '/admin': [ROLE.SUPER_ADMIN],
   // Gated AI mock interview engine — any authenticated role with email session
   '/interview/prequal': [
-    UserRole.USER,
-    UserRole.INTERVIEWER,
-    UserRole.COMPANY_ADMIN,
-    UserRole.PARTNER_ADMIN,
-    UserRole.PARTNER_MEMBER,
-    UserRole.SUPER_ADMIN,
+    ROLE.USER,
+    ROLE.INTERVIEWER,
+    ROLE.COMPANY_ADMIN,
+    ROLE.PARTNER_ADMIN,
+    ROLE.PARTNER_MEMBER,
+    ROLE.SUPER_ADMIN,
   ],
   '/interview/summary': [
-    UserRole.USER,
-    UserRole.INTERVIEWER,
-    UserRole.COMPANY_ADMIN,
-    UserRole.PARTNER_ADMIN,
-    UserRole.PARTNER_MEMBER,
-    UserRole.SUPER_ADMIN,
+    ROLE.USER,
+    ROLE.INTERVIEWER,
+    ROLE.COMPANY_ADMIN,
+    ROLE.PARTNER_ADMIN,
+    ROLE.PARTNER_MEMBER,
+    ROLE.SUPER_ADMIN,
   ],
   '/interview/session': [
-    UserRole.USER,
-    UserRole.INTERVIEWER,
-    UserRole.COMPANY_ADMIN,
-    UserRole.PARTNER_ADMIN,
-    UserRole.PARTNER_MEMBER,
-    UserRole.SUPER_ADMIN,
+    ROLE.USER,
+    ROLE.INTERVIEWER,
+    ROLE.COMPANY_ADMIN,
+    ROLE.PARTNER_ADMIN,
+    ROLE.PARTNER_MEMBER,
+    ROLE.SUPER_ADMIN,
   ],
   '/interview/report': [
-    UserRole.USER,
-    UserRole.INTERVIEWER,
-    UserRole.COMPANY_ADMIN,
-    UserRole.PARTNER_ADMIN,
-    UserRole.PARTNER_MEMBER,
-    UserRole.SUPER_ADMIN,
+    ROLE.USER,
+    ROLE.INTERVIEWER,
+    ROLE.COMPANY_ADMIN,
+    ROLE.PARTNER_ADMIN,
+    ROLE.PARTNER_MEMBER,
+    ROLE.SUPER_ADMIN,
   ],
 };
 
@@ -109,10 +123,10 @@ async function getRoleFromRequest(request: NextRequest): Promise<string | null> 
         cookieName: 'next-auth.session-token',
       });
       if (!fallback) return null;
-      return (fallback.role as string) || UserRole.USER;
+      return (fallback.role as string) || ROLE.USER;
     }
 
-    return (token.role as string) || UserRole.USER;
+    return (token.role as string) || ROLE.USER;
   } catch {
     return null;
   }
@@ -134,19 +148,24 @@ export default async function middleware(request: NextRequest) {
     if (!role) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (role !== UserRole.SUPER_ADMIN) {
+    if (role !== ROLE.SUPER_ADMIN) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Partner APIs — require partner roles (handlers also verify)
-  if (pathname.startsWith('/api/partner') && !pathname.startsWith('/api/partner/apply') && !pathname.startsWith('/api/partner/resolve')) {
+  if (
+    pathname.startsWith('/api/partner') &&
+    !pathname.startsWith('/api/partner/apply') &&
+    !pathname.startsWith('/api/partner/resolve')
+  ) {
     const role = await getRoleFromRequest(request);
     if (!role) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!['PARTNER_ADMIN', 'PARTNER_MEMBER', UserRole.SUPER_ADMIN].includes(role)) {
+    const partnerRoles: string[] = [ROLE.PARTNER_ADMIN, ROLE.PARTNER_MEMBER, ROLE.SUPER_ADMIN];
+    if (!partnerRoles.includes(role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     return NextResponse.next({ request: { headers: requestHeaders } });

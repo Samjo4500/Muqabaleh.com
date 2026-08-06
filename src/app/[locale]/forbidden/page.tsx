@@ -20,11 +20,9 @@ export default async function ForbiddenPage() {
 
       <ShieldX size={64} strokeWidth={1.25} className="text-rose-300/90" />
       <h1 className="mq-display text-3xl font-extrabold text-white">403</h1>
-      <p className="max-w-md text-lg text-white/55">
-        {t('forbiddenMessage') || 'ليس لديك صلاحية الوصول إلى هذه الصفحة.'}
-      </p>
+      <p className="max-w-md text-lg text-white/55">{t('forbiddenMessage')}</p>
       <Link href={localePath('/', locale)} className="mq-btn mq-btn-primary text-sm">
-        {t('goHome') || 'العودة للرئيسية'}
+        {t('goHome')}
       </Link>
     </div>
   );

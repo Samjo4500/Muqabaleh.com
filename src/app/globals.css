@@ -991,6 +991,31 @@
     linear-gradient(105deg, rgba(5, 8, 15, 0.88) 0%, rgba(5, 8, 15, 0.55) 48%, rgba(5, 8, 15, 0.28) 100%),
     linear-gradient(180deg, rgba(5, 8, 15, 0.25) 0%, rgba(5, 8, 15, 0.72) 100%);
 }
+/* Fixed hero passport badge — same anchor on every slider frame */
+.mq-atelier .mq-hero-score-anchor {
+  position: absolute;
+  z-index: 30;
+  inset-inline-end: 0.85rem;
+  top: 5.25rem;
+  width: min(16.75rem, calc(100vw - 1.7rem));
+}
+@media (min-width: 768px) {
+  .mq-atelier .mq-hero-score-anchor {
+    inset-inline-end: 2rem;
+    top: 6.5rem;
+    width: 18.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .mq-atelier .mq-hero-score-anchor {
+    inset-inline-end: 2.75rem;
+    top: 7.25rem;
+    width: 18.75rem;
+  }
+}
+.mq-atelier .mq-score-badge {
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+}
 .mq-atelier[dir='rtl'] .mq-hero-shade {
   background:
     linear-gradient(255deg, rgba(5, 8, 15, 0.88) 0%, rgba(5, 8, 15, 0.55) 48%, rgba(5, 8, 15, 0.28) 100%),

@@ -7,6 +7,7 @@ export { StatusIndicator } from "./status-indicator";
 export { TtsWaveBars, AudioReactBars } from "./tts-wave-bars";
 export { CountUpStat } from "./count-up-stat";
 export { VerifiedBadge } from "./verified-badge";
+export { MuqabalehScoreBadge } from "./muqabaleh-score-badge";
 export { PriceTag } from "./price-tag";
 export { AuthShell } from "./auth-shell";
 export { EmptyState } from "./empty-state";

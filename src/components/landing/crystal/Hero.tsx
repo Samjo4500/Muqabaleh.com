@@ -6,31 +6,43 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
+import { MuqabalehScoreBadge, type ScoreBadgeStatus } from '@/components/brand/muqabaleh-score-badge';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
-const HERO_FRAMES = [
+const HERO_SCORE = 86;
+
+const HERO_FRAMES: {
+  src: string;
+  altEn: string;
+  altAr: string;
+  objectPosition: string;
+  badgeStatus: ScoreBadgeStatus;
+}[] = [
   {
     src: '/images/hero-interview.webp',
     altEn: 'Candidate preparing for a job interview on Muqabaleh',
     altAr: 'مرشّحة تستعد لمقابلة عمل عبر مقابلة',
     objectPosition: 'center_20%',
+    badgeStatus: 'scored',
   },
   {
     src: '/images/hero-interview-meeting.webp',
     altEn: 'Candidate speaking confidently in a live interview on Muqabaleh',
     altAr: 'مرشّحة تتحدث بثقة في مقابلة مباشرة عبر مقابلة',
     objectPosition: 'center_25%',
+    badgeStatus: 'interview',
   },
   {
     src: '/images/hero-interview-hired.webp',
     altEn: 'Candidate hired after a successful interview handshake on Muqabaleh',
     altAr: 'مرشّحة تُقبل بعد مصافحة ناجحة عقب المقابلة عبر مقابلة',
     objectPosition: 'center_22%',
+    badgeStatus: 'hired',
   },
-] as const;
+];
 
 export function CrystalHero() {
   const locale = useLocale();
@@ -101,6 +113,26 @@ export function CrystalHero() {
           animate={{ opacity: [0.15, 0.7, 0.15], scaleX: [0.6, 1, 0.6] }}
           transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
         />
+      </div>
+
+      {/* Score badge — fixed anchor so every slider frame shows it in the same place */}
+      <div className="mq-hero-score-anchor">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current.badgeStatus}
+            initial={{ opacity: 0, y: 10, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.45, ease: easeCrystal }}
+          >
+            <MuqabalehScoreBadge
+              score={HERO_SCORE}
+              status={current.badgeStatus}
+              locale={locale}
+              size="lg"
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <div className="mq-wrap relative flex min-h-[100svh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">

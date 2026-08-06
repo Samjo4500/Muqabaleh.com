@@ -184,12 +184,39 @@ export async function ensureApplyQuotaFresh(userId: string) {
     user.appliesResetAt && user.appliesResetAt.getTime() <= now.getTime()
       ? user.appliesResetAt
       : now;
+  const nextReset = addMonths(resetFrom, 1);
+
+  // Promise-preserving reset: roll unmet applies into the new period.
+  try {
+    const { processExpiredSlaPeriods, ensureActiveSlaPeriod } = await import(
+      '@/lib/jeannie/sla'
+    );
+    await processExpiredSlaPeriods();
+    const period = await ensureActiveSlaPeriod(userId);
+    if (period) {
+      return db.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          tier: true,
+          appliesLeft: true,
+          appliesResetAt: true,
+          cvStudioEnabled: true,
+          coverLetterAiEnabled: true,
+          sessionsLeft: true,
+          subscriptionExpiresAt: true,
+        },
+      });
+    }
+  } catch (err) {
+    console.warn('[ensureApplyQuotaFresh] SLA reset fallback', err);
+  }
 
   return db.user.update({
     where: { id: userId },
     data: {
       appliesLeft: ent.monthlyApplies,
-      appliesResetAt: addMonths(resetFrom, 1),
+      appliesResetAt: nextReset,
       cvStudioEnabled: ent.cvStudio,
       coverLetterAiEnabled: ent.coverLetterAi,
     },
@@ -413,18 +440,39 @@ export async function grantPlan({
         : null
       : expiresAt;
 
-  return db.user.update({
+  const updated = await db.user.update({
     where: { id: userId },
     data: {
       tier,
       sessionsLeft: sessions ?? (ent.unlimitedPractice ? 999 : 1),
       appliesLeft: ent.monthlyApplies,
-      appliesResetAt: ent.monthlyApplies > 0 ? monthFromNow() : null,
+      appliesResetAt: ent.monthlyApplies > 0 ? (periodEnd ?? monthFromNow()) : null,
       cvStudioEnabled: ent.cvStudio,
       coverLetterAiEnabled: ent.coverLetterAi,
       subscriptionExpiresAt: periodEnd,
     },
   });
+
+  // Promise ledger — roll unmet prior applies forward so we never break the plan.
+  if (ent.monthlyApplies > 0 && periodEnd) {
+    try {
+      const { openSlaPeriodForGrant } = await import('@/lib/jeannie/sla');
+      const sla = await openSlaPeriodForGrant(userId, ent.monthlyApplies, periodEnd);
+      if (sla && sla.promisedApplies !== ent.monthlyApplies) {
+        await db.user.update({
+          where: { id: userId },
+          data: {
+            appliesLeft: sla.promisedApplies,
+            appliesResetAt: periodEnd,
+          },
+        });
+      }
+    } catch (err) {
+      console.warn('[grantPlan] SLA period open failed', err);
+    }
+  }
+
+  return updated;
 }
 
 export async function revokeToFree(userId: string) {

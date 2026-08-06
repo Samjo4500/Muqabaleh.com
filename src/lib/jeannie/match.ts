@@ -2,6 +2,8 @@ import { createHash } from 'crypto';
 import { db } from '@/lib/db';
 import { JeannieOpportunityStatus } from '@prisma/client';
 import { getOrCreateJeannieProfile } from './profile';
+import { findActiveListings, refreshJobCatalog } from './catalog';
+import { ensureActiveSlaPeriod } from './sla';
 
 const TERMINAL: JeannieOpportunityStatus[] = [
   JeannieOpportunityStatus.APPROVED,
@@ -16,12 +18,13 @@ function scoreJob(opts: {
   title: string;
   city?: string | null;
   country?: string | null;
-  careerLevel?: string | null;
+  seniority?: string | null;
   roles: string[];
   cities: string[];
   countries: string[];
-  seniority?: string | null;
+  profileSeniority?: string | null;
   passportScore?: number | null;
+  hasApplyEmail?: boolean;
 }) {
   let score = 40;
   const titleLower = opts.title.toLowerCase();
@@ -33,19 +36,20 @@ function scoreJob(opts: {
   }
   if (
     opts.country &&
-    opts.countries.some((c) => c.toLowerCase() === opts.country!.toLowerCase())
+    opts.countries.some((c) => opts.country!.toLowerCase().includes(c.toLowerCase()))
   ) {
-    score += 10;
+    score += 12;
   }
   if (
+    opts.profileSeniority &&
     opts.seniority &&
-    opts.careerLevel &&
-    opts.careerLevel.toLowerCase().includes(opts.seniority.toLowerCase())
+    opts.seniority.toLowerCase().includes(opts.profileSeniority.toLowerCase())
   ) {
     score += 8;
   }
   if (opts.passportScore && opts.passportScore >= 70) score += 8;
   else if (opts.passportScore && opts.passportScore >= 50) score += 4;
+  if (opts.hasApplyEmail) score += 6;
   return Math.max(0, Math.min(99, score));
 }
 
@@ -54,12 +58,12 @@ function idempotency(userId: string, key: string) {
 }
 
 /**
- * Build / refresh Jeannie shortlist.
- * Prefers public OPEN B2B jobs; supplements with target-based external stubs
- * while the marketplace is parked (NOT SPAM — still requires approval).
- * Terminal statuses (approved / applied / packet / rejected) are preserved.
+ * Build / refresh Jeannie shortlist from the external job catalog.
+ * Refreshes providers first, then matches — approve-gated (NOT SPAM).
  */
 export async function generateShortlist(userId: string, limit = 8) {
+  await ensureActiveSlaPeriod(userId);
+
   const profile = await getOrCreateJeannieProfile(userId);
   if (!profile.isActive) {
     return listActiveShortlist(userId, limit);
@@ -74,41 +78,35 @@ export async function generateShortlist(userId: string, limit = 8) {
         ? [pool.role]
         : ['Professional'];
 
-  const jobs = await db.b2BJob.findMany({
-    where: {
-      isPublic: true,
-      status: 'OPEN',
-      OR: [
-        ...roles.map((role) => ({
-          title: { contains: role, mode: 'insensitive' as const },
-        })),
-        ...(profile.targetCountries.length
-          ? [{ country: { in: profile.targetCountries } }]
-          : []),
-      ],
-    },
-    include: { company: { select: { name: true } } },
-    take: 40,
-    orderBy: { createdAt: 'desc' },
+  await refreshJobCatalog({
+    roles,
+    countries: profile.targetCountries,
+  });
+
+  const listings = await findActiveListings({
+    roles,
+    countries: profile.targetCountries,
+    take: 80,
   });
 
   const created: Awaited<ReturnType<typeof db.jeannieOpportunity.upsert>>[] = [];
 
-  for (const job of jobs) {
+  for (const listing of listings) {
     const matchScore = scoreJob({
-      title: job.title,
-      city: job.city,
-      country: job.country,
-      careerLevel: job.careerLevel,
+      title: listing.title,
+      city: listing.city,
+      country: listing.country,
+      seniority: listing.seniority,
       roles,
       cities: profile.targetCities,
       countries: profile.targetCountries,
-      seniority: profile.seniority,
+      profileSeniority: profile.seniority,
       passportScore: pool?.muqabalehScore,
+      hasApplyEmail: Boolean(listing.applyEmail),
     });
     if (matchScore < 45) continue;
 
-    const key = idempotency(userId, `job:${job.id}`);
+    const key = idempotency(userId, `listing:${listing.id}`);
     const existing = await db.jeannieOpportunity.findUnique({
       where: { idempotencyKey: key },
     });
@@ -119,31 +117,43 @@ export async function generateShortlist(userId: string, limit = 8) {
       continue;
     }
 
+    const channel = listing.applyEmail ? 'EMAIL' : 'URL_PACKET';
     const row = await db.jeannieOpportunity.upsert({
       where: { idempotencyKey: key },
       create: {
         userId,
         status: JeannieOpportunityStatus.AWAITING_APPROVAL,
-        b2bJobId: job.id,
-        companyName: job.company?.name || 'Company',
-        title: job.title,
-        titleAr: job.titleAr,
-        city: job.city,
-        country: job.country,
+        listingId: listing.id,
+        externalUrl: listing.applyUrl,
+        applyEmail: listing.applyEmail,
+        applyChannel: channel,
+        companyName: listing.companyName,
+        title: listing.title,
+        titleAr: listing.title,
+        city: listing.city,
+        country: listing.country,
         matchScore,
-        matchReason: `Matched to your targets and passport signal (score ${matchScore}).`,
-        matchReasonAr: `مطابقة لأهدافك وإشارة جوازك (درجة ${matchScore}).`,
+        matchReason: listing.applyEmail
+          ? `Strong target fit (score ${matchScore}). Jeannie can email your packet after you approve.`
+          : `Target fit (score ${matchScore}). Jeannie will prepare a tracked apply packet after you approve.`,
+        matchReasonAr: listing.applyEmail
+          ? `ملاءمة قوية (درجة ${matchScore}). جيني ترسل حزمتك بالبريد بعد موافقتك.`
+          : `ملاءمة لأهدافك (درجة ${matchScore}). جيني تجهّز حزمة تتبع بعد موافقتك.`,
+        descriptionSnippet: listing.description?.slice(0, 500) || null,
         expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         idempotencyKey: key,
       },
       update: {
         matchScore,
-        companyName: job.company?.name || 'Company',
-        title: job.title,
-        titleAr: job.titleAr,
-        city: job.city,
-        country: job.country,
-        // Only reopen soft states — never clobber approved/applied history
+        companyName: listing.companyName,
+        title: listing.title,
+        city: listing.city,
+        country: listing.country,
+        externalUrl: listing.applyUrl,
+        applyEmail: listing.applyEmail,
+        applyChannel: channel,
+        listingId: listing.id,
+        descriptionSnippet: listing.description?.slice(0, 500) || null,
         ...(existing &&
         (existing.status === JeannieOpportunityStatus.FAILED ||
           existing.status === JeannieOpportunityStatus.SUGGESTED ||
@@ -154,55 +164,6 @@ export async function generateShortlist(userId: string, limit = 8) {
     });
     created.push(row);
     if (created.length >= limit) break;
-  }
-
-  // External stubs when marketplace density is low — still approve-gated.
-  if (created.length < Math.min(3, limit)) {
-    const city = profile.targetCities[0] || 'Dubai';
-    const country = profile.targetCountries[0] || 'UAE';
-    for (let i = created.length; i < Math.min(3, limit); i++) {
-      const role = roles[i % roles.length] || 'Role';
-      const stubKey = `external:${role}:${city}:${i}`;
-      const key = idempotency(userId, stubKey);
-      const matchScore = 70 + (i % 3) * 5;
-      const existing = await db.jeannieOpportunity.findUnique({
-        where: { idempotencyKey: key },
-      });
-      if (existing && TERMINAL.includes(existing.status)) {
-        created.push(existing);
-        continue;
-      }
-      const row = await db.jeannieOpportunity.upsert({
-        where: { idempotencyKey: key },
-        create: {
-          userId,
-          status: JeannieOpportunityStatus.AWAITING_APPROVAL,
-          externalUrl: null,
-          companyName: i === 0 ? 'Regional employer shortlist' : `Partner board ${i + 1}`,
-          title: `${role}`,
-          titleAr: role,
-          city,
-          country,
-          matchScore,
-          matchReason:
-            'Target-fit shortlist while marketplace density grows. Approve only if you want Jeannie to prepare a professional apply packet.',
-          matchReasonAr:
-            'ترشيح حسب أهدافك بينما تنمو كثافة السوق. وافق فقط إذا أردت جيني تجهّز حزمة تقديم احترافية.',
-          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-          idempotencyKey: key,
-        },
-        update: {
-          matchScore,
-          ...(existing &&
-          (existing.status === JeannieOpportunityStatus.FAILED ||
-            existing.status === JeannieOpportunityStatus.SUGGESTED ||
-            existing.status === JeannieOpportunityStatus.AWAITING_APPROVAL)
-            ? { status: JeannieOpportunityStatus.AWAITING_APPROVAL }
-            : {}),
-        },
-      });
-      created.push(row);
-    }
   }
 
   return created.sort((a, b) => b.matchScore - a.matchScore);

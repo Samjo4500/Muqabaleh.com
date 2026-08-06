@@ -17,12 +17,20 @@ function getResendClient(): Resend | null {
  * Send an email immediately via Resend.
  * Returns { success: true, id } or { success: false, error }.
  */
+export type EmailAttachment = {
+  filename: string;
+  content: Buffer | string;
+  contentType?: string;
+};
+
 export async function sendEmail(opts: {
   to: string | string[];
   subject: string;
   html: string;
   from?: string;
   replyTo?: string;
+  cc?: string | string[];
+  attachments?: EmailAttachment[];
 }) {
   const resend = getResendClient();
   if (!resend) {
@@ -37,6 +45,16 @@ export async function sendEmail(opts: {
       subject: opts.subject,
       html: opts.html,
       replyTo: opts.replyTo || REPLY_TO,
+      cc: opts.cc
+        ? Array.isArray(opts.cc)
+          ? opts.cc
+          : [opts.cc]
+        : undefined,
+      attachments: opts.attachments?.map((a) => ({
+        filename: a.filename,
+        content: Buffer.isBuffer(a.content) ? a.content : Buffer.from(a.content),
+        contentType: a.contentType,
+      })),
     });
 
     if (error) {

@@ -92,6 +92,7 @@ export const L = {
   notifications: { ar: 'مركز التنبيهات', en: 'Notification Center' },
   audit: { ar: 'سجلات النشاط', en: 'Audit Logs' },
   applicants: { ar: 'قاعدة بيانات المتقدمين', en: 'Applicants' },
+  jeannieOps: { ar: 'عمليات جيني', en: 'Jeannie Ops' },
   refund: { ar: 'استرداد المبلغ', en: 'Refund' },
   enable2fa: { ar: 'تفعيل المصادقة الثنائية', en: 'Enable 2FA' },
   verify2fa: { ar: 'رمز المصادقة', en: 'Verification code' },

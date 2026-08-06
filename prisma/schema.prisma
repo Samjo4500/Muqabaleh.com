@@ -38,12 +38,19 @@ enum JeannieOpportunityStatus {
   AWAITING_APPROVAL
   APPROVED
   APPLYING
-  /// External / partner shortlist prepared but not submitted to a live board.
+  /// Packet prepared; awaiting outbound employer delivery.
   PACKET_READY
   APPLIED
   REJECTED_BY_USER
   EXPIRED
   FAILED
+}
+
+enum JeannieSlaStatus {
+  ACTIVE
+  FULFILLED
+  ROLLED_OVER
+  CLOSED
 }
 
 enum BookingStatus {
@@ -166,6 +173,7 @@ model User {
   jeannieProfile         JeannieProfile?
   jeannieOpportunities   JeannieOpportunity[]
   jeannieDocuments       JeannieDocument[]
+  jeannieSlaPeriods      JeannieSlaPeriod[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -435,7 +443,13 @@ model JeannieOpportunity {
   user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   status           JeannieOpportunityStatus @default(SUGGESTED)
   b2bJobId         String?
+  /// External catalog listing (preferred discovery source).
+  listingId        String?
+  listing          JeannieJobListing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
   externalUrl      String?
+  applyEmail       String?
+  /// EMAIL | URL_PACKET
+  applyChannel     String?
   companyName      String
   title            String
   titleAr          String?
@@ -444,11 +458,14 @@ model JeannieOpportunity {
   matchScore       Int                      @default(0)
   matchReason      String?                  @db.Text
   matchReasonAr    String?                  @db.Text
+  descriptionSnippet      String?                  @db.Text
   coverLetter             String?                  @db.Text
   cvAssetId               String?
   jobApplicationId        String?
   /// Snapshot of Muqabaleh passport verification id at apply/packet time.
   passportVerificationId  String?
+  /// Resend / provider message id for employer outbound.
+  employerMsgId           String?
   failureReason           String?
   approvedAt              DateTime?
   appliedAt               DateTime?
@@ -461,6 +478,8 @@ model JeannieOpportunity {
   @@index([userId, status])
   @@index([userId, createdAt])
   @@index([b2bJobId])
+  @@index([listingId])
+  @@index([applyEmail])
 }
 
 model JeannieDocument {
@@ -476,6 +495,55 @@ model JeannieDocument {
   updatedAt DateTime @updatedAt
 
   @@index([userId, kind])
+}
+
+/// Cached external job inventory for Jeannie discovery (not an internal ATS bank).
+model JeannieJobListing {
+  id             String   @id @default(cuid())
+  source         String
+  sourceJobId    String
+  title          String
+  companyName    String
+  city           String?
+  country        String?
+  description    String?  @db.Text
+  applyUrl       String?
+  applyEmail     String?
+  seniority      String?
+  employmentType String?
+  raw            Json?
+  fetchedAt      DateTime @default(now())
+  expiresAt      DateTime?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  opportunities  JeannieOpportunity[]
+
+  @@unique([source, sourceJobId])
+  @@index([isActive, country])
+  @@index([fetchedAt])
+  @@index([applyEmail])
+}
+
+/// Promise ledger: delivered APPLIED count vs monthly promised applies.
+/// Unmet promise rolls into the next period so we never silently break the plan.
+model JeannieSlaPeriod {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  periodStart      DateTime
+  periodEnd        DateTime
+  promisedApplies  Int
+  deliveredApplies Int             @default(0)
+  rolledInApplies  Int             @default(0)
+  rolledOutApplies Int             @default(0)
+  status           JeannieSlaStatus @default(ACTIVE)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId, status])
+  @@index([periodEnd, status])
+  @@index([userId, periodStart])
 }
 
 // ─── AuditLog ───

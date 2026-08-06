@@ -182,7 +182,7 @@ export const C = {
           { en: 'Session recording', ar: 'تسجيل الجلسة' },
         ],
         cta: { en: 'Get Pro', ar: 'اشترك في الاحترافي' },
-        href: '/pricing',
+        href: '/app/packages',
         popular: true,
       },
       {
@@ -197,7 +197,7 @@ export const C = {
           { en: 'LinkedIn optimization', ar: 'تحسين ملف LinkedIn' },
         ],
         cta: { en: 'Go Expert', ar: 'اشترك في الخبير' },
-        href: '/pricing',
+        href: '/app/packages',
         popular: false,
       },
       {

@@ -19,6 +19,7 @@ import {
   Briefcase,
   ClipboardList,
   Sparkles,
+  Bell,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { BackButton } from '@/components/navigation';
@@ -32,6 +33,7 @@ const navItems = [
   { key: 'practice', icon: Sparkles, href: '/interview/prequal' },
   { key: 'applications', icon: ClipboardList, href: '/app/applications' },
   { key: 'jobs', icon: Briefcase, href: '/portal/jobs' },
+  { key: 'notifications', icon: Bell, href: '/app/notifications' },
   { key: 'bookings', icon: Calendar, href: '/app/bookings' },
   { key: 'packages', icon: Package, href: '/app/packages' },
   { key: 'payments', icon: CreditCard, href: '/app/payments' },

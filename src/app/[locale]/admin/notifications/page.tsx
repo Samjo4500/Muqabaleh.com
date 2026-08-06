@@ -12,9 +12,14 @@ export default function Page() {
           ar: 'بث عام أو لشريحة أو لمستخدم محدد، جدولة، وسجل التنبيهات، واختبار الدفع.',
           en: 'Broadcast to all/segment/user, scheduled notifications, history, push test sender.',
         }}
+        footerNote={{
+          ar: 'مسودة تشغيلية: نموذج البث يُحفظ محلياً في المتصفح فقط. سجل التنبيهات أدناه يعرض سجلات البريد/التشغيل الحقيقية إن وُجدت.',
+          en: 'Operational draft: broadcast form saves to this browser only. History below shows real email/ops logs when present.',
+        }}
         sections={[
           {
             title: { ar: 'بث جديد', en: 'New broadcast' },
+            note: { ar: 'مسودة محلية', en: 'Local draft' },
             fields: [
               {
                 key: 'audience',

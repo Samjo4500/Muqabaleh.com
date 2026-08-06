@@ -14,7 +14,7 @@ import { C } from './copy';
 
 const NAV_LINKS = [
   { bi: C.nav.services, href: '#services' },
-  { bi: C.nav.pricing, href: '#pricing' },
+  { bi: C.nav.howItWorks, href: '#how-it-works' },
   { bi: C.nav.jobs, href: '/portal' },
   { bi: C.nav.forCompanies, href: '/business' },
 ] as const;

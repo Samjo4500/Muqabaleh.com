@@ -6,7 +6,7 @@ export const C = {
   brand: { en: 'Muqabaleh', ar: 'مقابلة' } as Bi,
   nav: {
     services: { en: 'Services', ar: 'الخدمات' },
-    howItWorks: { en: 'How it works', ar: 'كيف تعمل' },
+    howItWorks: { en: 'For job seekers', ar: 'للباحثين عن عمل' },
     forCompanies: { en: 'For companies', ar: 'للشركات' },
     pricing: { en: 'Pricing', ar: 'الأسعار' },
     jobs: { en: 'Job Portal', ar: 'بوابة الوظائف' },
@@ -111,48 +111,72 @@ export const C = {
     ],
   },
   how: {
-    title: { en: 'The Muqabaleh journey', ar: 'رحلة مقابلة' },
+    eyebrow: { en: 'For job seekers', ar: 'للباحثين عن عمل' },
+    title: { en: 'Your path to the offer', ar: 'مسارك إلى العرض الوظيفي' },
     subtitle: {
-      en: 'From your first practice answer to a verified hire-ready passport — watch the path light up.',
-      ar: 'من أول إجابة تدريبية إلى جواز جاهزية موثّق — شاهد المسار يضيء أمامك.',
+      en: 'Get hire-ready with AI, earn a verified passport, then use the Job Portal to apply with proof employers trust.',
+      ar: 'كن جاهزاً للتوظيف مع الذكاء الاصطناعي، احصل على جواز موثّق، ثم استخدم بوابة الوظائف للتقديم بدليل يثق به أصحاب العمل.',
     },
-    cta: { en: 'Start free AI interview', ar: 'ابدأ مقابلة ذكية مجاناً' },
-    scoreLabel: { en: 'Hire-ready score', ar: 'نتيجة الجاهزية' },
-    steps: [
+    ctaInterview: { en: 'Start AI interview', ar: 'ابدأ المقابلة الذكية' },
+    ctaJobs: { en: 'Open Job Portal', ar: 'افتح بوابة الوظائف' },
+    acts: [
       {
-        title: { en: 'Shape the interview', ar: 'شكّل المقابلة' },
-        desc: {
-          en: 'Pick role, level, language, and focus in under a minute.',
-          ar: 'اختر الدور والمستوى واللغة والتركيز في أقل من دقيقة.',
-        },
+        label: { en: 'Act I · Get hire-ready', ar: 'الفصل ١ · كن جاهزاً' },
+        beats: [
+          {
+            scene: 'setup' as const,
+            title: { en: 'Shape your AI interview', ar: 'شكّل مقابلتك الذكية' },
+            desc: {
+              en: 'Choose role, seniority, language, and focus. Under a minute — then your plan is ready.',
+              ar: 'اختر الدور والمستوى واللغة والتركيز. في أقل من دقيقة — وتكون خطتك جاهزة.',
+            },
+          },
+          {
+            scene: 'interview' as const,
+            title: { en: 'Practice like it is real', ar: 'تدرّب كأنها حقيقية' },
+            desc: {
+              en: 'Timed questions with instant feedback on content, structure, and confidence after every answer.',
+              ar: 'أسئلة موقوتة مع ملاحظات فورية على المحتوى والبنية والثقة بعد كل إجابة.',
+            },
+          },
+          {
+            scene: 'passport' as const,
+            title: { en: 'Earn your Muqabaleh passport', ar: 'احصل على جواز مقابلة' },
+            desc: {
+              en: 'Your score becomes a shareable, verifiable hire-ready passport — the signal that opens doors.',
+              ar: 'تتحول نتيجتك إلى جواز جاهزية قابل للمشاركة والتحقق — الإشارة التي تفتح الأبواب.',
+            },
+          },
+          {
+            scene: 'coach' as const,
+            title: { en: 'Go deeper with a human expert', ar: 'تعمّق مع خبير بشري' },
+            desc: {
+              en: 'Optional: book a live interviewer by the hour when you want coaching beyond AI practice.',
+              ar: 'اختياري: احجز محاوراً مباشراً بالساعة حين تريد تدريباً أعمق من الذكاء الاصطناعي.',
+            },
+          },
+        ],
       },
       {
-        title: { en: 'Answer in real time', ar: 'أجب لحظياً' },
-        desc: {
-          en: 'Timed questions that feel like the real room — not a quiz.',
-          ar: 'أسئلة موقوتة بإحساس المقابلة الحقيقية — لا اختباراً مدرسياً.',
-        },
-      },
-      {
-        title: { en: 'Instant AI scoring', ar: 'تقييم فوري بالذكاء' },
-        desc: {
-          en: 'Content, structure, and confidence — scored after every answer.',
-          ar: 'المحتوى والبنية والثقة — تُقيَّم بعد كل إجابة.',
-        },
-      },
-      {
-        title: { en: 'Unlock your report', ar: 'افتح تقريرك' },
-        desc: {
-          en: 'Clear strengths, gaps, and the next moves that raise your score.',
-          ar: 'نقاط قوة وفجوات وخطوات ترفع نتيجتك بوضوح.',
-        },
-      },
-      {
-        title: { en: 'Earn your passport', ar: 'احصل على جوازك' },
-        desc: {
-          en: 'A verified Muqabaleh score employers can trust and share.',
-          ar: 'نتيجة مقابلة موثّقة يثق بها أصحاب العمل ويمكن مشاركتها.',
-        },
+        label: { en: 'Act II · Get hired', ar: 'الفصل ٢ · احصل على الوظيفة' },
+        beats: [
+          {
+            scene: 'jobs' as const,
+            title: { en: 'Browse the Job Portal', ar: 'تصفّح بوابة الوظائف' },
+            desc: {
+              en: 'Explore real openings matched to your path — not a dead CV inbox.',
+              ar: 'استكشف شواغر حقيقية تناسب مسارك — لا صندوق سيرة ميتاً.',
+            },
+          },
+          {
+            scene: 'apply' as const,
+            title: { en: 'Apply with proof', ar: 'قدّم ومعك الدليل' },
+            desc: {
+              en: 'Send applications backed by your Muqabaleh score and certificates. Track every stage in one place.',
+              ar: 'أرسل طلباتك مدعومة بنتيجة مقابلة وشهاداتك. تابع كل مرحلة من مكان واحد.',
+            },
+          },
+        ],
       },
     ],
   },

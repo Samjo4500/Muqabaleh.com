@@ -3,6 +3,6 @@
 import { C } from '@/components/landing/crystal/copy';
 import { FeatureParked } from './FeatureParked';
 
-export function PortalParked() {
-  return <FeatureParked copy={C.portalParked} />;
+export function HumansParked() {
+  return <FeatureParked copy={C.humansParked} />;
 }

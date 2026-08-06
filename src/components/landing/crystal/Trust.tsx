@@ -8,27 +8,9 @@ import { fadeUp } from './motion';
 const LOGOS = ['NEOM', 'STC', 'Aramco', 'Careem', 'Tabby', 'Anghami'];
 
 export function CrystalTrust() {
-  const stats = [C.hero.statInterviews, C.hero.statPartners, C.hero.statSuccess];
-
   return (
     <section className="mq-section !py-12 md:!py-16">
       <div className="mq-wrap">
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-60px' }}
-          className="mb-10 grid gap-6 border-b border-white/10 pb-10 sm:grid-cols-3"
-        >
-          {stats.map((stat) => (
-            <T
-              key={stat.en}
-              bi={stat}
-              className="mq-display text-xl font-bold text-white md:text-2xl"
-            />
-          ))}
-        </motion.div>
-
         <motion.div
           variants={fadeUp}
           initial="hidden"

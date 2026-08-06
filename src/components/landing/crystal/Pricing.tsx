@@ -134,7 +134,7 @@ export function CrystalPricing() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+          className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2"
         >
           {C.pricing.plans.map((plan, index) => {
             return (
@@ -145,7 +145,7 @@ export function CrystalPricing() {
               transition={{ type: 'spring', stiffness: 260, damping: 22 }}
               className={`mq-panel group relative flex flex-col overflow-hidden p-6 ${PLAN_FACETS[index]} ${
                 plan.popular
-                  ? 'ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] xl:-translate-y-2'
+                  ? 'ring-1 ring-teal-300/30 shadow-[0_0_40px_rgba(45,212,191,0.12)] md:-translate-y-2'
                   : ''
               }`}
             >
@@ -232,6 +232,19 @@ export function CrystalPricing() {
             </motion.article>
           );
           })}
+        </motion.div>
+
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="mx-auto mt-10 max-w-3xl text-center"
+        >
+          <T as="p" bi={C.pricing.companyNote} className="mb-4 text-sm text-white/55 md:text-base" />
+          <Link href={localePath('/request-demo', locale)} className="mq-btn mq-btn-ghost inline-flex text-sm">
+            <BiInline bi={C.pricing.companyCta} />
+          </Link>
         </motion.div>
       </div>
     </section>

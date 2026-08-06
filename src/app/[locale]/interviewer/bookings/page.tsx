@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GlowCard } from '@/components/brand';
 import { toast } from 'sonner';
+import { localePath } from '@/i18n/navigation';
 
 interface Booking {
   id: string;
@@ -30,6 +31,7 @@ interface Booking {
 
 function InterviewerJoinCall({ bookingId, scheduledAt }: { bookingId: string; scheduledAt: string }) {
   const tc = useTranslations('call');
+  const locale = useLocale();
   const router = useRouter();
   const [now, setNow] = useState(Date.now());
 
@@ -59,7 +61,7 @@ function InterviewerJoinCall({ bookingId, scheduledAt }: { bookingId: string; sc
     <Button
       size="sm"
       disabled={!isJoinable}
-      onClick={() => router.push(`/call/${bookingId}`)}
+      onClick={() => router.push(localePath(`/call/${bookingId}`, locale))}
       className={
         isJoinable
           ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
@@ -80,6 +82,7 @@ interface BookingCardProps {
 function BookingCard({ booking, onUpdate }: BookingCardProps) {
   const t = useTranslations('interviewerPanel');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const [actionLoading, setActionLoading] = useState(false);
 
   const isUpcoming = booking.status === 'PENDING' || booking.status === 'CONFIRMED';
@@ -197,7 +200,7 @@ function BookingCard({ booking, onUpdate }: BookingCardProps) {
 
         {/* Evaluate link */}
         <Link
-          href={`/interviewer/bookings/${booking.id}/evaluate`}
+          href={localePath(`/interviewer/bookings/${booking.id}/evaluate`, locale)}
           className="inline-flex items-center gap-1.5 text-sm text-teal-300 transition-colors hover:text-teal-300/80"
         >
           <ExternalLink size={14} strokeWidth={1.75} />

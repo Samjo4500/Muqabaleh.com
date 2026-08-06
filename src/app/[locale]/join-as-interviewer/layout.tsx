@@ -8,10 +8,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/join-as-interviewer',
-    titleAr: 'انضم كمحاور — مقابلة',
-    titleEn: 'Join as Interviewer — Muqabaleh',
-    descAr: 'قدّم للانضمام كمحاور خبير على منصة مقابلة واكسب من جلسات التدريب.',
-    descEn: 'Apply to join Muqabaleh as an expert interviewer and earn from coaching sessions.',
+    titleAr: 'الانضمام كمحاور لاحقاً — مقابلة',
+    titleEn: 'Join as interviewer later — Muqabaleh',
+    descAr: 'التقديم كمحاور بشري متوقف مؤقتاً بينما نركّز على الجوازات وجيني.',
+    descEn: 'Interviewer applications are paused while we focus on passports and Jeannie.',
   });
 }
 

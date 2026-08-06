@@ -194,7 +194,7 @@ export function CrystalServices() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid gap-5 md:grid-cols-2"
+          className="grid gap-5 md:grid-cols-3"
         >
           {C.services.cards.map((card, i) => {
             return (

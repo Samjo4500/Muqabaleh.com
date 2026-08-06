@@ -1,26 +1,24 @@
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
-import { InterviewersBoardClient } from './interviewers-board-client';
+import { pageMetadata } from '@/lib/seo';
+import { HumansParked } from '@/components/portal/HumansParked';
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
+type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const isAr = locale === 'ar';
-  return {
-    title: {
-      absolute: isAr ? 'المحاورون — مقابلة | Muqabaleh' : 'Interviewers — Muqabaleh',
-    },
-    description: isAr
-      ? 'احجز جلسة مع محاور بشري معتمد من مجال تخصصك — عربية وإنجليزية، حجز بالساعة.'
-      : 'Book a live session with a certified human interviewer from your field — Arabic & English, hourly booking.',
-  };
+  return pageMetadata({
+    locale,
+    path: '/interviewers',
+    titleAr: 'المحاورون البشريون لاحقاً — مقابلة',
+    titleEn: 'Human interviewers later — Muqabaleh',
+    descAr: 'المقابلات البشرية متوقفة مؤقتاً. ابدأ بمقابلة ذكية وجواز موثّق مع جيني.',
+    descEn: 'Human interviews are paused for now. Start with AI interview, a verified passport, and Jeannie.',
+  });
 }
 
 export default async function InterviewersPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <InterviewersBoardClient />;
+  return <HumansParked />;
 }

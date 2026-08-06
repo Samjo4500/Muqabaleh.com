@@ -19,6 +19,10 @@ const CrystalHowItWorks = dynamic(
   () => import('./HowItWorks').then((m) => m.CrystalHowItWorks),
   { ssr: true },
 );
+const CrystalJeannie = dynamic(
+  () => import('./Jeannie').then((m) => m.CrystalJeannie),
+  { ssr: true },
+);
 const CrystalForCompanies = dynamic(
   () => import('./ForCompanies').then((m) => m.CrystalForCompanies),
   { ssr: true },
@@ -90,6 +94,7 @@ export function CrystalLanding() {
         <CrystalTrust />
         <CrystalServices />
         <CrystalHowItWorks />
+        <CrystalJeannie />
         <CrystalForCompanies />
         <CrystalPricing />
         <CrystalTestimonials />

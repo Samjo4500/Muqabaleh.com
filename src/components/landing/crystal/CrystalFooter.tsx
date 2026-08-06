@@ -21,14 +21,13 @@ export function CrystalFooter() {
 
   const col = {
     services: [
-      { bi: C.nav.services, href: '/#services' },
       { bi: C.nav.howItWorks, href: '/#how-it-works' },
+      { bi: C.nav.jeannie, href: '/#jeannie' },
       { bi: C.nav.pricing, href: '/#pricing' },
     ],
     company: [
       { bi: C.footer.about, href: '/about' },
       { bi: C.nav.forCompanies, href: '/business' },
-      { bi: C.footer.becomeInterviewer, href: '/join-as-interviewer' },
       { bi: C.nav.partners, href: '/partners' },
       { bi: C.nav.blog, href: '/blog' },
       { bi: C.footer.support, href: '/support' },

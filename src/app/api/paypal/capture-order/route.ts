@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { PaymentStatus, PaymentType, UserTier } from '@/lib/enums';
+import { PaymentStatus, PaymentType } from '@/lib/enums';
 import {
   findPlanByAmount,
   getPayPalAccessToken,
   getPayPalApiBase,
   refundPayPalCapture,
+  creditPlanPurchase,
 } from '@/lib/paypal';
 
 type CaptureUnit = {
@@ -20,12 +21,6 @@ type CaptureUnit = {
     }>;
   };
 };
-
-function asUserTier(value: string): UserTier | null {
-  return (Object.values(UserTier) as string[]).includes(value)
-    ? (value as UserTier)
-    : null;
-}
 
 /**
  * POST /api/paypal/capture-order
@@ -129,7 +124,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [, config] = matched;
+    const [planCode, config] = matched;
 
     try {
       // Record the payment in the database
@@ -139,7 +134,7 @@ export async function POST(req: NextRequest) {
           type: PaymentType.AI_PACKAGE,
           amount: Number.parseFloat(config.amount),
           currency: 'USD',
-          packageType: config.tier,
+          packageType: planCode,
           paypalOrderId: orderId,
           status: PaymentStatus.COMPLETED,
           sessionsCredited: config.sessions,
@@ -148,28 +143,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Upgrade user tier / credit sessions for AI packages
-      if (config.sessions > 0) {
-        const tier = asUserTier(config.tier);
-        const updateData: {
-          sessionsLeft: number | { increment: number };
-          tier?: UserTier;
-        } = {
-          sessionsLeft:
-            tier === UserTier.UNLIMITED
-              ? 999
-              : { increment: config.sessions },
-        };
-
-        // Only set user.tier when config.tier is a UserTier (not STANDARD_HUMAN/PRO_HUMAN)
-        if (tier) {
-          updateData.tier = tier;
-        }
-
-        await db.user.update({
-          where: { id: userId },
-          data: updateData,
-        });
+      // Upgrade entitlements (sessions + Jeannie apply quota + Pro tools)
+      if (config.sessions > 0 || config.applies > 0) {
+        await creditPlanPurchase(userId, planCode);
       }
     } catch (dbErr) {
       console.error('Post-capture DB error — initiating refund:', dbErr);

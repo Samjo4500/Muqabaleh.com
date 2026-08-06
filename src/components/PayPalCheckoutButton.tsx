@@ -6,17 +6,24 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, CheckCircle2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export type PlanType = 'pro' | 'unlimited';
+export type PlanType = 'pro' | 'unlimited' | 'jeannie' | 'jeannie_pro';
 
 interface PayPalCheckoutButtonProps {
   plan: PlanType;
   className?: string;
 }
 
+const PLAN_CODE: Record<PlanType, string> = {
+  pro: 'PRO',
+  unlimited: 'UNLIMITED',
+  jeannie: 'JEANNIE',
+  jeannie_pro: 'JEANNIE_PRO',
+};
+
 /**
  * Unified PayPal checkout button.
- * - plan='pro'        → one-time $9.99 via PayPal Orders API
- * - plan='unlimited'  → recurring $29.99/mo via PayPal Subscriptions API
+ * Jeannie / Jeannie Pro / Pro → one-time Orders API
+ * Unlimited (legacy) → Subscriptions API when configured
  */
 export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutButtonProps) {
   const { data: session, status } = useSession();
@@ -28,9 +35,21 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
   const [error, setError] = useState('');
 
   const userTier = (session?.user as Record<string, unknown> | undefined)?.tier as string | undefined;
-  const isCurrentPlan = (plan === 'pro' && userTier === 'PRO') || (plan === 'unlimited' && userTier === 'UNLIMITED');
+  const isCurrentPlan =
+    (plan === 'jeannie' && userTier === 'JEANNIE') ||
+    (plan === 'jeannie_pro' && userTier === 'JEANNIE_PRO') ||
+    (plan === 'pro' && userTier === 'PRO') ||
+    (plan === 'unlimited' && userTier === 'UNLIMITED');
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  // Prefer PayPal Subscriptions for Jeannie when plan IDs are configured;
+  // otherwise fall back to one-time Orders (still grants a 1-month period).
+  const jeannieSubConfigured =
+    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === '1' ||
+    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === 'true';
+  const isSubscription =
+    plan === 'unlimited' ||
+    ((plan === 'jeannie' || plan === 'jeannie_pro') && jeannieSubConfigured);
 
   useEffect(() => {
     if (!paypalClientId || !session || isCurrentPlan) {
@@ -42,8 +61,6 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     const initPayPal = async () => {
       try {
         const { loadScript } = await import('@paypal/paypal-js');
-
-        const isSubscription = plan === 'unlimited';
 
         const paypal = await loadScript({
           clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
@@ -58,11 +75,11 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
         const callbacks: Record<string, (...args: any[]) => Promise<void> | Promise<string>> = {};
 
         if (isSubscription) {
-          // ── UNLIMITED: Subscription flow ──
           callbacks.createSubscription = async () => {
             const res = await fetch('/api/paypal/create-subscription', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ plan: PLAN_CODE[plan] }),
             });
             const data = (await res.json()) as {
               subscriptionId?: string;
@@ -94,12 +111,11 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
             }
           };
         } else {
-          // ── PRO: One-time order flow ──
           callbacks.createOrder = async () => {
             const res = await fetch('/api/paypal/create-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ plan: 'pro' }),
+              body: JSON.stringify({ plan: PLAN_CODE[plan] }),
             });
             const data = (await res.json()) as {
               orderId?: string;
@@ -148,7 +164,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
           },
           ...callbacks,
         } as any).render(containerRef.current);
-      } catch (err) {
+      } catch {
         if (mounted) setError(t('loadError'));
       } finally {
         if (mounted) setLoading(false);
@@ -156,26 +172,24 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     };
 
     initPayPal();
-    return () => { mounted = false; };
-  }, [session, isCurrentPlan, locale, t, plan, paypalClientId]);
+    return () => {
+      mounted = false;
+    };
+  }, [session, isCurrentPlan, locale, t, plan, paypalClientId, isSubscription]);
 
-  // --- PayPal not configured ---
   if (!paypalClientId) {
     return (
       <div className={className}>
         <div className="flex flex-col items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-5 py-6">
           <Crown size={28} className="text-[var(--text-faint)]" />
           <p className="text-center text-sm text-[var(--text-muted)]">
-            {locale === 'ar'
-              ? 'الدفع غير متاح حالياً'
-              : 'Payment unavailable at this time'}
+            {locale === 'ar' ? 'الدفع غير متاح حالياً' : 'Payment unavailable at this time'}
           </p>
         </div>
       </div>
     );
   }
 
-  // --- Already on this plan ---
   if (isCurrentPlan) {
     return (
       <div className={`flex items-center gap-3 rounded-xl border border-emerald/20 bg-emerald/5 px-5 py-4 ${className}`}>
@@ -188,7 +202,6 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     );
   }
 
-  // --- Not logged in ---
   if (status !== 'authenticated') {
     return (
       <div className={className}>
@@ -204,7 +217,6 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     );
   }
 
-  // --- Processing ---
   if (processing) {
     return (
       <div className={`flex items-center justify-center gap-3 py-6 ${className}`}>
@@ -214,25 +226,29 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     );
   }
 
-  // --- Error ---
   if (error) {
     return (
       <div className={className}>
         <p className="mb-3 text-center text-sm text-red-400">{error}</p>
-        <Button
-          className="btn-gold w-full cursor-pointer"
-          onClick={() => window.location.reload()}
-        >
+        <Button className="btn-gold w-full cursor-pointer" onClick={() => window.location.reload()}>
           {t('retry')}
         </Button>
       </div>
     );
   }
 
-  // --- PayPal button container ---
-  const priceNote = plan === 'unlimited'
-    ? t('priceNoteUnlimited')
-    : t('priceNotePro');
+  const priceNote =
+    plan === 'jeannie_pro'
+      ? locale === 'ar'
+        ? '٣٩ دولار — جيني برو'
+        : '$39 — Jeannie Pro'
+      : plan === 'jeannie'
+        ? locale === 'ar'
+          ? '١٩ دولار — جيني'
+          : '$19 — Jeannie'
+        : plan === 'unlimited'
+          ? t('priceNoteUnlimited')
+          : t('priceNotePro');
 
   return (
     <div className={className}>
@@ -242,13 +258,8 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
           {t('loadingGateway')}
         </div>
       )}
-      <div
-        ref={containerRef}
-        className={loading ? 'invisible' : ''}
-      />
-      <p className="mt-3 text-center text-xs text-[var(--text-faint)]">
-        {priceNote}
-      </p>
+      <div ref={containerRef} className={loading ? 'invisible' : ''} />
+      <p className="mt-3 text-center text-xs text-[var(--text-faint)]">{priceNote}</p>
     </div>
   );
 }

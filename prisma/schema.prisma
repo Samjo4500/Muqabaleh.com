@@ -29,6 +29,21 @@ enum UserTier {
   PRO
   PREMIUM
   UNLIMITED
+  JEANNIE
+  JEANNIE_PRO
+}
+
+enum JeannieOpportunityStatus {
+  SUGGESTED
+  AWAITING_APPROVAL
+  APPROVED
+  APPLYING
+  /// External / partner shortlist prepared but not submitted to a live board.
+  PACKET_READY
+  APPLIED
+  REJECTED_BY_USER
+  EXPIRED
+  FAILED
 }
 
 enum BookingStatus {
@@ -110,6 +125,14 @@ model User {
   partner               Partner?  @relation(fields: [partnerId], references: [id])
   sessionsLeft          Int       @default(1)
   tier                  UserTier  @default(FREE)
+  /// Monthly Jeannie approve-gated apply quota remaining.
+  appliesLeft           Int       @default(0)
+  /// When the monthly apply quota resets.
+  appliesResetAt        DateTime?
+  /// Jeannie Pro: CV studio / improve tools.
+  cvStudioEnabled       Boolean   @default(false)
+  /// Jeannie Pro: cover letter generate + assist.
+  coverLetterAiEnabled  Boolean   @default(false)
   subscriptionExpiresAt DateTime?
   isActive              Boolean   @default(true)
   passwordResetToken    String?
@@ -140,6 +163,9 @@ model User {
   interviewSessions      InterviewSession[]
   jobApplications        JobApplication[]
   mediaAssets            MediaAsset[]
+  jeannieProfile         JeannieProfile?
+  jeannieOpportunities   JeannieOpportunity[]
+  jeannieDocuments       JeannieDocument[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -383,6 +409,73 @@ model JobApplication {
   @@index([jobId, stage])
   @@index([candidateId])
   @@index([stage])
+}
+
+// ─── Jeannie career agent ───
+model JeannieProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRoles     String[] @default([])
+  targetCities    String[] @default([])
+  targetCountries String[] @default([])
+  seniority       String?
+  languages       String[] @default([])
+  minSalary       Int?
+  workModes       String[] @default([])
+  notes           String?  @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model JeannieOpportunity {
+  id               String                   @id @default(cuid())
+  userId           String
+  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           JeannieOpportunityStatus @default(SUGGESTED)
+  b2bJobId         String?
+  externalUrl      String?
+  companyName      String
+  title            String
+  titleAr          String?
+  city             String?
+  country          String?
+  matchScore       Int                      @default(0)
+  matchReason      String?                  @db.Text
+  matchReasonAr    String?                  @db.Text
+  coverLetter             String?                  @db.Text
+  cvAssetId               String?
+  jobApplicationId        String?
+  /// Snapshot of Muqabaleh passport verification id at apply/packet time.
+  passportVerificationId  String?
+  failureReason           String?
+  approvedAt              DateTime?
+  appliedAt               DateTime?
+  rejectedAt              DateTime?
+  expiresAt               DateTime?
+  idempotencyKey          String?                  @unique
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([b2bJobId])
+}
+
+model JeannieDocument {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  content   String   @db.Text
+  contentAr String?  @db.Text
+  meta      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, kind])
 }
 
 // ─── AuditLog ───
@@ -1059,6 +1152,8 @@ model InterviewSession {
   numQuestionsTotal    Int
   numQuestionsAnswered Int                 @default(0)
   currentQuestionIndex Int                 @default(0)
+  /// Practice entitlement was consumed when this session started.
+  practiceDebited      Boolean             @default(false)
   startedAt            DateTime?
   completedAt          DateTime?
   totalDurationSeconds Int?

@@ -19,6 +19,7 @@ import {
   Sparkles,
   Bell,
   BadgeCheck,
+  Bot,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { BackButton } from '@/components/navigation';
@@ -31,6 +32,7 @@ const navItems = [
   { key: 'interviews', icon: MessageSquare, href: '/app/interviews' },
   { key: 'practice', icon: Sparkles, href: '/interview/prequal' },
   { key: 'applications', icon: ClipboardList, href: '/app/applications' },
+  { key: 'jeannie', icon: Bot, href: '/app/jeannie' },
   { key: 'notifications', icon: Bell, href: '/app/notifications' },
   { key: 'packages', icon: Package, href: '/app/packages' },
   { key: 'payments', icon: CreditCard, href: '/app/payments' },

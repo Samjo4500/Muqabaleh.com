@@ -103,14 +103,63 @@ export async function syncSessionToPassportInterview(
     expiresAt,
   };
 
+  let interviewId: string;
   if (existing) {
     await db.interview.update({
       where: { id: existing.id },
       data: payload,
     });
-    return { interviewId: existing.id, verificationId };
+    interviewId = existing.id;
+  } else {
+    const created = await db.interview.create({ data: payload });
+    interviewId = created.id;
   }
 
-  const created = await db.interview.create({ data: payload });
-  return { interviewId: created.id, verificationId };
+  // Keep CandidatePool passport signal fresh for Jeannie matching
+  try {
+    const completed = await db.interview.count({
+      where: {
+        userId: input.userId,
+        status: 'COMPLETED',
+        overallScore: { not: null },
+      },
+    });
+    const avg = await db.interview.aggregate({
+      where: {
+        userId: input.userId,
+        status: 'COMPLETED',
+        overallScore: { not: null },
+      },
+      _avg: { overallScore: true },
+    });
+
+    await db.candidatePool.upsert({
+      where: { userId: input.userId },
+      create: {
+        userId: input.userId,
+        role: input.targetRole?.trim() || 'Professional',
+        level: mapExperience(input.seniorityLevel) || 'MID',
+        industry: input.targetIndustry?.trim() || null,
+        desiredRole: input.targetRole?.trim() || null,
+        muqabalehScore: overall,
+        averageScore: avg._avg.overallScore ?? overall,
+        interviewCount: completed,
+      },
+      update: {
+        muqabalehScore: overall,
+        averageScore: avg._avg.overallScore ?? overall,
+        interviewCount: completed,
+        ...(input.targetRole?.trim()
+          ? { desiredRole: input.targetRole.trim(), role: input.targetRole.trim() }
+          : {}),
+        ...(input.targetIndustry?.trim()
+          ? { industry: input.targetIndustry.trim() }
+          : {}),
+      },
+    });
+  } catch (err) {
+    console.error('[syncSessionToPassportInterview] candidate pool sync failed', err);
+  }
+
+  return { interviewId, verificationId };
 }

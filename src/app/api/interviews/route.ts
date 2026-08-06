@@ -31,20 +31,23 @@ export async function POST(req: NextRequest) {
 
     const { industry, experience, type, interviewerGender, language } = parsed.data;
 
-    // Check sessions left — PRO and UNLIMITED users have access
+    // Check sessions left — Jeannie / Pro / Unlimited have practice access
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
       return NextResponse.json({ error: { ar: 'المستخدم غير موجود', en: 'User not found' } }, { status: 404 });
     }
 
     const hasAccess =
-      user.tier === UserTier.PRO || user.tier === UserTier.UNLIMITED;
+      user.tier === UserTier.PRO ||
+      user.tier === UserTier.UNLIMITED ||
+      user.tier === UserTier.JEANNIE ||
+      user.tier === UserTier.JEANNIE_PRO;
     if (!hasAccess && user.sessionsLeft < 1) {
       return NextResponse.json(
         {
           error: {
-            ar: 'لقد استخدمت مقابلتك المجانية. اشترك في خطة Pro أو Unlimited.',
-            en: "You've used your free interview. Subscribe to Pro or Unlimited plan.",
+            ar: 'لقد استخدمت مقابلتك المجانية. فعّل جيني لمواصلة التدريب والجواز.',
+            en: "You've used your free interview. Unlock Jeannie to keep practicing for your passport.",
           },
           code: 'FREE_LIMIT_REACHED',
         },

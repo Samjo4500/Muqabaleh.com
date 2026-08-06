@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { UserTier } from '@/lib/enums';
 import {
   getAllowedPayPalPlanIds,
   getPayPalAccessToken,
   getPayPalSubscription,
+  planKeyForPayPalPlanId,
 } from '@/lib/paypal';
+import { grantPlan } from '@/lib/plans/entitlements';
 import { triggerPaymentReceiptEmail } from '@/lib/email-triggers';
 
 export async function POST(req: NextRequest) {
@@ -100,17 +101,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Upgrade user to UNLIMITED
-    await db.user.update({
-      where: { id: userId },
-      data: {
-        tier: UserTier.UNLIMITED,
-        sessionsLeft: 999,
-      },
-    });
+    const planKey = planKeyForPayPalPlanId(planId);
+    await grantPlan({ userId, planKey, sessions: 999 });
 
     // Send payment receipt email (fire and forget)
-    const planName = planId.includes('PRO') ? 'Pro' : 'Premium';
+    const planName =
+      planKey === 'JEANNIE'
+        ? 'Jeannie'
+        : planKey === 'JEANNIE_PRO'
+          ? 'Jeannie Pro'
+          : planKey === 'PRO'
+            ? 'Pro'
+            : 'Premium';
     triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(
       () => {},
     );

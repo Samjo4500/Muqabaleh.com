@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
+import {
+  getAllowedPayPalPlanIds,
+  getPayPalAccessToken,
+  getPayPalApiBase,
+  paypalPlanIdForCatalogPlan,
+} from '@/lib/paypal';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = (session.user as Record<string, unknown>).id as string;
+    const body = (await req.json().catch(() => ({}))) as { plan?: string };
+    const catalogPlan = String(body.plan || 'JEANNIE').toUpperCase();
+
     const planId =
+      paypalPlanIdForCatalogPlan(catalogPlan) ||
       process.env.PAYPAL_PLAN_ID ||
       process.env.PAYPAL_PLAN_ID_UNLIMITED ||
       process.env.PAYPAL_PLAN_ID_PRO;
@@ -26,8 +32,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const accessToken = await getPayPalAccessToken();
+    const allowed = getAllowedPayPalPlanIds();
+    if (allowed.length > 0 && !allowed.includes(planId)) {
+      return NextResponse.json(
+        { error: 'PayPal plan not allowed' },
+        { status: 400 },
+      );
+    }
 
+    const accessToken = await getPayPalAccessToken();
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
     const subRes = await fetch(
@@ -37,16 +50,16 @@ export async function POST(req: NextRequest) {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'PayPal-Request-Id': `${userId}-${Date.now()}`,
+          'PayPal-Request-Id': `${userId}-${catalogPlan}-${Date.now()}`,
         },
         body: JSON.stringify({
           plan_id: planId,
-          // Bind subscription to our user so /activate can verify ownership
           custom_id: userId,
           subscriber: {
             name: {
               given_name: session.user.name?.split(' ')[0] || 'Muqabaleh',
-              surname: session.user.name?.split(' ').slice(1).join(' ') || 'User',
+              surname:
+                session.user.name?.split(' ').slice(1).join(' ') || 'User',
             },
             email_address: session.user.email,
           },
@@ -85,6 +98,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       subscriptionId: subData.id,
       approveLink,
+      plan: catalogPlan,
     });
   } catch (err) {
     console.error('PayPal create subscription error:', err);

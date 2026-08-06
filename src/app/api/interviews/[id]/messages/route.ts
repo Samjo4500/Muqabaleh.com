@@ -119,7 +119,19 @@ async function evaluateAndSave(interviewId: string, language: 'AR' | 'EN', userI
 
     // Save evaluation results + debit session (atomic transaction)
     await db.$transaction(async (tx) => {
-      // Update interview with scores
+      const interview = await tx.interview.findUnique({
+        where: { id: interviewId },
+        select: { userId: true, sessionDebited: true },
+      });
+
+      // Debit before flipping the flag (previous order made debit unreachable)
+      if (interview?.userId && !interview.sessionDebited) {
+        await tx.user.updateMany({
+          where: { id: interview.userId, sessionsLeft: { gt: 0 } },
+          data: { sessionsLeft: { decrement: 1 } },
+        });
+      }
+
       await tx.interview.update({
         where: { id: interviewId },
         data: {
@@ -137,15 +149,6 @@ async function evaluateAndSave(interviewId: string, language: 'AR' | 'EN', userI
           sessionDebited: true,
         },
       });
-
-      // Debit session only if not already debited
-      const interview = await tx.interview.findUnique({ where: { id: interviewId } });
-      if (interview?.userId && !interview.sessionDebited) {
-        await tx.user.update({
-          where: { id: interview.userId },
-          data: { sessionsLeft: { decrement: 1 } },
-        });
-      }
     });
 
   } catch (err) {

@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { db } from '@/lib/db';
 import { evaluateAnswer } from '@/lib/ai/interviewer';
 import { generateFinalReport } from '@/lib/ai/report-generator';
+import { debitPractice } from '@/lib/plans/entitlements';
 import type { InterviewPlan, PlanQuestion } from './plan-generator';
 import { memoryStore } from './memory-store';
 import { syncSessionToPassportInterview } from './sync-passport-interview';
@@ -42,15 +43,39 @@ export async function startSession(sessionId: string, userId: string) {
   if (!bundle?.plan) throw new Error('Session not found');
 
   if (bundle.source === 'db') {
+    const alreadyDebited = Boolean(
+      (bundle.session as { practiceDebited?: boolean }).practiceDebited,
+    );
+    const practice = await debitPractice(userId, { alreadyDebited });
+    if (!practice.ok) {
+      const err = new Error(practice.error);
+      (err as Error & { status?: number }).status = practice.status;
+      throw err;
+    }
+
     const updated = await db.interviewSession.update({
       where: { id: sessionId },
       data: {
         status: 'active',
         startedAt: bundle.session.startedAt ?? new Date(),
+        practiceDebited: alreadyDebited || practice.debited || practice.unlimited,
       },
     });
     const first = bundle.plan.questions[0];
-    return { session: updated, firstQuestion: first, plan: bundle.plan };
+    return {
+      session: updated,
+      firstQuestion: first,
+      plan: bundle.plan,
+      sessionsLeft: practice.sessionsLeft,
+    };
+  }
+
+  // Memory fallback: still enforce practice entitlement (no passport sync later)
+  const practice = await debitPractice(userId);
+  if (!practice.ok) {
+    const err = new Error(practice.error);
+    (err as Error & { status?: number }).status = practice.status;
+    throw err;
   }
 
   const mem = bundle.session;
@@ -62,6 +87,7 @@ export async function startSession(sessionId: string, userId: string) {
     session: mem,
     firstQuestion: bundle.plan.questions[0],
     plan: bundle.plan,
+    sessionsLeft: practice.sessionsLeft,
   };
 }
 

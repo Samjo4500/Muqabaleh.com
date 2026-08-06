@@ -2032,7 +2032,7 @@
     "loadError": "Could not load PayPal. Check your connection.",
     "activating": "Activating your subscription…",
     "retry": "Try Again",
-    "priceNote": "$19 / month — cancel anytime",
+    "priceNote": "Custom pricing — request a demo or get a quote",
     "premiumActive": "Premium Active",
     "premiumDesc": "You have unlimited interview sessions.",
     "signInToSubscribe": "Sign In to Subscribe",

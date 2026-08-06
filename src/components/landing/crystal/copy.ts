@@ -480,8 +480,8 @@ export const C = {
           ar: 'ما الفرق بين جيني وجيني برو؟',
         },
         a: {
-          en: 'Jeannie ($19) includes 10 approve-gated applies/month with CV and cover letter upload. Jeannie Pro ($39) raises that to 20/month and adds full CV studio plus cover letter generate/assist and richer tracking.',
-          ar: 'جيني (١٩$) تشمل ١٠ تقديمات بموافقتك شهرياً مع رفع السيرة وخطاب التقديم. جيني برو (٣٩$) ترفعها إلى ٢٠/شهر وتضيف استوديو سيرة كاملاً وتوليد/مساعدة خطاب التقديم وتتبعاً أغنى.',
+          en: 'Jeannie includes approve-gated applies each month with CV and cover letter upload. Jeannie Pro adds more monthly applies, full CV studio, cover letter generate/assist, and richer tracking. Pricing is on request — request a demo or get a quote.',
+          ar: 'جيني تشمل تقديمات بموافقتك شهرياً مع رفع السيرة وخطاب التقديم. جيني برو تضيف تقديمات أكثر واستوديو سيرة وتوليد/مساعدة الخطاب وتتبعاً أغنى. الأسعار عند الطلب — اطلب عرضاً أو احصل على عرض سعر.',
         },
       },
       {
@@ -490,8 +490,8 @@ export const C = {
           ar: 'هل يمكنني التدرّب بالعربية أو الإنجليزية؟',
         },
         a: {
-          en: 'Both. Choose your language per session — the platform is fully bilingual.',
-          ar: 'كلاهما. اختر لغة كل جلسة — المنصة ثنائية اللغة بالكامل.',
+          en: 'Both. Jeannie interviews you in Arabic or English — choose per session.',
+          ar: 'كلاهما. جيني تُجري مقابلتك بالعربية أو الإنجليزية — اختر لغة كل جلسة.',
         },
       },
       {
@@ -500,8 +500,8 @@ export const C = {
           ar: 'هل توجد تجربة مجانية؟',
         },
         a: {
-          en: 'Yes. Start with a free AI interview and passport preview, then subscribe when you want Jeannie applying for you.',
-          ar: 'نعم. ابدأ بمقابلة ذكاء اصطناعي مجانية ومعاينة الجواز، ثم اشترك عندما تريد جيني تقدّم عنك.',
+          en: 'Yes. Start with a free practice interview and passport preview, then request a demo or get a quote when you want Jeannie applying for you.',
+          ar: 'نعم. ابدأ بمقابلة تدريب مجانية ومعاينة الجواز، ثم اطلب عرضاً أو عرض سعر عندما تريد جيني تقدّم عنك.',
         },
       },
       {

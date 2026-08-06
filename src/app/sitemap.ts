@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
   '/interviewers',
   '/blog',
   '/partners',
+  '/verify',
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

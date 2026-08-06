@@ -1677,7 +1677,9 @@
     "404Alt": "Or start practicing your first interview for free",
     "500Title": "Unexpected Error",
     "500Sub": "We apologize for this error. Our team is working on fixing it.",
-    "500Cta": "Back to Home"
+    "500Cta": "Back to Home",
+    "forbiddenMessage": "You do not have permission to access this page.",
+    "goHome": "Back to Home"
   },
   "brand": {
     "live": "Live",

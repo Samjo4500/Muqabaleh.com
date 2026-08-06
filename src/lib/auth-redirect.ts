@@ -49,6 +49,29 @@ export function defaultHomeForRole(role: string | undefined | null): string {
   }
 }
 
+/** Role allow-lists mirrored from middleware (edge-safe strings). */
+const CALLBACK_ROUTE_ROLES: Array<{ prefix: string; roles: string[] }> = [
+  { prefix: '/app', roles: ['USER', 'SUPER_ADMIN'] },
+  { prefix: '/interviewer', roles: ['INTERVIEWER', 'SUPER_ADMIN'] },
+  { prefix: '/partner', roles: ['PARTNER_ADMIN', 'PARTNER_MEMBER', 'SUPER_ADMIN'] },
+  { prefix: '/admin', roles: ['SUPER_ADMIN'] },
+];
+
+function roleCanAccessPath(role: string | undefined | null, path: string): boolean {
+  const bare = barePath(path).split('?')[0] || '/';
+  // Public interviewer apply/login
+  if (bare === '/interviewer/apply' || bare.startsWith('/interviewer/apply/')) return true;
+  if (bare === '/interviewer/login' || bare.startsWith('/interviewer/login/')) return true;
+  if (bare === '/partners' || bare.startsWith('/partners/')) return true;
+
+  for (const rule of CALLBACK_ROUTE_ROLES) {
+    if (bare === rule.prefix || bare.startsWith(`${rule.prefix}/`)) {
+      return Boolean(role && rule.roles.includes(role));
+    }
+  }
+  return true;
+}
+
 /**
  * Resolve post-login destination: prefer safe callbackUrl, else role home.
  * Always returns a locale-prefixed path (ar unprefixed).
@@ -59,7 +82,7 @@ export function resolvePostAuthPath(opts: {
   callbackUrl?: string | null;
 }): string {
   const safe = sanitizeCallbackUrl(opts.callbackUrl);
-  if (safe) {
+  if (safe && roleCanAccessPath(opts.role, safe)) {
     return localePath(barePath(safe), opts.locale);
   }
   return localePath(defaultHomeForRole(opts.role), opts.locale);

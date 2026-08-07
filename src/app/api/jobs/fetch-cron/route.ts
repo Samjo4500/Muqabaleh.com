@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
   const authError = requireCronSecret(req);
   if (authError) return authError;
   try {
-    const summary = await runAtsFetchTick({ limit: 2 });
+    // Rotate through more boards per tick so new employers appear faster
+    const summary = await runAtsFetchTick({ limit: 4 });
     return NextResponse.json({ ok: true, ...summary });
   } catch (err) {
     console.error('GET /api/jobs/fetch-cron', err);

@@ -4,13 +4,15 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, MapPin, Search, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Banknote, Briefcase, MapPin, Search, Sparkles } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import {
-  classifyMenaCity,
-  MENA_CITY_LABELS,
-  type MenaCityKey,
+  classifyMenaCountry,
+  MENA_COUNTRY_FLAGS,
+  MENA_COUNTRY_LABELS,
+  MENA_COUNTRY_ORDER,
+  type MenaCountryKey,
 } from '@/lib/jobs/mena';
 
 export type ListedJobCard = {
@@ -21,8 +23,10 @@ export type ListedJobCard = {
   department: string | null;
   employmentType: string | null;
   description: string;
+  requirements: string | null;
   applyUrl: string;
   source: string;
+  salaryLabel: string | null;
   company: {
     name: string;
     slug: string;
@@ -31,61 +35,55 @@ export type ListedJobCard = {
   } | null;
 };
 
-const CITY_ORDER: MenaCityKey[] = [
-  'uae',
-  'ksa',
-  'egypt',
-  'qatar',
-  'kuwait',
-  'bahrain',
-  'oman',
-  'jordan',
-  'other',
-];
-
 export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[] }) {
   const locale = useLocale();
   const isAr = locale === 'ar';
-  const [city, setCity] = useState<'all' | MenaCityKey>('all');
+  const [country, setCountry] = useState<'all' | MenaCountryKey>('all');
   const [q, setQ] = useState('');
+  const [salaryOnly, setSalaryOnly] = useState(false);
 
-  const cityCounts = useMemo(() => {
-    const map = new Map<MenaCityKey, number>();
+  const countryCounts = useMemo(() => {
+    const map = new Map<MenaCountryKey, number>();
     for (const j of initialJobs) {
-      const key = classifyMenaCity(j.location, j.company?.country);
-      if (key === 'remote') continue;
+      const key = classifyMenaCountry(j.location, j.company?.country, j.title);
       map.set(key, (map.get(key) || 0) + 1);
     }
-    return CITY_ORDER.filter((k) => (map.get(k) || 0) > 0).map((k) => ({
+    // Always render every MENA flag tile — 0 means not covered yet
+    return MENA_COUNTRY_ORDER.map((k) => ({
       key: k,
       count: map.get(k) || 0,
     }));
   }, [initialJobs]);
 
+  const withSalaryCount = useMemo(
+    () => initialJobs.filter((j) => Boolean(j.salaryLabel)).length,
+    [initialJobs],
+  );
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return initialJobs.filter((j) => {
-      const key = classifyMenaCity(j.location, j.company?.country);
-      if (city !== 'all' && key !== city) return false;
-      if (!needle) return true;
-      const hay = `${j.title} ${j.company?.name ?? ''} ${j.location} ${j.department ?? ''}`.toLowerCase();
-      return hay.includes(needle);
-    });
-  }, [initialJobs, city, q]);
+    return initialJobs
+      .filter((j) => {
+        const key = classifyMenaCountry(j.location, j.company?.country, j.title);
+        if (country !== 'all' && key !== country) return false;
+        if (salaryOnly && !j.salaryLabel) return false;
+        if (!needle) return true;
+        const hay =
+          `${j.title} ${j.company?.name ?? ''} ${j.location} ${j.department ?? ''} ${j.employmentType ?? ''} ${j.salaryLabel ?? ''} ${j.description}`.toLowerCase();
+        return hay.includes(needle);
+      })
+      .sort((a, b) => Number(Boolean(b.salaryLabel)) - Number(Boolean(a.salaryLabel)));
+  }, [initialJobs, country, q, salaryOnly]);
 
-  const spotlight = filtered[0] ?? null;
-  const rest = filtered.slice(1);
+  const spotlight =
+    filtered.find((j) => j.salaryLabel) ?? filtered[0] ?? null;
+  const rest = filtered.filter((j) => j.id !== spotlight?.id);
 
   if (!initialJobs.length) {
     return (
       <div id="roles" className="mq-wrap py-16 text-center">
         <p className="mq-display text-3xl font-bold text-white">
           {isAr ? 'نجهّز أدوار المنطقة' : 'Warming up MENA roles'}
-        </p>
-        <p className="mx-auto mt-3 max-w-md text-sm text-white/55">
-          {isAr
-            ? 'تدرّب مع جيني الآن — اللوحة تتحدث من واجهات ATS القانونية.'
-            : 'Practice with Jeannie now — the board refreshes from legal ATS feeds.'}
         </p>
         <Link
           href={localePath('/interview/prequal', locale)}
@@ -115,13 +113,12 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
           </div>
           <p className="text-sm text-white/45 md:max-w-xs md:text-end">
             {isAr
-              ? `${filtered.length} دور · أنت تقدّم على موقع الشركة`
-              : `${filtered.length} roles · you apply on the company site`}
+              ? `${filtered.length} دور · ${withSalaryCount} براتب معلن`
+              : `${filtered.length} roles · ${withSalaryCount} with published pay`}
           </p>
         </div>
 
-        {/* Interactive filters — not decorative chips */}
-        <div className="mb-8 space-y-4">
+        <div className="mb-8 space-y-5">
           <div className="relative">
             <Search
               size={16}
@@ -130,33 +127,88 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder={isAr ? 'ابحث عن دور، شركة، أو مدينة…' : 'Search role, company, or city…'}
+              placeholder={
+                isAr ? 'ابحث عن دور، شركة، مدينة، أو راتب…' : 'Search role, company, city, or salary…'
+              }
               className="glass-input min-h-[52px] w-full rounded-2xl pe-4 ps-11 text-sm"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <FilterBtn
-              active={city === 'all'}
-              onClick={() => setCity('all')}
-              label={isAr ? `الكل (${initialJobs.length})` : `All (${initialJobs.length})`}
-            />
-            {cityCounts.map((c) => (
-              <FilterBtn
-                key={c.key}
-                active={city === c.key}
-                onClick={() => setCity(c.key)}
-                label={`${isAr ? MENA_CITY_LABELS[c.key].ar : MENA_CITY_LABELS[c.key].en} (${c.count})`}
+
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-white/40">
+              {isAr ? 'كل دول المنطقة' : 'All MENA countries'}
+            </p>
+            <div className="flex flex-wrap gap-2 pb-1 pt-0.5">
+              <CountryFlagTile
+                flag="🌐"
+                label={isAr ? 'الكل' : 'All'}
+                count={initialJobs.length}
+                active={country === 'all'}
+                onClick={() => setCountry('all')}
               />
-            ))}
+              {countryCounts.map((c) => (
+                <CountryFlagTile
+                  key={c.key}
+                  flag={MENA_COUNTRY_FLAGS[c.key]}
+                  label={isAr ? MENA_COUNTRY_LABELS[c.key].ar : MENA_COUNTRY_LABELS[c.key].en}
+                  count={c.count}
+                  active={country === c.key}
+                  muted={c.count === 0}
+                  onClick={() => setCountry(c.key)}
+                />
+              ))}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setSalaryOnly((v) => !v)}
+            className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
+              salaryOnly
+                ? 'border-amber-300/40 bg-amber-400/15 text-amber-100'
+                : 'border-white/10 bg-white/[0.03] text-white/55 hover:border-white/20 hover:text-white/80'
+            }`}
+          >
+            <Banknote size={14} />
+            {isAr
+              ? `راتب معلن فقط (${withSalaryCount})`
+              : `Published salary only (${withSalaryCount})`}
+          </button>
         </div>
 
         {spotlight ? (
           <SpotlightRole job={spotlight} isAr={isAr} locale={locale} />
         ) : (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-10 text-center text-sm text-white/50">
-            {isAr ? 'لا نتائج — جرّب مدينة أخرى أو امسح البحث.' : 'No matches — try another city or clear search.'}
-          </p>
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] px-6 py-12 text-center">
+            <p className="mq-display text-2xl font-bold text-white">
+              {isAr ? 'لا أدوار هنا بعد' : 'No roles here yet'}
+            </p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-white/55">
+              {isAr
+                ? 'نضيف شركات بواجهات ATS قانونية في كل بلد. تدرّب مع جيني الآن — وفلتر «كل المنطقة» للأدوار المتاحة.'
+                : 'We’re adding employers with legal ATS boards in every country. Practice with Jeannie now — or clear filters to see open roles.'}
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => {
+                  setCountry('all');
+                  setSalaryOnly(false);
+                  setQ('');
+                }}
+                className="mq-btn mq-btn-ghost inline-flex min-h-[48px] px-5 text-sm font-bold"
+              >
+                {isAr ? 'عرض كل المنطقة' : 'Show all MENA'}
+              </button>
+              <Link
+                href={localePath('/interview/prequal', locale)}
+                className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center gap-2 px-5 text-sm font-bold"
+              >
+                <Sparkles size={15} />
+                {isAr ? 'تدرّب مع جيني' : 'Practice with Jeannie'}
+              </Link>
+            </div>
+          </div>
         )}
 
         {rest.length > 0 ? (
@@ -171,14 +223,14 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
               const href = job.company
                 ? localePath(`/companies/${job.company.slug}/${job.slug}`, locale)
                 : localePath(`/jobs/${job.id}`, locale);
-              const cityKey = classifyMenaCity(job.location, job.company?.country);
+              const countryKey = classifyMenaCountry(
+                job.location,
+                job.company?.country,
+                job.title,
+              );
+              const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
               return (
-                <motion.li
-                  key={job.id}
-                  variants={fadeUp}
-                  custom={i}
-                  className="group"
-                >
+                <motion.li key={job.id} variants={fadeUp} custom={i} className="group">
                   <Link
                     href={href}
                     className="flex flex-col gap-3 px-5 py-5 transition hover:bg-white/[0.04] md:flex-row md:items-center md:justify-between md:gap-6 md:px-7"
@@ -195,20 +247,38 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                           <MapPin size={13} />
                           {job.location}
                         </span>
-                        <span>
+                        <span className="inline-flex items-center gap-1">
+                          <span aria-hidden>{MENA_COUNTRY_FLAGS[countryKey]}</span>
                           {isAr
-                            ? MENA_CITY_LABELS[cityKey].ar
-                            : MENA_CITY_LABELS[cityKey].en}
+                            ? MENA_COUNTRY_LABELS[countryKey].ar
+                            : MENA_COUNTRY_LABELS[countryKey].en}
                         </span>
-                        {job.department ? <span>{job.department}</span> : null}
+                        {meta ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Briefcase size={13} />
+                            {meta}
+                          </span>
+                        ) : null}
+                        {job.salaryLabel ? (
+                          <span className="inline-flex items-center gap-1 font-semibold text-amber-200/90">
+                            <Banknote size={13} />
+                            {job.salaryLabel}
+                          </span>
+                        ) : (
+                          <span className="text-white/35">
+                            {isAr ? 'الراتب على موقع الشركة' : 'Pay on company site'}
+                          </span>
+                        )}
                       </p>
+                      {job.description && !/^https?:\/\//i.test(job.description.trim()) ? (
+                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/40">
+                          {job.description}
+                        </p>
+                      ) : null}
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-teal-200">
                       {isAr ? 'تدرّب لهذا الدور' : 'Practice this role'}
-                      <ArrowUpRight
-                        size={16}
-                        className="transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                      />
+                      <ArrowUpRight size={16} />
                     </span>
                   </Link>
                 </motion.li>
@@ -219,34 +289,55 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
 
         <p className="mt-10 text-center text-xs leading-relaxed text-white/35">
           {isAr
-            ? 'القوائم من واجهات ATS العامة القانونية فقط. مقابلة لا تقدّم نيابةً عنك.'
-            : 'Listings from legal public ATS APIs only. Muqabaleh never applies on your behalf.'}
+            ? 'الرواتب تُعرض فقط إن نشرها صاحب العمل عبر ATS. البلدان بلا أدوار بعد — نضيف لوحات قانونية باستمرار.'
+            : 'Salaries appear only when the employer published pay via ATS. Countries at 0 are still in scope — we add legal boards continuously.'}
         </p>
       </div>
     </section>
   );
 }
 
-function FilterBtn({
-  active,
-  onClick,
+function CountryFlagTile({
+  flag,
   label,
+  count,
+  active,
+  muted,
+  onClick,
 }: {
-  active: boolean;
-  onClick: () => void;
+  flag: string;
   label: string;
+  count: number;
+  active: boolean;
+  muted?: boolean;
+  onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
+      aria-label={`${label}: ${count}`}
+      className={`flex w-[4.6rem] shrink-0 flex-col items-center gap-0.5 rounded-2xl border px-1.5 py-2.5 transition ${
         active
-          ? 'border-teal-300/40 bg-teal-400/15 text-teal-100'
-          : 'border-white/10 bg-white/[0.03] text-white/55 hover:border-white/20 hover:text-white/80'
+          ? 'border-teal-300/45 bg-teal-400/15 text-teal-50'
+          : muted
+            ? 'border-white/8 bg-transparent text-white/30 hover:border-white/15 hover:text-white/50'
+            : 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:text-white'
       }`}
     >
-      {label}
+      <span className="text-[1.55rem] leading-none" aria-hidden>
+        {flag}
+      </span>
+      <span className="max-w-full truncate text-[0.62rem] font-bold uppercase tracking-[0.04em]">
+        {label}
+      </span>
+      <span
+        className={`text-sm font-bold tabular-nums ${
+          active ? 'text-teal-100' : muted ? 'text-white/25' : 'text-white/85'
+        }`}
+      >
+        {count}
+      </span>
     </button>
   );
 }
@@ -267,6 +358,8 @@ function SpotlightRole({
     `/interview/prequal?company=${encodeURIComponent(job.company?.name || '')}&role=${encodeURIComponent(job.title)}&job=${encodeURIComponent(job.id)}`,
     locale,
   );
+  const countryKey = classifyMenaCountry(job.location, job.company?.country, job.title);
+  const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
 
   return (
     <motion.article
@@ -279,24 +372,47 @@ function SpotlightRole({
         className="pointer-events-none absolute -end-16 -top-20 h-56 w-56 rounded-full bg-teal-400/15 blur-3xl"
         aria-hidden
       />
-      <p className="relative text-xs font-bold uppercase tracking-[0.18em] text-teal-200/90">
-        {isAr ? 'الدور المميّز' : 'Spotlight role'}
-      </p>
-      <p className="relative mt-3 text-sm font-semibold text-white/55">
-        {job.company?.name}
-      </p>
+      <div className="relative flex flex-wrap items-center gap-2">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200/90">
+          {isAr ? 'الدور المميّز' : 'Spotlight role'}
+        </p>
+        {job.salaryLabel ? (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/30 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-100">
+            <Banknote size={13} />
+            {job.salaryLabel}
+          </span>
+        ) : null}
+      </div>
+      <p className="relative mt-3 text-sm font-semibold text-white/55">{job.company?.name}</p>
       <h3 className="relative mq-display mt-1 text-3xl font-bold tracking-tight text-white md:text-4xl">
         {job.title}
       </h3>
-      <p className="relative mt-3 inline-flex items-center gap-1.5 text-sm text-white/55">
-        <MapPin size={14} />
-        {job.location}
-        {job.department ? ` · ${job.department}` : ''}
+      <p className="relative mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/55">
+        <span className="inline-flex items-center gap-1.5">
+          <MapPin size={14} />
+          {job.location}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span aria-hidden>{MENA_COUNTRY_FLAGS[countryKey]}</span>
+          {isAr ? MENA_COUNTRY_LABELS[countryKey].ar : MENA_COUNTRY_LABELS[countryKey].en}
+        </span>
+        {meta ? (
+          <span className="inline-flex items-center gap-1">
+            <Briefcase size={14} />
+            {meta}
+          </span>
+        ) : null}
       </p>
+      {!job.salaryLabel ? (
+        <p className="relative mt-2 text-sm text-white/40">
+          {isAr
+            ? 'الراتب غير معلن هنا — يظهر على موقع الشركة عند التقديم.'
+            : 'Pay not published here — check the company site when you apply.'}
+        </p>
+      ) : null}
       {job.description && !/^https?:\/\//i.test(job.description.trim()) ? (
         <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-          {job.description.slice(0, 220)}
-          {job.description.length > 220 ? '…' : ''}
+          {job.description}
         </p>
       ) : (
         <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/55 md:text-base">
@@ -305,6 +421,15 @@ function SpotlightRole({
             : 'Practice role-specific questions with Jeannie, then apply yourself on the company site.'}
         </p>
       )}
+      {job.requirements ? (
+        <p className="relative mt-3 max-w-2xl text-sm leading-relaxed text-white/45">
+          <span className="font-semibold text-white/55">
+            {isAr ? 'المتطلبات: ' : 'Requirements: '}
+          </span>
+          {job.requirements.slice(0, 220)}
+          {job.requirements.length > 220 ? '…' : ''}
+        </p>
+      ) : null}
       <div className="relative mt-7 flex flex-col gap-3 sm:flex-row">
         <Link
           href={practiceHref}

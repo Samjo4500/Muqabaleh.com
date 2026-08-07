@@ -6,7 +6,8 @@ import { JobsHero } from '@/components/jobs/JobsHero';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
 import { DEMO_JOBS } from '@/lib/jobs/demo-listings';
-import { isMenaLocation } from '@/lib/jobs/mena';
+import { safeJobText } from '@/lib/jobs/job-details';
+import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
 import { JobsBrowserClient } from './jobs-browser-client';
@@ -21,9 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titleAr: 'وظائف المنطقة — تدرّب ثم قدّم | مقابلة',
     titleEn: 'MENA jobs — practice then apply | Muqabaleh',
     descAr:
-      'أدوار حقيقية في الخليج ومصر والشام. تدرّب مع جيني ثم قدّم بنفسك على موقع الشركة.',
+      'أدوار حقيقية عبر دول المنطقة مع راتب معلن عند نشره. تدرّب مع جيني ثم قدّم بنفسك على موقع الشركة.',
     descEn:
-      'Live roles across the Gulf, Egypt, and the Levant. Practice with Jeannie, then apply yourself on the company site.',
+      'Live roles across MENA with published salary when employers share it. Practice with Jeannie, then apply yourself on the company site.',
   });
 }
 
@@ -41,15 +42,17 @@ export default async function JobsPage() {
       department: j.department,
       employmentType: j.employmentType,
       description: j.description,
+      requirements: j.requirements ?? null,
       applyUrl: j.applyUrl,
       source: j.source,
+      salaryLabel: null as string | null,
       company: j.company,
     }));
   }
 
-  // Social-ad board: only roles with a MENA/GCC location signal
-  jobs = jobs.filter(
-    (j) => isMenaLocation(j.location) || isMenaLocation(j.company?.country),
+  // Strict MENA board: location/title signal (or Remote/Hybrid from regional HQ)
+  jobs = jobs.filter((j) =>
+    isMenaListedRole(j.location, j.title, j.company?.country),
   );
 
   return (
@@ -90,7 +93,7 @@ async function loadJobsSafe() {
         },
       },
       orderBy: { postedAt: 'desc' },
-      take: 160,
+      take: 400,
     });
     return rows.map((j) => ({
       id: j.id,
@@ -99,9 +102,11 @@ async function loadJobsSafe() {
       location: j.location,
       department: j.department,
       employmentType: j.employmentType,
-      description: j.description,
+      description: safeJobText(j.description),
+      requirements: j.requirements ? safeJobText(j.requirements, 400) : null,
       applyUrl: j.applyUrl,
       source: j.source,
+      salaryLabel: j.salaryLabel,
       company: j.company,
     }));
   } catch (err) {

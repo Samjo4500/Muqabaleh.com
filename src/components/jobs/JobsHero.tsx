@@ -100,8 +100,8 @@ export function JobsHero({ roleCount }: Props) {
             className="mt-5 max-w-xl text-base leading-relaxed text-white/70 md:text-lg"
           >
             {isAr
-              ? `${roleCount > 0 ? `${roleCount}+ ` : ''}وظيفة حقيقية من شركات توظّف في الخليج ومصر والشام — تدرّب مع جيني، ثم قدّم بنفسك على موقع الشركة.`
-              : `${roleCount > 0 ? `${roleCount}+ ` : ''}live openings from employers hiring across the Gulf, Egypt, and the Levant — practice with Jeannie, then apply yourself on their site.`}
+              ? `${roleCount > 0 ? `${roleCount}+ ` : ''}وظيفة حقيقية عبر دول المنطقة — نعرض الراتب عند نشره، تتدرّب مع جيني، ثم تقدّم بنفسك على موقع الشركة.`
+              : `${roleCount > 0 ? `${roleCount}+ ` : ''}live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.`}
           </motion.p>
 
           <motion.div

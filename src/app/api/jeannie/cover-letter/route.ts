@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
     jobSummary?: string;
     candidateSummary?: string;
     language?: 'en' | 'ar' | 'both';
-    opportunityId?: string;
   };
 
   const result = await generateCoverLetter({
@@ -22,7 +21,6 @@ export async function POST(req: NextRequest) {
     jobSummary: body.jobSummary,
     candidateSummary: body.candidateSummary,
     language: body.language,
-    opportunityId: body.opportunityId,
   });
 
   if (!result.ok) {

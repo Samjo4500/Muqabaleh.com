@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, CheckCircle2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export type PlanType = 'pro' | 'unlimited' | 'jeannie' | 'jeannie_pro';
+export type PlanType = 'pro' | 'unlimited' | 'jeannie' | 'jeannie_pro' | 'mastery_pack';
 
 interface PayPalCheckoutButtonProps {
   plan: PlanType;
@@ -18,6 +18,7 @@ const PLAN_CODE: Record<PlanType, string> = {
   unlimited: 'UNLIMITED',
   jeannie: 'JEANNIE',
   jeannie_pro: 'JEANNIE_PRO',
+  mastery_pack: 'MASTERY_PACK',
 };
 
 /**
@@ -238,9 +239,11 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
   }
 
   const priceNotes: Record<PlanType, string> = {
-    jeannie: locale === 'ar' ? '$24.99 / شهر — يمكن الإلغاء في أي وقت' : '$24.99 / month — cancel anytime',
+    jeannie: locale === 'ar' ? '$14.99 / شهر — يمكن الإلغاء في أي وقت' : '$14.99 / month — cancel anytime',
     jeannie_pro:
-      locale === 'ar' ? '$39.99 / شهر — يمكن الإلغاء في أي وقت' : '$39.99 / month — cancel anytime',
+      locale === 'ar' ? '$29.99 / شهر — يمكن الإلغاء في أي وقت' : '$29.99 / month — cancel anytime',
+    mastery_pack:
+      locale === 'ar' ? '$44.99 مرة واحدة — بلا اشتراك' : '$44.99 one-time — no subscription',
     pro: locale === 'ar' ? '$9.99 دفعة واحدة' : '$9.99 one-time',
     unlimited: locale === 'ar' ? '$29.99 / شهر — يمكن الإلغاء في أي وقت' : '$29.99 / month — cancel anytime',
   };

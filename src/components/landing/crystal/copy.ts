@@ -17,14 +17,14 @@ export const C = {
     getStarted: { en: 'Get started', ar: 'ابدأ الآن' },
   },
   hero: {
-    eyebrow: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
+    eyebrow: { en: 'Jeannie · Muqabaleh', ar: 'جيني · مقابلة' },
     headline: {
-      en: 'Jeannie interviews you. Then she applies.',
-      ar: 'جيني تُجري مقابلتك. ثم تقدّم عنك.',
+      en: 'Practice with Jeannie. Get a verified passport.',
+      ar: 'تدرّب مع جيني. احصل على جواز موثّق.',
     },
     sub: {
-      en: 'Your bilingual career agent for MENA — she practices with you in Arabic or English, builds your verified passport, then applies only with your approval. Not spam.',
-      ar: 'وكيلتك المهنية ثنائية اللغة للمنطقة — تتدرّب معك بالعربية أو الإنجليزية، تبني جوازك الموثّق، ثم تقدّم فقط بموافقتك. ليس عشوائياً.',
+      en: 'She coaches your interview in Arabic or English. You earn a shareable passport — then apply yourself on the company site.',
+      ar: 'تدرّبك على المقابلة بالعربية أو الإنجليزية. تحصل على جواز قابل للمشاركة — ثم تقدّم بنفسك على موقع الشركة.',
     },
     dialectNote: {
       en: 'Jeannie understands and fairly scores Arabic regional dialects (Gulf, Levantine, Egyptian), professional English with local accents, and natural bilingual code-switching — accent is not a penalty.',
@@ -34,9 +34,55 @@ export const C = {
       en: 'Your interview scores stay private until you choose to publish or share your passport. Practice and retake anytime to improve before locking a public score.',
       ar: 'درجات مقابلتك تبقى خاصة حتى تختار نشر جوازك أو مشاركته. تدرّب وأعد المقابلة في أي وقت لتحسين نتيجتك قبل تثبيت درجة عامة.',
     },
-    ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
-    ctaJeannie: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
+    ctaInterview: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
+    ctaJeannie: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
+  },
+  path: {
+    eyebrow: { en: 'Simple path', ar: 'مسار بسيط' },
+    title: { en: 'Three steps. Jeannie in the middle.', ar: 'ثلاث خطوات. جيني في الوسط.' },
+    sub: {
+      en: 'No auto-apply. No spam. Practice, verify, then you apply.',
+      ar: 'بلا تقديم تلقائي. بلا عشوائية. تدرّب، وثّق، ثم قدّم أنت.',
+    },
+    ctaJobs: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
+    steps: [
+      {
+        title: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+        body: {
+          en: 'Company-specific or general mocks in Arabic or English. Dialects welcome.',
+          ar: 'مقابلات خاصة بشركات أو عامة بالعربية أو الإنجليزية. اللهجات مرحّب بها.',
+        },
+      },
+      {
+        title: { en: 'Get your passport', ar: 'احصل على جوازك' },
+        body: {
+          en: 'A verified score you can share — private until you decide to publish.',
+          ar: 'درجة موثّقة يمكنك مشاركتها — خاصة حتى تقرر النشر.',
+        },
+      },
+      {
+        title: { en: 'Apply yourself', ar: 'قدّم بنفسك' },
+        body: {
+          en: 'Open the company site from our jobs board. You always send the application.',
+          ar: 'افتح موقع الشركة من لوحة وظائفنا. أنت ترسل التقديم دائماً.',
+        },
+      },
+    ],
+  },
+  passport: {
+    eyebrow: { en: 'Your passport', ar: 'جوازك' },
+    title: { en: 'Proof employers can trust', ar: 'دليل يثق به أصحاب العمل' },
+    sub: {
+      en: 'Not a gimmick score — a clear, verifiable readiness credential from your Jeannie interview.',
+      ar: 'ليست درجة شكلية — اعتماد جاهزية واضح وقابل للتحقق من مقابلتك مع جيني.',
+    },
+    cta: { en: 'Earn your passport free', ar: 'احصل على جوازك مجاناً' },
+    bullets: [
+      { en: '0–100 interview-verified score', ar: 'درجة ٠–١٠٠ موثّقة بالمقابلة' },
+      { en: 'Clarity, confidence, structure, bilingual signal', ar: 'وضوح، ثقة، هيكل، إشارة ثنائية اللغة' },
+      { en: 'Public verify link + QR when you choose to share', ar: 'رابط تحقق عام + QR عندما تختار المشاركة' },
+    ],
   },
   trust: {
     text: {
@@ -80,18 +126,18 @@ export const C = {
         href: '/app/passport',
       },
       {
-        title: { en: 'She applies — you approve', ar: 'هي تقدّم — أنت توافق' },
+        title: { en: 'You apply with confidence', ar: 'تقدّم بثقة' },
         body: {
-          en: 'Jeannie shortlists roles, waits for your OK, then applies with your passport attached. Not spam.',
-          ar: 'جيني ترشّح الأدوار، تنتظر موافقتك، ثم تقدّم مع جوازك مرفقاً. ليس عشوائياً.',
+          en: 'Browse roles, practice for the company, then apply yourself on their site — passport ready to share.',
+          ar: 'تصفّح الأدوار، تدرّب للشركة، ثم قدّم بنفسك على موقعها — وجوازك جاهز للمشاركة.',
         },
         features: [
-          { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
-          { en: 'Passport attached', ar: 'الجواز مرفق' },
-          { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+          { en: 'Apply on company site', ar: 'قدّم على موقع الشركة' },
+          { en: 'Passport ready to share', ar: 'جواز جاهز للمشاركة' },
+          { en: 'Manual tracker', ar: 'متتبّع يدوي' },
         ],
-        cta: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
-        href: '/#jeannie-magic',
+        cta: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
+        href: '/jobs',
       },
     ],
   },
@@ -258,10 +304,10 @@ export const C = {
     cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
   },
   pricing: {
-    title: { en: 'Choose how far Jeannie goes', ar: 'اختر إلى أين تصل جيني' },
+    title: { en: 'Prepare. Get verified. Apply yourself.', ar: 'تدرّب. احصل على توثيق. قدّم بنفسك.' },
     subtitle: {
-      en: 'Clear individual plans. Approve every apply. Not spam.',
-      ar: 'خطط فردية واضحة. وافق على كل تقديم. ليس عشوائياً.',
+      en: 'Mock interviews, verified passports, and career prep — you always apply on the company site.',
+      ar: 'مقابلات تجريبية، جوازات موثّقة، وتحضير مهني — وأنت تقدّم دائماً على موقع الشركة.',
     },
     priceHidden: {
       en: 'Custom pricing',
@@ -274,30 +320,30 @@ export const C = {
     ctaDemo: { en: 'Request demo', ar: 'اطلب عرضاً' },
     ctaQuote: { en: 'Get a quote', ar: 'احصل على عرض سعر' },
     notSpam: {
-      badge: { en: 'NOT SPAM', ar: 'ليس عشوائياً' },
+      badge: { en: 'YOU APPLY', ar: 'أنت تقدّم' },
       line: {
-        en: 'Jeannie never spray-applies. Every application needs your approval — passport proof attached.',
-        ar: 'جيني لا ترسل عشوائياً. كل تقديم يحتاج موافقتك — مع دليل الجواز مرفقاً.',
+        en: 'Muqabaleh never applies on your behalf. Practice, verify, then apply yourself on the employer’s site.',
+        ar: 'مقابلة لا تقدّم نيابةً عنك. تدرّب، وثّق، ثم قدّم بنفسك على موقع صاحب العمل.',
       },
     },
     applyHow: {
-      title: { en: 'How Jeannie applies', ar: 'كيف تقدّم جيني' },
+      title: { en: 'How Prepare-and-Verify works', ar: 'كيف يعمل التجهيز والتوثيق' },
       body: {
-        en: 'After you approve, Jeannie prepares a professional apply packet — your CV, cover letter, and verified passport proof. She delivers it by recruiter email when an apply address is available, or as a tracked packet with the role’s official apply link. She does not bot-fill ATS portals or spray mass applications.',
-        ar: 'بعد موافقتك، تجهّز جيني حزمة تقديم احترافية — سيرتك وخطابك ودليل جوازك الموثّق. ترسلها ببريد المسؤول عن التوظيف عند توفر عنوان تقديم، أو كحزمة متتبّعة مع رابط التقديم الرسمي للوظيفة. لا تملأ بوابات أنظمة التتبع آلياً ولا ترسل تقديمات جماعية.',
+        en: 'Browse roles, practice a company-specific mock with Jeannie, earn a verified passport, then click “Apply on Company Site.” Cover letters and trackers help you prepare — you send everything yourself.',
+        ar: 'تصفّح الأدوار، تدرّب مقابلة خاصة بالشركة مع جيني، احصل على جواز موثّق، ثم اضغط «قدّم على موقع الشركة». الخطابات والمتتبّع يساعدانك على التحضير — وأنت ترسل كل شيء بنفسك.',
       },
       steps: [
         {
-          en: 'Shortlist roles that fit your passport and targets',
-          ar: 'ترشيح أدوار تناسب جوازك وأهدافك',
+          en: 'Practice role-specific mocks with Jeannie',
+          ar: 'تدرّب مقابلات خاصة بالدور مع جيني',
         },
         {
-          en: 'You approve every opportunity first',
-          ar: 'أنت توافق على كل فرصة أولاً',
+          en: 'Lock a verified, shareable passport',
+          ar: 'ثبّت جوازاً موثّقاً قابلاً للمشاركة',
         },
         {
-          en: 'Email packet or tracked apply-link delivery — with proof attached',
-          ar: 'تسليم بحزمة بريد أو رابط تقديم متتبّع — مع الدليل مرفقاً',
+          en: 'Apply yourself on the company site',
+          ar: 'قدّم بنفسك على موقع الشركة',
         },
       ],
     },
@@ -309,15 +355,15 @@ export const C = {
         price: { en: 'FREE', ar: 'مجاني' },
         period: { en: '', ar: '' },
         tagline: {
-          en: 'Prove the product. No applies.',
-          ar: 'جرّب المنتج. بلا تقديمات.',
+          en: 'Start practicing. Preview your passport.',
+          ar: 'ابدأ التدريب. عاين جوازك.',
         },
-        applies: { en: '0 applies', ar: '٠ تقديمات' },
+        applies: { en: '1 mock / mo', ar: 'مقابلة واحدة / شهر' },
         features: [
-          { en: '1 AI interview with Jeannie', ar: 'مقابلة واحدة مع جيني' },
-          { en: 'Passport preview', ar: 'معاينة الجواز' },
-          { en: 'Basic scorecard', ar: 'بطاقة تقييم أساسية' },
-          { en: 'No Jeannie applies', ar: 'بدون تقديمات جيني' },
+          { en: '1 mock interview / month', ar: 'مقابلة تجريبية واحدة / شهر' },
+          { en: 'Basic score preview', ar: 'معاينة درجة أساسية' },
+          { en: 'Basic passport preview', ar: 'معاينة جواز أساسية' },
+          { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
         ],
         cta: { en: 'Start free', ar: 'ابدأ مجاناً' },
         href: '/interview/prequal',
@@ -327,20 +373,19 @@ export const C = {
       {
         id: 'jeannie' as const,
         name: { en: 'Jeannie', ar: 'جيني' },
-        price: { en: '$24.99', ar: '$24.99' },
+        price: { en: '$14.99', ar: '$14.99' },
         period: { en: '/mo', ar: '/شهر' },
         tagline: {
-          en: 'Controlled applies. Upload your materials.',
-          ar: 'تقديمات مضبوطة. ارفع موادك.',
+          en: 'Unlimited mocks. Full passport. Prep tools.',
+          ar: 'مقابلات بلا حدود. جواز كامل. أدوات تحضير.',
         },
-        applies: { en: '10 applies / mo', ar: '١٠ تقديمات / شهر' },
+        applies: { en: 'Unlimited mocks', ar: 'مقابلات بلا حدود' },
         features: [
-          { en: 'Unlimited practice with Jeannie', ar: 'تدريب بلا حدود مع جيني' },
+          { en: 'Unlimited mock interviews', ar: 'مقابلات تجريبية بلا حدود' },
           { en: 'Full verified passport', ar: 'جواز موثّق كامل' },
-          { en: 'Jeannie applies — 10 / month', ar: 'جيني تقدّم — ١٠ / شهر' },
-          { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
-          { en: 'Upload CV + cover letter', ar: 'رفع السيرة وخطاب التقديم' },
-          { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+          { en: 'Manual application tracker', ar: 'متتبّع تقديمات يدوي' },
+          { en: 'Cover letter generator', ar: 'مولّد خطاب التقديم' },
+          { en: 'Salary benchmark access', ar: 'الوصول لمؤشرات الرواتب' },
         ],
         cta: { en: 'Unlock Jeannie', ar: 'فعّل جيني' },
         href: '/app/packages',
@@ -350,22 +395,42 @@ export const C = {
       {
         id: 'pro' as const,
         name: { en: 'Jeannie Pro', ar: 'جيني برو' },
-        price: { en: '$39.99', ar: '$39.99' },
+        price: { en: '$29.99', ar: '$29.99' },
         period: { en: '/mo', ar: '/شهر' },
         tagline: {
-          en: 'Full CV studio. Stronger materials. More volume.',
-          ar: 'استوديو سيرة كامل. مواد أقوى. حجم أكبر.',
+          en: 'CV studio, negotiation scripts, priority ranking.',
+          ar: 'استوديو سيرة، سكربتات تفاوض، ترتيب أولوية.',
         },
-        applies: { en: '20 applies / mo', ar: '٢٠ تقديمات / شهر' },
+        applies: { en: 'Pro prep suite', ar: 'حزمة تحضير برو' },
         features: [
           { en: 'Everything in Jeannie', ar: 'كل مزايا جيني' },
-          { en: 'Jeannie applies — 20 / month', ar: 'جيني تقدّم — ٢٠ / شهر' },
           { en: 'Full CV studio', ar: 'استوديو سيرة كامل' },
-          { en: 'Cover letter generate + assist', ar: 'توليد ومساعدة خطاب التقديم' },
-          { en: 'Full tracker + insights', ar: 'متتبّع كامل مع رؤى' },
-          { en: 'Priority matching', ar: 'مطابقة ذات أولوية' },
+          { en: 'AI negotiation scripts', ar: 'سكربتات تفاوض بالذكاء الاصطناعي' },
+          { en: 'Priority ranking in employer search', ar: 'ترتيب أولوية في بحث أصحاب العمل' },
+          { en: '“Top 10%” badge', ar: 'شارة «أعلى ١٠٪»' },
         ],
         cta: { en: 'Go Jeannie Pro', ar: 'اشترك في جيني برو' },
+        href: '/app/packages',
+        popular: false,
+        concealPrice: false,
+      },
+      {
+        id: 'mastery' as const,
+        name: { en: 'Mastery Pack', ar: 'باقة الإتقان' },
+        price: { en: '$44.99', ar: '$44.99' },
+        period: { en: ' once', ar: ' مرة واحدة' },
+        tagline: {
+          en: '5 company-specific mocks + negotiation pack. No subscription.',
+          ar: '٥ مقابلات خاصة بشركات + باقة تفاوض. بلا اشتراك.',
+        },
+        applies: { en: 'One-time pack', ar: 'باقة لمرة واحدة' },
+        features: [
+          { en: '5 company-specific mock interviews', ar: '٥ مقابلات تجريبية خاصة بشركات' },
+          { en: 'Negotiation script pack', ar: 'باقة سكربتات التفاوض' },
+          { en: 'No monthly subscription', ar: 'بلا اشتراك شهري' },
+          { en: 'Keep your free Basic practice too', ar: 'تحتفظ بتدريب الأساسي المجاني' },
+        ],
+        cta: { en: 'Get Mastery Pack', ar: 'احصل على باقة الإتقان' },
         href: '/app/packages',
         popular: false,
         concealPrice: false,
@@ -373,11 +438,12 @@ export const C = {
     ],
     compare: [
       {
-        label: { en: 'AI interview practice', ar: 'تدريب المقابلة الذكية' },
+        label: { en: 'AI mock interviews', ar: 'مقابلات تجريبية ذكية' },
         values: [
-          { en: '1 session', ar: 'جلسة واحدة' },
+          { en: '1 / mo', ar: '١ / شهر' },
           { en: 'Unlimited', ar: 'بلا حدود' },
           { en: 'Unlimited', ar: 'بلا حدود' },
+          { en: '5 company mocks', ar: '٥ مقابلات شركات' },
         ],
       },
       {
@@ -386,62 +452,52 @@ export const C = {
           { en: 'Preview', ar: 'معاينة' },
           { en: 'Full verified', ar: 'موثّق كامل' },
           { en: 'Full verified', ar: 'موثّق كامل' },
+          { en: 'Full verified', ar: 'موثّق كامل' },
         ],
       },
       {
-        label: { en: 'Jeannie applies / month', ar: 'تقديمات جيني / شهر' },
-        values: [
-          { en: '0', ar: '٠' },
-          { en: '10', ar: '١٠' },
-          { en: '20', ar: '٢٠' },
-        ],
-      },
-      {
-        label: { en: 'Approve every apply (NOT SPAM)', ar: 'موافقة على كل تقديم (ليس عشوائياً)' },
+        label: { en: 'Manual application tracker', ar: 'متتبّع تقديمات يدوي' },
         values: [
           { en: '—', ar: '—' },
           { en: 'Yes', ar: 'نعم' },
           { en: 'Yes', ar: 'نعم' },
+          { en: '—', ar: '—' },
         ],
       },
       {
-        label: { en: 'CV upload', ar: 'رفع السيرة' },
+        label: { en: 'Cover letter generator', ar: 'مولّد خطاب التقديم' },
         values: [
           { en: '—', ar: '—' },
           { en: 'Yes', ar: 'نعم' },
           { en: 'Yes', ar: 'نعم' },
-        ],
-      },
-      {
-        label: { en: 'Cover letter upload / paste', ar: 'رفع / لصق خطاب التقديم' },
-        values: [
           { en: '—', ar: '—' },
-          { en: 'Yes', ar: 'نعم' },
-          { en: 'Yes', ar: 'نعم' },
         ],
       },
       {
-        label: { en: 'CV studio (build & improve)', ar: 'استوديو السيرة (بناء وتحسين)' },
+        label: { en: 'CV studio', ar: 'استوديو السيرة' },
         values: [
           { en: '—', ar: '—' },
           { en: '—', ar: '—' },
           { en: 'Yes', ar: 'نعم' },
+          { en: '—', ar: '—' },
         ],
       },
       {
-        label: { en: 'Cover letter generate + assist', ar: 'توليد ومساعدة خطاب التقديم' },
+        label: { en: 'Negotiation scripts', ar: 'سكربتات التفاوض' },
         values: [
           { en: '—', ar: '—' },
           { en: '—', ar: '—' },
           { en: 'Yes', ar: 'نعم' },
+          { en: 'Pack included', ar: 'الباقة مشمولة' },
         ],
       },
       {
-        label: { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+        label: { en: 'Apply on your behalf', ar: 'تقديم نيابةً عنك' },
         values: [
-          { en: '—', ar: '—' },
-          { en: 'Standard', ar: 'أساسي' },
-          { en: 'Full + insights', ar: 'كامل + رؤى' },
+          { en: 'Never', ar: 'أبداً' },
+          { en: 'Never', ar: 'أبداً' },
+          { en: 'Never', ar: 'أبداً' },
+          { en: 'Never', ar: 'أبداً' },
         ],
       },
     ],
@@ -500,8 +556,8 @@ export const C = {
           ar: 'من هي جيني؟',
         },
         a: {
-          en: 'Jeannie is your interview-verified career agent. She shortlists fitting roles and applies only after you approve — never spam.',
-          ar: 'جيني وكيلتك المهنية الموثّقة بالمقابلة. ترشّح أدواراً مناسبة وتقدّم فقط بعد موافقتك — بلا إرسال عشوائي.',
+          en: 'Jeannie is your AI interview coach. She runs mock interviews, helps build your verified passport, and preps materials — you always apply yourself on the company site.',
+          ar: 'جيني مدربة مقابلاتك بالذكاء الاصطناعي. تُجري مقابلات تجريبية، تساعد في بناء جوازك الموثّق، وتجهّز المواد — وأنت تقدّم دائماً بنفسك على موقع الشركة.',
         },
       },
       {
@@ -510,8 +566,8 @@ export const C = {
           ar: 'ما الفرق بين جيني وجيني برو؟',
         },
         a: {
-          en: 'Basic is FREE. Jeannie is $24.99/mo with approve-gated applies and CV/cover letter upload. Jeannie Pro is $39.99/mo with more applies, full CV studio, cover letter generate/assist, and richer tracking.',
-          ar: 'الأساسي مجاني. جيني بـ $24.99/شهر مع تقديمات بموافقتك ورفع السيرة وخطاب التقديم. جيني برو بـ $39.99/شهر مع تقديمات أكثر واستوديو سيرة وتوليد/مساعدة الخطاب وتتبعاً أغنى.',
+          en: 'Basic is FREE. Jeannie is $14.99/mo for unlimited mocks, full passport, manual tracker, cover letters, and salary benchmarks. Jeannie Pro is $29.99/mo with CV studio, negotiation scripts, and priority ranking. Mastery Pack is $44.99 one-time for 5 company-specific mocks.',
+          ar: 'الأساسي مجاني. جيني بـ $14.99/شهر لمقابلات بلا حدود وجواز كامل ومتتبّع يدوي وخطابات ومؤشرات رواتب. جيني برو بـ $29.99/شهر مع استوديو سيرة وسكربتات تفاوض وترتيب أولوية. باقة الإتقان بـ $44.99 مرة واحدة لـ ٥ مقابلات خاصة بشركات.',
         },
       },
       {
@@ -536,12 +592,12 @@ export const C = {
       },
       {
         q: {
-          en: 'How does Jeannie actually apply for me?',
-          ar: 'كيف تقدّم جيني عني فعلياً؟',
+          en: 'Does Jeannie apply to jobs for me?',
+          ar: 'هل تقدّم جيني للوظائف عني؟',
         },
         a: {
-          en: 'She shortlists external roles, waits for your approval, then delivers a packet (CV + cover letter + passport proof) by recruiter email when possible, or as a tracked packet with the role’s apply link. No spray-applying and no ATS bot-filling.',
-          ar: 'ترشّح وظائف خارجية، تنتظر موافقتك، ثم تسلّم حزمة (سيرة + خطاب + دليل الجواز) ببريد المسؤول عن التوظيف عند الإمكان، أو كحزمة متتبّعة مع رابط التقديم. بلا إرسال عشوائي وبلا ملء آلي لأنظمة التتبع.',
+          en: 'She doesn’t. Muqabaleh never applies on your behalf. You practice for the role, prep materials, then click “Apply on Company Site” and submit yourself.',
+          ar: 'لا تفعل. مقابلة لا تقدّم نيابةً عنك. تتدرّب للدور، تجهّز موادك، ثم تضغط «قدّم على موقع الشركة» وتقدّم بنفسك.',
         },
       },
       {
@@ -550,8 +606,8 @@ export const C = {
           ar: 'هل توجد تجربة مجانية؟',
         },
         a: {
-          en: 'Yes. Basic is FREE — one practice interview and passport preview. Upgrade to Jeannie ($24.99/mo) or Jeannie Pro ($39.99/mo) when you want her applying for you.',
-          ar: 'نعم. الأساسي مجاني — مقابلة تدريب واحدة ومعاينة الجواز. رقِّ إلى جيني ($24.99/شهر) أو جيني برو ($39.99/شهر) عندما تريدها تقدّم عنك.',
+          en: 'Yes. Basic is FREE — one mock interview and passport preview. Upgrade to Jeannie ($14.99/mo) or Jeannie Pro ($29.99/mo) for unlimited practice and prep tools — you still apply yourself.',
+          ar: 'نعم. الأساسي مجاني — مقابلة تجريبية واحدة ومعاينة الجواز. رقِّ إلى جيني ($14.99/شهر) أو جيني برو ($29.99/شهر) لتدريب بلا حدود وأدوات تحضير — وأنت تقدّم بنفسك.',
         },
       },
       {
@@ -568,10 +624,10 @@ export const C = {
   },
   finalCta: {
     headline: {
-      en: 'Ready for your hire-ready passport?',
-      ar: 'هل أنت مستعد لجوازك الجاهز للتوظيف؟',
+      en: 'Ready to practice with Jeannie?',
+      ar: 'هل أنت مستعد للتدرّب مع جيني؟',
     },
-    startFree: { en: 'Start free', ar: 'ابدأ مجاناً' },
+    startFree: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
     hiring: { en: "I'm hiring", ar: 'أبحث عن مواهب' },
   },
   footer: {

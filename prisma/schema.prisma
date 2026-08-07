@@ -31,26 +31,34 @@ enum UserTier {
   UNLIMITED
   JEANNIE
   JEANNIE_PRO
+  /// One-time Mastery Pack ($44.99) — company-specific mocks pack, not a subscription.
+  MASTERY_PACK
 }
 
-enum JeannieOpportunityStatus {
-  SUGGESTED
-  AWAITING_APPROVAL
-  APPROVED
-  APPLYING
-  /// Packet prepared; awaiting outbound employer delivery.
-  PACKET_READY
+/// Public job board listing source (employer-posted or legal public ATS APIs).
+enum ListedJobSource {
+  EMPLOYER_POSTED
+  GREENHOUSE
+  LEVER
+  WORKABLE
+  RECRUITEE
+  ASHBY
+}
+
+enum ManualApplicationStatus {
   APPLIED
-  REJECTED_BY_USER
-  EXPIRED
-  FAILED
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
 }
 
-enum JeannieSlaStatus {
-  ACTIVE
-  FULFILLED
-  ROLLED_OVER
-  CLOSED
+enum JobMockType {
+  COMPANY_SPECIFIC
+  BEHAVIORAL
+  TECHNICAL
+  GENERAL
 }
 
 enum BookingStatus {
@@ -132,14 +140,12 @@ model User {
   partner               Partner?  @relation(fields: [partnerId], references: [id])
   sessionsLeft          Int       @default(1)
   tier                  UserTier  @default(FREE)
-  /// Monthly Jeannie approve-gated apply quota remaining.
-  appliesLeft           Int       @default(0)
-  /// When the monthly apply quota resets.
-  appliesResetAt        DateTime?
   /// Jeannie Pro: CV studio / improve tools.
   cvStudioEnabled       Boolean   @default(false)
-  /// Jeannie Pro: cover letter generate + assist.
+  /// Jeannie / Pro: cover letter generate + assist (candidate sends themselves).
   coverLetterAiEnabled  Boolean   @default(false)
+  /// Mastery Pack: remaining company-specific mock credits (one-time).
+  masteryMocksLeft      Int       @default(0)
   subscriptionExpiresAt DateTime?
   isActive              Boolean   @default(true)
   passwordResetToken    String?
@@ -171,9 +177,9 @@ model User {
   jobApplications        JobApplication[]
   mediaAssets            MediaAsset[]
   jeannieProfile         JeannieProfile?
-  jeannieOpportunities   JeannieOpportunity[]
   jeannieDocuments       JeannieDocument[]
-  jeannieSlaPeriods      JeannieSlaPeriod[]
+  manualApplications     ManualApplication[]
+  jobMockInterviews      JobMockInterview[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -437,51 +443,6 @@ model JeannieProfile {
   updatedAt       DateTime @updatedAt
 }
 
-model JeannieOpportunity {
-  id               String                   @id @default(cuid())
-  userId           String
-  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status           JeannieOpportunityStatus @default(SUGGESTED)
-  b2bJobId         String?
-  /// External catalog listing (preferred discovery source).
-  listingId        String?
-  listing          JeannieJobListing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
-  externalUrl      String?
-  applyEmail       String?
-  /// EMAIL | URL_PACKET
-  applyChannel     String?
-  companyName      String
-  title            String
-  titleAr          String?
-  city             String?
-  country          String?
-  matchScore       Int                      @default(0)
-  matchReason      String?                  @db.Text
-  matchReasonAr    String?                  @db.Text
-  descriptionSnippet      String?                  @db.Text
-  coverLetter             String?                  @db.Text
-  cvAssetId               String?
-  jobApplicationId        String?
-  /// Snapshot of Muqabaleh passport verification id at apply/packet time.
-  passportVerificationId  String?
-  /// Resend / provider message id for employer outbound.
-  employerMsgId           String?
-  failureReason           String?
-  approvedAt              DateTime?
-  appliedAt               DateTime?
-  rejectedAt              DateTime?
-  expiresAt               DateTime?
-  idempotencyKey          String?                  @unique
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
-
-  @@index([userId, status])
-  @@index([userId, createdAt])
-  @@index([b2bJobId])
-  @@index([listingId])
-  @@index([applyEmail])
-}
-
 model JeannieDocument {
   id        String   @id @default(cuid())
   userId    String
@@ -497,53 +458,107 @@ model JeannieDocument {
   @@index([userId, kind])
 }
 
-/// Cached external job inventory for Jeannie discovery (not an internal ATS bank).
-model JeannieJobListing {
-  id             String   @id @default(cuid())
-  source         String
-  sourceJobId    String
-  title          String
-  companyName    String
-  city           String?
-  country        String?
-  description    String?  @db.Text
-  applyUrl       String?
-  applyEmail     String?
-  seniority      String?
-  employmentType String?
-  raw            Json?
-  fetchedAt      DateTime @default(now())
-  expiresAt      DateTime?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  opportunities  JeannieOpportunity[]
+// ─── Public job board (Prepare-and-Verify) ───
+// Named Listed* to avoid colliding with B2B Company / B2BJob.
 
-  @@unique([source, sourceJobId])
+model ListedCompany {
+  id        String      @id @default(cuid())
+  name      String
+  slug      String      @unique
+  /// GREENHOUSE | LEVER | ASHBY | WORKABLE | RECRUITEE — null for employer-posted only
+  ats       String?
+  country   String
+  industry  String?
+  logoUrl   String?
+  website   String?
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  jobs      ListedJob[]
+  fetchLogs JobFetchLog[]
+
   @@index([isActive, country])
-  @@index([fetchedAt])
-  @@index([applyEmail])
+  @@index([ats])
 }
 
-/// Promise ledger: delivered APPLIED count vs monthly promised applies.
-/// Unmet promise rolls into the next period so we never silently break the plan.
-model JeannieSlaPeriod {
-  id               String          @id @default(cuid())
-  userId           String
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  periodStart      DateTime
-  periodEnd        DateTime
-  promisedApplies  Int
-  deliveredApplies Int             @default(0)
-  rolledInApplies  Int             @default(0)
-  rolledOutApplies Int             @default(0)
-  status           JeannieSlaStatus @default(ACTIVE)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+model ListedJob {
+  id             String          @id @default(cuid())
+  companyId      String?
+  company        ListedCompany?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  /// ATS-native id for scraped jobs
+  externalId     String?
+  title          String
+  slug           String
+  location       String
+  department     String?
+  employmentType String?
+  /// 300-char summary ONLY — never full rehost
+  description    String          @db.Text
+  requirements   String?         @db.Text
+  applyUrl       String
+  source         ListedJobSource @default(EMPLOYER_POSTED)
+  isActive       Boolean         @default(true)
+  postedAt       DateTime        @default(now())
+  fetchedAt      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  mockInterviews JobMockInterview[]
+
+  @@unique([companyId, externalId])
+  @@unique([companyId, slug])
+  @@index([isActive, postedAt])
+  @@index([source])
+  @@index([location])
+  @@index([department])
+}
+
+model JobMockInterview {
+  id          String      @id @default(cuid())
+  jobId       String?
+  job         ListedJob?  @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        JobMockType @default(GENERAL)
+  transcript  String?     @db.Text
+  audioUrl    String?
+  scores      Json?
+  feedback    Json?
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([jobId])
+}
+
+/// Candidate-owned personal CRM — not auto-populated, no employer emails.
+model ManualApplication {
+  id          String                   @id @default(cuid())
+  userId      String
+  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  role        String
+  status      ManualApplicationStatus  @default(APPLIED)
+  notes       String?                  @db.Text
+  appliedDate DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  createdAt   DateTime                 @default(now())
 
   @@index([userId, status])
-  @@index([periodEnd, status])
-  @@index([userId, periodStart])
+  @@index([userId, updatedAt])
+}
+
+model JobFetchLog {
+  id           String         @id @default(cuid())
+  companyId    String?
+  company      ListedCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  url          String
+  statusCode   Int?
+  responseSize Int?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+
+  @@index([companyId, createdAt])
+  @@index([createdAt])
 }
 
 // ─── AuditLog ───

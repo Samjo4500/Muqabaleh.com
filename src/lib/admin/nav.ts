@@ -129,11 +129,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'applicants',
     items: [{ href: '/admin/applicants', label: 'applicants' }],
   },
-  {
-    id: 'jeannie',
-    label: 'jeannieOps',
-    items: [{ href: '/admin/jeannie', label: 'jeannieOps' }],
-  },
 ];
 
 export function parentAdminPath(pathname: string): string {

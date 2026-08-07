@@ -14,6 +14,7 @@ const PLAN_FACETS = [
   'mq-facet mq-facet-cyan mq-facet-shape-soft',
   'mq-facet mq-facet-teal mq-facet-shape-soft',
   'mq-facet mq-facet-gold mq-facet-shape-wave',
+  'mq-facet mq-facet-cyan mq-facet-shape-wave',
 ] as const;
 
 function FreeVisual() {
@@ -273,7 +274,7 @@ export function CrystalPricing() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid gap-4 lg:grid-cols-3"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
         >
           {C.pricing.plans.map((plan, index) => (
             <motion.article
@@ -425,7 +426,7 @@ export function CrystalPricing() {
 
           <div className="mq-compare overflow-hidden rounded-[1.75rem] border border-white/10 bg-black/20 backdrop-blur-sm">
             {/* Header */}
-            <div className="mq-compare-head grid grid-cols-[1.4fr_repeat(3,minmax(0,1fr))] gap-2 border-b border-white/10 px-3 py-4 md:gap-4 md:px-6">
+            <div className="mq-compare-head grid grid-cols-[1.2fr_repeat(4,minmax(0,1fr))] gap-2 border-b border-white/10 px-3 py-4 md:gap-3 md:px-6">
               <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/35">
                 {isAr ? 'الميزة' : 'Feature'}
               </span>
@@ -446,7 +447,7 @@ export function CrystalPricing() {
               {C.pricing.compare.map((row, rowIdx) => (
                 <motion.div
                   key={row.label.en}
-                  className="mq-compare-row grid grid-cols-[1.4fr_repeat(3,minmax(0,1fr))] items-center gap-2 px-3 py-3.5 md:gap-4 md:px-6"
+                  className="mq-compare-row grid grid-cols-[1.2fr_repeat(4,minmax(0,1fr))] items-center gap-2 px-3 py-3.5 md:gap-3 md:px-6"
                   initial={{ opacity: 0, y: 12 }}
                   animate={compareInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
                   transition={{ delay: 0.06 * rowIdx, duration: 0.45, ease: easeCrystal }}

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAtsSession, unauthorized } from '@/lib/ats/auth';
 import { getEntitlementSnapshot } from '@/lib/plans/entitlements';
-import { getSlaSnapshot } from '@/lib/jeannie/sla';
 
 export async function GET() {
   const user = await getAtsSession();
@@ -11,6 +10,5 @@ export async function GET() {
   if (!snap) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
-  const sla = await getSlaSnapshot(user.id);
-  return NextResponse.json({ ...snap, sla });
+  return NextResponse.json(snap);
 }

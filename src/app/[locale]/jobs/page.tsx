@@ -6,7 +6,7 @@ import { JobsHero } from '@/components/jobs/JobsHero';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
 import { DEMO_JOBS } from '@/lib/jobs/demo-listings';
-import { isMenaLocation } from '@/lib/jobs/mena';
+import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
 import { JobsBrowserClient } from './jobs-browser-client';
@@ -41,6 +41,7 @@ export default async function JobsPage() {
       department: j.department,
       employmentType: j.employmentType,
       description: j.description,
+      requirements: j.requirements ?? null,
       applyUrl: j.applyUrl,
       source: j.source,
       salaryLabel: null as string | null,
@@ -48,9 +49,9 @@ export default async function JobsPage() {
     }));
   }
 
-  // Social-ad board: only roles with a MENA/GCC location signal
-  jobs = jobs.filter(
-    (j) => isMenaLocation(j.location) || isMenaLocation(j.company?.country),
+  // Strict MENA board: location/title signal (or Remote/Hybrid from regional HQ)
+  jobs = jobs.filter((j) =>
+    isMenaListedRole(j.location, j.title, j.company?.country),
   );
 
   return (
@@ -91,7 +92,7 @@ async function loadJobsSafe() {
         },
       },
       orderBy: { postedAt: 'desc' },
-      take: 160,
+      take: 400,
     });
     return rows.map((j) => ({
       id: j.id,
@@ -101,6 +102,7 @@ async function loadJobsSafe() {
       department: j.department,
       employmentType: j.employmentType,
       description: j.description,
+      requirements: j.requirements,
       applyUrl: j.applyUrl,
       source: j.source,
       salaryLabel: j.salaryLabel,

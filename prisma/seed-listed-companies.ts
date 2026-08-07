@@ -26,6 +26,13 @@ const COMPANIES: SeedCompany[] = [
   { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'MENA', industry: 'SaaS' },
   { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA', industry: 'SaaS' },
   { name: 'Trendyol', slug: 'trendyol', ats: 'LEVER', country: 'KSA/GCC', industry: 'E-commerce' },
+  { name: 'Syarah', slug: 'syarah', ats: 'WORKABLE', country: 'KSA/Jordan', industry: 'Automotive' },
+  { name: 'Datadog', slug: 'datadog', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
+  { name: 'Cloudflare', slug: 'cloudflare', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Infrastructure' },
+  { name: 'GitLab', slug: 'gitlab', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'DevTools' },
+  { name: 'Elastic', slug: 'elastic', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
+  { name: 'MongoDB', slug: 'mongodb', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Database' },
+  { name: 'Coinbase', slug: 'coinbase', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Crypto' },
   { name: 'Stripe', slug: 'stripe', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Fintech' },
   { name: 'Spotify', slug: 'spotify', ats: 'LEVER', country: 'Global→MENA', industry: 'Media' },
 ];

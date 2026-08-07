@@ -101,6 +101,51 @@ export const MENA_COUNTRY_LABELS: Record<MenaCountryKey, { en: string; ar: strin
   other: { en: 'Wider MENA', ar: 'أوسع المنطقة' },
 };
 
+/** Flag emoji for country filter tiles (a11y label still uses MENA_COUNTRY_LABELS). */
+export const MENA_COUNTRY_FLAGS: Record<MenaCountryKey, string> = {
+  uae: '🇦🇪',
+  ksa: '🇸🇦',
+  egypt: '🇪🇬',
+  qatar: '🇶🇦',
+  kuwait: '🇰🇼',
+  bahrain: '🇧🇭',
+  oman: '🇴🇲',
+  jordan: '🇯🇴',
+  lebanon: '🇱🇧',
+  morocco: '🇲🇦',
+  tunisia: '🇹🇳',
+  algeria: '🇩🇿',
+  iraq: '🇮🇶',
+  palestine: '🇵🇸',
+  libya: '🇱🇾',
+  sudan: '🇸🇩',
+  yemen: '🇾🇪',
+  other: '🌍',
+};
+
+/** True for regional HQ tags (UAE, KSA…) — false for Global→MENA aggregator boards. */
+export function isRegionalMenaHq(country: string | null | undefined): boolean {
+  if (!country) return false;
+  if (/global/i.test(country)) return false;
+  return isMenaLocation(country);
+}
+
+/** Keep vague Remote/Hybrid rows only when the employer is a regional MENA HQ. */
+export function isMenaListedRole(
+  location: string | null | undefined,
+  title?: string | null,
+  companyCountry?: string | null,
+): boolean {
+  if (isMenaLocation(location, title)) return true;
+  if (
+    isRegionalMenaHq(companyCountry) &&
+    /\b(remote|hybrid|anywhere)\b/i.test(`${location || ''} ${title || ''}`)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /** @deprecated use classifyMenaCountry */
 export type MenaCityKey = MenaCountryKey;
 /** @deprecated use classifyMenaCountry */

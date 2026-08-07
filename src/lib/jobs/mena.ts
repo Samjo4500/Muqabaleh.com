@@ -57,8 +57,11 @@ export const MENA_COUNTRY_ORDER: MenaCountryKey[] = [
 export function classifyMenaCountry(
   location: string,
   country?: string | null,
+  title?: string | null,
 ): MenaCountryKey {
-  const hay = `${location} ${country || ''}`.toLowerCase();
+  // Include title — Greenhouse often puts "Egypt" / "UAE & Oman" only in the title
+  // when location is a vague "Hybrid" / "Remote".
+  const hay = `${location} ${country || ''} ${title || ''}`.toLowerCase();
   if (/\b(dubai|abu dhabi|sharjah|ajman|uae|united arab)\b/.test(hay)) return 'uae';
   if (/\b(riyadh|jeddah|dammam|khobar|neom|saudi|ksa)\b/.test(hay)) return 'ksa';
   if (/\b(cairo|giza|alexandria|egypt)\b/.test(hay)) return 'egypt';

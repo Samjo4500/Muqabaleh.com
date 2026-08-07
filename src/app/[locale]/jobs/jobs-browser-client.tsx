@@ -45,9 +45,10 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const countryCounts = useMemo(() => {
     const map = new Map<MenaCountryKey, number>();
     for (const j of initialJobs) {
-      const key = classifyMenaCountry(j.location, j.company?.country);
+      const key = classifyMenaCountry(j.location, j.company?.country, j.title);
       map.set(key, (map.get(key) || 0) + 1);
     }
+    // Always render every MENA flag tile — 0 means not covered yet
     return MENA_COUNTRY_ORDER.map((k) => ({
       key: k,
       count: map.get(k) || 0,
@@ -63,7 +64,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
     const needle = q.trim().toLowerCase();
     return initialJobs
       .filter((j) => {
-        const key = classifyMenaCountry(j.location, j.company?.country);
+        const key = classifyMenaCountry(j.location, j.company?.country, j.title);
         if (country !== 'all' && key !== country) return false;
         if (salaryOnly && !j.salaryLabel) return false;
         if (!needle) return true;
@@ -133,25 +134,30 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
             />
           </div>
 
-          <div className="flex gap-2.5 overflow-x-auto pb-1 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <CountryFlagTile
-              flag="🌐"
-              label={isAr ? 'كل المنطقة' : 'All MENA'}
-              count={initialJobs.length}
-              active={country === 'all'}
-              onClick={() => setCountry('all')}
-            />
-            {countryCounts.map((c) => (
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-white/40">
+              {isAr ? 'كل دول المنطقة' : 'All MENA countries'}
+            </p>
+            <div className="flex flex-wrap gap-2 pb-1 pt-0.5">
               <CountryFlagTile
-                key={c.key}
-                flag={MENA_COUNTRY_FLAGS[c.key]}
-                label={isAr ? MENA_COUNTRY_LABELS[c.key].ar : MENA_COUNTRY_LABELS[c.key].en}
-                count={c.count}
-                active={country === c.key}
-                muted={c.count === 0}
-                onClick={() => setCountry(c.key)}
+                flag="🌐"
+                label={isAr ? 'الكل' : 'All'}
+                count={initialJobs.length}
+                active={country === 'all'}
+                onClick={() => setCountry('all')}
               />
-            ))}
+              {countryCounts.map((c) => (
+                <CountryFlagTile
+                  key={c.key}
+                  flag={MENA_COUNTRY_FLAGS[c.key]}
+                  label={isAr ? MENA_COUNTRY_LABELS[c.key].ar : MENA_COUNTRY_LABELS[c.key].en}
+                  count={c.count}
+                  active={country === c.key}
+                  muted={c.count === 0}
+                  onClick={() => setCountry(c.key)}
+                />
+              ))}
+            </div>
           </div>
 
           <button
@@ -217,7 +223,11 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
               const href = job.company
                 ? localePath(`/companies/${job.company.slug}/${job.slug}`, locale)
                 : localePath(`/jobs/${job.id}`, locale);
-              const countryKey = classifyMenaCountry(job.location, job.company?.country);
+              const countryKey = classifyMenaCountry(
+                job.location,
+                job.company?.country,
+                job.title,
+              );
               const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
               return (
                 <motion.li key={job.id} variants={fadeUp} custom={i} className="group">
@@ -348,7 +358,7 @@ function SpotlightRole({
     `/interview/prequal?company=${encodeURIComponent(job.company?.name || '')}&role=${encodeURIComponent(job.title)}&job=${encodeURIComponent(job.id)}`,
     locale,
   );
-  const countryKey = classifyMenaCountry(job.location, job.company?.country);
+  const countryKey = classifyMenaCountry(job.location, job.company?.country, job.title);
   const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
 
   return (

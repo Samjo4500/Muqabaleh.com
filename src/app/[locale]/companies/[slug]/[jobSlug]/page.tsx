@@ -6,6 +6,7 @@ import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
 import { getDemoJob } from '@/lib/jobs/demo-listings';
+import { safeJobText } from '@/lib/jobs/job-details';
 import {
   classifyMenaCountry,
   MENA_COUNTRY_FLAGS,
@@ -78,13 +79,17 @@ export default async function CompanyJobPage({
             <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white/45">
               {isAr ? 'تفاصيل المنصب' : 'Position details'}
             </h2>
-            <p className="mt-3 text-base leading-relaxed text-white/70">{job.description}</p>
+            <p className="mt-3 text-base leading-relaxed text-white/70">
+              {safeJobText(job.description)}
+            </p>
             {job.requirements ? (
               <>
                 <h3 className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-white/45">
                   {isAr ? 'المتطلبات' : 'Requirements'}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">{job.requirements}</p>
+                <p className="mt-2 text-sm leading-relaxed text-white/60">
+                  {safeJobText(job.requirements, 400)}
+                </p>
               </>
             ) : (
               <p className="mt-4 text-sm text-white/40">
@@ -149,15 +154,15 @@ async function loadJob(companySlug: string, jobSlug: string) {
       return {
         id: row.id,
         title: row.title,
-        description: row.description,
-        requirements: row.requirements,
+        description: safeJobText(row.description),
+        requirements: row.requirements ? safeJobText(row.requirements, 400) : null,
         location: row.location,
         department: row.department,
         employmentType: row.employmentType,
         applyUrl: row.applyUrl,
         salaryLabel: row.salaryLabel,
         companyName: row.company.name,
-        countryKey: classifyMenaCountry(row.location, row.company.country),
+        countryKey: classifyMenaCountry(row.location, row.company.country, row.title),
       };
     }
   } catch (err) {
@@ -169,14 +174,14 @@ async function loadJob(companySlug: string, jobSlug: string) {
   return {
     id: demo.id,
     title: demo.title,
-    description: demo.description,
-    requirements: demo.requirements,
+    description: safeJobText(demo.description),
+    requirements: demo.requirements ? safeJobText(demo.requirements, 400) : null,
     location: demo.location,
     department: demo.department,
     employmentType: demo.employmentType,
     applyUrl: demo.applyUrl,
     salaryLabel: null as string | null,
     companyName: demo.company.name,
-    countryKey: classifyMenaCountry(demo.location, demo.company.country),
+    countryKey: classifyMenaCountry(demo.location, demo.company.country, demo.title),
   };
 }

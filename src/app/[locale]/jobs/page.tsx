@@ -6,6 +6,7 @@ import { JobsHero } from '@/components/jobs/JobsHero';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
 import { DEMO_JOBS } from '@/lib/jobs/demo-listings';
+import { safeJobText } from '@/lib/jobs/job-details';
 import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
@@ -101,8 +102,8 @@ async function loadJobsSafe() {
       location: j.location,
       department: j.department,
       employmentType: j.employmentType,
-      description: j.description,
-      requirements: j.requirements,
+      description: safeJobText(j.description),
+      requirements: j.requirements ? safeJobText(j.requirements, 400) : null,
       applyUrl: j.applyUrl,
       source: j.source,
       salaryLabel: j.salaryLabel,

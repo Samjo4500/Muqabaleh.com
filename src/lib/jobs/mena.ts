@@ -123,14 +123,16 @@ export const MENA_COUNTRY_FLAGS: Record<MenaCountryKey, string> = {
   other: '🌍',
 };
 
-/** True for regional HQ tags (UAE, KSA…) — false for Global→MENA aggregator boards. */
+/** True for a concrete regional HQ (UAE, KSA…) — not Global→MENA or bare “MENA” tags. */
 export function isRegionalMenaHq(country: string | null | undefined): boolean {
   if (!country) return false;
   if (/global/i.test(country)) return false;
+  // Board region tags are not HQs — would otherwise keep Poland/Berlin remotes
+  if (/^\s*mena\s*$/i.test(country)) return false;
   return isMenaLocation(country);
 }
 
-/** Keep vague Remote/Hybrid rows only when the employer is a regional MENA HQ. */
+/** Keep vague Remote/Hybrid rows only when the employer is a concrete MENA HQ. */
 export function isMenaListedRole(
   location: string | null | undefined,
   title?: string | null,
@@ -139,7 +141,11 @@ export function isMenaListedRole(
   if (isMenaLocation(location, title)) return true;
   if (
     isRegionalMenaHq(companyCountry) &&
-    /\b(remote|hybrid|anywhere)\b/i.test(`${location || ''} ${title || ''}`)
+    /\b(remote|hybrid|anywhere)\b/i.test(`${location || ''} ${title || ''}`) &&
+    // Still drop obvious non-MENA cities even for HQ remotes
+    !/\b(poland|warsaw|berlin|germany|deutschland|bucharest|romania|london|paris|amsterdam|dublin)\b/i.test(
+      `${location || ''} ${title || ''}`,
+    )
   ) {
     return true;
   }

@@ -308,11 +308,11 @@ async function fetchForCompany(company: {
   }
 
   const seen = new Set<string>();
-  let upserted = 0;
-  for (const job of parsed) {
+  const now = new Date();
+  const ops = parsed.map((job) => {
     seen.add(job.externalId);
     const slug = `${slugify(job.title)}-${job.externalId.slice(0, 8)}`;
-    await db.listedJob.upsert({
+    return db.listedJob.upsert({
       where: {
         companyId_externalId: {
           companyId: company.id,
@@ -332,7 +332,7 @@ async function fetchForCompany(company: {
         source,
         isActive: true,
         postedAt: job.postedAt,
-        fetchedAt: new Date(),
+        fetchedAt: now,
       },
       update: {
         title: job.title,
@@ -342,10 +342,16 @@ async function fetchForCompany(company: {
         description: job.description.slice(0, DESC_MAX),
         applyUrl: job.applyUrl,
         isActive: true,
-        fetchedAt: new Date(),
+        fetchedAt: now,
       },
     });
-    upserted += 1;
+  });
+  // Parallel chunks — sequential upserts of large boards (100+) blow Vercel timeouts
+  const CHUNK = 25;
+  let upserted = 0;
+  for (let i = 0; i < ops.length; i += CHUNK) {
+    await Promise.all(ops.slice(i, i + CHUNK));
+    upserted += Math.min(CHUNK, ops.length - i);
   }
 
   const stale = await db.listedJob.findMany({

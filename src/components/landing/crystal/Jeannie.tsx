@@ -9,6 +9,7 @@ import { localePath } from '@/i18n/navigation';
 import { MuqabalehScoreBadge } from '@/components/brand';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
+import { JeannieNameLockup } from './JeannieNameLockup';
 import { easeCrystal, fadeUp } from './motion';
 
 type OfferKey = 'interview' | 'passport' | 'shortlist' | 'approve' | 'apply';
@@ -347,7 +348,7 @@ export function CrystalJeannie() {
                 ))}
               </div>
 
-              {/* Name lockup */}
+              {/* Name lockup — Jeannie · avatar · جيني */}
               <motion.div
                 className="absolute start-5 top-5 z-20 md:start-8 md:top-8"
                 initial={{ opacity: 0, y: -10 }}
@@ -355,13 +356,7 @@ export function CrystalJeannie() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.55, ease: easeCrystal }}
               >
-                <motion.p
-                  className="mq-display text-4xl font-bold tracking-tight text-white md:text-6xl"
-                  animate={{ opacity: [0.88, 1, 0.88] }}
-                  transition={{ duration: 3.4, repeat: Infinity }}
-                >
-                  <BiInline bi={C.jeannie.name} />
-                </motion.p>
+                <JeannieNameLockup size="xl" />
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-md border border-teal-300/35 bg-teal-400/15 px-2.5 py-1 text-[10px] font-black tracking-[0.16em] text-teal-100">
                     {isAr ? 'أنت تقدّم' : 'YOU APPLY'}

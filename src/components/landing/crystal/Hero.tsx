@@ -10,6 +10,7 @@ import { MuqabalehScoreBadge, type ScoreBadgeStatus } from '@/components/brand/m
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
+import { JeannieNameLockup } from './JeannieNameLockup';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
 const HERO_SCORE = 86;
@@ -165,15 +166,9 @@ export function CrystalHero() {
             <BiInline bi={C.hero.eyebrow} />
           </motion.p>
 
-          <motion.p
-            variants={fadeUp}
-            className="mq-display mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl"
-          >
-            Jeannie
-            <span className="ms-2 text-teal-200/90" dir="rtl" lang="ar">
-              جيني
-            </span>
-          </motion.p>
+          <motion.div variants={fadeUp} className="mb-3">
+            <JeannieNameLockup size="lg" />
+          </motion.div>
 
           <motion.div variants={fadeUp}>
             <T

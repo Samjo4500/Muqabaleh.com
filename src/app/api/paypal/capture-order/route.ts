@@ -143,8 +143,8 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Upgrade entitlements (sessions + Jeannie apply quota + Pro tools)
-      if (config.sessions > 0 || config.applies > 0) {
+      // Upgrade entitlements (sessions / subscriptions / Mastery Pack)
+      if (config.sessions > 0 || config.planKey !== 'FREE') {
         await creditPlanPurchase(userId, planCode);
       }
     } catch (dbErr) {

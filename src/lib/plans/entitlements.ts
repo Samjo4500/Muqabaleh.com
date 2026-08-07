@@ -1,89 +1,140 @@
 import { db } from '@/lib/db';
 import { UserTier } from '@/lib/enums';
 
-export type PlanKey = 'FREE' | 'JEANNIE' | 'JEANNIE_PRO' | 'PRO' | 'UNLIMITED';
+export type PlanKey = 'FREE' | 'JEANNIE' | 'JEANNIE_PRO' | 'MASTERY_PACK' | 'PRO' | 'UNLIMITED';
 
 export type PlanEntitlements = {
   key: PlanKey;
   label: { en: string; ar: string };
-  monthlyApplies: number;
+  priceUsd: string;
+  pricePeriod: 'free' | 'month' | 'once';
+  /** Monthly mock interview allowance; null = unlimited */
+  monthlyMocks: number | null;
   unlimitedPractice: boolean;
   fullPassport: boolean;
-  cvUpload: boolean;
-  coverLetterUpload: boolean;
-  cvStudio: boolean;
+  /** Manual Kanban application tracker (candidate-owned CRM) */
+  manualTracker: boolean;
   coverLetterAi: boolean;
-  tracker: 'none' | 'standard' | 'full';
-  notSpamApproveGate: boolean;
+  cvStudio: boolean;
+  salaryBenchmarks: boolean;
+  negotiationScripts: boolean;
+  priorityEmployerRanking: boolean;
+  topTenBadge: boolean;
+  /** One-time Mastery Pack company-specific mock credits */
+  masteryMocks: number;
 };
 
+/**
+ * Prepare-and-Verify pricing (Aug 2026 pivot):
+ * 1. Free — $0
+ * 2. Jeannie — $14.99/mo
+ * 3. Jeannie Pro — $29.99/mo
+ * 4. Mastery Pack — $44.99 one-time
+ *
+ * No apply quotas. No apply-on-behalf.
+ */
 export const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
   FREE: {
     key: 'FREE',
-    label: { en: 'Free', ar: 'مجاني' },
-    monthlyApplies: 0,
+    label: { en: 'Basic', ar: 'أساسي' },
+    priceUsd: '0',
+    pricePeriod: 'free',
+    monthlyMocks: 1,
     unlimitedPractice: false,
-    fullPassport: true,
-    cvUpload: false,
-    coverLetterUpload: false,
-    cvStudio: false,
+    fullPassport: false,
+    manualTracker: false,
     coverLetterAi: false,
-    tracker: 'none',
-    notSpamApproveGate: false,
-  },
-  PRO: {
-    // Legacy pack — treat as practice-only bridge
-    key: 'PRO',
-    label: { en: 'Pro (legacy)', ar: 'احترافي (قديم)' },
-    monthlyApplies: 0,
-    unlimitedPractice: false,
-    fullPassport: true,
-    cvUpload: false,
-    coverLetterUpload: false,
     cvStudio: false,
-    coverLetterAi: false,
-    tracker: 'none',
-    notSpamApproveGate: false,
-  },
-  UNLIMITED: {
-    // Legacy unlimited — map to Jeannie Pro-like practice until migrated
-    key: 'UNLIMITED',
-    label: { en: 'Unlimited (legacy)', ar: 'بلا حدود (قديم)' },
-    monthlyApplies: 20,
-    unlimitedPractice: true,
-    fullPassport: true,
-    cvUpload: true,
-    coverLetterUpload: true,
-    cvStudio: true,
-    coverLetterAi: true,
-    tracker: 'full',
-    notSpamApproveGate: true,
+    salaryBenchmarks: false,
+    negotiationScripts: false,
+    priorityEmployerRanking: false,
+    topTenBadge: false,
+    masteryMocks: 0,
   },
   JEANNIE: {
     key: 'JEANNIE',
     label: { en: 'Jeannie', ar: 'جيني' },
-    monthlyApplies: 10,
+    priceUsd: '14.99',
+    pricePeriod: 'month',
+    monthlyMocks: null,
     unlimitedPractice: true,
     fullPassport: true,
-    cvUpload: true,
-    coverLetterUpload: true,
+    manualTracker: true,
+    coverLetterAi: true,
     cvStudio: false,
-    coverLetterAi: false,
-    tracker: 'standard',
-    notSpamApproveGate: true,
+    salaryBenchmarks: true,
+    negotiationScripts: false,
+    priorityEmployerRanking: false,
+    topTenBadge: false,
+    masteryMocks: 0,
   },
   JEANNIE_PRO: {
     key: 'JEANNIE_PRO',
     label: { en: 'Jeannie Pro', ar: 'جيني برو' },
-    monthlyApplies: 20,
+    priceUsd: '29.99',
+    pricePeriod: 'month',
+    monthlyMocks: null,
     unlimitedPractice: true,
     fullPassport: true,
-    cvUpload: true,
-    coverLetterUpload: true,
-    cvStudio: true,
+    manualTracker: true,
     coverLetterAi: true,
-    tracker: 'full',
-    notSpamApproveGate: true,
+    cvStudio: true,
+    salaryBenchmarks: true,
+    negotiationScripts: true,
+    priorityEmployerRanking: true,
+    topTenBadge: true,
+    masteryMocks: 0,
+  },
+  MASTERY_PACK: {
+    key: 'MASTERY_PACK',
+    label: { en: 'Mastery Pack', ar: 'باقة الإتقان' },
+    priceUsd: '44.99',
+    pricePeriod: 'once',
+    monthlyMocks: null,
+    unlimitedPractice: false,
+    fullPassport: true,
+    manualTracker: false,
+    coverLetterAi: false,
+    cvStudio: false,
+    salaryBenchmarks: false,
+    negotiationScripts: true,
+    priorityEmployerRanking: false,
+    topTenBadge: false,
+    masteryMocks: 5,
+  },
+  PRO: {
+    key: 'PRO',
+    label: { en: 'Pro (legacy)', ar: 'احترافي (قديم)' },
+    priceUsd: '9.99',
+    pricePeriod: 'once',
+    monthlyMocks: 3,
+    unlimitedPractice: false,
+    fullPassport: true,
+    manualTracker: false,
+    coverLetterAi: false,
+    cvStudio: false,
+    salaryBenchmarks: false,
+    negotiationScripts: false,
+    priorityEmployerRanking: false,
+    topTenBadge: false,
+    masteryMocks: 0,
+  },
+  UNLIMITED: {
+    key: 'UNLIMITED',
+    label: { en: 'Unlimited (legacy)', ar: 'بلا حدود (قديم)' },
+    priceUsd: '29.99',
+    pricePeriod: 'month',
+    monthlyMocks: null,
+    unlimitedPractice: true,
+    fullPassport: true,
+    manualTracker: true,
+    coverLetterAi: true,
+    cvStudio: true,
+    salaryBenchmarks: true,
+    negotiationScripts: true,
+    priorityEmployerRanking: true,
+    topTenBadge: true,
+    masteryMocks: 0,
   },
 };
 
@@ -98,13 +149,7 @@ function monthFromNow(): Date {
   return d;
 }
 
-function addMonths(from: Date, months = 1): Date {
-  const d = new Date(from);
-  d.setMonth(d.getMonth() + months);
-  return d;
-}
-
-const PAID_APPLY_TIERS = new Set<string>([
+const PAID_SUB_TIERS = new Set<string>([
   UserTier.JEANNIE,
   UserTier.JEANNIE_PRO,
   UserTier.UNLIMITED,
@@ -118,30 +163,28 @@ async function hasActivePaypalSubscription(userId: string): Promise<boolean> {
 }
 
 /**
- * Keep apply quota in sync with billing period.
- * - Expired paid tiers without an active PayPal sub → revoke to Free
- * - Monthly reset only while the paid period is still valid
+ * Keep subscription state fresh for paid monthly tiers.
+ * Expired paid tiers without an active PayPal sub → revoke to Free.
  */
-export async function ensureApplyQuotaFresh(userId: string) {
+export async function ensureSubscriptionFresh(userId: string) {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
       tier: true,
-      appliesLeft: true,
-      appliesResetAt: true,
       cvStudioEnabled: true,
       coverLetterAiEnabled: true,
       sessionsLeft: true,
+      masteryMocksLeft: true,
       subscriptionExpiresAt: true,
     },
   });
   if (!user) return null;
 
   const now = new Date();
-  const isPaidApplyTier = PAID_APPLY_TIERS.has(String(user.tier));
+  const isPaidSub = PAID_SUB_TIERS.has(String(user.tier));
 
-  if (isPaidApplyTier) {
+  if (isPaidSub) {
     const expired =
       user.subscriptionExpiresAt != null &&
       user.subscriptionExpiresAt.getTime() <= now.getTime();
@@ -154,11 +197,10 @@ export async function ensureApplyQuotaFresh(userId: string) {
           select: {
             id: true,
             tier: true,
-            appliesLeft: true,
-            appliesResetAt: true,
             cvStudioEnabled: true,
             coverLetterAiEnabled: true,
             sessionsLeft: true,
+            masteryMocksLeft: true,
             subscriptionExpiresAt: true,
           },
         });
@@ -166,92 +208,39 @@ export async function ensureApplyQuotaFresh(userId: string) {
     }
   }
 
-  const ent = entitlementsForTier(user.tier);
-  const periodValid =
-    !isPaidApplyTier ||
-    (user.subscriptionExpiresAt != null &&
-      user.subscriptionExpiresAt.getTime() > now.getTime()) ||
-    (await hasActivePaypalSubscription(userId));
-
-  const needsReset =
-    ent.monthlyApplies > 0 &&
-    periodValid &&
-    (!user.appliesResetAt || user.appliesResetAt.getTime() <= now.getTime());
-
-  if (!needsReset) return user;
-
-  const resetFrom =
-    user.appliesResetAt && user.appliesResetAt.getTime() <= now.getTime()
-      ? user.appliesResetAt
-      : now;
-  const nextReset = addMonths(resetFrom, 1);
-
-  // Promise-preserving reset: roll unmet applies into the new period.
-  try {
-    const { processExpiredSlaPeriods, ensureActiveSlaPeriod } = await import(
-      '@/lib/jeannie/sla'
-    );
-    await processExpiredSlaPeriods();
-    const period = await ensureActiveSlaPeriod(userId);
-    if (period) {
-      return db.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          tier: true,
-          appliesLeft: true,
-          appliesResetAt: true,
-          cvStudioEnabled: true,
-          coverLetterAiEnabled: true,
-          sessionsLeft: true,
-          subscriptionExpiresAt: true,
-        },
-      });
-    }
-  } catch (err) {
-    console.warn('[ensureApplyQuotaFresh] SLA reset fallback', err);
-  }
-
-  return db.user.update({
-    where: { id: userId },
-    data: {
-      appliesLeft: ent.monthlyApplies,
-      appliesResetAt: nextReset,
-      cvStudioEnabled: ent.cvStudio,
-      coverLetterAiEnabled: ent.coverLetterAi,
-    },
-    select: {
-      id: true,
-      tier: true,
-      appliesLeft: true,
-      appliesResetAt: true,
-      cvStudioEnabled: true,
-      coverLetterAiEnabled: true,
-      sessionsLeft: true,
-      subscriptionExpiresAt: true,
-    },
-  });
+  return user;
 }
 
+/** @deprecated Use ensureSubscriptionFresh — apply quotas removed in Prepare-and-Verify pivot. */
+export const ensureApplyQuotaFresh = ensureSubscriptionFresh;
+
 export async function getEntitlementSnapshot(userId: string) {
-  const user = await ensureApplyQuotaFresh(userId);
+  const user = await ensureSubscriptionFresh(userId);
   if (!user) return null;
   const ent = entitlementsForTier(user.tier);
+  const canPractice =
+    ent.unlimitedPractice ||
+    user.sessionsLeft > 0 ||
+    user.masteryMocksLeft > 0;
   return {
     tier: user.tier,
     plan: ent,
     sessionsLeft: user.sessionsLeft,
-    appliesLeft: user.appliesLeft,
-    appliesResetAt: user.appliesResetAt,
+    masteryMocksLeft: user.masteryMocksLeft,
     subscriptionExpiresAt: user.subscriptionExpiresAt,
     cvStudioEnabled: user.cvStudioEnabled || ent.cvStudio,
     coverLetterAiEnabled: user.coverLetterAiEnabled || ent.coverLetterAi,
-    canPractice: ent.unlimitedPractice || user.sessionsLeft > 0,
-    canUseJeannie: ent.monthlyApplies > 0,
-    canApply: ent.monthlyApplies > 0 && user.appliesLeft > 0,
-    cvUpload: ent.cvUpload,
-    coverLetterUpload: ent.coverLetterUpload,
-    tracker: ent.tracker,
+    canPractice,
+    canUseJeannie: ent.key === 'JEANNIE' || ent.key === 'JEANNIE_PRO' || ent.key === 'UNLIMITED',
+    manualTracker: ent.manualTracker,
+    salaryBenchmarks: ent.salaryBenchmarks,
+    negotiationScripts: ent.negotiationScripts,
+    cvUpload: ent.cvStudio || ent.coverLetterAi,
+    coverLetterUpload: ent.coverLetterAi,
+    /** Removed — always false (no apply-on-behalf). */
+    canApply: false,
+    appliesLeft: 0,
+    tracker: ent.manualTracker ? ('full' as const) : ('none' as const),
   };
 }
 
@@ -270,63 +259,13 @@ export async function canUseCoverLetterAi(userId: string): Promise<boolean> {
   return !!snap?.coverLetterAiEnabled;
 }
 
-export async function assertCanApply(userId: string): Promise<
-  | { ok: true; appliesLeft: number }
-  | { ok: false; error: string; status: number }
-> {
-  const snap = await getEntitlementSnapshot(userId);
-  if (!snap) return { ok: false, error: 'User not found', status: 404 };
-  if (!snap.canUseJeannie) {
-    return {
-      ok: false,
-      error: 'Jeannie applies require a Jeannie plan',
-      status: 403,
-    };
-  }
-  if (snap.appliesLeft <= 0) {
-    return {
-      ok: false,
-      error: 'Monthly apply quota exhausted',
-      status: 402,
-    };
-  }
-  return { ok: true, appliesLeft: snap.appliesLeft };
-}
-
-/**
- * Atomic apply debit — only succeeds when appliesLeft > 0.
- * Safe under concurrent requests.
- */
-export async function debitApply(userId: string) {
-  const gate = await assertCanApply(userId);
-  if (!gate.ok) return gate;
-
-  const updated = await db.user.updateMany({
-    where: { id: userId, appliesLeft: { gt: 0 } },
-    data: { appliesLeft: { decrement: 1 } },
-  });
-  if (updated.count === 0) {
-    return {
-      ok: false as const,
-      error: 'Monthly apply quota exhausted',
-      status: 402,
-    };
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { appliesLeft: true },
-  });
-  return { ok: true as const, appliesLeft: user?.appliesLeft ?? 0 };
-}
-
 /**
  * Debit one practice session unless the plan has unlimited practice.
- * Idempotent when `alreadyDebited` is true for the session.
+ * Mastery Pack credits debit masteryMocksLeft first for company-specific mocks when flagged.
  */
 export async function debitPractice(
   userId: string,
-  opts?: { alreadyDebited?: boolean },
+  opts?: { alreadyDebited?: boolean; useMasteryCredit?: boolean },
 ): Promise<
   | { ok: true; sessionsLeft: number; unlimited: boolean; debited: boolean }
   | { ok: false; error: string; status: number }
@@ -348,6 +287,26 @@ export async function debitPractice(
 
   const snap = await getEntitlementSnapshot(userId);
   if (!snap) return { ok: false, error: 'User not found', status: 404 };
+
+  if (opts?.useMasteryCredit && snap.masteryMocksLeft > 0) {
+    const updated = await db.user.updateMany({
+      where: { id: userId, masteryMocksLeft: { gt: 0 } },
+      data: { masteryMocksLeft: { decrement: 1 } },
+    });
+    if (updated.count === 0) {
+      return { ok: false, error: 'No Mastery Pack mocks left', status: 402 };
+    }
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { sessionsLeft: true },
+    });
+    return {
+      ok: true,
+      sessionsLeft: user?.sessionsLeft ?? 0,
+      unlimited: false,
+      debited: true,
+    };
+  }
 
   if (snap.plan.unlimitedPractice) {
     return {
@@ -394,7 +353,7 @@ export type GrantPlanInput = {
   userId: string;
   planKey: PlanKey;
   sessions?: number;
-  /** Billing period end; defaults to +1 month for apply plans. */
+  /** Billing period end; defaults to +1 month for subscriptions. */
   expiresAt?: Date | null;
 };
 
@@ -411,11 +370,13 @@ export async function grantPlan({
       ? UserTier.JEANNIE
       : planKey === 'JEANNIE_PRO'
         ? UserTier.JEANNIE_PRO
-        : planKey === 'UNLIMITED'
-          ? UserTier.UNLIMITED
-          : planKey === 'PRO'
-            ? UserTier.PRO
-            : UserTier.FREE;
+        : planKey === 'MASTERY_PACK'
+          ? UserTier.MASTERY_PACK
+          : planKey === 'UNLIMITED'
+            ? UserTier.UNLIMITED
+            : planKey === 'PRO'
+              ? UserTier.PRO
+              : UserTier.FREE;
 
   if (planKey === 'PRO') {
     const add = sessions ?? 3;
@@ -424,8 +385,6 @@ export async function grantPlan({
       data: {
         tier,
         sessionsLeft: { increment: add },
-        appliesLeft: 0,
-        appliesResetAt: null,
         cvStudioEnabled: false,
         coverLetterAiEnabled: false,
         subscriptionExpiresAt: null,
@@ -433,46 +392,35 @@ export async function grantPlan({
     });
   }
 
+  if (planKey === 'MASTERY_PACK') {
+    return db.user.update({
+      where: { id: userId },
+      data: {
+        // Keep existing subscription tier if already on Jeannie; otherwise tag Mastery.
+        // One-time pack adds mock credits + negotiation access flags via masteryMocksLeft.
+        masteryMocksLeft: { increment: ent.masteryMocks },
+        coverLetterAiEnabled: true,
+      },
+    });
+  }
+
   const periodEnd =
     expiresAt === undefined
-      ? ent.monthlyApplies > 0
+      ? ent.pricePeriod === 'month'
         ? monthFromNow()
         : null
       : expiresAt;
 
-  const updated = await db.user.update({
+  return db.user.update({
     where: { id: userId },
     data: {
       tier,
-      sessionsLeft: sessions ?? (ent.unlimitedPractice ? 999 : 1),
-      appliesLeft: ent.monthlyApplies,
-      appliesResetAt: ent.monthlyApplies > 0 ? (periodEnd ?? monthFromNow()) : null,
+      sessionsLeft: sessions ?? (ent.unlimitedPractice ? 999 : ent.monthlyMocks ?? 1),
       cvStudioEnabled: ent.cvStudio,
       coverLetterAiEnabled: ent.coverLetterAi,
       subscriptionExpiresAt: periodEnd,
     },
   });
-
-  // Promise ledger — roll unmet prior applies forward so we never break the plan.
-  if (ent.monthlyApplies > 0 && periodEnd) {
-    try {
-      const { openSlaPeriodForGrant } = await import('@/lib/jeannie/sla');
-      const sla = await openSlaPeriodForGrant(userId, ent.monthlyApplies, periodEnd);
-      if (sla && sla.promisedApplies !== ent.monthlyApplies) {
-        await db.user.update({
-          where: { id: userId },
-          data: {
-            appliesLeft: sla.promisedApplies,
-            appliesResetAt: periodEnd,
-          },
-        });
-      }
-    } catch (err) {
-      console.warn('[grantPlan] SLA period open failed', err);
-    }
-  }
-
-  return updated;
 }
 
 export async function revokeToFree(userId: string) {
@@ -481,8 +429,6 @@ export async function revokeToFree(userId: string) {
     data: {
       tier: UserTier.FREE,
       sessionsLeft: 1,
-      appliesLeft: 0,
-      appliesResetAt: null,
       cvStudioEnabled: false,
       coverLetterAiEnabled: false,
       subscriptionExpiresAt: null,

@@ -1,9 +1,9 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { Check, CreditCard, Sparkles, Crown } from 'lucide-react';
+import { Check, CreditCard, Sparkles, Crown, Package } from 'lucide-react';
 import { GlowCard } from '@/components/brand';
-import { PayPalCheckoutButton } from '@/components/PayPalCheckoutButton';
+import { PayPalCheckoutButton, type PlanType } from '@/components/PayPalCheckoutButton';
 
 export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
   const t = useTranslations('app.packages');
@@ -11,53 +11,90 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
   const locale = useLocale();
   const isAr = locale === 'ar';
 
-  const plans = [
+  const plans: Array<{
+    key: PlanType;
+    popular: boolean;
+    icon: typeof Sparkles;
+    name: string;
+    price: string;
+    period: string;
+    sub: string;
+    features: string[];
+  }> = [
     {
-      key: 'jeannie' as const,
+      key: 'jeannie',
       popular: true,
       icon: Sparkles,
       name: isAr ? 'جيني' : 'Jeannie',
-      price: '$24.99',
+      price: '$14.99',
       period: isAr ? '/شهر' : '/mo',
-      sub: isAr ? '١٠ تقديمات بموافقتك — بلا عشوائية' : '10 approve-gated applies — NOT SPAM',
+      sub: isAr
+        ? 'مقابلات بلا حدود · جواز كامل · أدوات تحضير'
+        : 'Unlimited mocks · full passport · prep tools',
       features: isAr
         ? [
-            'تدريب ذكي بلا حدود مع جيني',
+            'مقابلات تجريبية بلا حدود',
             'جواز موثّق كامل',
-            'جيني تقدّم — ١٠ / شهر',
-            'رفع السيرة وخطاب التقديم',
-            'متتبّع الطلبات',
+            'متتبّع تقديمات يدوي',
+            'مولّد خطاب التقديم',
+            'مؤشرات الرواتب',
           ]
         : [
-            'Unlimited practice with Jeannie',
+            'Unlimited mock interviews',
             'Full verified passport',
-            'Jeannie applies — 10 / month',
-            'Upload CV + cover letter',
-            'Application tracker',
+            'Manual application tracker',
+            'Cover letter generator',
+            'Salary benchmarks',
           ],
     },
     {
-      key: 'jeannie_pro' as const,
+      key: 'jeannie_pro',
       popular: false,
       icon: Crown,
       name: isAr ? 'جيني برو' : 'Jeannie Pro',
-      price: '$39.99',
+      price: '$29.99',
       period: isAr ? '/شهر' : '/mo',
-      sub: isAr ? '٢٠ تقديماً + استوديو سيرة وخطاب' : '20 applies + CV studio & cover letter AI',
+      sub: isAr
+        ? 'استوديو سيرة · تفاوض · ترتيب أولوية'
+        : 'CV studio · negotiation · priority ranking',
       features: isAr
         ? [
             'كل مزايا جيني',
-            'جيني تقدّم — ٢٠ / شهر',
             'استوديو سيرة كامل',
-            'توليد ومساعدة خطاب التقديم',
-            'متتبّع كامل مع رؤى',
+            'سكربتات تفاوض بالذكاء الاصطناعي',
+            'ترتيب أولوية لدى أصحاب العمل',
+            'شارة أعلى ١٠٪',
           ]
         : [
             'Everything in Jeannie',
-            'Jeannie applies — 20 / month',
             'Full CV studio',
-            'Cover letter generate + assist',
-            'Full tracker + insights',
+            'AI negotiation scripts',
+            'Priority employer ranking',
+            '“Top 10%” badge',
+          ],
+    },
+    {
+      key: 'mastery_pack',
+      popular: false,
+      icon: Package,
+      name: isAr ? 'باقة الإتقان' : 'Mastery Pack',
+      price: '$44.99',
+      period: isAr ? ' مرة واحدة' : ' once',
+      sub: isAr
+        ? '٥ مقابلات شركات + باقة تفاوض — بلا اشتراك'
+        : '5 company mocks + negotiation pack — no subscription',
+      features: isAr
+        ? [
+            '٥ مقابلات تجريبية خاصة بشركات',
+            'باقة سكربتات التفاوض',
+            'بلا اشتراك شهري',
+            'تحتفظ بتدريب الأساسي المجاني',
+          ]
+        : [
+            '5 company-specific mock interviews',
+            'Negotiation script pack',
+            'No monthly subscription',
+            'Keep your free Basic practice',
           ],
     },
   ];
@@ -68,8 +105,8 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
         <h1 className="mq-display text-2xl font-bold text-white md:text-3xl">{t('title')}</h1>
         <p className="mt-2 text-sm text-white/55">
           {isAr
-            ? 'فعّل جيني عبر PayPal. بعد موافقتك ترسل حزمة تقديم (سيرة + خطاب + جواز) بالبريد أو برابط متتبّع — ليس عشوائياً ولا ملء آلي لأنظمة التتبع.'
-            : 'Unlock Jeannie via PayPal. After you approve, she delivers an apply packet (CV + cover letter + passport) by recruiter email or tracked apply link — NOT SPAM, no ATS bot-filling.'}
+            ? 'فعّل التجهيز والتوثيق عبر PayPal. مقابلة لا تقدّم نيابةً عنك — أنت تقدّم على موقع الشركة.'
+            : 'Unlock Prepare-and-Verify via PayPal. Muqabaleh never applies for you — you apply on the company site.'}
         </p>
       </div>
 
@@ -80,7 +117,7 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
           </span>
         ) : null}
         <span className="inline-flex items-center rounded-full border border-teal-300/30 bg-teal-400/10 px-3 py-1 text-xs font-bold text-teal-100">
-          NOT SPAM
+          {isAr ? 'أنت تقدّم' : 'YOU APPLY'}
         </span>
         <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
           {tCommon('currencyNote')}
@@ -103,7 +140,7 @@ export function PackagesClient({ isSandbox }: { isSandbox: boolean }) {
         </div>
       </GlowCard>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         {plans.map((plan) => {
           const Icon = plan.icon;
           return (

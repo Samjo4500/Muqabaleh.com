@@ -11,27 +11,32 @@ export const PLAN_CONFIG: Record<
     description: string;
     tier: string;
     sessions: number;
-    applies: number;
     planKey: PlanKey;
   }
 > = {
   JEANNIE: {
-    amount: '24.99',
+    amount: '14.99',
     currency: 'USD',
-    description: 'Muqabaleh Jeannie — 10 approve-gated applies / month',
+    description: 'Muqabaleh Jeannie — unlimited mocks, passport, prep tools / month',
     tier: UserTier.JEANNIE,
     sessions: 999,
-    applies: 10,
     planKey: 'JEANNIE',
   },
   JEANNIE_PRO: {
-    amount: '39.99',
+    amount: '29.99',
     currency: 'USD',
-    description: 'Muqabaleh Jeannie Pro — 20 applies + CV studio + cover letter AI',
+    description: 'Muqabaleh Jeannie Pro — CV studio, negotiation scripts, priority ranking',
     tier: UserTier.JEANNIE_PRO,
     sessions: 999,
-    applies: 20,
     planKey: 'JEANNIE_PRO',
+  },
+  MASTERY_PACK: {
+    amount: '44.99',
+    currency: 'USD',
+    description: 'Muqabaleh Mastery Pack — 5 company-specific mocks + negotiation scripts',
+    tier: UserTier.MASTERY_PACK,
+    sessions: 5,
+    planKey: 'MASTERY_PACK',
   },
   // Legacy packs kept for existing checkouts / receipts
   PRO: {
@@ -40,7 +45,6 @@ export const PLAN_CONFIG: Record<
     description: 'Muqabaleh Pro — 3 AI Interviews + Full Reports',
     tier: UserTier.PRO,
     sessions: 3,
-    applies: 0,
     planKey: 'PRO',
   },
   UNLIMITED: {
@@ -49,7 +53,6 @@ export const PLAN_CONFIG: Record<
     description: 'Muqabaleh Unlimited — Unlimited AI Interviews + All Features',
     tier: UserTier.UNLIMITED,
     sessions: 999,
-    applies: 20,
     planKey: 'UNLIMITED',
   },
   HUMAN_STD: {
@@ -58,7 +61,6 @@ export const PLAN_CONFIG: Record<
     description: 'Human Interview — Standard',
     tier: 'STANDARD_HUMAN',
     sessions: 0,
-    applies: 0,
     planKey: 'FREE',
   },
   HUMAN_PRO: {
@@ -67,7 +69,6 @@ export const PLAN_CONFIG: Record<
     description: 'Human Interview — Pro',
     tier: 'PRO_HUMAN',
     sessions: 0,
-    applies: 0,
     planKey: 'FREE',
   },
 };
@@ -321,7 +322,7 @@ export async function deactivateSubscription(paypalSubscriptionId: string) {
 export async function creditPlanPurchase(userId: string, planCode: string) {
   const config = PLAN_CONFIG[planCode.toUpperCase()];
   if (!config) return null;
-  if (config.sessions <= 0 && config.applies <= 0) return null;
+  if (config.sessions <= 0 && config.planKey === 'FREE') return null;
   return grantPlan({
     userId,
     planKey: config.planKey,

@@ -7,10 +7,6 @@
     {
       "path": "/api/email/daily-summary",
       "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/jeannie/cron",
-      "schedule": "0 */6 * * *"
     }
   ]
 }

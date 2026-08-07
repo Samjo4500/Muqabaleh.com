@@ -16,6 +16,7 @@ import { C } from './copy';
 const NAV_LINKS = [
   { bi: C.nav.howItWorks, href: '#jeannie-magic' },
   { bi: C.nav.jeannie, href: '#jeannie' },
+  { bi: { en: 'Jobs', ar: 'الوظائف' }, href: '/jobs' },
   { bi: C.nav.forCompanies, href: '/business' },
   { bi: C.nav.partners, href: '/partners' },
   { bi: C.nav.pricing, href: '#pricing' },

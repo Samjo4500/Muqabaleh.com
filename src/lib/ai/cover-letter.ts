@@ -9,18 +9,18 @@ export type CoverLetterInput = {
   jobSummary?: string;
   candidateSummary?: string;
   language?: 'en' | 'ar' | 'both';
-  opportunityId?: string;
 };
 
 /**
- * Jeannie Pro — cover letter generate + assist.
+ * Cover letter generate + assist — candidate sends themselves.
+ * Available on Jeannie and Jeannie Pro (Prepare-and-Verify).
  */
 export async function generateCoverLetter(input: CoverLetterInput) {
   const allowed = await canUseCoverLetterAi(input.userId);
   if (!allowed) {
     return {
       ok: false as const,
-      error: 'Cover letter assist requires Jeannie Pro',
+      error: 'Cover letter assist requires Jeannie or Jeannie Pro',
       status: 403,
     };
   }
@@ -63,8 +63,9 @@ export async function generateCoverLetter(input: CoverLetterInput) {
   };
 
   const { data, mode } = await generateJsonWithFallback(
-    `You write concise professional cover letters for Muqabaleh Jeannie Pro.
-Never spam. Keep under 180 words. Mention verified interview passport briefly.
+    `You write concise professional cover letters for Muqabaleh candidates.
+The candidate will send this themselves — never imply Muqabaleh applies for them.
+Keep under 180 words. Mention verified interview passport briefly.
 Return JSON: { "content": string, "contentAr": string, "subject": string }`,
     `Company: ${company}
 Role: ${role}
@@ -89,17 +90,9 @@ Language: ${input.language || 'both'}`,
         mode,
         company,
         role,
-        opportunityId: input.opportunityId || null,
       },
     },
   });
-
-  if (input.opportunityId) {
-    await db.jeannieOpportunity.updateMany({
-      where: { id: input.opportunityId, userId: input.userId },
-      data: { coverLetter: content },
-    });
-  }
 
   return { ok: true as const, document: doc, mode };
 }

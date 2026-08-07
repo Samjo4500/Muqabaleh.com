@@ -496,6 +496,13 @@ model ListedJob {
   description    String          @db.Text
   requirements   String?         @db.Text
   applyUrl       String
+  /// Structured pay when ATS publishes it (Lever salaryRange / JD parse). Never invented.
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String?
+  salaryInterval String?
+  /// Display string e.g. "AED 15,000–20,000/mo"
+  salaryLabel    String?
   source         ListedJobSource @default(EMPLOYER_POSTED)
   isActive       Boolean         @default(true)
   postedAt       DateTime        @default(now())
@@ -510,6 +517,7 @@ model ListedJob {
   @@index([source])
   @@index([location])
   @@index([department])
+  @@index([salaryCurrency, salaryMin])
 }
 
 model JobMockInterview {

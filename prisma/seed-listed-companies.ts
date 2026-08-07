@@ -25,6 +25,7 @@ const COMPANIES: SeedCompany[] = [
   { name: 'Aldar Properties', slug: 'aldar', ats: 'LEVER', country: 'UAE', industry: 'Real Estate' },
   { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'MENA', industry: 'SaaS' },
   { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA', industry: 'SaaS' },
+  { name: 'Trendyol', slug: 'trendyol', ats: 'LEVER', country: 'KSA/GCC', industry: 'E-commerce' },
   { name: 'Stripe', slug: 'stripe', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Fintech' },
   { name: 'Spotify', slug: 'spotify', ats: 'LEVER', country: 'Global→MENA', industry: 'Media' },
 ];

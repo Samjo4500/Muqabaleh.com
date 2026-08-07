@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
-import { ExternalLink, Sparkles } from 'lucide-react';
+import { Banknote, ExternalLink, Sparkles } from 'lucide-react';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
@@ -41,6 +41,18 @@ export default async function CompanyJobPage({
           <p className="mt-3 text-base text-white/55">
             {[job.location, job.department, job.employmentType].filter(Boolean).join(' · ')}
           </p>
+          {job.salaryLabel ? (
+            <p className="mt-3 inline-flex items-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-100">
+              <Banknote size={16} />
+              {job.salaryLabel}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-white/40">
+              {isAr
+                ? 'الراتب غير معلن هنا — يظهر على موقع الشركة عند التقديم.'
+                : 'Pay not published here — check the company site when you apply.'}
+            </p>
+          )}
 
           <div className="mt-8 rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 md:p-8">
             <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white/45">
@@ -117,6 +129,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
         department: row.department,
         employmentType: row.employmentType,
         applyUrl: row.applyUrl,
+        salaryLabel: row.salaryLabel,
         companyName: row.company.name,
       };
     }
@@ -135,6 +148,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
     department: demo.department,
     employmentType: demo.employmentType,
     applyUrl: demo.applyUrl,
+    salaryLabel: null as string | null,
     companyName: demo.company.name,
   };
 }

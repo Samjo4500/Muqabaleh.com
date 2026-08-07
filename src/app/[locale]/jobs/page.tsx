@@ -21,9 +21,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titleAr: 'وظائف المنطقة — تدرّب ثم قدّم | مقابلة',
     titleEn: 'MENA jobs — practice then apply | Muqabaleh',
     descAr:
-      'أدوار حقيقية في الخليج ومصر والشام. تدرّب مع جيني ثم قدّم بنفسك على موقع الشركة.',
+      'أدوار حقيقية عبر دول المنطقة مع راتب معلن عند نشره. تدرّب مع جيني ثم قدّم بنفسك على موقع الشركة.',
     descEn:
-      'Live roles across the Gulf, Egypt, and the Levant. Practice with Jeannie, then apply yourself on the company site.',
+      'Live roles across MENA with published salary when employers share it. Practice with Jeannie, then apply yourself on the company site.',
   });
 }
 
@@ -43,6 +43,7 @@ export default async function JobsPage() {
       description: j.description,
       applyUrl: j.applyUrl,
       source: j.source,
+      salaryLabel: null as string | null,
       company: j.company,
     }));
   }
@@ -102,6 +103,7 @@ async function loadJobsSafe() {
       description: j.description,
       applyUrl: j.applyUrl,
       source: j.source,
+      salaryLabel: j.salaryLabel,
       company: j.company,
     }));
   } catch (err) {

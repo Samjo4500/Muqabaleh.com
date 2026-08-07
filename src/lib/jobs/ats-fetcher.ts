@@ -13,7 +13,14 @@
 
 import { db } from '@/lib/db';
 import type { ListedJobSource } from '@prisma/client';
-import { isMenaLocation, MENA_FILTER_SLUGS } from '@/lib/jobs/mena';
+import { isMenaLocation } from '@/lib/jobs/mena';
+import {
+  resolveSalary,
+  salaryFromGreenhouse,
+  salaryFromLeverRange,
+  salaryFromText,
+  type SalaryFields,
+} from '@/lib/jobs/salary';
 
 export const MUQABALEH_UA =
   'MuqabalehBot/1.0 (https://muqabaleh.com; contact@muqabaleh.com)';
@@ -31,7 +38,7 @@ type NormalizedJob = {
   description: string;
   applyUrl: string;
   postedAt: Date;
-};
+} & SalaryFields;
 
 const lastHitByDomain = new Map<string, number>();
 const robotsCache = new Map<string, { allowed: boolean; checkedAt: number }>();
@@ -167,6 +174,7 @@ function parseGreenhouse(json: unknown, boardSlug: string): NormalizedJob[] {
     const description = truncateDesc(
       rawContent || `${String(job.title || 'Role')} — ${loc}${dept ? ` · ${dept}` : ''}`,
     );
+    const pay = resolveSalary(salaryFromGreenhouse(job), rawContent);
     return {
       externalId: id,
       title: String(job.title || 'Role'),
@@ -176,6 +184,7 @@ function parseGreenhouse(json: unknown, boardSlug: string): NormalizedJob[] {
       description,
       applyUrl: String(job.absolute_url || `https://boards.greenhouse.io/${boardSlug}/jobs/${id}`),
       postedAt: job.updated_at ? new Date(String(job.updated_at)) : new Date(),
+      ...pay,
     };
   }).filter((j) => j.externalId);
 }
@@ -187,15 +196,22 @@ function parseLever(json: unknown, companySlug: string): NormalizedJob[] {
     const cats = (job.categories || {}) as Record<string, string>;
     const lists = (job.lists || []) as Array<{ text?: string; content?: string }>;
     const snippet = lists.map((l) => l.text || l.content || '').join(' ');
+    const body = String(job.descriptionPlain || job.description || '');
+    const salary = resolveSalary(
+      salaryFromLeverRange(job.salaryRange),
+      snippet,
+      body,
+    );
     return {
       externalId: id,
       title: String(job.text || 'Role'),
       location: cats.location || 'Remote',
       department: cats.team || cats.department || undefined,
       employmentType: cats.commitment || undefined,
-      description: truncateDesc(snippet || String(job.descriptionPlain || job.description || '')),
+      description: truncateDesc(snippet || body),
       applyUrl: String(job.hostedUrl || job.applyUrl || `https://jobs.lever.co/${companySlug}/${id}`),
       postedAt: job.createdAt ? new Date(Number(job.createdAt)) : new Date(),
+      ...salary,
     };
   }).filter((j) => j.externalId);
 }
@@ -208,15 +224,17 @@ function parseWorkable(json: unknown, accountSlug: string): NormalizedJob[] {
     const city = String(job.city || '').trim();
     const country = String(job.country || '').trim();
     const loc = [city, country].filter(Boolean).join(', ') || String(job.location || 'Remote');
+    const desc = String(job.description || job.snippet || '');
     return {
       externalId: id,
       title: String(job.title || 'Role'),
       location: loc,
       department: String(job.department || '') || undefined,
       employmentType: String(job.employment_type || '') || undefined,
-      description: truncateDesc(String(job.description || job.snippet || '')),
+      description: truncateDesc(desc || `${String(job.title || 'Role')} — ${loc}`),
       applyUrl: String(job.url || `https://apply.workable.com/${accountSlug}/j/${id}/`),
       postedAt: job.published_on ? new Date(String(job.published_on)) : new Date(),
+      ...salaryFromText(desc),
     };
   }).filter((j) => j.externalId);
 }
@@ -226,15 +244,17 @@ function parseRecruitee(json: unknown, slug: string): NormalizedJob[] {
   const offers = Array.isArray(root?.offers) ? root.offers : [];
   return offers.map((offer) => {
     const id = String(offer.id ?? '');
+    const desc = String(offer.description || offer.description_html || '').replace(/<[^>]+>/g, ' ');
     return {
       externalId: id,
       title: String(offer.title || 'Role'),
       location: String(offer.location || offer.city || 'Remote'),
       department: String(offer.department || '') || undefined,
       employmentType: String(offer.employment_type_code || '') || undefined,
-      description: truncateDesc(String(offer.description || offer.description_html || '').replace(/<[^>]+>/g, ' ')),
+      description: truncateDesc(desc),
       applyUrl: String(offer.careers_url || `https://${slug}.recruitee.com/o/${id}`),
       postedAt: offer.published_at ? new Date(String(offer.published_at)) : new Date(),
+      ...salaryFromText(desc),
     };
   }).filter((j) => j.externalId);
 }
@@ -258,7 +278,8 @@ async function fetchForCompany(company: {
   if (ats === 'GREENHOUSE') {
     origin = 'https://boards-api.greenhouse.io';
     path = `/v1/boards/${company.slug}/jobs`;
-    url = `${origin}${path}`;
+    // content=true unlocks JD text so we can surface published salary ranges
+    url = `${origin}${path}?content=true`;
     source = 'GREENHOUSE';
   } else if (ats === 'LEVER') {
     origin = 'https://api.lever.co';
@@ -315,12 +336,10 @@ async function fetchForCompany(company: {
     return { upserted: 0, deactivated: 0, skipped: 'parse_error' };
   }
 
-  // Global boards → keep MENA/GCC locations only (social ads target the region)
-  if (MENA_FILTER_SLUGS.has(company.slug.toLowerCase())) {
-    parsed = parsed.filter((j) => isMenaLocation(j.location, j.title));
-    if (!parsed.length) {
-      return { upserted: 0, deactivated: 0, skipped: 'no_mena_locations' };
-    }
+  // Board is MENA-only — drop Ghana/India/Pakistan noise from regional employers too
+  parsed = parsed.filter((j) => isMenaLocation(j.location, j.title));
+  if (!parsed.length) {
+    return { upserted: 0, deactivated: 0, skipped: 'no_mena_locations' };
   }
 
   const seen = new Set<string>();
@@ -328,6 +347,13 @@ async function fetchForCompany(company: {
   const ops = parsed.map((job) => {
     seen.add(job.externalId);
     const slug = `${slugify(job.title)}-${job.externalId.slice(0, 8)}`;
+    const salary = {
+      salaryMin: job.salaryMin,
+      salaryMax: job.salaryMax,
+      salaryCurrency: job.salaryCurrency,
+      salaryInterval: job.salaryInterval,
+      salaryLabel: job.salaryLabel,
+    };
     return db.listedJob.upsert({
       where: {
         companyId_externalId: {
@@ -345,6 +371,7 @@ async function fetchForCompany(company: {
         employmentType: job.employmentType,
         description: job.description.slice(0, DESC_MAX),
         applyUrl: job.applyUrl,
+        ...salary,
         source,
         isActive: true,
         postedAt: job.postedAt,
@@ -357,6 +384,7 @@ async function fetchForCompany(company: {
         employmentType: job.employmentType,
         description: job.description.slice(0, DESC_MAX),
         applyUrl: job.applyUrl,
+        ...salary,
         isActive: true,
         fetchedAt: now,
       },

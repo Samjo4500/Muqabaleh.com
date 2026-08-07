@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { pageMetadata } from '@/lib/seo';
-import { PortalParked } from '@/components/portal/PortalParked';
+import { localePath } from '@/i18n/navigation';
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -10,15 +11,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/portal',
-    titleAr: 'بوابة الوظائف قريباً — مقابلة',
-    titleEn: 'Job Portal coming soon — Muqabaleh',
-    descAr: 'السوق متوقفة مؤقتاً. احصل على جواز مقابلة ودع جيني تقدّم عنك باحتراف.',
-    descEn: 'Marketplace paused for now. Get your Muqabaleh passport and let Jeannie apply professionally for you.',
+    titleAr: 'بوابة الوظائف — مقابلة',
+    titleEn: 'Job Portal — Muqabaleh',
+    descAr: 'تصفّح الأدوار، تدرّب مع جيني، ثم قدّم بنفسك على موقع الشركة.',
+    descEn: 'Browse roles, practice with Jeannie, then apply yourself on the company site.',
   });
 }
 
+/** Legacy /portal → live Prepare-and-Verify jobs board. */
 export default async function PortalPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PortalParked />;
+  redirect(localePath('/jobs', locale));
 }

@@ -206,7 +206,7 @@ export function CrystalPricing() {
           <T as="p" bi={C.pricing.subtitle} className="text-base text-white/65 md:text-lg" />
         </motion.div>
 
-        {/* NOT SPAM banner */}
+        {/* YOU APPLY banner */}
         <motion.div
           variants={fadeUp}
           initial="hidden"

@@ -5,9 +5,19 @@ import { authOptions } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { generatePlanForPrequalId } from '@/lib/interview/plan-generator';
+import { sanitizeCompanyMock } from '@/lib/interview/company-mock';
 
 const schema = z.object({
   prequalId: z.string().min(1),
+  companyMock: z
+    .object({
+      companyName: z.string().min(1).max(120),
+      roleTitle: z.string().min(1).max(160),
+      jobId: z.string().max(80).optional().nullable(),
+      jobDescription: z.string().max(300).optional().nullable(),
+    })
+    .optional()
+    .nullable(),
 });
 
 export async function POST(req: NextRequest) {
@@ -30,9 +40,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { prequalId } = schema.parse(await req.json());
+    const body = schema.parse(await req.json());
     const started = Date.now();
-    const result = await generatePlanForPrequalId(prequalId, userId);
+    const result = await generatePlanForPrequalId(
+      body.prequalId,
+      userId,
+      sanitizeCompanyMock(body.companyMock),
+    );
     return NextResponse.json({
       plan: result.plan,
       sessionId: result.sessionId,

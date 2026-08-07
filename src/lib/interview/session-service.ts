@@ -118,6 +118,7 @@ export async function submitAnswer(params: {
       ? bundle.session.prequal
       : bundle.prequal;
 
+  const companyMock = bundle.plan.companyMock;
   const feedback = await evaluateAnswer({
     role: prequal?.targetRole || 'general',
     level: prequal?.seniorityLevel || 'mid',
@@ -130,6 +131,9 @@ export async function submitAnswer(params: {
     timeLimit: q.timeLimit,
     timeTaken: params.timeTakenSeconds,
     answer: params.userAnswer,
+    companyName: companyMock?.companyName,
+    roleTitle: companyMock?.roleTitle,
+    jobDescription: companyMock?.jobDescription,
   });
 
   const needFollowUp =

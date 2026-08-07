@@ -364,12 +364,12 @@ export function CrystalJeannie() {
                 </motion.p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-md border border-teal-300/35 bg-teal-400/15 px-2.5 py-1 text-[10px] font-black tracking-[0.16em] text-teal-100">
-                    {isAr ? 'ليس عشوائياً' : 'NOT SPAM'}
+                    {isAr ? 'أنت تقدّم' : 'YOU APPLY'}
                   </span>
                   <span className="text-sm font-medium text-white/70">
                     {isAr
-                      ? 'المقابِلة والوكيلة — عربية وإنجليزية'
-                      : 'Interviewer & career agent — Arabic & English'}
+                      ? 'المقابِلة والمدربة — عربية وإنجليزية'
+                      : 'Interviewer & career coach — Arabic & English'}
                   </span>
                 </div>
               </motion.div>

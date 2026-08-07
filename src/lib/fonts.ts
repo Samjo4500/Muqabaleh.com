@@ -1,4 +1,10 @@
-import { Syne, Manrope, IBM_Plex_Sans_Arabic, Readex_Pro } from 'next/font/google';
+import {
+  Syne,
+  Manrope,
+  IBM_Plex_Sans_Arabic,
+  Readex_Pro,
+  Cairo,
+} from 'next/font/google';
 
 /** Display — English atelier headlines */
 export const fontDisplayEn = Syne({
@@ -36,9 +42,19 @@ export const fontDisplayAr = Readex_Pro({
   preload: true,
 });
 
+/** Jeannie Arabic name mark — distinct from site display Arabic (Readex) */
+export const fontJeannieAr = Cairo({
+  subsets: ['arabic', 'latin'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
+  variable: '--font-jeannie-ar',
+  preload: true,
+});
+
 export const fontVariables = [
   fontDisplayEn.variable,
   fontBodyEn.variable,
   fontBodyAr.variable,
   fontDisplayAr.variable,
+  fontJeannieAr.variable,
 ].join(' ');

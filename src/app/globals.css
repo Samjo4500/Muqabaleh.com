@@ -801,6 +801,10 @@
   font-family: var(--font-display-ar), var(--font-body-ar), system-ui, sans-serif;
   letter-spacing: 0;
 }
+.mq-atelier .mq-jeannie-ar {
+  font-family: var(--font-jeannie-ar), var(--font-display-ar), sans-serif;
+  letter-spacing: 0;
+}
 .mq-atelier .mq-wrap {
   margin-inline: auto;
   max-width: 1180px;

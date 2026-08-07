@@ -4,45 +4,54 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.c
 
 export function pageMetadata(opts: {
   locale: string;
-  path: string; // e.g. '/pricing' or ''
+  path: string; // e.g. '/pricing' or '' or '/jobs'
   titleAr: string;
   titleEn: string;
   descAr: string;
   descEn: string;
   keywords?: string[];
+  noIndex?: boolean;
+  ogImage?: string;
 }): Metadata {
   const isAr = opts.locale !== 'en';
   const path = opts.path === '/' ? '' : opts.path;
-  const arUrl = `${SITE_URL}${path || '/'}`;
+  const arUrl = path ? `${SITE_URL}${path}` : SITE_URL;
   const enUrl = `${SITE_URL}/en${path}`;
-  const url = isAr ? (path ? `${SITE_URL}${path}` : SITE_URL) : enUrl;
+  const url = isAr ? arUrl : enUrl;
   const title = isAr ? opts.titleAr : opts.titleEn;
   const description = isAr ? opts.descAr : opts.descEn;
+  const image = opts.ogImage || '/og-image.jpg';
 
   return {
     title: { absolute: title },
     description,
     keywords: opts.keywords,
+    robots: opts.noIndex
+      ? { index: false, follow: false, googleBot: { index: false, follow: false } }
+      : { index: true, follow: true },
     alternates: {
       canonical: url,
       languages: {
-        'ar-SA': path ? `${SITE_URL}${path}` : SITE_URL,
+        'ar-SA': arUrl,
         'en-US': enUrl,
-        'x-default': path ? `${SITE_URL}${path}` : SITE_URL,
+        'x-default': arUrl,
       },
     },
     openGraph: {
       title,
       description,
       url,
+      siteName: 'مقابلة | Muqabaleh',
+      locale: isAr ? 'ar_SA' : 'en_US',
       type: 'website',
-      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Muqabaleh' }],
+      images: [{ url: image, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.jpg'],
+      images: [image],
     },
+    category: 'career',
   };
 }

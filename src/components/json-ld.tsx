@@ -58,7 +58,43 @@ export function WebSiteJsonLd({ locale }: { locale: string }) {
   );
 }
 
-export async function FaqJsonLd({ locale }: { locale: string }) {
+/** Prefer landing copy FAQ so schema matches visible accordion. */
+export function FaqJsonLd({
+  locale,
+  items,
+}: {
+  locale: string;
+  items?: ReadonlyArray<{
+    q: { readonly en: string; readonly ar: string };
+    a: { readonly en: string; readonly ar: string };
+  }>;
+}) {
+  const isAr = locale === 'ar';
+  const source = items;
+  if (!source?.length) return null;
+
+  const faqs = source.map((item) => ({
+    '@type': 'Question',
+    name: isAr ? item.q.ar : item.q.en,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: isAr ? item.a.ar : item.a.en,
+    },
+  }));
+
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs,
+      }}
+    />
+  );
+}
+
+/** @deprecated legacy message-namespace FAQ — kept for callers that still use getTranslations */
+export async function FaqJsonLdFromMessages({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'landing' });
   const faqs = [1, 2, 3, 4, 5, 6].map((n) => ({
     '@type': 'Question',
@@ -149,4 +185,50 @@ export function BreadcrumbJsonLd({
       }}
     />
   );
+}
+
+/** JobPosting for listed board roles — employer apply URL, short summary only. */
+export function JobPostingJsonLd({
+  title,
+  description,
+  datePosted,
+  hiringOrganization,
+  jobLocation,
+  employmentType,
+  applyUrl,
+  salaryLabel,
+  locale,
+}: {
+  title: string;
+  description: string;
+  datePosted?: string | null;
+  hiringOrganization: string;
+  jobLocation: string;
+  employmentType?: string | null;
+  applyUrl: string;
+  salaryLabel?: string | null;
+  locale: string;
+}) {
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title,
+    description: description.slice(0, 300),
+    datePosted: datePosted || new Date().toISOString().slice(0, 10),
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: hiringOrganization,
+    },
+    jobLocation: {
+      '@type': 'Place',
+      address: jobLocation,
+    },
+    url: applyUrl,
+    directApply: false,
+    inLanguage: locale === 'en' ? 'en' : 'ar',
+  };
+  if (employmentType) data.employmentType = employmentType;
+  // Only hint at pay when we have a published label — never invent currency/amount
+  if (salaryLabel) data.incentiveCompensation = salaryLabel;
+  return <JsonLd data={data} />;
 }

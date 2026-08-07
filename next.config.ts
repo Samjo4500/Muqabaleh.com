@@ -53,6 +53,9 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
+  },
   async redirects() {
     return [
       { source: '/login', destination: '/auth/signin', permanent: false },
@@ -62,6 +65,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    const noIndex = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }];
     return [
       {
         source: '/(.*)',
@@ -94,6 +98,14 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      { source: '/app/:path*', headers: noIndex },
+      { source: '/en/app/:path*', headers: noIndex },
+      { source: '/auth/:path*', headers: noIndex },
+      { source: '/en/auth/:path*', headers: noIndex },
+      { source: '/admin/:path*', headers: noIndex },
+      { source: '/en/admin/:path*', headers: noIndex },
+      { source: '/b2b/:path*', headers: noIndex },
+      { source: '/en/b2b/:path*', headers: noIndex },
     ];
   },
 };

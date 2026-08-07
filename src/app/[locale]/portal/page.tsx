@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titleEn: 'Job Portal — Muqabaleh',
     descAr: 'تصفّح الأدوار، تدرّب مع جيني، ثم قدّم بنفسك على موقع الشركة.',
     descEn: 'Browse roles, practice with Jeannie, then apply yourself on the company site.',
+    noIndex: true,
   });
 }
 

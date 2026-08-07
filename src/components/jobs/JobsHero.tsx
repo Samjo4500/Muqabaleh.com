@@ -53,6 +53,7 @@ export function JobsHero({ roleCount }: Props) {
             fill
             priority
             sizes="100vw"
+            quality={68}
             className="object-cover object-[center_35%]"
           />
         </motion.div>

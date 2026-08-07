@@ -66,7 +66,7 @@ export function CrystalNavbar() {
           className="relative z-10 flex h-full shrink-0 items-center overflow-visible"
           aria-label="Muqabaleh"
         >
-          <BrandLogo size="nav" priority />
+          <BrandLogo size="nav" />
         </Link>
 
         <div className="hidden items-center gap-6 lg:flex">

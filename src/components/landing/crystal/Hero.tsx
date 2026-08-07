@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -48,14 +48,24 @@ const HERO_FRAMES: {
 export function CrystalHero() {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const reduceMotion = useReducedMotion();
   const [frame, setFrame] = useState(0);
+  const [carouselReady, setCarouselReady] = useState(false);
+
+  // Defer carousel so LCP stays on the first frame; skip when reduced motion.
+  useEffect(() => {
+    if (reduceMotion) return;
+    const warm = window.setTimeout(() => setCarouselReady(true), 2500);
+    return () => window.clearTimeout(warm);
+  }, [reduceMotion]);
 
   useEffect(() => {
+    if (!carouselReady || reduceMotion) return;
     const id = window.setInterval(() => {
       setFrame((prev) => (prev + 1) % HERO_FRAMES.length);
     }, 7000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [carouselReady, reduceMotion]);
 
   const current = HERO_FRAMES[frame];
 
@@ -63,20 +73,24 @@ export function CrystalHero() {
     <section className="relative min-h-[100svh] overflow-hidden">
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.12, opacity: 0.55 }}
+        initial={reduceMotion ? false : { scale: 1.12, opacity: 0.55 }}
         animate={{ scale: 1.04, opacity: 1 }}
         transition={{ duration: 1.6, ease: easeCrystal }}
       >
         <motion.div
           className="absolute inset-0"
-          animate={{ scale: [1, 1.06, 1], x: [0, 12, 0], y: [0, -8, 0] }}
+          animate={
+            reduceMotion
+              ? undefined
+              : { scale: [1, 1.06, 1], x: [0, 12, 0], y: [0, -8, 0] }
+          }
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
         >
           <AnimatePresence mode="sync">
             <motion.div
               key={current.src}
               className="absolute inset-0"
-              initial={{ opacity: 0 }}
+              initial={frame === 0 ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.4, ease: 'easeInOut' }}
@@ -86,10 +100,11 @@ export function CrystalHero() {
                 alt={isAr ? current.altAr : current.altEn}
                 fill
                 priority={frame === 0}
+                fetchPriority={frame === 0 ? 'high' : 'auto'}
                 className="object-cover mq-hero-face"
                 style={{ objectPosition: current.objectPosition }}
                 sizes="100vw"
-                quality={72}
+                quality={70}
               />
             </motion.div>
           </AnimatePresence>
@@ -98,21 +113,25 @@ export function CrystalHero() {
       </motion.div>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <motion.div
-          className="absolute -start-10 top-[18%] h-56 w-56 rounded-full bg-teal-400/15 blur-3xl"
-          animate={{ y: [0, -24, 0], opacity: [0.25, 0.55, 0.25] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -end-8 top-[40%] h-64 w-64 rounded-full bg-amber-300/10 blur-3xl"
-          animate={{ y: [0, 28, 0], opacity: [0.2, 0.45, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        />
-        <motion.div
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/50 to-transparent"
-          animate={{ opacity: [0.15, 0.7, 0.15], scaleX: [0.6, 1, 0.6] }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        {!reduceMotion ? (
+          <>
+            <motion.div
+              className="absolute -start-10 top-[18%] h-56 w-56 rounded-full bg-teal-400/15 blur-3xl"
+              animate={{ y: [0, -24, 0], opacity: [0.25, 0.55, 0.25] }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute -end-8 top-[40%] h-64 w-64 rounded-full bg-amber-300/10 blur-3xl"
+              animate={{ y: [0, 28, 0], opacity: [0.2, 0.45, 0.2] }}
+              transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            />
+            <motion.div
+              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/50 to-transparent"
+              animate={{ opacity: [0.15, 0.7, 0.15], scaleX: [0.6, 1, 0.6] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </>
+        ) : null}
       </div>
 
       {/* Desktop / tablet floating score — kept off the face */}

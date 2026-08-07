@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: isAr
       ? 'خصّص جلسة مقابلة تجريبية حسب دورك ومستواك ولغتك على مقابلة.'
       : 'Tailor your Muqabaleh mock interview session to your role, level, and language.',
+    robots: { index: false, follow: false },
   };
 }
 

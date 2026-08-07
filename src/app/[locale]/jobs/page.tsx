@@ -25,6 +25,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       'وظائف حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل. تدرّب مع جيني ثم قدّم بنفسك لدى الشركة.',
     descEn:
       'Live roles across MENA with published salary when employers share it. Practice with Jeannie, then apply yourself on the company site.',
+    keywords:
+      locale === 'ar'
+        ? [
+            'وظائف الشرق الأوسط',
+            'وظائف الخليج',
+            'وظائف السعودية',
+            'وظائف الإمارات',
+            'راتب معلن',
+            'مقابلة',
+          ]
+        : [
+            'MENA jobs',
+            'Gulf jobs',
+            'Saudi jobs',
+            'UAE jobs',
+            'jobs with salary',
+            'Muqabaleh',
+          ],
   });
 }
 

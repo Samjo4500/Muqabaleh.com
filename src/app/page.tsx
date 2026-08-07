@@ -1,2 +1,6 @@
 import { redirect } from 'next/navigation';
-export default function RootPage() { redirect('/ar'); }
+
+/** Fallback when middleware does not rewrite the bare `/` path. */
+export default function RootPage() {
+  redirect('/ar');
+}

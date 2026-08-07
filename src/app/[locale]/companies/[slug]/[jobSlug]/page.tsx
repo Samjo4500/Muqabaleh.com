@@ -1,9 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { Banknote, Briefcase, ExternalLink, MapPin, Sparkles } from 'lucide-react';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
+import { BreadcrumbJsonLd, JobPostingJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
 import { getDemoJob } from '@/lib/jobs/demo-listings';
 import { safeJobText } from '@/lib/jobs/job-details';
@@ -13,12 +15,36 @@ import {
   MENA_COUNTRY_LABELS,
 } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
+import { pageMetadata, SITE_URL } from '@/lib/seo';
 
-export default async function CompanyJobPage({
-  params,
-}: {
-  params: Promise<{ locale: string; slug: string; jobSlug: string }>;
-}) {
+type Props = { params: Promise<{ locale: string; slug: string; jobSlug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug, jobSlug } = await params;
+  const job = await loadJob(slug, jobSlug);
+  if (!job) {
+    return pageMetadata({
+      locale,
+      path: `/companies/${slug}/${jobSlug}`,
+      titleAr: 'وظيفة | مقابلة',
+      titleEn: 'Job | Muqabaleh',
+      descAr: 'وظيفة على مقابلة.',
+      descEn: 'Job listing on Muqabaleh.',
+      noIndex: true,
+    });
+  }
+  return pageMetadata({
+    locale,
+    path: `/companies/${slug}/${jobSlug}`,
+    titleAr: `${job.title} — ${job.companyName} | مقابلة`,
+    titleEn: `${job.title} — ${job.companyName} | Muqabaleh`,
+    descAr: `${job.title} لدى ${job.companyName} · ${job.location}. تدرّب مع جيني ثم قدّم لدى الشركة.`,
+    descEn: `${job.title} at ${job.companyName} · ${job.location}. Practice with Jeannie, then apply on their site.`,
+    keywords: [job.title, job.companyName, job.location, 'MENA jobs', 'Muqabaleh'],
+  });
+}
+
+export default async function CompanyJobPage({ params }: Props) {
   const { slug, jobSlug } = await params;
   const locale = await getLocale();
   const isAr = locale === 'ar';
@@ -30,9 +56,35 @@ export default async function CompanyJobPage({
     `/interview/prequal?company=${encodeURIComponent(job.companyName)}&role=${encodeURIComponent(job.title)}&job=${encodeURIComponent(job.id)}`,
     locale,
   );
+  const prefix = locale === 'en' ? '/en' : '';
 
   return (
     <div className="mq-atelier min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: isAr ? 'الرئيسية' : 'Home', url: locale === 'en' ? `${SITE_URL}/en` : SITE_URL },
+          { name: isAr ? 'الوظائف' : 'Jobs', url: `${SITE_URL}${prefix}/jobs` },
+          {
+            name: job.companyName,
+            url: `${SITE_URL}${prefix}/companies/${slug}`,
+          },
+          {
+            name: job.title,
+            url: `${SITE_URL}${prefix}/companies/${slug}/${jobSlug}`,
+          },
+        ]}
+      />
+      <JobPostingJsonLd
+        title={job.title}
+        description={job.description}
+        datePosted={job.datePosted}
+        hiringOrganization={job.companyName}
+        jobLocation={job.location}
+        employmentType={job.employmentType}
+        applyUrl={job.applyUrl}
+        salaryLabel={job.salaryLabel}
+        locale={locale}
+      />
       <JobPortalChrome
         backHref={`/companies/${slug}`}
         backLabel={{ en: job.companyName, ar: job.companyName }}
@@ -162,6 +214,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
         applyUrl: row.applyUrl,
         salaryLabel: row.salaryLabel,
         companyName: row.company.name,
+        datePosted: (row.postedAt || row.updatedAt)?.toISOString?.() ?? null,
         countryKey: classifyMenaCountry(row.location, row.company.country, row.title),
       };
     }
@@ -182,6 +235,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
     applyUrl: demo.applyUrl,
     salaryLabel: null as string | null,
     companyName: demo.company.name,
+    datePosted: null as string | null,
     countryKey: classifyMenaCountry(demo.location, demo.company.country, demo.title),
   };
 }

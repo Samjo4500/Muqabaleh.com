@@ -293,10 +293,18 @@ function SpotlightRole({
         {job.location}
         {job.department ? ` · ${job.department}` : ''}
       </p>
-      <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-        {job.description.slice(0, 220)}
-        {job.description.length > 220 ? '…' : ''}
-      </p>
+      {job.description && !/^https?:\/\//i.test(job.description.trim()) ? (
+        <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
+          {job.description.slice(0, 220)}
+          {job.description.length > 220 ? '…' : ''}
+        </p>
+      ) : (
+        <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/55 md:text-base">
+          {isAr
+            ? 'تدرّب على أسئلة خاصة بهذا الدور مع جيني، ثم قدّم بنفسك على موقع الشركة.'
+            : 'Practice role-specific questions with Jeannie, then apply yourself on the company site.'}
+        </p>
+      )}
       <div className="relative mt-7 flex flex-col gap-3 sm:flex-row">
         <Link
           href={practiceHref}

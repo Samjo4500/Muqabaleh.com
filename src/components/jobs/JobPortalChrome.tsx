@@ -62,14 +62,16 @@ export function JobPortalChrome({ backHref, backLabel, transparent }: Props) {
                   : 'Back'}
             </span>
           </button>
-          <Link
-            href={localePath('/', locale)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-3.5 text-sm font-semibold text-white/85 transition hover:border-teal-300/35 hover:bg-white/[0.08] hover:text-white"
-            aria-label={isAr ? 'الرئيسية' : 'Home'}
-          >
-            <Home size={16} />
-            <span className="hidden sm:inline">{isAr ? 'الرئيسية' : 'Home'}</span>
-          </Link>
+          {backHref !== '/' ? (
+            <Link
+              href={localePath('/', locale)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-3.5 text-sm font-semibold text-white/85 transition hover:border-teal-300/35 hover:bg-white/[0.08] hover:text-white"
+              aria-label={isAr ? 'الرئيسية' : 'Home'}
+            >
+              <Home size={16} />
+              <span className="hidden sm:inline">{isAr ? 'الرئيسية' : 'Home'}</span>
+            </Link>
+          ) : null}
         </div>
 
         <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="inline-flex">

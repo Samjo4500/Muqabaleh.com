@@ -162,14 +162,18 @@ function parseGreenhouse(json: unknown, boardSlug: string): NormalizedJob[] {
     const dept = Array.isArray(job.departments)
       ? String((job.departments[0] as { name?: string } | undefined)?.name || '')
       : '';
-    const content = String(job.content || job.absolute_url || '');
+    const rawContent = String(job.content || '').replace(/<[^>]+>/g, ' ').trim();
+    // Never store apply URLs as the description (Greenhouse often omits content in list)
+    const description = truncateDesc(
+      rawContent || `${String(job.title || 'Role')} — ${loc}${dept ? ` · ${dept}` : ''}`,
+    );
     return {
       externalId: id,
       title: String(job.title || 'Role'),
       location: loc,
       department: dept || undefined,
       employmentType: undefined,
-      description: truncateDesc(content.replace(/<[^>]+>/g, ' ')),
+      description,
       applyUrl: String(job.absolute_url || `https://boards.greenhouse.io/${boardSlug}/jobs/${id}`),
       postedAt: job.updated_at ? new Date(String(job.updated_at)) : new Date(),
     };

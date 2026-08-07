@@ -1,11 +1,8 @@
-'use client';
-
 import dynamic from 'next/dynamic';
-import { useLocale } from 'next-intl';
-import { usePathname } from 'next/navigation';
-import { getLocaleSwitchPath } from '@/i18n/navigation';
+import { getLocale } from 'next-intl/server';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
+import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 
 const CrystalSimplePath = dynamic(
   () => import('./SimplePath').then((m) => m.CrystalSimplePath),
@@ -23,6 +20,10 @@ const CrystalPricing = dynamic(
   () => import('./Pricing').then((m) => m.CrystalPricing),
   { ssr: true },
 );
+const CrystalFAQ = dynamic(
+  () => import('./FAQ').then((m) => m.CrystalFAQ),
+  { ssr: true },
+);
 const CrystalFinalCta = dynamic(
   () => import('./FinalCta').then((m) => m.CrystalFinalCta),
   { ssr: true },
@@ -32,35 +33,12 @@ const CrystalFooter = dynamic(
   { ssr: true },
 );
 
-function LanguageSwitcherFixed() {
-  const locale = useLocale();
-  const pathname = usePathname() || '/';
-  const nextLocale = locale === 'ar' ? 'en' : 'ar';
-  const href = getLocaleSwitchPath(pathname, locale, nextLocale);
-
-  return (
-    <div className="fixed top-4 right-4 z-[70]">
-      <a
-        href={href}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/8 px-3 py-2 text-[11px] font-bold tracking-wide text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition hover:border-teal-300/40 hover:bg-white/12"
-        aria-label={locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
-      >
-        <span className={locale === 'en' ? 'text-teal-300' : 'text-white/45'}>EN</span>
-        <span className="text-white/35">/</span>
-        <span className={locale === 'ar' ? 'text-teal-300' : 'text-white/45'} dir="rtl" lang="ar">
-          عربي
-        </span>
-      </a>
-    </div>
-  );
-}
-
 /**
- * Prepare-and-Verify landing — simple, Jeannie-centered.
- * Hero → path → passport (visible) → Jeannie → pricing → CTA.
+ * Prepare-and-Verify landing — server shell, client islands below the fold.
+ * Hero → path → passport → Jeannie → pricing → FAQ → CTA.
  */
-export function CrystalLanding() {
-  const locale = useLocale();
+export async function CrystalLanding() {
+  const locale = await getLocale();
   const isAr = locale === 'ar';
 
   return (
@@ -83,6 +61,7 @@ export function CrystalLanding() {
         <CrystalPassportShowcase />
         <CrystalJeannie />
         <CrystalPricing />
+        <CrystalFAQ />
         <CrystalFinalCta />
       </main>
       <CrystalFooter />

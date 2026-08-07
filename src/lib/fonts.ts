@@ -9,7 +9,7 @@ import {
 /** Display — English atelier headlines */
 export const fontDisplayEn = Syne({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
+  weight: ['600', '700', '800'],
   display: 'swap',
   variable: '--font-display-en',
   preload: true,
@@ -36,19 +36,19 @@ export const fontBodyAr = IBM_Plex_Sans_Arabic({
 /** Display — Arabic headlines */
 export const fontDisplayAr = Readex_Pro({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['500', '600', '700'],
   display: 'swap',
   variable: '--font-display-ar',
   preload: true,
 });
 
-/** Jeannie Arabic name mark — distinct from site display Arabic (Readex) */
+/** Jeannie Arabic name mark — not on critical path for every route */
 export const fontJeannieAr = Cairo({
   subsets: ['arabic', 'latin'],
-  weight: ['600', '700', '800'],
+  weight: ['700', '800'],
   display: 'swap',
   variable: '--font-jeannie-ar',
-  preload: true,
+  preload: false,
 });
 
 export const fontVariables = [

@@ -38,10 +38,13 @@ export function JeannieNameLockup({
   size = 'xl',
   className,
   avatarSrc = '/images/hero-interview.webp',
+  priority = false,
 }: {
   size?: Size;
   className?: string;
   avatarSrc?: string;
+  /** Keep false when a full-bleed hero already owns LCP. */
+  priority?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const s = SIZE[size];
@@ -80,7 +83,7 @@ export function JeannieNameLockup({
           className="object-cover"
           style={{ objectPosition: 'center 18%' }}
           sizes={`${s.avatar}px`}
-          priority={size === 'xl'}
+          priority={priority}
         />
         <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/25" />
       </span>

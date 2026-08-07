@@ -1,14 +1,13 @@
 import type { MetadataRoute } from 'next';
 import { getAllPosts, getAllSlugs } from '@/content/blog';
+import { db } from '@/lib/db';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
 const PUBLIC_ROUTES = [
   '',
-  '/pricing',
+  '/jobs',
   '/business',
-  '/portal',
-  '/portal/jobs',
   '/request-demo',
   '/demo',
   '/about',
@@ -23,24 +22,33 @@ const PUBLIC_ROUTES = [
   '/verify',
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   const now = new Date().toISOString();
 
   for (const route of PUBLIC_ROUTES) {
     const priority =
-      route === '' ? 1 : route === '/blog' || route === '/demo' ? 0.9 : route === '/pricing' ? 0.85 : 0.75;
+      route === ''
+        ? 1
+        : route === '/jobs' || route === '/blog'
+          ? 0.95
+          : route === '/demo' || route === '/business'
+            ? 0.85
+            : 0.7;
+
+    const freq: MetadataRoute.Sitemap[0]['changeFrequency'] =
+      route === '' || route === '/jobs' || route === '/blog' ? 'daily' : 'monthly';
 
     entries.push({
       url: `${SITE_URL}${route || '/'}`,
       lastModified: now,
-      changeFrequency: route === '' || route === '/blog' ? 'weekly' : 'monthly',
+      changeFrequency: freq,
       priority,
     });
     entries.push({
       url: `${SITE_URL}/en${route}`,
       lastModified: now,
-      changeFrequency: route === '' || route === '/blog' ? 'weekly' : 'monthly',
+      changeFrequency: freq,
       priority: Math.max(0.5, priority - 0.1),
     });
   }
@@ -60,6 +68,44 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.7,
     });
+  }
+
+  try {
+    const companies = await db.listedCompany.findMany({
+      where: { isActive: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        jobs: {
+          where: { isActive: true },
+          select: { slug: true, updatedAt: true, postedAt: true },
+          take: 80,
+          orderBy: { postedAt: 'desc' },
+        },
+      },
+      take: 60,
+    });
+
+    for (const company of companies) {
+      for (const prefix of ['', '/en'] as const) {
+        entries.push({
+          url: `${SITE_URL}${prefix}/companies/${company.slug}`,
+          lastModified: company.updatedAt.toISOString(),
+          changeFrequency: 'daily',
+          priority: 0.8,
+        });
+        for (const job of company.jobs) {
+          entries.push({
+            url: `${SITE_URL}${prefix}/companies/${company.slug}/${job.slug}`,
+            lastModified: (job.updatedAt || job.postedAt).toISOString(),
+            changeFrequency: 'daily',
+            priority: 0.75,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[sitemap] listed jobs', err);
   }
 
   return entries;

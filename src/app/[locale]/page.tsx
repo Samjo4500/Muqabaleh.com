@@ -6,8 +6,8 @@ import {
   WebSiteJsonLd,
   FaqJsonLd,
 } from '@/components/json-ld';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
+import { C } from '@/components/landing/crystal/copy';
+import { pageMetadata } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -15,49 +15,26 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const isAr = locale === 'ar';
-  const url = isAr ? SITE_URL : `${SITE_URL}/en`;
-  const title = isAr
-    ? 'مقابلة | Muqabaleh — تدرّب على مقابلات العمل بالذكاء الاصطناعي'
-    : 'Muqabaleh — AI Mock Interviews for Job Seekers in MENA';
-  const description = isAr
-    ? 'تدرّب على مقابلات العمل بالعربية والإنجليزية مع محاور ذكاء اصطناعي، واحصل على تقييم فوري وشهادة موثّقة.'
-    : 'Practice job interviews in Arabic and English with an AI interviewer. Get instant scoring, coaching tips, and a verified certificate.';
-
-  return {
-    title: { absolute: title },
-    description,
-    alternates: {
-      canonical: url,
-      languages: {
-        'ar-SA': SITE_URL,
-        'en-US': `${SITE_URL}/en`,
-        'x-default': SITE_URL,
-      },
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      type: 'website',
-      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Muqabaleh' }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/og-image.jpg'],
-    },
-    keywords: isAr
-      ? ['مقابلة عمل', 'تدريب مقابلات', 'ذكاء اصطناعي', 'مقابلة', 'مقابلات وظيفية']
-      : [
-          'mock interview',
-          'AI interview practice',
-          'job interview Arabic',
-          'MENA careers',
-          'Muqabaleh',
-        ],
-  };
+  return pageMetadata({
+    locale,
+    path: '',
+    titleAr: 'مقابلة | Muqabaleh — تدرّب على مقابلات العمل بالذكاء الاصطناعي',
+    titleEn: 'Muqabaleh — AI Mock Interviews for Job Seekers in MENA',
+    descAr:
+      'تدرّب على مقابلات العمل بالعربية والإنجليزية مع جيني، واحصل على تقييم فوري وجواز جاهزية موثّق.',
+    descEn:
+      'Practice job interviews in Arabic and English with Jeannie. Get instant scoring and a verified hire-ready passport.',
+    keywords:
+      locale === 'ar'
+        ? ['مقابلة عمل', 'تدريب مقابلات', 'جيني', 'ذكاء اصطناعي', 'وظائف']
+        : [
+            'mock interview',
+            'AI interview practice',
+            'Jeannie',
+            'MENA careers',
+            'Muqabaleh',
+          ],
+  });
 }
 
 export default async function LandingPage({ params }: Props) {
@@ -68,7 +45,7 @@ export default async function LandingPage({ params }: Props) {
     <>
       <OrganizationJsonLd />
       <WebSiteJsonLd locale={locale} />
-      <FaqJsonLd locale={locale} />
+      <FaqJsonLd locale={locale} items={C.faq.items} />
       <CrystalLanding />
     </>
   );

@@ -4,8 +4,7 @@ import { notFound } from 'next/navigation';
 import { routing, type Locale } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
-import { MobileTabBar } from '@/components/layout/MobileTabBar';
-import { PWAInstallPrompt } from '@/components/pwa/InstallPrompt';
+import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
@@ -79,6 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: meta.description,
       images: ['/og-image.jpg'],
     },
+    robots: { index: true, follow: true },
     other: {
       'theme-color': '#0a1220',
     },
@@ -115,8 +115,7 @@ export default async function LocaleLayout({
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
-            <MobileTabBar />
-            <PWAInstallPrompt />
+            <DeferredMarketingChrome />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
         </Providers>

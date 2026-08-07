@@ -1,29 +1,32 @@
 /**
  * Seed ListedCompany rows for the MENA ATS aggregator.
  * Only include boards verified live against public ATS APIs (HTTP 200).
- * Wrong slugs are inactive-on-404 by the fetcher — keep this list honest.
+ * Global boards (stripe/spotify) are MENA-filtered at fetch time.
  *
  * Run: npx tsx prisma/seed-listed-companies.ts
  */
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const db = new PrismaClient();
 
 type SeedCompany = {
   name: string;
   slug: string;
-  ats: "GREENHOUSE" | "LEVER";
+  ats: 'GREENHOUSE' | 'LEVER' | 'WORKABLE';
   country: string;
   industry?: string;
 };
 
-/** Verified 200 against boards-api.greenhouse.io / api.lever.co (Aug 2026). */
+/** Verified live against public ATS APIs (Aug 2026). */
 const COMPANIES: SeedCompany[] = [
-  { name: "Careem", slug: "careem", ats: "GREENHOUSE", country: "UAE", industry: "Mobility" },
-  { name: "Tamara", slug: "tamara", ats: "GREENHOUSE", country: "UAE/KSA", industry: "Fintech" },
-  { name: "Jumia", slug: "jumia", ats: "GREENHOUSE", country: "Egypt/Nigeria", industry: "E-commerce" },
-  { name: "Aldar Properties", slug: "aldar", ats: "LEVER", country: "UAE", industry: "Real Estate" },
-  { name: "Fresha", slug: "fresha", ats: "LEVER", country: "UK/UAE", industry: "SaaS" },
+  { name: 'Careem', slug: 'careem', ats: 'GREENHOUSE', country: 'UAE', industry: 'Mobility' },
+  { name: 'Tamara', slug: 'tamara', ats: 'GREENHOUSE', country: 'UAE/KSA', industry: 'Fintech' },
+  { name: 'Jumia', slug: 'jumia', ats: 'GREENHOUSE', country: 'Egypt', industry: 'E-commerce' },
+  { name: 'Aldar Properties', slug: 'aldar', ats: 'LEVER', country: 'UAE', industry: 'Real Estate' },
+  { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'MENA', industry: 'SaaS' },
+  { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA', industry: 'SaaS' },
+  { name: 'Stripe', slug: 'stripe', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Fintech' },
+  { name: 'Spotify', slug: 'spotify', ats: 'LEVER', country: 'Global→MENA', industry: 'Media' },
 ];
 
 async function main() {
@@ -49,7 +52,7 @@ async function main() {
     });
     upserted += 1;
   }
-  console.log(`Seeded ${upserted} verified ListedCompany rows.`);
+  console.log(`Seeded ${upserted} verified ListedCompany rows (MENA focus).`);
 }
 
 main()

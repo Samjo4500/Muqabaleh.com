@@ -11,12 +11,14 @@ type Props = {
   /** Optional override for back destination (defaults to browser back, fallback /jobs) */
   backHref?: string;
   backLabel?: { en: string; ar: string };
+  /** Overlay chrome on full-bleed heroes */
+  transparent?: boolean;
 };
 
 /**
  * Persistent chrome for every job-portal surface: Back + Home.
  */
-export function JobPortalChrome({ backHref, backLabel }: Props) {
+export function JobPortalChrome({ backHref, backLabel, transparent }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const router = useRouter();
@@ -35,7 +37,13 @@ export function JobPortalChrome({ backHref, backLabel }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#070b14]/85 px-3 py-3 backdrop-blur-xl md:px-5">
+    <header
+      className={`z-50 px-3 py-3 md:px-5 ${
+        transparent
+          ? 'absolute inset-x-0 top-0 border-b border-transparent bg-gradient-to-b from-[#05080f]/85 via-[#05080f]/40 to-transparent'
+          : 'sticky top-0 border-b border-white/10 bg-[#070b14]/85 backdrop-blur-xl'
+      }`}
+    >
       <div className="mq-wrap flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button

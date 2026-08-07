@@ -13,6 +13,7 @@
 
 import { db } from '@/lib/db';
 import type { ListedJobSource } from '@prisma/client';
+import { isMenaLocation, MENA_FILTER_SLUGS } from '@/lib/jobs/mena';
 
 export const MUQABALEH_UA =
   'MuqabalehBot/1.0 (https://muqabaleh.com; contact@muqabaleh.com)';
@@ -200,10 +201,13 @@ function parseWorkable(json: unknown, accountSlug: string): NormalizedJob[] {
   const jobs = Array.isArray(root?.jobs) ? root.jobs : [];
   return jobs.map((job) => {
     const id = String(job.shortcode || job.id || '');
+    const city = String(job.city || '').trim();
+    const country = String(job.country || '').trim();
+    const loc = [city, country].filter(Boolean).join(', ') || String(job.location || 'Remote');
     return {
       externalId: id,
       title: String(job.title || 'Role'),
-      location: String(job.city || job.location || 'Remote'),
+      location: loc,
       department: String(job.department || '') || undefined,
       employmentType: String(job.employment_type || '') || undefined,
       description: truncateDesc(String(job.description || job.snippet || '')),
@@ -305,6 +309,14 @@ async function fetchForCompany(company: {
     else if (source === 'RECRUITEE') parsed = parseRecruitee(json, company.slug);
   } catch {
     return { upserted: 0, deactivated: 0, skipped: 'parse_error' };
+  }
+
+  // Global boards → keep MENA/GCC locations only (social ads target the region)
+  if (MENA_FILTER_SLUGS.has(company.slug.toLowerCase())) {
+    parsed = parsed.filter((j) => isMenaLocation(j.location, j.title));
+    if (!parsed.length) {
+      return { upserted: 0, deactivated: 0, skipped: 'no_mena_locations' };
+    }
   }
 
   const seen = new Set<string>();

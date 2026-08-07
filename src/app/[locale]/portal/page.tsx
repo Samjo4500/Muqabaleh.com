@@ -10,10 +10,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/portal',
-    titleAr: 'بوابة الوظائف قريباً — مقابلة',
-    titleEn: 'Job Portal coming soon — Muqabaleh',
-    descAr: 'السوق متوقفة مؤقتاً. احصل على جواز مقابلة ودع جيني تقدّم عنك باحتراف.',
-    descEn: 'Marketplace paused for now. Get your Muqabaleh passport and let Jeannie apply professionally for you.',
+    titleAr: 'بوابة الوظائف — مقابلة',
+    titleEn: 'Job Portal — Muqabaleh',
+    descAr: 'تصفّح الأدوار، تدرّب مع جيني، ثم قدّم بنفسك على موقع الشركة.',
+    descEn: 'Browse roles, practice with Jeannie, then apply yourself on the company site.',
   });
 }
 

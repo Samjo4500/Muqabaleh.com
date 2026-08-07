@@ -15,6 +15,7 @@ import {
 } from './question-sequencer';
 import { getDefaultTime, getDifficultyRange } from './scoring';
 import { FALLBACK_QUESTIONS, memoryStore, type MemPrequal } from './memory-store';
+import type { CompanyMockContext } from './company-mock';
 
 export type PrequalInput = {
   userId: string;
@@ -28,6 +29,7 @@ export type PrequalInput = {
   targetIndustry?: string | null;
   weaknessFocus?: string | null;
   durationPreset: string;
+  companyMock?: CompanyMockContext | null;
 };
 
 export type PlanQuestion = {
@@ -53,6 +55,8 @@ export type InterviewPlan = {
   focusAreas: string[];
   coachingTips: string[];
   questions: PlanQuestion[];
+  /** Present when practicing from a listed job / company page */
+  companyMock?: CompanyMockContext | null;
 };
 
 function durationMeta(preset: string) {
@@ -150,14 +154,28 @@ export async function buildInterviewPlan(
     : [];
   const preferAr = prequal.languagePreference === 'arabic';
   const roleEn = labelFor(ROLE_OPTIONS, prequal.targetRole, 'en');
+  const mock = prequal.companyMock ?? null;
+  const title = mock
+    ? `${mock.companyName} · ${mock.roleTitle}`
+    : `${prequal.seniorityLevel} ${roleEn} — ${prequal.interviewRound}`;
+
+  const companyTips = mock
+    ? [
+        `You are interviewing for ${mock.roleTitle} at ${mock.companyName}. Frame answers for that employer and role.`,
+        mock.jobDescription
+          ? `Role context (snippet): ${mock.jobDescription}`
+          : `Emphasize why you fit ${mock.companyName} and this role specifically.`,
+      ]
+    : [];
 
   const plan: InterviewPlan = {
-    title: `${prequal.seniorityLevel} ${roleEn} — ${prequal.interviewRound}`,
+    title,
     language: prequal.languagePreference,
     estimatedDuration,
     numQuestions,
     focusAreas: prequal.questionTypes.map((t) => FOCUS_MAP[t] ?? t),
-    coachingTips: [...weaknessTips],
+    coachingTips: [...companyTips, ...weaknessTips],
+    companyMock: mock,
     questions: annotated.map((q) => {
       const tips = [
         ...(q.coachingTips ?? []),
@@ -263,10 +281,58 @@ export async function savePrequal(input: PrequalInput): Promise<{
   }
 }
 
+async function resolveCompanyMock(
+  input?: CompanyMockContext | null,
+): Promise<CompanyMockContext | null> {
+  if (!input) return null;
+  if (input.jobDescription || !input.jobId) return input;
+  try {
+    const job = await db.listedJob.findFirst({
+      where: { id: input.jobId, isActive: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        company: { select: { name: true } },
+      },
+    });
+    if (!job) return input;
+    return {
+      companyName: input.companyName || job.company?.name || 'Company',
+      roleTitle: input.roleTitle || job.title,
+      jobId: job.id,
+      jobDescription: (job.description || '').slice(0, 300) || null,
+    };
+  } catch {
+    return input;
+  }
+}
+
+async function recordJobMockInterview(
+  userId: string,
+  mock: CompanyMockContext | null,
+) {
+  if (!mock?.jobId) return;
+  try {
+    await db.jobMockInterview.create({
+      data: {
+        userId,
+        jobId: mock.jobId,
+        type: 'COMPANY_SPECIFIC',
+      },
+    });
+  } catch {
+    // non-blocking — job may have been deactivated
+  }
+}
+
 export async function generatePlanForPrequalId(
   prequalId: string,
   userId: string,
+  companyMock?: CompanyMockContext | null,
 ): Promise<{ plan: InterviewPlan; sessionId: string; prequalId: string }> {
+  const resolvedMock = await resolveCompanyMock(companyMock ?? null);
+
   // DB path
   try {
     const existing = await db.interviewPrequal.findFirst({
@@ -274,9 +340,10 @@ export async function generatePlanForPrequalId(
       include: { interviewSession: true },
     });
     if (existing) {
-      if (existing.generatedPlan && existing.interviewSession) {
+      const cached = existing.generatedPlan as InterviewPlan | null;
+      if (cached && existing.interviewSession && (!resolvedMock || cached.companyMock)) {
         return {
-          plan: existing.generatedPlan as InterviewPlan,
+          plan: cached,
           sessionId: existing.interviewSession.id,
           prequalId: existing.id,
         };
@@ -296,6 +363,7 @@ export async function generatePlanForPrequalId(
         durationPreset: existing.durationPreset,
         numQuestions: existing.numQuestions,
         estimatedDurationMin: existing.estimatedDurationMin,
+        companyMock: resolvedMock,
       });
 
       await db.interviewPrequal.update({
@@ -326,6 +394,8 @@ export async function generatePlanForPrequalId(
         ),
       );
 
+      await recordJobMockInterview(userId, resolvedMock);
+
       return { plan, sessionId: session.id, prequalId: existing.id };
     }
   } catch {
@@ -338,9 +408,10 @@ export async function generatePlanForPrequalId(
   }
 
   const existingSession = memoryStore.findSessionByPrequal(prequalId);
-  if (mem.generatedPlan && existingSession) {
+  const cachedMem = mem.generatedPlan as InterviewPlan | undefined;
+  if (cachedMem && existingSession && (!resolvedMock || cachedMem.companyMock)) {
     return {
-      plan: mem.generatedPlan as InterviewPlan,
+      plan: cachedMem,
       sessionId: existingSession.id,
       prequalId,
     };
@@ -360,6 +431,7 @@ export async function generatePlanForPrequalId(
     durationPreset: mem.durationPreset,
     numQuestions: mem.numQuestions,
     estimatedDurationMin: mem.estimatedDurationMin,
+    companyMock: resolvedMock,
   });
 
   mem.generatedPlan = plan;
@@ -381,6 +453,8 @@ export async function generatePlanForPrequalId(
     updatedAt: new Date().toISOString(),
     responses: [],
   });
+
+  await recordJobMockInterview(userId, resolvedMock);
 
   return { plan, sessionId, prequalId };
 }

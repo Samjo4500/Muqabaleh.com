@@ -1,3 +1,9 @@
+export type CompanyMockForm = {
+  companyName: string;
+  roleTitle: string;
+  jobId: string | null;
+};
+
 export type PrequalFormState = {
   targetRole: string;
   seniorityLevel: string;
@@ -7,6 +13,7 @@ export type PrequalFormState = {
   targetIndustry: string | null;
   weaknessFocus: string | null;
   durationPreset: string;
+  companyMock: CompanyMockForm | null;
 };
 
 export const EMPTY_PREQUAL: PrequalFormState = {
@@ -18,4 +25,5 @@ export const EMPTY_PREQUAL: PrequalFormState = {
   targetIndustry: null,
   weaknessFocus: null,
   durationPreset: '',
+  companyMock: null,
 };

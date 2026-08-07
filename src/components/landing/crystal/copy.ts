@@ -142,12 +142,12 @@ export const C = {
     ],
   },
   how: {
-    // Kept for legacy references; landing now uses Jeannie Magic as the path.
+    // Kept for legacy references; landing now uses Prepare-and-Verify path.
     eyebrow: { en: 'How Jeannie works', ar: 'كيف تعمل جيني' },
-    title: { en: 'From interview to invite', ar: 'من المقابلة إلى الدعوة' },
+    title: { en: 'Prepare. Verify. Apply yourself.', ar: 'تجهيز. توثيق. تقديم بنفسك.' },
     subtitle: {
-      en: 'Jeannie interviews you, builds your passport, then applies with your approval.',
-      ar: 'جيني تُجري مقابلتك، تبني جوازك، ثم تقدّم بموافقتك.',
+      en: 'Jeannie interviews you, builds your passport, and helps you prep — you always apply on the company site.',
+      ar: 'جيني تُجري مقابلتك، تبني جوازك، وتساعدك على التحضير — وأنت تقدّم دائماً على موقع الشركة.',
     },
     ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
     ctaJeannie: { en: 'See the live sample', ar: 'شاهِد المحاكاة الحية' },
@@ -170,32 +170,32 @@ export const C = {
       },
       {
         scene: 'jeannie' as const,
-        title: { en: 'She shortlists roles', ar: 'ترشّح الأدوار' },
+        title: { en: 'Browse real roles', ar: 'تصفّح أدواراً حقيقية' },
         desc: {
-          en: 'Fits based on your passport and targets — not spam.',
-          ar: 'فرص تناسب جوازك وأهدافك — لا عشوائية.',
+          en: 'Employer-posted and legal public ATS listings — practice for the ones you want.',
+          ar: 'إعلانات أصحاب العمل وواجهات ATS العامة القانونية — تدرّب لما تريده.',
         },
       },
       {
         scene: 'apply' as const,
-        title: { en: 'You approve — she applies', ar: 'أنت توافق — وهي تقدّم' },
+        title: { en: 'You apply yourself', ar: 'أنت تقدّم بنفسك' },
         desc: {
-          en: 'Every application needs your OK, with passport attached.',
-          ar: 'كل تقديم يحتاج موافقتك، مع الجواز مرفقاً.',
+          en: 'Click “Apply on company site.” Muqabaleh never applies for you.',
+          ar: 'اضغط «قدّم على موقع الشركة». مقابلة لا تقدّم نيابةً عنك.',
         },
       },
     ],
   },
   jeannie: {
-    eyebrow: { en: 'One agent. Full path.', ar: 'وكيلة واحدة. المسار كامل.' },
+    eyebrow: { en: 'One coach. Clear path.', ar: 'مدربة واحدة. مسار واضح.' },
     name: { en: 'Jeannie', ar: 'جيني' },
     title: {
-      en: 'Meet Jeannie — interviewer and career agent',
-      ar: 'تعرّف على جيني — المقابِلة والوكيلة المهنية',
+      en: 'Meet Jeannie — interviewer and career coach',
+      ar: 'تعرّف على جيني — المقابِلة والمدربة المهنية',
     },
     body: {
-      en: 'She interviews you in Arabic or English, turns your score into a Muqabaleh passport, shortlists roles, waits for your approval, then applies with proof.',
-      ar: 'تُجري مقابلتك بالعربية أو الإنجليزية، تحوّل نتيجتك إلى جواز مقابلة، ترشّح الأدوار، تنتظر موافقتك، ثم تقدّم مع الدليل.',
+      en: 'She interviews you in Arabic or English, turns your score into a Muqabaleh passport, and helps you prep materials — then you apply yourself on the employer’s site.',
+      ar: 'تُجري مقابلتك بالعربية أو الإنجليزية، تحوّل نتيجتك إلى جواز مقابلة، وتساعدك على تجهيز موادك — ثم تقدّم بنفسك على موقع صاحب العمل.',
     },
     offers: [
       {
@@ -216,26 +216,26 @@ export const C = {
       },
       {
         key: 'shortlist',
-        title: { en: 'Shortlists that fit', ar: 'ترشيحات مناسبة' },
+        title: { en: 'Company-specific mocks', ar: 'مقابلات خاصة بالشركة' },
         desc: {
-          en: 'Roles matched to your score, path, and cities — not random sprays.',
-          ar: 'أدوار تناسب نتيجتك ومسارك ومدنك — لا إرسال عشوائي.',
+          en: 'Practice for a listed role before you click apply on their site.',
+          ar: 'تدرّب لدور معلن قبل أن تضغط تقديم على موقعهم.',
         },
       },
       {
         key: 'approve',
-        title: { en: 'You stay in control', ar: 'القرار بيدك' },
+        title: { en: 'Career prep tools', ar: 'أدوات تحضير مهني' },
         desc: {
-          en: 'Nothing goes out until you approve. Review every opportunity first.',
-          ar: 'لا يُرسل شيء قبل موافقتك. راجع كل فرصة أولاً.',
+          en: 'Cover letters, salary context, and a personal tracker — you send everything.',
+          ar: 'خطابات، سياق رواتب، ومتتبّع شخصي — وأنت ترسل كل شيء.',
         },
       },
       {
         key: 'apply',
-        title: { en: 'Applies with proof', ar: 'تقدّم مع الدليل' },
+        title: { en: 'You apply with proof', ar: 'أنت تقدّم بالدليل' },
         desc: {
-          en: 'Professional apply with your passport attached.',
-          ar: 'تقديم احترافي مع جوازك مرفقاً.',
+          en: 'Take your passport to the company site and submit yourself.',
+          ar: 'خذ جوازك إلى موقع الشركة وقدّم بنفسك.',
         },
       },
     ],
@@ -246,8 +246,8 @@ export const C = {
     eyebrow: { en: "Sample of Jeannie's magic", ar: 'عيّنة من سحر جيني' },
     title: { en: 'See how Jeannie works', ar: 'شاهِد كيف تعمل جيني' },
     body: {
-      en: 'A live sample: she interviews you, builds your passport, picks a role, asks approval, applies — then lands the interview invite.',
-      ar: 'محاكاة حية: تُجري مقابلتك، تبني جوازك، تختار دوراً، تطلب موافقتك، تقدّم — ثم تصل دعوة المقابلة.',
+      en: 'Live sample: she interviews you, builds your passport, helps you prep for a role — then you apply on the company site.',
+      ar: 'محاكاة حية: تُجري مقابلتك، تبني جوازك، تساعدك على التحضير لدور — ثم تقدّم على موقع الشركة.',
     },
     steps: [
       {
@@ -265,24 +265,24 @@ export const C = {
         },
       },
       {
-        title: { en: 'Reviews & selects', ar: 'تراجع وتختار' },
+        title: { en: 'Company mock', ar: 'مقابلة خاصة بالشركة' },
         desc: {
-          en: 'Scans MENA roles and picks a high-fit shortlist.',
-          ar: 'تفحص أدوار المنطقة وتختار ترشيحاً عالي التطابق.',
+          en: 'Practice for a real listing with role-aware feedback.',
+          ar: 'تدرّب لإعلان حقيقي مع ملاحظات تراعي الدور.',
         },
       },
       {
-        title: { en: 'Asks your approval', ar: 'تطلب موافقتك' },
+        title: { en: 'You stay in control', ar: 'القرار بيدك' },
         desc: {
-          en: 'Nothing goes out until you say yes. NOT SPAM.',
-          ar: 'لا يُرسل شيء قبل موافقتك. ليس عشوائياً.',
+          en: 'Muqabaleh never applies for you. YOU APPLY.',
+          ar: 'مقابلة لا تقدّم نيابةً عنك. أنت تقدّم.',
         },
       },
       {
-        title: { en: 'Applies & wins invite', ar: 'تقدّم وتفوز بالدعوة' },
+        title: { en: 'Apply on company site', ar: 'قدّم على موقع الشركة' },
         desc: {
-          en: 'Passport attached — the employer invites you.',
-          ar: 'الجواز مرفق — صاحب العمل يدعوك.',
+          en: 'Take your passport and submit yourself.',
+          ar: 'خذ جوازك وقدّم بنفسك.',
         },
       },
     ],
@@ -290,15 +290,15 @@ export const C = {
     ctaSecondary: { en: 'Get a quote', ar: 'احصل على عرض سعر' },
   },
   companies: {
-    headline: { en: 'Hire with verified signal', ar: 'وظّف بإشارة موثّقة' },
+    headline: { en: 'Hire with verified passports', ar: 'وظّف بجوازات موثّقة' },
     body: {
-      en: 'Stop spending cycles on unqualified candidates. AI screening surfaces hire-ready talent with passport proof — without waiting on a public job board.',
-      ar: 'توقّف عن إضاعة الوقت مع مرشحين غير مؤهلين. فرز الذكاء الاصطناعي يُظهر مواهب جاهزة مع دليل الجواز — دون انتظار لوحة وظائف عامة.',
+      en: 'Screen candidates with AI interviews and shareable passport proof. Muqabaleh is a screening desk — not a job board that applies for people.',
+      ar: 'افرز المرشحين بمقابلات ذكية وجواز قابل للمشاركة. مقابلة مكتب فرز — وليست لوحة وظائف تقدّم عن أحد.',
     },
     bullets: [
-      { en: 'Cut time-to-hire with scored shortlists', ar: 'اختصر وقت التوظيف بقوائم مقيّمة' },
+      { en: 'Cut first-round time with scored shortlists', ar: 'اختصر الجولة الأولى بقوائم مقيّمة' },
       { en: 'Consistent AI scoring', ar: 'تقييم ذكي موحّد' },
-      { en: 'Receive applicants with passports', ar: 'استلم متقدمين مع جوازاتهم' },
+      { en: 'Invite by link — review passports', ar: 'ادعُ برابط — وراجع الجوازات' },
       { en: 'Real-time hiring analytics', ar: 'تحليلات توظيف فورية' },
     ],
     cta: { en: 'Talk to sales', ar: 'تحدث إلى المبيعات' },
@@ -492,7 +492,7 @@ export const C = {
         ],
       },
       {
-        label: { en: 'Apply on your behalf', ar: 'تقديم نيابةً عنك' },
+        label: { en: 'We apply for you', ar: 'نقدّم عنك' },
         values: [
           { en: 'Never', ar: 'أبداً' },
           { en: 'Never', ar: 'أبداً' },
@@ -659,12 +659,12 @@ export const C = {
   portalParked: {
     kicker: { en: 'Job Portal', ar: 'بوابة الوظائف' },
     title: {
-      en: 'Marketplace paused — Jeannie is live',
-      ar: 'السوق متوقفة مؤقتاً — جيني تعمل',
+      en: 'Jobs are live — apply yourself',
+      ar: 'الوظائف متاحة — وقدّم بنفسك',
     },
     body: {
-      en: "We're building a denser network of verified passports and hiring partners before reopening public listings. Meanwhile, get your passport and let Jeannie apply professionally on your behalf.",
-      ar: 'نبني شبكة أوثق من الجوازات الموثّقة وشركاء التوظيف قبل إعادة فتح الإعلانات العامة. في الأثناء، احصل على جوازك ودع جيني تقدّم عنك باحتراف.',
+      en: "Browse employer and legal ATS listings, practice with Jeannie, earn your passport, then apply on the company site. Muqabaleh never applies for you.",
+      ar: 'تصفّح إعلانات أصحاب العمل وواجهات ATS القانونية، تدرّب مع جيني، احصل على جوازك، ثم قدّم على موقع الشركة. مقابلة لا تقدّم نيابةً عنك.',
     },
     ctaPassport: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
     ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
@@ -677,8 +677,8 @@ export const C = {
       ar: 'المقابلات البشرية — قريباً لاحقاً',
     },
     body: {
-      en: 'Live human experts are paused for now so we can keep the individual offer simple: AI interview, verified passport, and Jeannie applying for you.',
-      ar: 'الخبراء البشريون متوقفون مؤقتاً لنُبقي عرض الأفراد بسيطاً: مقابلة ذكية، جواز موثّق، وجيني تقدّم عنك.',
+      en: 'Live human experts are paused for now so we can keep the individual offer simple: AI interview, verified passport, and you apply yourself.',
+      ar: 'الخبراء البشريون متوقفون مؤقتاً لنُبقي عرض الأفراد بسيطاً: مقابلة ذكية، جواز موثّق، وأنت تقدّم بنفسك.',
     },
     ctaPassport: { en: 'Start free interview', ar: 'ابدأ مقابلة مجانية' },
     ctaJeannie: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },

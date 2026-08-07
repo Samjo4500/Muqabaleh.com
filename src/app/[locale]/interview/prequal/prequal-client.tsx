@@ -19,22 +19,48 @@ import { ProgressBar } from './components/ProgressBar';
 import { QuestionCard } from './components/QuestionCard';
 import { Stepper } from './components/Stepper';
 import { SummaryScreen } from './components/SummaryScreen';
+import { inferRoleFromTitle } from '@/lib/interview/company-mock';
 import { EMPTY_PREQUAL, type PrequalFormState } from './prequal-types';
 
 const TOTAL_STEPS = 9; // 8 questions + summary
 
-export function PrequalClient({ email }: { email: string }) {
+type Props = {
+  email: string;
+  initialCompany?: string | null;
+  initialRole?: string | null;
+  initialJobId?: string | null;
+};
+
+export function PrequalClient({
+  email,
+  initialCompany,
+  initialRole,
+  initialJobId,
+}: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<PrequalFormState>(() => ({
-    ...EMPTY_PREQUAL,
-    languagePreference: isAr ? 'arabic' : 'english',
-  }));
+  const [form, setForm] = useState<PrequalFormState>(() => {
+    const company = (initialCompany || '').trim();
+    const roleTitle = (initialRole || '').trim();
+    const hasMock = Boolean(company && roleTitle);
+    return {
+      ...EMPTY_PREQUAL,
+      languagePreference: isAr ? 'arabic' : 'english',
+      targetRole: hasMock ? inferRoleFromTitle(roleTitle) : '',
+      companyMock: hasMock
+        ? {
+            companyName: company.slice(0, 120),
+            roleTitle: roleTitle.slice(0, 160),
+            jobId: initialJobId ? String(initialJobId).slice(0, 80) : null,
+          }
+        : null,
+    };
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [roleQuery, setRoleQuery] = useState('');
+  const [roleQuery, setRoleQuery] = useState(initialRole?.trim() || '');
 
   const titles = useMemo(
     () => [
@@ -117,10 +143,11 @@ export function PrequalClient({ email }: { email: string }) {
 
     setLoading(true);
     try {
+      const { companyMock, ...prequalPayload } = form;
       const prequalRes = await fetch('/api/interview/prequal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(prequalPayload),
       });
       const prequalData = await prequalRes.json();
       if (!prequalRes.ok) {
@@ -139,7 +166,16 @@ export function PrequalClient({ email }: { email: string }) {
       const planRes = await fetch('/api/interview/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prequalId: prequalData.prequalId }),
+        body: JSON.stringify({
+          prequalId: prequalData.prequalId,
+          companyMock: companyMock
+            ? {
+                companyName: companyMock.companyName,
+                roleTitle: companyMock.roleTitle,
+                jobId: companyMock.jobId,
+              }
+            : null,
+        }),
       });
       const planData = await planRes.json();
       if (!planRes.ok) throw new Error(planData.error || 'Failed to generate plan');
@@ -181,6 +217,20 @@ export function PrequalClient({ email }: { email: string }) {
               ? 'أجب عن بضعة أسئلة لنجهّز جلسة تناسب دورك ومستواك.'
               : 'Answer a few questions so we can tailor a session to your role and level.'}
           </p>
+          {form.companyMock ? (
+            <div className="mt-4 rounded-2xl border border-teal-300/25 bg-teal-400/10 px-4 py-3 text-sm text-teal-50">
+              <p className="font-medium">
+                {isAr
+                  ? `تدريب خاص: ${form.companyMock.roleTitle} — ${form.companyMock.companyName}`
+                  : `Company mock: ${form.companyMock.roleTitle} @ ${form.companyMock.companyName}`}
+              </p>
+              <p className="mt-1 text-xs text-teal-100/70">
+                {isAr
+                  ? 'جيني ستقيّم إجاباتك لهذا الدور. أنت تقدّم بنفسك على موقع الشركة لاحقاً.'
+                  : 'Jeannie will score you for this role. You still apply yourself on the company site afterward.'}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="mb-6">

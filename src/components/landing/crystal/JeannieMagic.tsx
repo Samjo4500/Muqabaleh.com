@@ -208,7 +208,9 @@ function StageApprove({ isAr, active }: { isAr: boolean; active: boolean }) {
         </span>
       </div>
       <p className="text-xs text-white/40">
-        {isAr ? 'لا تقديم بدون موافقتك. ليس عشوائياً.' : 'No apply without your approval. NOT SPAM.'}
+        {isAr
+          ? 'مقابلة لا تقدّم نيابةً عنك. أنت تقدّم على موقع الشركة.'
+          : 'Muqabaleh never applies for you. You apply on the company site.'}
       </p>
     </div>
   );

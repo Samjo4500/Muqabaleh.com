@@ -32,6 +32,10 @@ export type InterviewerContext = {
   timeTaken: number;
   answer: string;
   isFollowUp?: boolean;
+  /** Company-specific mock from jobs portal — practice only */
+  companyName?: string | null;
+  roleTitle?: string | null;
+  jobDescription?: string | null;
 };
 
 const SYSTEM_PROMPT = `You are an expert AI interviewer for Muqabaleh, an AI-powered mock interview platform.
@@ -232,6 +236,16 @@ export async function evaluateAnswer(ctx: InterviewerContext): Promise<FeedbackR
     };
   }
 
+  const companyBlock =
+    ctx.companyName && ctx.roleTitle
+      ? `
+COMPANY-SPECIFIC MOCK (candidate is practicing for a real listing — they will apply themselves):
+- Target company: ${ctx.companyName}
+- Target role title: ${ctx.roleTitle}
+- Role snippet: ${ctx.jobDescription || 'n/a'}
+Score answers for fit to THIS company and role. Prefer feedback that references the employer/role when relevant.`
+      : '';
+
   const userPrompt = `
 CONTEXT:
 - Role: ${ctx.role}
@@ -245,6 +259,7 @@ CONTEXT:
 - Time Limit: ${ctx.timeLimit}s
 - Time Taken: ${ctx.timeTaken}s
 - Is Follow-up answer: ${ctx.isFollowUp ? 'yes' : 'no'}
+${companyBlock}
 
 CANDIDATE ANSWER:
 """

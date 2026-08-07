@@ -83,7 +83,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
     return (
       <div id="roles" className="mq-wrap py-16 text-center">
         <p className="mq-display text-3xl font-bold text-white">
-          {isAr ? 'نجهّز أدوار المنطقة' : 'Warming up MENA roles'}
+          {isAr ? 'نجهّز قائمة الوظائف' : 'Warming up MENA roles'}
         </p>
         <Link
           href={localePath('/interview/prequal', locale)}
@@ -106,14 +106,14 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
       <div className="mq-wrap relative py-12 md:py-16">
         <div className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mq-kicker mb-2">{isAr ? 'الأدوار المفتوحة' : 'Open roles'}</p>
+            <p className="mq-kicker mb-2">{isAr ? 'الوظائف المتاحة' : 'Open roles'}</p>
             <h2 className="mq-display text-3xl font-bold text-white md:text-4xl">
-              {isAr ? 'اختر دوراً. تدرّب عليه.' : 'Pick a role. Practice it.'}
+              {isAr ? 'اختر وظيفة. تدرّب عليها.' : 'Pick a role. Practice it.'}
             </h2>
           </div>
           <p className="text-sm text-white/45 md:max-w-xs md:text-end">
             {isAr
-              ? `${filtered.length} دور · ${withSalaryCount} براتب معلن`
+              ? `${filtered.length} وظيفة · ${withSalaryCount} براتب معلن`
               : `${filtered.length} roles · ${withSalaryCount} with published pay`}
           </p>
         </div>
@@ -128,7 +128,9 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={
-                isAr ? 'ابحث عن دور، شركة، مدينة، أو راتب…' : 'Search role, company, city, or salary…'
+                isAr
+                  ? 'ابحث عن وظيفة أو شركة أو مدينة أو راتب…'
+                  : 'Search role, company, city, or salary…'
               }
               className="glass-input min-h-[52px] w-full rounded-2xl pe-4 ps-11 text-sm"
             />
@@ -136,7 +138,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
 
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-white/40">
-              {isAr ? 'كل دول المنطقة' : 'All MENA countries'}
+              {isAr ? 'حسب الدولة' : 'All MENA countries'}
             </p>
             <div className="flex flex-wrap gap-2 pb-1 pt-0.5">
               <CountryFlagTile
@@ -171,7 +173,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
           >
             <Banknote size={14} />
             {isAr
-              ? `راتب معلن فقط (${withSalaryCount})`
+              ? `الراتب المعلن فقط (${withSalaryCount})`
               : `Published salary only (${withSalaryCount})`}
           </button>
         </div>
@@ -181,11 +183,11 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
         ) : (
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] px-6 py-12 text-center">
             <p className="mq-display text-2xl font-bold text-white">
-              {isAr ? 'لا أدوار هنا بعد' : 'No roles here yet'}
+              {isAr ? 'لا وظائف هنا بعد' : 'No roles here yet'}
             </p>
             <p className="mx-auto mt-3 max-w-md text-sm text-white/55">
               {isAr
-                ? 'نضيف شركات بواجهات ATS قانونية في كل بلد. تدرّب مع جيني الآن — وفلتر «كل المنطقة» للأدوار المتاحة.'
+                ? 'نضيف شركات لديها لوحات توظيف قانونية في كل دولة. تدرّب مع جيني الآن، أو امسح الفلاتر لعرض الوظائف المتاحة.'
                 : 'We’re adding employers with legal ATS boards in every country. Practice with Jeannie now — or clear filters to see open roles.'}
             </p>
             <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -198,7 +200,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                 }}
                 className="mq-btn mq-btn-ghost inline-flex min-h-[48px] px-5 text-sm font-bold"
               >
-                {isAr ? 'عرض كل المنطقة' : 'Show all MENA'}
+                {isAr ? 'عرض كل الوظائف' : 'Show all MENA'}
               </button>
               <Link
                 href={localePath('/interview/prequal', locale)}
@@ -266,7 +268,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                           </span>
                         ) : (
                           <span className="text-white/35">
-                            {isAr ? 'الراتب على موقع الشركة' : 'Pay on company site'}
+                            {isAr ? 'الراتب لدى الشركة' : 'Pay on company site'}
                           </span>
                         )}
                       </p>
@@ -277,7 +279,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                       ) : null}
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-teal-200">
-                      {isAr ? 'تدرّب لهذا الدور' : 'Practice this role'}
+                      {isAr ? 'تدرّب لهذه الوظيفة' : 'Practice this role'}
                       <ArrowUpRight size={16} />
                     </span>
                   </Link>
@@ -289,7 +291,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
 
         <p className="mt-10 text-center text-xs leading-relaxed text-white/35">
           {isAr
-            ? 'الرواتب تُعرض فقط إن نشرها صاحب العمل عبر ATS. البلدان بلا أدوار بعد — نضيف لوحات قانونية باستمرار.'
+            ? 'نعرض الراتب فقط إذا أعلنه صاحب العمل. الدول بلا وظائف بعد ضمن نطاقنا — ونضيف لوحات توظيف قانونية باستمرار.'
             : 'Salaries appear only when the employer published pay via ATS. Countries at 0 are still in scope — we add legal boards continuously.'}
         </p>
       </div>
@@ -374,7 +376,7 @@ function SpotlightRole({
       />
       <div className="relative flex flex-wrap items-center gap-2">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-200/90">
-          {isAr ? 'الدور المميّز' : 'Spotlight role'}
+          {isAr ? 'فرصة مميزة' : 'Spotlight role'}
         </p>
         {job.salaryLabel ? (
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300/30 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-100">
@@ -406,7 +408,7 @@ function SpotlightRole({
       {!job.salaryLabel ? (
         <p className="relative mt-2 text-sm text-white/40">
           {isAr
-            ? 'الراتب غير معلن هنا — يظهر على موقع الشركة عند التقديم.'
+            ? 'الراتب غير معلن هنا — راجعه عند التقديم لدى الشركة.'
             : 'Pay not published here — check the company site when you apply.'}
         </p>
       ) : null}
@@ -417,7 +419,7 @@ function SpotlightRole({
       ) : (
         <p className="relative mt-4 max-w-2xl text-sm leading-relaxed text-white/55 md:text-base">
           {isAr
-            ? 'تدرّب على أسئلة خاصة بهذا الدور مع جيني، ثم قدّم بنفسك على موقع الشركة.'
+            ? 'تدرّب مع جيني على أسئلة مخصّصة لهذه الوظيفة، ثم قدّم بنفسك لدى الشركة.'
             : 'Practice role-specific questions with Jeannie, then apply yourself on the company site.'}
         </p>
       )}
@@ -436,7 +438,7 @@ function SpotlightRole({
           className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
           <Sparkles size={15} />
-          {isAr ? 'تدرّب لهذا الدور مع جيني' : 'Practice this role with Jeannie'}
+          {isAr ? 'تدرّب لهذه الوظيفة مع جيني' : 'Practice this role with Jeannie'}
         </Link>
         <a
           href={job.applyUrl}
@@ -444,7 +446,7 @@ function SpotlightRole({
           rel="noopener noreferrer"
           className="mq-btn mq-btn-ghost inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
-          {isAr ? 'قدّم على موقع الشركة' : 'Apply on company site'}
+          {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
           <ArrowUpRight size={15} />
         </a>
         <Link

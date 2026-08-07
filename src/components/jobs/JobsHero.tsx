@@ -20,6 +20,16 @@ export function JobsHero({ roleCount }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
 
+  const subAr =
+    roleCount > 0
+      ? `أكثر من ${roleCount} وظيفة حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل، وتتدرّب مع جيني قبل أن تقدّم بنفسك لدى الشركة.`
+      : 'وظائف حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل، وتتدرّب مع جيني قبل أن تقدّم بنفسك لدى الشركة.';
+
+  const subEn =
+    roleCount > 0
+      ? `${roleCount}+ live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.`
+      : 'Live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.';
+
   return (
     <section className="relative min-h-[92svh] overflow-hidden">
       <motion.div
@@ -37,7 +47,7 @@ export function JobsHero({ roleCount }: Props) {
             src="/images/jobs-mena-hero.webp"
             alt={
               isAr
-                ? 'أفق مدينة في المنطقة — أدوار مهنية حقيقية'
+                ? 'أفق مدينة عربية — فرص عمل مهنية حقيقية'
                 : 'MENA city skyline — real professional roles'
             }
             fill
@@ -82,9 +92,9 @@ export function JobsHero({ roleCount }: Props) {
           >
             {isAr ? (
               <>
-                أدوار المنطقة.
+                وظائف من المنطقة.
                 <br />
-                <span className="text-teal-300">تدرّب. ثم قدّم.</span>
+                <span className="text-teal-300">استعد… ثم قدّم.</span>
               </>
             ) : (
               <>
@@ -99,9 +109,7 @@ export function JobsHero({ roleCount }: Props) {
             variants={fadeUp}
             className="mt-5 max-w-xl text-base leading-relaxed text-white/70 md:text-lg"
           >
-            {isAr
-              ? `${roleCount > 0 ? `${roleCount}+ ` : ''}وظيفة حقيقية عبر دول المنطقة — نعرض الراتب عند نشره، تتدرّب مع جيني، ثم تقدّم بنفسك على موقع الشركة.`
-              : `${roleCount > 0 ? `${roleCount}+ ` : ''}live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.`}
+            {isAr ? subAr : subEn}
           </motion.p>
 
           <motion.div
@@ -112,7 +120,7 @@ export function JobsHero({ roleCount }: Props) {
               href="#roles"
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
             >
-              {isAr ? 'تصفّح الأدوار' : 'Browse roles'}
+              {isAr ? 'استعرض الوظائف' : 'Browse roles'}
             </a>
             <Link
               href={localePath('/interview/prequal', locale)}

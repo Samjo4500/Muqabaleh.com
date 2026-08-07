@@ -101,7 +101,7 @@ export const MENA_COUNTRY_LABELS: Record<MenaCountryKey, { en: string; ar: strin
   libya: { en: 'Libya', ar: 'ليبيا' },
   sudan: { en: 'Sudan', ar: 'السودان' },
   yemen: { en: 'Yemen', ar: 'اليمن' },
-  other: { en: 'Wider MENA', ar: 'أوسع المنطقة' },
+  other: { en: 'Wider MENA', ar: 'دول أخرى' },
 };
 
 /** Flag emoji for country filter tiles (a11y label still uses MENA_COUNTRY_LABELS). */

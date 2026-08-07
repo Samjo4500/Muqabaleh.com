@@ -346,8 +346,8 @@ async function fetchForCompany(company: {
       },
     });
   });
-  // Parallel chunks — sequential upserts of large boards (100+) blow Vercel timeouts
-  const CHUNK = 25;
+  // Small parallel chunks — prod DATABASE_URL is PgBouncer with connection_limit=1
+  const CHUNK = 5;
   let upserted = 0;
   for (let i = 0; i < ops.length; i += CHUNK) {
     await Promise.all(ops.slice(i, i + CHUNK));

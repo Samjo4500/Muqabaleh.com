@@ -14,11 +14,10 @@ import { C } from './copy';
 
 /** Product story first; Pricing always last before auth CTAs. */
 const NAV_LINKS = [
-  { bi: C.nav.howItWorks, href: '#jeannie-magic' },
   { bi: C.nav.jeannie, href: '#jeannie' },
+  { bi: { en: 'How it works', ar: 'كيف يعمل' }, href: '#how' },
+  { bi: { en: 'Passport', ar: 'الجواز' }, href: '#passport' },
   { bi: { en: 'Jobs', ar: 'الوظائف' }, href: '/jobs' },
-  { bi: C.nav.forCompanies, href: '/business' },
-  { bi: C.nav.partners, href: '/partners' },
   { bi: C.nav.pricing, href: '#pricing' },
 ] as const;
 

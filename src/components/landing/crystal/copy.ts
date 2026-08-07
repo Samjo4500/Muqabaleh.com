@@ -17,14 +17,14 @@ export const C = {
     getStarted: { en: 'Get started', ar: 'ابدأ الآن' },
   },
   hero: {
-    eyebrow: { en: 'Meet Jeannie', ar: 'تعرّف على جيني' },
+    eyebrow: { en: 'Jeannie · Muqabaleh', ar: 'جيني · مقابلة' },
     headline: {
-      en: 'Master your interview. Get verified. Land the job.',
-      ar: 'أتقن مقابلتك. احصل على توثيق. احصل على الوظيفة.',
+      en: 'Practice with Jeannie. Get a verified passport.',
+      ar: 'تدرّب مع جيني. احصل على جواز موثّق.',
     },
     sub: {
-      en: 'Practice company-specific interviews with Jeannie, earn a verified passport, then apply yourself on the company site — with confidence.',
-      ar: 'تدرّب مقابلات خاصة بالشركات مع جيني، احصل على جواز موثّق، ثم قدّم بنفسك على موقع الشركة — بثقة.',
+      en: 'She coaches your interview in Arabic or English. You earn a shareable passport — then apply yourself on the company site.',
+      ar: 'تدرّبك على المقابلة بالعربية أو الإنجليزية. تحصل على جواز قابل للمشاركة — ثم تقدّم بنفسك على موقع الشركة.',
     },
     dialectNote: {
       en: 'Jeannie understands and fairly scores Arabic regional dialects (Gulf, Levantine, Egyptian), professional English with local accents, and natural bilingual code-switching — accent is not a penalty.',
@@ -34,9 +34,55 @@ export const C = {
       en: 'Your interview scores stay private until you choose to publish or share your passport. Practice and retake anytime to improve before locking a public score.',
       ar: 'درجات مقابلتك تبقى خاصة حتى تختار نشر جوازك أو مشاركته. تدرّب وأعد المقابلة في أي وقت لتحسين نتيجتك قبل تثبيت درجة عامة.',
     },
-    ctaInterview: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
-    ctaJeannie: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
+    ctaInterview: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
+    ctaJeannie: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
+  },
+  path: {
+    eyebrow: { en: 'Simple path', ar: 'مسار بسيط' },
+    title: { en: 'Three steps. Jeannie in the middle.', ar: 'ثلاث خطوات. جيني في الوسط.' },
+    sub: {
+      en: 'No auto-apply. No spam. Practice, verify, then you apply.',
+      ar: 'بلا تقديم تلقائي. بلا عشوائية. تدرّب، وثّق، ثم قدّم أنت.',
+    },
+    ctaJobs: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
+    steps: [
+      {
+        title: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+        body: {
+          en: 'Company-specific or general mocks in Arabic or English. Dialects welcome.',
+          ar: 'مقابلات خاصة بشركات أو عامة بالعربية أو الإنجليزية. اللهجات مرحّب بها.',
+        },
+      },
+      {
+        title: { en: 'Get your passport', ar: 'احصل على جوازك' },
+        body: {
+          en: 'A verified score you can share — private until you decide to publish.',
+          ar: 'درجة موثّقة يمكنك مشاركتها — خاصة حتى تقرر النشر.',
+        },
+      },
+      {
+        title: { en: 'Apply yourself', ar: 'قدّم بنفسك' },
+        body: {
+          en: 'Open the company site from our jobs board. You always send the application.',
+          ar: 'افتح موقع الشركة من لوحة وظائفنا. أنت ترسل التقديم دائماً.',
+        },
+      },
+    ],
+  },
+  passport: {
+    eyebrow: { en: 'Your passport', ar: 'جوازك' },
+    title: { en: 'Proof employers can trust', ar: 'دليل يثق به أصحاب العمل' },
+    sub: {
+      en: 'Not a gimmick score — a clear, verifiable readiness credential from your Jeannie interview.',
+      ar: 'ليست درجة شكلية — اعتماد جاهزية واضح وقابل للتحقق من مقابلتك مع جيني.',
+    },
+    cta: { en: 'Earn your passport free', ar: 'احصل على جوازك مجاناً' },
+    bullets: [
+      { en: '0–100 interview-verified score', ar: 'درجة ٠–١٠٠ موثّقة بالمقابلة' },
+      { en: 'Clarity, confidence, structure, bilingual signal', ar: 'وضوح، ثقة، هيكل، إشارة ثنائية اللغة' },
+      { en: 'Public verify link + QR when you choose to share', ar: 'رابط تحقق عام + QR عندما تختار المشاركة' },
+    ],
   },
   trust: {
     text: {
@@ -80,18 +126,18 @@ export const C = {
         href: '/app/passport',
       },
       {
-        title: { en: 'She applies — you approve', ar: 'هي تقدّم — أنت توافق' },
+        title: { en: 'You apply with confidence', ar: 'تقدّم بثقة' },
         body: {
-          en: 'Jeannie shortlists roles, waits for your OK, then applies with your passport attached. Not spam.',
-          ar: 'جيني ترشّح الأدوار، تنتظر موافقتك، ثم تقدّم مع جوازك مرفقاً. ليس عشوائياً.',
+          en: 'Browse roles, practice for the company, then apply yourself on their site — passport ready to share.',
+          ar: 'تصفّح الأدوار، تدرّب للشركة، ثم قدّم بنفسك على موقعها — وجوازك جاهز للمشاركة.',
         },
         features: [
-          { en: 'You approve every apply', ar: 'أنت توافق على كل تقديم' },
-          { en: 'Passport attached', ar: 'الجواز مرفق' },
-          { en: 'Application tracker', ar: 'متتبّع الطلبات' },
+          { en: 'Apply on company site', ar: 'قدّم على موقع الشركة' },
+          { en: 'Passport ready to share', ar: 'جواز جاهز للمشاركة' },
+          { en: 'Manual tracker', ar: 'متتبّع يدوي' },
         ],
-        cta: { en: 'See how she works', ar: 'شاهِد كيف تعمل' },
-        href: '/#jeannie-magic',
+        cta: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
+        href: '/jobs',
       },
     ],
   },
@@ -546,8 +592,8 @@ export const C = {
       },
       {
         q: {
-          en: 'How does Jeannie actually apply for me?',
-          ar: 'كيف تقدّم جيني عني فعلياً؟',
+          en: 'Does Jeannie apply to jobs for me?',
+          ar: 'هل تقدّم جيني للوظائف عني؟',
         },
         a: {
           en: 'She doesn’t. Muqabaleh never applies on your behalf. You practice for the role, prep materials, then click “Apply on Company Site” and submit yourself.',
@@ -578,10 +624,10 @@ export const C = {
   },
   finalCta: {
     headline: {
-      en: 'Ready for your hire-ready passport?',
-      ar: 'هل أنت مستعد لجوازك الجاهز للتوظيف؟',
+      en: 'Ready to practice with Jeannie?',
+      ar: 'هل أنت مستعد للتدرّب مع جيني؟',
     },
-    startFree: { en: 'Start free', ar: 'ابدأ مجاناً' },
+    startFree: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
     hiring: { en: "I'm hiring", ar: 'أبحث عن مواهب' },
   },
   footer: {

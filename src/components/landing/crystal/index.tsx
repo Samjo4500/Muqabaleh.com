@@ -7,36 +7,20 @@ import { getLocaleSwitchPath } from '@/i18n/navigation';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
 
-const CrystalTrust = dynamic(
-  () => import('./Trust').then((m) => m.CrystalTrust),
+const CrystalSimplePath = dynamic(
+  () => import('./SimplePath').then((m) => m.CrystalSimplePath),
   { ssr: true },
 );
-const CrystalServices = dynamic(
-  () => import('./Services').then((m) => m.CrystalServices),
+const CrystalPassportShowcase = dynamic(
+  () => import('./PassportShowcase').then((m) => m.CrystalPassportShowcase),
   { ssr: true },
 );
 const CrystalJeannie = dynamic(
   () => import('./Jeannie').then((m) => m.CrystalJeannie),
   { ssr: true },
 );
-const CrystalJeannieMagic = dynamic(
-  () => import('./JeannieMagic').then((m) => m.CrystalJeannieMagic),
-  { ssr: true },
-);
-const CrystalForCompanies = dynamic(
-  () => import('./ForCompanies').then((m) => m.CrystalForCompanies),
-  { ssr: true },
-);
 const CrystalPricing = dynamic(
   () => import('./Pricing').then((m) => m.CrystalPricing),
-  { ssr: true },
-);
-const CrystalTestimonials = dynamic(
-  () => import('./Testimonials').then((m) => m.CrystalTestimonials),
-  { ssr: true },
-);
-const CrystalFAQ = dynamic(
-  () => import('./FAQ').then((m) => m.CrystalFAQ),
   { ssr: true },
 );
 const CrystalFinalCta = dynamic(
@@ -71,6 +55,10 @@ function LanguageSwitcherFixed() {
   );
 }
 
+/**
+ * Prepare-and-Verify landing — simple, Jeannie-centered.
+ * Hero → path → passport (visible) → Jeannie → pricing → CTA.
+ */
 export function CrystalLanding() {
   const locale = useLocale();
   const isAr = locale === 'ar';
@@ -91,14 +79,10 @@ export function CrystalLanding() {
       <CrystalNavbar />
       <main>
         <CrystalHero />
-        <CrystalTrust />
-        <CrystalServices />
+        <CrystalSimplePath />
+        <CrystalPassportShowcase />
         <CrystalJeannie />
-        <CrystalJeannieMagic />
-        <CrystalForCompanies />
         <CrystalPricing />
-        <CrystalTestimonials />
-        <CrystalFAQ />
         <CrystalFinalCta />
       </main>
       <CrystalFooter />

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
-import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
+import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { localePath } from '@/i18n/navigation';
 
 export default async function OptOutPage() {
@@ -8,7 +8,8 @@ export default async function OptOutPage() {
   const isAr = locale === 'ar';
 
   return (
-    <AtelierShell>
+    <div className="mq-atelier min-h-screen">
+      <JobPortalChrome backHref="/jobs" backLabel={{ en: 'Jobs', ar: 'الوظائف' }} />
       <main className="mq-wrap mx-auto max-w-2xl py-16 md:py-24">
         <p className="mq-kicker mb-3">{isAr ? 'قانوني' : 'Legal'}</p>
         <h1 className="mq-display text-3xl font-bold text-white md:text-4xl">
@@ -44,6 +45,6 @@ export default async function OptOutPage() {
           {isAr ? 'العودة للوظائف' : 'Back to jobs'}
         </Link>
       </main>
-    </AtelierShell>
+    </div>
   );
 }

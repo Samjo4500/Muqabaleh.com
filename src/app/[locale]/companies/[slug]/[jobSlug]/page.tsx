@@ -70,14 +70,14 @@ export default async function CompanyJobPage({
           ) : (
             <p className="mt-3 text-sm text-white/40">
               {isAr
-                ? 'الراتب غير معلن هنا — يظهر على موقع الشركة عند التقديم.'
+                ? 'الراتب غير معلن هنا — راجعه عند التقديم لدى الشركة.'
                 : 'Pay not published here — check the company site when you apply.'}
             </p>
           )}
 
           <div className="mt-8 rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 md:p-8">
             <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white/45">
-              {isAr ? 'تفاصيل المنصب' : 'Position details'}
+              {isAr ? 'عن الوظيفة' : 'Position details'}
             </h2>
             <p className="mt-3 text-base leading-relaxed text-white/70">
               {safeJobText(job.description)}
@@ -94,7 +94,7 @@ export default async function CompanyJobPage({
             ) : (
               <p className="mt-4 text-sm text-white/40">
                 {isAr
-                  ? 'التفاصيل الكاملة والمتطلبات على إعلان الشركة الأصلي.'
+                  ? 'التفاصيل والمتطلبات الكاملة في إعلان الشركة.'
                   : 'Full requirements are on the original company posting.'}
               </p>
             )}
@@ -105,7 +105,7 @@ export default async function CompanyJobPage({
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-300 hover:text-teal-200"
             >
               <ExternalLink size={14} />
-              {isAr ? 'عرض الإعلان الأصلي' : 'View original posting'}
+              {isAr ? 'افتح إعلان الشركة' : 'View original posting'}
             </a>
           </div>
 
@@ -124,13 +124,13 @@ export default async function CompanyJobPage({
               className="mq-btn mq-btn-ghost inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
             >
               <ExternalLink size={16} />
-              {isAr ? 'قدّم على موقع الشركة' : 'Apply on company site'}
+              {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
             </a>
           </div>
 
           <p className="mt-5 text-center text-xs text-white/40">
             {isAr
-              ? 'مقابلة لا تقدّم نيابةً عنك. أنت ترسل الطلب على موقع الشركة.'
+              ? 'مقابلة لا تقدّم نيابةً عنك — أنت ترسل طلبك مباشرة لدى الشركة.'
               : 'Muqabaleh never applies for you. You submit on the company site.'}
           </p>
         </div>

@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/jobs',
-    titleAr: 'وظائف المنطقة — تدرّب ثم قدّم | مقابلة',
+    titleAr: 'وظائف الشرق الأوسط — استعد ثم قدّم | مقابلة',
     titleEn: 'MENA jobs — practice then apply | Muqabaleh',
     descAr:
-      'أدوار حقيقية عبر دول المنطقة مع راتب معلن عند نشره. تدرّب مع جيني ثم قدّم بنفسك على موقع الشركة.',
+      'وظائف حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل. تدرّب مع جيني ثم قدّم بنفسك لدى الشركة.',
     descEn:
       'Live roles across MENA with published salary when employers share it. Practice with Jeannie, then apply yourself on the company site.',
   });
@@ -68,9 +68,9 @@ export default async function JobsPage() {
 
       <div className="mq-wrap pb-12 text-center">
         <p className="text-sm text-white/40">
-          {isAr ? 'شركة تريد الإزالة؟' : 'Company want removal?'}{' '}
+          {isAr ? 'شركتك تريد حذف إعلاناتها؟' : 'Company want removal?'}{' '}
           <Link href={localePath('/legal/opt-out', locale)} className="text-teal-300 underline">
-            {isAr ? 'طلب إزالة' : 'Opt out'}
+            {isAr ? 'اطلب الحذف' : 'Opt out'}
           </Link>
         </p>
       </div>

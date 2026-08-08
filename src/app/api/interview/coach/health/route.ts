@@ -19,35 +19,75 @@ export async function GET() {
   let geminiError: string | null = null;
   let geminiModelTried: string | null = null;
 
-  if (geminiKey) {
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+  if (geminiKey || googleServiceAccount) {
+    const models = [
+      'gemini-flash-latest',
+      'gemini-pro-latest',
+      'gemini-3.5-flash',
+      'gemini-2.5-flash',
+    ];
+    const accessToken = googleServiceAccount
+      ? await getGoogleAccessToken([
+          'https://www.googleapis.com/auth/generative-language',
+        ])
+      : null;
+    const key = process.env.GEMINI_API_KEY?.trim() || null;
+
     for (const model of models) {
       geminiModelTried = model;
       try {
-        const key = process.env.GEMINI_API_KEY!.trim();
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: OK' }] }],
-          }),
-        });
-        if (!res.ok) {
-          const errText = await res.text().catch(() => '');
-          geminiError = `${res.status}: ${errText.slice(0, 160)}`;
-          continue;
+        const attempts: {
+          url: string;
+          headers: Record<string, string>;
+          label: string;
+        }[] = [];
+        if (accessToken) {
+          attempts.push({
+            label: 'service_account',
+            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
         }
-        const data = (await res.json()) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-        };
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (text) {
-          geminiPing = 'ok';
-          geminiError = null;
-          break;
+        if (key) {
+          attempts.push({
+            label: 'api_key',
+            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+            headers: { 'Content-Type': 'application/json' },
+          });
         }
-        geminiError = 'empty_response';
+
+        let modelOk = false;
+        for (const attempt of attempts) {
+          const res = await fetch(attempt.url, {
+            method: 'POST',
+            headers: attempt.headers,
+            body: JSON.stringify({
+              contents: [
+                { role: 'user', parts: [{ text: 'Reply with exactly: OK' }] },
+              ],
+            }),
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            geminiError = `${attempt.label} ${res.status}: ${errText.slice(0, 160)}`;
+            continue;
+          }
+          const data = (await res.json()) as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[];
+          };
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text) {
+            geminiPing = 'ok';
+            geminiError = null;
+            modelOk = true;
+            break;
+          }
+          geminiError = `${attempt.label}: empty_response`;
+        }
+        if (modelOk) break;
       } catch (err) {
         geminiError = err instanceof Error ? err.message.slice(0, 160) : 'exception';
       }
@@ -131,7 +171,7 @@ export async function GET() {
     sttError,
     hint:
       geminiPing === 'fail'
-        ? 'GEMINI_API_KEY must be a Google AI Studio key (usually starts with AIza). Create at https://aistudio.google.com/apikey'
+        ? 'Gemini failed. Prefer GOOGLE_APPLICATION_CREDENTIALS_JSON (service account) with Generative Language API enabled, or a valid AI Studio GEMINI_API_KEY.'
         : sttPing === 'fail'
           ? 'Speech API rejected API key auth. Add GOOGLE_APPLICATION_CREDENTIALS_JSON (service account) with Speech-to-Text enabled.'
           : null,

@@ -6,7 +6,16 @@ type ServiceAccount = {
   token_uri?: string;
 };
 
-let cachedToken: { accessToken: string; expiresAt: number } | null = null;
+const DEFAULT_SCOPES = [
+  'https://www.googleapis.com/auth/cloud-platform',
+  'https://www.googleapis.com/auth/generative-language',
+];
+
+let cachedToken: {
+  accessToken: string;
+  expiresAt: number;
+  scopeKey: string;
+} | null = null;
 
 function readServiceAccount(): ServiceAccount | null {
   const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON?.trim();
@@ -21,12 +30,22 @@ function readServiceAccount(): ServiceAccount | null {
   }
 }
 
+function mergeScopes(scopes: string[]): string[] {
+  return Array.from(new Set([...DEFAULT_SCOPES, ...scopes]));
+}
+
 /** OAuth access token from service-account JSON (server-only). */
 export async function getGoogleAccessToken(
-  scopes: string[],
+  scopes: string[] = [],
 ): Promise<string | null> {
   const now = Date.now();
-  if (cachedToken && cachedToken.expiresAt > now + 60_000) {
+  const merged = mergeScopes(scopes);
+  const scopeKey = merged.slice().sort().join(' ');
+  if (
+    cachedToken &&
+    cachedToken.scopeKey === scopeKey &&
+    cachedToken.expiresAt > now + 60_000
+  ) {
     return cachedToken.accessToken;
   }
 
@@ -41,7 +60,7 @@ export async function getGoogleAccessToken(
     const iat = Math.floor(now / 1000);
     const exp = iat + 3600;
     const assertion = await new SignJWT({
-      scope: scopes.join(' '),
+      scope: merged.join(' '),
     })
       .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
       .setIssuer(sa.client_email)
@@ -69,6 +88,7 @@ export async function getGoogleAccessToken(
     cachedToken = {
       accessToken: data.access_token,
       expiresAt: now + (data.expires_in || 3600) * 1000,
+      scopeKey,
     };
     return data.access_token;
   } catch (err) {

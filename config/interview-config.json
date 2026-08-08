@@ -74,7 +74,7 @@
     "iframeBaseUrl": ""
   },
   "engine": {
-    "geminiModel": "gemini-2.0-flash",
+    "geminiModel": "gemini-flash-latest",
     "minQuestions": 5,
     "maxQuestions": 7,
     "speechProvider": "google-cloud-stt",

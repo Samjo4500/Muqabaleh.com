@@ -9,24 +9,41 @@ async function callGeminiPro(
 ): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
-  const model = getInterviewConfig().engine.geminiModel || 'gemini-1.5-pro';
-  try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const client = new GoogleGenerativeAI(key);
-    const gen = client.getGenerativeModel({
-      model,
-      systemInstruction: system,
-    });
-    const chat = gen.startChat({
-      history: contents.slice(0, -1),
-    });
-    const last = contents[contents.length - 1];
-    const result = await chat.sendMessage(last?.parts?.[0]?.text || 'Continue.');
-    return result.response.text() || null;
-  } catch (err) {
-    console.error('[coach/gemini] turn failed', err);
-    return null;
+  const preferred = getInterviewConfig().engine.geminiModel || 'gemini-1.5-pro';
+  // AI Studio keys often accept flash aliases more reliably than pinned pro ids.
+  const models = Array.from(
+    new Set([preferred, 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']),
+  );
+
+  // Gemini chat history must start with a user turn.
+  let history = contents.slice(0, -1);
+  if (history[0]?.role === 'model') {
+    history = [
+      { role: 'user', parts: [{ text: 'Continue the interview.' }] },
+      ...history,
+    ];
   }
+  const last = contents[contents.length - 1];
+  const lastText = last?.parts?.[0]?.text || 'Continue.';
+
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
+  const client = new GoogleGenerativeAI(key);
+
+  for (const model of models) {
+    try {
+      const gen = client.getGenerativeModel({
+        model,
+        systemInstruction: system,
+      });
+      const chat = gen.startChat({ history });
+      const result = await chat.sendMessage(lastText);
+      const text = result.response.text() || null;
+      if (text) return text;
+    } catch (err) {
+      console.error(`[coach/gemini] turn failed model=${model}`, err);
+    }
+  }
+  return null;
 }
 
 function toGeminiHistory(messages: ChatMessage[]) {
@@ -64,6 +81,14 @@ export async function generateCoachTurn(opts: {
 
   const text = await callGeminiPro(system, toGeminiHistory(history));
   if (!text) {
+    // Prefer contextual fallback — never crash the session.
+    if (opts.userMessage?.trim()) {
+      const fallbackFollow =
+        opts.prep.language === 'en'
+          ? 'Thank you. Could you share a specific example with numbers or outcomes?'
+          : 'شكراً لك. هل يمكنك مشاركة مثال محدد بأرقام أو نتائج؟';
+      return { reply: fallbackFollow, complete: false };
+    }
     const fallback =
       opts.prep.language === 'en' ? OPENING_FALLBACK.en : OPENING_FALLBACK.ar;
     return { reply: fallback, complete: false };

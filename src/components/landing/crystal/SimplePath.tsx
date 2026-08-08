@@ -65,7 +65,7 @@ export function CrystalSimplePath() {
           className="mt-10 flex flex-col gap-3 sm:flex-row"
         >
           <Link
-            href={localePath('/interview/prequal', locale)}
+            href={localePath('/interview/prep', locale)}
             className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-6 text-sm font-bold"
           >
             <BiInline bi={C.hero.ctaInterview} />

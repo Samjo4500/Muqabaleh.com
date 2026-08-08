@@ -36,6 +36,14 @@ const ROUTE_ROLES: Record<string, string[]> = {
     ROLE.PARTNER_MEMBER,
     ROLE.SUPER_ADMIN,
   ],
+  '/interview/prep': [
+    ROLE.USER,
+    ROLE.INTERVIEWER,
+    ROLE.COMPANY_ADMIN,
+    ROLE.PARTNER_ADMIN,
+    ROLE.PARTNER_MEMBER,
+    ROLE.SUPER_ADMIN,
+  ],
   '/interview/summary': [
     ROLE.USER,
     ROLE.INTERVIEWER,

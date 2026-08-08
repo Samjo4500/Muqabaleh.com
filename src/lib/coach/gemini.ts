@@ -26,24 +26,81 @@ async function callGeminiPro(
   const last = contents[contents.length - 1];
   const lastText = last?.parts?.[0]?.text || 'Continue.';
 
-  const { GoogleGenerativeAI } = await import('@google/generative-ai');
-  const client = new GoogleGenerativeAI(key);
-
+  // Prefer REST (works with AI Studio + Cloud API keys) then SDK.
   for (const model of models) {
     try {
-      const gen = client.getGenerativeModel({
+      const rest = await callGeminiRest({
+        key,
         model,
-        systemInstruction: system,
+        system,
+        history,
+        lastText,
       });
-      const chat = gen.startChat({ history });
-      const result = await chat.sendMessage(lastText);
-      const text = result.response.text() || null;
-      if (text) return text;
+      if (rest) return rest;
     } catch (err) {
-      console.error(`[coach/gemini] turn failed model=${model}`, err);
+      console.error(`[coach/gemini] REST failed model=${model}`, err);
     }
   }
+
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const client = new GoogleGenerativeAI(key);
+    for (const model of models) {
+      try {
+        const gen = client.getGenerativeModel({
+          model,
+          systemInstruction: system,
+        });
+        const chat = gen.startChat({ history });
+        const result = await chat.sendMessage(lastText);
+        const text = result.response.text() || null;
+        if (text) return text;
+      } catch (err) {
+        console.error(`[coach/gemini] SDK failed model=${model}`, err);
+      }
+    }
+  } catch (err) {
+    console.error('[coach/gemini] SDK init failed', err);
+  }
   return null;
+}
+
+async function callGeminiRest(opts: {
+  key: string;
+  model: string;
+  system: string;
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[];
+  lastText: string;
+}): Promise<string | null> {
+  const contents = [
+    ...opts.history.map((h) => ({
+      role: h.role,
+      parts: h.parts,
+    })),
+    { role: 'user' as const, parts: [{ text: opts.lastText }] },
+  ];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: opts.system }] },
+      contents,
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    console.error(
+      `[coach/gemini] REST ${opts.model}`,
+      res.status,
+      errText.slice(0, 220),
+    );
+    return null;
+  }
+  const data = (await res.json()) as {
+    candidates?: { content?: { parts?: { text?: string }[] } }[];
+  };
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
 }
 
 function toGeminiHistory(messages: ChatMessage[]) {

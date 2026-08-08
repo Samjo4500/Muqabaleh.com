@@ -85,7 +85,9 @@ const FALLBACK_CONFIG: InterviewConfig = {
     geminiModel: 'gemini-1.5-pro',
     minQuestions: 5,
     maxQuestions: 7,
-    whisperModel: 'whisper-1',
+    speechProvider: 'google-cloud-stt',
+    speechEncoding: 'WEBM_OPUS',
+    speechSampleRateHertz: 48000,
   },
   competencies: [
     'Communication',

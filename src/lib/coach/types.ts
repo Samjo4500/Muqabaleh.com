@@ -66,7 +66,9 @@ export type InterviewConfig = {
     geminiModel: string;
     minQuestions: number;
     maxQuestions: number;
-    whisperModel: string;
+    speechProvider?: string;
+    speechEncoding?: string;
+    speechSampleRateHertz?: number;
   };
   competencies: string[];
   accessGates: Record<AccessTierLabel, AccessGate>;

@@ -1,6 +1,14 @@
 import { getInterviewConfig } from './config';
 import type { CoachGender } from './types';
 
+function googleApiKey(): string | null {
+  return (
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.GOOGLE_TTS_API_KEY?.trim() ||
+    null
+  );
+}
+
 export function resolveTtsVoice(
   coachGender: CoachGender,
   language: 'ar' | 'en',
@@ -12,23 +20,23 @@ export function resolveTtsVoice(
 }
 
 /**
- * Google Cloud Text-to-Speech (API key).
- * Returns base64 audio content (MP3) or null.
+ * Google Cloud Text-to-Speech (GOOGLE_API_KEY).
+ * Returns base64 audio content (MP3) or null — never throws.
  */
 export async function synthesizeSpeech(opts: {
   text: string;
   voiceName: string;
   languageCode: string;
 }): Promise<{ audioBase64: string; mimeType: string } | null> {
-  const key = process.env.GOOGLE_TTS_API_KEY;
+  const key = googleApiKey();
   if (!key) {
-    console.warn('[coach/tts] GOOGLE_TTS_API_KEY missing');
+    console.warn('[coach/tts] GOOGLE_API_KEY missing');
     return null;
   }
 
   try {
     const res = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${key}`,
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(key)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

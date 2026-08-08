@@ -1,38 +1,7 @@
 /**
- * Shared LLM helpers for Jeannie writing tools and matching rationales.
- * Prefers OpenAI → Gemini → heuristic fallback.
+ * Shared LLM helpers for Jeannie writing tools.
+ * Gemini → heuristic. No OpenAI in the muqabaleh.com stack path.
  */
-
-export async function callOpenAIJson(system: string, user: string): Promise<string | null> {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return null;
-  const model = process.env.OPENAI_MODEL || 'gpt-4o';
-  try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-      }),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    return data.choices?.[0]?.message?.content ?? null;
-  } catch {
-    return null;
-  }
-}
 
 export async function callGeminiText(system: string, user: string): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
@@ -78,12 +47,7 @@ export async function generateJsonWithFallback(
   system: string,
   user: string,
   fallback: Record<string, unknown>,
-): Promise<{ data: Record<string, unknown>; mode: 'openai' | 'gemini' | 'heuristic' }> {
-  const openai = await callOpenAIJson(system, user);
-  if (openai) {
-    const parsed = extractJsonObject(openai);
-    if (parsed) return { data: { ...fallback, ...parsed }, mode: 'openai' };
-  }
+): Promise<{ data: Record<string, unknown>; mode: 'gemini' | 'heuristic' }> {
   const gemini = await callGeminiText(system, `${system}\n\n${user}\n\nRespond with JSON only.`);
   if (gemini) {
     const parsed = extractJsonObject(gemini);

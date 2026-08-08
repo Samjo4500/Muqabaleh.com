@@ -49,6 +49,8 @@ export function CoachSessionClient({ candidateName }: Props) {
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef(false);
+  const answerInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const [voiceFallback, setVoiceFallback] = useState(false);
 
   const setHistoryBoth = (next: ChatMessage[]) => {
     historyRef.current = next;
@@ -240,22 +242,40 @@ export function CoachSessionClient({ candidateName }: Props) {
       };
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
         const fd = new FormData();
         fd.append('audio', blob, 'answer.webm');
+        fd.append('language', prep?.language || 'mixed');
         setBusy(true);
         try {
-          const res = await fetch('/api/interview/coach/transcribe', { method: 'POST', body: fd });
-          const data = (await res.json()) as { text?: string };
+          const res = await fetch('/api/speech-to-text', { method: 'POST', body: fd });
+          const data = (await res.json()) as {
+            text?: string;
+            fallback?: boolean;
+            error?: string;
+          };
           if (data.text?.trim() && prep) {
+            setError(null);
+            setVoiceFallback(false);
             await runTurn(prep, data.text.trim());
           } else {
+            // Text fallback — interview continues without crash
+            setVoiceFallback(true);
             setError(
               isAr
-                ? 'تعذّر تحويل الصوت. اكتب إجابتك.'
-                : 'Could not transcribe. Type your answer.',
+                ? 'لم نتمكن من سماع صوتك. اكتب إجابتك هنا:'
+                : "We couldn't hear you. Type your answer below:",
             );
+            window.setTimeout(() => answerInputRef.current?.focus(), 50);
           }
+        } catch {
+          setVoiceFallback(true);
+          setError(
+            isAr
+              ? 'لم نتمكن من سماع صوتك. اكتب إجابتك هنا:'
+              : "We couldn't hear you. Type your answer below:",
+          );
+          window.setTimeout(() => answerInputRef.current?.focus(), 50);
         } finally {
           setBusy(false);
         }
@@ -370,7 +390,11 @@ export function CoachSessionClient({ candidateName }: Props) {
             </div>
 
             <div className="border-t border-white/10 p-4">
-              {error ? <p className="mb-2 text-sm text-rose-300">{error}</p> : null}
+              {error ? (
+                <p className={`mb-2 text-sm ${voiceFallback ? 'text-amber-200' : 'text-rose-300'}`}>
+                  {error}
+                </p>
+              ) : null}
               <div className="flex items-end gap-2">
                 <button
                   type="button"
@@ -386,12 +410,25 @@ export function CoachSessionClient({ candidateName }: Props) {
                   {recording ? <MicOff size={18} /> : <Mic size={18} />}
                 </button>
                 <textarea
+                  ref={answerInputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  rows={2}
+                  rows={voiceFallback ? 3 : 2}
                   disabled={busy}
-                  placeholder={isAr ? 'اكتب إجابتك…' : 'Type your answer…'}
-                  className="min-h-[48px] flex-1 resize-none rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-white/35"
+                  placeholder={
+                    voiceFallback
+                      ? isAr
+                        ? 'اكتب إجابتك هنا…'
+                        : 'Type your answer here…'
+                      : isAr
+                        ? 'اكتب إجابتك…'
+                        : 'Type your answer…'
+                  }
+                  className={`min-h-[48px] flex-1 resize-none rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-white/35 ${
+                    voiceFallback
+                      ? 'border-amber-300/50 ring-1 ring-amber-300/30'
+                      : 'border-white/12'
+                  }`}
                 />
                 <button
                   type="button"

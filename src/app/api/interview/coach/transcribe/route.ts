@@ -1,27 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
-import { transcribeWithWhisper } from '@/lib/coach/whisper';
+import {
+  transcribeWithGoogleStt,
+  type SttLanguageMode,
+} from '@/lib/coach/google-stt';
 
+/**
+ * Legacy coach path — same Google STT backend as /api/speech-to-text.
+ * No OpenAI / Whisper.
+ */
 export async function POST(req: NextRequest) {
   try {
     await requireApiAuth();
     const form = await req.formData();
     const file = form.get('audio');
+    const langRaw = String(form.get('language') || 'mixed');
+    const languageMode: SttLanguageMode =
+      langRaw === 'ar' || langRaw === 'en' || langRaw === 'mixed' ? langRaw : 'mixed';
+
     if (!file || !(file instanceof Blob)) {
-      return NextResponse.json({ error: 'audio required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'audio required', text: '', fallback: true },
+        { status: 200 },
+      );
     }
 
     const buf = Buffer.from(await file.arrayBuffer());
-    const result = await transcribeWithWhisper(buf, 'answer.webm');
-    if (!result) {
-      return NextResponse.json({ error: 'Transcription unavailable', text: '' }, { status: 200 });
+    const result = await transcribeWithGoogleStt({
+      audio: buf,
+      languageMode,
+    });
+
+    if (!result?.text) {
+      return NextResponse.json(
+        { error: 'Transcription unavailable', text: '', fallback: true },
+        { status: 200 },
+      );
     }
-    return NextResponse.json({ text: result.text });
+    return NextResponse.json({
+      text: result.text,
+      languageCode: result.languageCode,
+      fallback: false,
+    });
   } catch (err) {
     if (err instanceof ApiError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
+      return NextResponse.json(
+        { error: err.message, text: '', fallback: true },
+        { status: err.status },
+      );
     }
     console.error('[api/coach/transcribe]', err);
-    return NextResponse.json({ text: '', error: 'Transcription failed' }, { status: 200 });
+    return NextResponse.json(
+      { text: '', error: 'Transcription failed', fallback: true },
+      { status: 200 },
+    );
   }
 }

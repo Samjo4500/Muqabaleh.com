@@ -1,6 +1,6 @@
 /**
  * Muqabaleh AI Interviewer
- * Prefers OpenAI (OPENAI_API_KEY), falls back to Gemini, then heuristic scoring.
+ * Prefers Gemini (GEMINI_API_KEY), then heuristic scoring. No OpenAI.
  */
 
 export type FeedbackResult = {
@@ -133,37 +133,6 @@ function heuristicFeedback(ctx: InterviewerContext): FeedbackResult {
   };
 }
 
-async function callOpenAI(system: string, user: string): Promise<string | null> {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) return null;
-  const model = process.env.OPENAI_MODEL || 'gpt-4o';
-  try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-      }),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    return data.choices?.[0]?.message?.content ?? null;
-  } catch {
-    return null;
-  }
-}
-
 async function callGemini(system: string, user: string): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
@@ -267,14 +236,6 @@ ${ctx.answer}
 """
 
 Evaluate and return JSON only.`;
-
-  const openaiText = await callOpenAI(SYSTEM_PROMPT, userPrompt);
-  if (openaiText) {
-    const parsed = extractJson(openaiText);
-    if (parsed && typeof parsed === 'object') {
-      return normalizeFeedback(parsed as Record<string, unknown>, ctx);
-    }
-  }
 
   const geminiText = await callGemini(SYSTEM_PROMPT, userPrompt);
   if (geminiText) {

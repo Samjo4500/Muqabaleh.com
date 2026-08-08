@@ -638,12 +638,19 @@ export async function textToSpeech(text: string, voice: 'fahd' | 'noora'): Promi
   }
 }
 
-// ─── ASR (Speech-to-Text) ───
+// ─── ASR (Speech-to-Text) — Google Cloud only (no OpenAI) ───
 export async function speechToText(audioBuffer: Buffer): Promise<string> {
-  const zai = await getZAI();
-  const base64Audio = audioBuffer.toString('base64');
-  const response = await zai.audio.asr.create({ file_base64: base64Audio });
-  return response.text || '';
+  try {
+    const { transcribeWithGoogleStt } = await import('@/lib/coach/google-stt');
+    const result = await transcribeWithGoogleStt({
+      audio: audioBuffer,
+      languageMode: 'mixed',
+    });
+    return result?.text || '';
+  } catch (err) {
+    console.error('[speechToText] Google STT failed', err);
+    return '';
+  }
 }
 
 // ─── Rate Limiter (simple in-memory) ───

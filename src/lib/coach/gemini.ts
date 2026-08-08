@@ -2,31 +2,150 @@ import { getInterviewConfig } from './config';
 import { extractJsonObject } from '@/lib/ai/llm';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from './types';
 import { buildCoachSystemPrompt, buildScoringPrompt } from './prompts';
+import { getGoogleAccessToken, hasGoogleServiceAccount } from './google-auth';
+
+const GEMINI_MODEL_FALLBACKS = [
+  'gemini-flash-latest',
+  'gemini-pro-latest',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash',
+];
 
 async function callGeminiPro(
   system: string,
   contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
 ): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    null;
+  const accessToken = hasGoogleServiceAccount()
+    ? await getGoogleAccessToken([
+        'https://www.googleapis.com/auth/generative-language',
+      ])
+    : null;
+  if (!accessToken && !key) return null;
+
+  const preferred =
+    getInterviewConfig().engine.geminiModel || 'gemini-flash-latest';
+  // Prefer stable aliases — pinned ids are frequently retired for new projects.
+  const models = Array.from(new Set([preferred, ...GEMINI_MODEL_FALLBACKS]));
+
+  // Gemini chat history must start with a user turn.
+  let history = contents.slice(0, -1);
+  if (history[0]?.role === 'model') {
+    history = [
+      { role: 'user', parts: [{ text: 'Continue the interview.' }] },
+      ...history,
+    ];
+  }
+  const last = contents[contents.length - 1];
+  const lastText = last?.parts?.[0]?.text || 'Continue.';
+
+  // Prefer service-account OAuth, then API key REST, then SDK.
+  for (const model of models) {
+    try {
+      const rest = await callGeminiRest({
+        accessToken,
+        key,
+        model,
+        system,
+        history,
+        lastText,
+      });
+      if (rest) return rest;
+    } catch (err) {
+      console.error(`[coach/gemini] REST failed model=${model}`, err);
+    }
+  }
+
   if (!key) return null;
-  const model = getInterviewConfig().engine.geminiModel || 'gemini-1.5-pro';
+
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const client = new GoogleGenerativeAI(key);
-    const gen = client.getGenerativeModel({
-      model,
-      systemInstruction: system,
-    });
-    const chat = gen.startChat({
-      history: contents.slice(0, -1),
-    });
-    const last = contents[contents.length - 1];
-    const result = await chat.sendMessage(last?.parts?.[0]?.text || 'Continue.');
-    return result.response.text() || null;
+    for (const model of models) {
+      try {
+        const gen = client.getGenerativeModel({
+          model,
+          systemInstruction: system,
+        });
+        const chat = gen.startChat({ history });
+        const result = await chat.sendMessage(lastText);
+        const text = result.response.text() || null;
+        if (text) return text;
+      } catch (err) {
+        console.error(`[coach/gemini] SDK failed model=${model}`, err);
+      }
+    }
   } catch (err) {
-    console.error('[coach/gemini] turn failed', err);
-    return null;
+    console.error('[coach/gemini] SDK init failed', err);
   }
+  return null;
+}
+
+async function callGeminiRest(opts: {
+  accessToken: string | null;
+  key: string | null;
+  model: string;
+  system: string;
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[];
+  lastText: string;
+}): Promise<string | null> {
+  const contents = [
+    ...opts.history.map((h) => ({
+      role: h.role,
+      parts: h.parts,
+    })),
+    { role: 'user' as const, parts: [{ text: opts.lastText }] },
+  ];
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: opts.system }] },
+    contents,
+  });
+
+  const attempts: { auth: string; url: string; headers: Record<string, string> }[] =
+    [];
+  if (opts.accessToken) {
+    attempts.push({
+      auth: 'service_account',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent`,
+      headers: {
+        Authorization: `Bearer ${opts.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+  if (opts.key) {
+    attempts.push({
+      auth: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  for (const attempt of attempts) {
+    const res = await fetch(attempt.url, {
+      method: 'POST',
+      headers: attempt.headers,
+      body,
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.error(
+        `[coach/gemini] REST ${opts.model} ${attempt.auth}`,
+        res.status,
+        errText.slice(0, 220),
+      );
+      continue;
+    }
+    const data = (await res.json()) as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    };
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    if (text) return text;
+  }
+  return null;
 }
 
 function toGeminiHistory(messages: ChatMessage[]) {
@@ -64,6 +183,14 @@ export async function generateCoachTurn(opts: {
 
   const text = await callGeminiPro(system, toGeminiHistory(history));
   if (!text) {
+    // Prefer contextual fallback — never crash the session.
+    if (opts.userMessage?.trim()) {
+      const fallbackFollow =
+        opts.prep.language === 'en'
+          ? 'Thank you. Could you share a specific example with numbers or outcomes?'
+          : 'شكراً لك. هل يمكنك مشاركة مثال محدد بأرقام أو نتائج؟';
+      return { reply: fallbackFollow, complete: false };
+    }
     const fallback =
       opts.prep.language === 'en' ? OPENING_FALLBACK.en : OPENING_FALLBACK.ar;
     return { reply: fallback, complete: false };
@@ -111,7 +238,10 @@ export async function scoreTranscript(
   transcript: string,
 ): Promise<CoachScoreResult> {
   const { system, user } = buildScoringPrompt(prep, transcript);
-  const key = process.env.GEMINI_API_KEY;
+  const key =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    null;
   if (!key) return heuristicScore(transcript);
 
   try {

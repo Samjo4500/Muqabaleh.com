@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { requireAuth } from '@/lib/session';
 import { db } from '@/lib/db';
+import { getCoachAccess } from '@/lib/coach/access';
 import { GlowCard, CountUpStat, EmptyState } from '@/components/brand';
 import { NewInterviewForm } from './new-interview-form';
 
@@ -130,7 +131,13 @@ export default async function DashboardPage({
   }
 
   const displayName = user.name ?? session.user.email?.split('@')[0] ?? '—';
-  const sessionsLeft = user.sessionsLeft ?? 0;
+  const coachAccess = await getCoachAccess(user.id);
+  const sessionsLeft =
+    coachAccess.remaining == null
+      ? user.sessionsLeft ?? 0
+      : coachAccess.remaining;
+  const remainingLabel =
+    coachAccess.remaining == null ? '∞' : String(coachAccess.remaining);
 
   /* ---- Fetch interviews ---- */
   const interviews = await db.interview.findMany({
@@ -191,12 +198,26 @@ export default async function DashboardPage({
             <Clock size={18} strokeWidth={1.75} />
             <span className="text-sm">{t('remaining')}</span>
           </div>
-          <CountUpStat value={String(sessionsLeft)} label="" />
+          <CountUpStat value={remainingLabel} label="" />
         </GlowCard>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-300/25 bg-teal-400/10 px-4 py-3">
+        <p className="text-sm text-teal-50">
+          {locale === 'ar'
+            ? `باقة المدرب: ${coachAccess.gateLabel} · المتبقي: ${remainingLabel}`
+            : `Coach plan: ${coachAccess.gateLabel} · remaining: ${remainingLabel}`}
+        </p>
+        <Link
+          href={localePath('/interview/prep', locale)}
+          className="rounded-xl bg-teal-400/20 px-3 py-2 text-sm font-semibold text-teal-100 hover:bg-teal-400/30"
+        >
+          {locale === 'ar' ? 'ابدأ مع جيني' : 'Practice with Jeannie'}
+        </Link>
+      </div>
+
       {/* Buy package CTA if 0 sessions */}
-      {sessionsLeft === 0 && (
+      {coachAccess.canStart === false && (
         <GlowCard className="flex flex-col items-center justify-center p-8 text-center">
           <AlertTriangle size={40} strokeWidth={1.75} className="text-amber mb-4" />
           <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">

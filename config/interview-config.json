@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "site": "muqabaleh.com",
+  "brand": {
+    "name": "Muqabaleh",
+    "nameAr": "مقابلة",
+    "passportTitle": "Muqabaleh Interview Passport",
+    "verifyBaseUrl": "https://muqabaleh.com/verify",
+    "emailFrom": "Muqabaleh <noreply@muqabaleh.com>",
+    "passportEmailSubject": "Your Interview Passport is Ready — Muqabaleh"
+  },
+  "roles": [
+    { "id": "software_engineer", "en": "Software Engineer", "ar": "مهندس برمجيات" },
+    { "id": "marketing_manager", "en": "Marketing Manager", "ar": "مدير تسويق" },
+    { "id": "sales_executive", "en": "Sales Executive", "ar": "مسؤول مبيعات" },
+    { "id": "hr_specialist", "en": "HR Specialist", "ar": "أخصائي موارد بشرية" },
+    { "id": "finance_analyst", "en": "Finance Analyst", "ar": "محلل مالي" },
+    { "id": "product_manager", "en": "Product Manager", "ar": "مدير منتج" },
+    { "id": "data_analyst", "en": "Data Analyst", "ar": "محلل بيانات" },
+    { "id": "customer_success", "en": "Customer Success", "ar": "نجاح العملاء" },
+    { "id": "operations_manager", "en": "Operations Manager", "ar": "مدير عمليات" },
+    { "id": "other", "en": "Other", "ar": "أخرى" }
+  ],
+  "industries": [
+    { "id": "tech_saas", "en": "Tech/SaaS", "ar": "تقنية / SaaS" },
+    { "id": "healthcare", "en": "Healthcare", "ar": "الرعاية الصحية" },
+    { "id": "finance_banking", "en": "Finance/Banking", "ar": "المالية / البنوك" },
+    { "id": "retail_ecommerce", "en": "Retail/E-commerce", "ar": "التجزئة / التجارة الإلكترونية" },
+    { "id": "manufacturing", "en": "Manufacturing", "ar": "التصنيع" },
+    { "id": "education", "en": "Education", "ar": "التعليم" },
+    { "id": "government", "en": "Government", "ar": "الحكومة" },
+    { "id": "consulting", "en": "Consulting", "ar": "الاستشارات" },
+    { "id": "other", "en": "Other", "ar": "أخرى" }
+  ],
+  "seniority": [
+    { "id": "entry", "en": "Entry-level", "ar": "مبتدئ" },
+    { "id": "mid", "en": "Mid-level", "ar": "متوسط" },
+    { "id": "senior", "en": "Senior", "ar": "كبير" },
+    { "id": "manager", "en": "Manager", "ar": "مدير" },
+    { "id": "executive", "en": "Executive", "ar": "تنفيذي" }
+  ],
+  "languages": [
+    { "id": "ar", "en": "Arabic", "ar": "العربية" },
+    { "id": "en", "en": "English", "ar": "الإنجليزية" },
+    { "id": "mixed", "en": "Mixed (Arabic questions, answers in either)", "ar": "مختلط (أسئلة عربية، إجابات بأي لغة)" }
+  ],
+  "coaches": {
+    "female": {
+      "id": "female",
+      "name": "Jeannie",
+      "nameAr": "جيني",
+      "image": "/images/hero-interview.webp",
+      "tts": {
+        "ar": "ar-XA-Wavenet-B",
+        "en": "en-US-Wavenet-F"
+      },
+      "heygenAvatarId": ""
+    },
+    "male": {
+      "id": "male",
+      "name": "Jean",
+      "nameAr": "جين",
+      "image": "/images/fahd.webp",
+      "tts": {
+        "ar": "ar-XA-Wavenet-A",
+        "en": "en-US-Wavenet-D"
+      },
+      "heygenAvatarId": ""
+    },
+    "defaultPreference": "female"
+  },
+  "heygen": {
+    "enabled": false,
+    "iframeBaseUrl": ""
+  },
+  "engine": {
+    "geminiModel": "gemini-1.5-pro",
+    "minQuestions": 5,
+    "maxQuestions": 7,
+    "whisperModel": "whisper-1"
+  },
+  "competencies": [
+    "Communication",
+    "Technical Depth",
+    "Problem Solving",
+    "Cultural Fit",
+    "Confidence"
+  ],
+  "accessGates": {
+    "Free": {
+      "maxInterviews": 1,
+      "period": "lifetime",
+      "passportPdf": false,
+      "emailPassport": false,
+      "videoPlayback": false,
+      "linkedinBadge": false
+    },
+    "Pro": {
+      "maxInterviews": 3,
+      "period": "month",
+      "passportPdf": true,
+      "emailPassport": true,
+      "videoPlayback": false,
+      "linkedinBadge": false
+    },
+    "Premium": {
+      "maxInterviews": null,
+      "period": "unlimited",
+      "passportPdf": true,
+      "emailPassport": true,
+      "videoPlayback": true,
+      "linkedinBadge": true
+    }
+  },
+  "tierMap": {
+    "FREE": "Free",
+    "BASIC": "Pro",
+    "PRO": "Pro",
+    "PREMIUM": "Premium",
+    "JEANNIE": "Premium",
+    "JEANNIE_PRO": "Premium",
+    "UNLIMITED": "Premium",
+    "MASTERY_PACK": "Premium"
+  },
+  "storageKey": "mq_coach_prep"
+}

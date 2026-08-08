@@ -531,7 +531,7 @@ export function CrystalJeannie() {
 
               <div className="mt-7 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row">
                 <Link
-                  href={localePath('/interview/prequal', locale)}
+                  href={localePath('/interview/prep', locale)}
                   className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] flex-1 items-center justify-center text-sm font-bold"
                 >
                   <BiInline bi={C.jeannie.cta} />

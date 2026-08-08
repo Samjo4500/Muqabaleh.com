@@ -218,7 +218,7 @@ export function CrystalHero() {
           <motion.div variants={fadeUp} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link
-                href={localePath('/interview/prequal', locale)}
+                href={localePath('/interview/prep', locale)}
                 className="mq-btn mq-btn-on-dark mq-btn-shimmer"
               >
                 <BiInline bi={C.hero.ctaInterview} />

@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
+import {
+  getGoogleAccessToken,
+  hasGeminiApiKey,
+  hasGoogleApiKey,
+  hasGoogleServiceAccount,
+} from '@/lib/coach/google-auth';
 
 /**
  * Preview/ops health for Jeannie coach providers.
  * Never returns secret values — only presence + a tiny live ping.
  */
 export async function GET() {
-  const geminiKey = Boolean(process.env.GEMINI_API_KEY?.trim());
-  const googleKey = Boolean(
-    process.env.GOOGLE_API_KEY?.trim() || process.env.GOOGLE_TTS_API_KEY?.trim(),
-  );
+  const geminiKey = hasGeminiApiKey();
+  const googleKey = hasGoogleApiKey();
+  const googleServiceAccount = hasGoogleServiceAccount();
 
   let geminiPing: 'ok' | 'fail' | 'skipped' = 'skipped';
   let geminiError: string | null = null;
@@ -52,19 +57,21 @@ export async function GET() {
 
   let sttPing: 'ok' | 'fail' | 'skipped' = 'skipped';
   let sttError: string | null = null;
-  if (googleKey) {
+  let sttAuth: 'service_account' | 'api_key' | 'none' = 'none';
+  if (googleServiceAccount || googleKey) {
     try {
-      const key = (
-        process.env.GOOGLE_API_KEY ||
-        process.env.GOOGLE_TTS_API_KEY ||
-        ''
-      ).trim();
-      // Minimal invalid audio request — 400 with API enabled vs 403/404 for auth/API disabled
-      const res = await fetch(
-        `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(key)}`,
-        {
+      const token = await getGoogleAccessToken([
+        'https://www.googleapis.com/auth/cloud-platform',
+      ]);
+      let res: Response;
+      if (token) {
+        sttAuth = 'service_account';
+        res = await fetch('https://speech.googleapis.com/v1/speech:recognize', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             config: {
               encoding: 'WEBM_OPUS',
@@ -73,10 +80,32 @@ export async function GET() {
             },
             audio: { content: Buffer.from('not-audio').toString('base64') },
           }),
-        },
-      );
+        });
+      } else {
+        sttAuth = 'api_key';
+        const key = (
+          process.env.GOOGLE_API_KEY ||
+          process.env.GOOGLE_TTS_API_KEY ||
+          ''
+        ).trim();
+        res = await fetch(
+          `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(key)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              config: {
+                encoding: 'WEBM_OPUS',
+                sampleRateHertz: 48000,
+                languageCode: 'en-US',
+              },
+              audio: { content: Buffer.from('not-audio').toString('base64') },
+            }),
+          },
+        );
+      }
       const errText = await res.text().catch(() => '');
-      // 200 unexpected; 400 INVALID_ARGUMENT usually means API reachable+authorized
+      // 400 INVALID_ARGUMENT usually means API reachable+authorized
       if (res.status === 400 || res.ok) {
         sttPing = 'ok';
       } else {
@@ -90,14 +119,22 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    ok: geminiPing === 'ok' && googleKey,
+    ok: geminiPing === 'ok' && (sttPing === 'ok' || googleServiceAccount),
     geminiKey,
     googleKey,
+    googleServiceAccount,
     geminiPing,
     geminiModelTried,
     geminiError,
     sttPing,
+    sttAuth,
     sttError,
+    hint:
+      geminiPing === 'fail'
+        ? 'GEMINI_API_KEY must be a Google AI Studio key (usually starts with AIza). Create at https://aistudio.google.com/apikey'
+        : sttPing === 'fail'
+          ? 'Speech API rejected API key auth. Add GOOGLE_APPLICATION_CREDENTIALS_JSON (service account) with Speech-to-Text enabled.'
+          : null,
     vercelEnv: process.env.VERCEL_ENV || null,
   });
 }

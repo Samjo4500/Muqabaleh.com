@@ -1,17 +1,12 @@
 /**
  * Google Cloud Speech-to-Text for muqabaleh.com interview voice input.
+ * Prefers OAuth service-account (required by some GCP projects); falls back to API key.
  * Never throws — callers must treat null/empty as text-fallback.
  */
 
-export type SttLanguageMode = 'ar' | 'en' | 'mixed';
+import { getGoogleAccessToken, hasGoogleApiKey } from './google-auth';
 
-function googleApiKey(): string | null {
-  return (
-    process.env.GOOGLE_API_KEY?.trim() ||
-    process.env.GOOGLE_TTS_API_KEY?.trim() ||
-    null
-  );
-}
+export type SttLanguageMode = 'ar' | 'en' | 'mixed';
 
 function languageConfig(mode: SttLanguageMode): {
   languageCode: string;
@@ -27,6 +22,36 @@ function languageConfig(mode: SttLanguageMode): {
   return { languageCode: 'ar-SA' };
 }
 
+async function authorizeHeaders(): Promise<Record<string, string> | null> {
+  const token = await getGoogleAccessToken([
+    'https://www.googleapis.com/auth/cloud-platform',
+  ]);
+  if (token) {
+    return {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  }
+  const key =
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.GOOGLE_TTS_API_KEY?.trim() ||
+    '';
+  if (!key && !hasGoogleApiKey()) return null;
+  if (!key) return null;
+  return { 'Content-Type': 'application/json', 'x-goog-api-key': key };
+}
+
+function recognizeUrl(headers: Record<string, string>): string {
+  if (headers.Authorization) {
+    return 'https://speech.googleapis.com/v1/speech:recognize';
+  }
+  const key =
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.GOOGLE_TTS_API_KEY?.trim() ||
+    '';
+  return `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(key)}`;
+}
+
 /**
  * Recognize WebM/Opus audio via Google Cloud Speech-to-Text.
  */
@@ -34,9 +59,9 @@ export async function transcribeWithGoogleStt(opts: {
   audio: Buffer;
   languageMode?: SttLanguageMode;
 }): Promise<{ text: string; languageCode?: string } | null> {
-  const key = googleApiKey();
-  if (!key) {
-    console.warn('[coach/google-stt] GOOGLE_API_KEY missing');
+  const headers = await authorizeHeaders();
+  if (!headers) {
+    console.warn('[coach/google-stt] no Google credentials configured');
     return null;
   }
 
@@ -45,26 +70,23 @@ export async function transcribeWithGoogleStt(opts: {
   const content = opts.audio.toString('base64');
 
   try {
-    const res = await fetch(
-      `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(key)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config: {
-            encoding: 'WEBM_OPUS',
-            sampleRateHertz: 48000,
-            languageCode: lang.languageCode,
-            ...(lang.alternativeLanguageCodes
-              ? { alternativeLanguageCodes: lang.alternativeLanguageCodes }
-              : {}),
-            model: 'latest_long',
-            enableAutomaticPunctuation: true,
-          },
-          audio: { content },
-        }),
-      },
-    );
+    const res = await fetch(recognizeUrl(headers), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        config: {
+          encoding: 'WEBM_OPUS',
+          sampleRateHertz: 48000,
+          languageCode: lang.languageCode,
+          ...(lang.alternativeLanguageCodes
+            ? { alternativeLanguageCodes: lang.alternativeLanguageCodes }
+            : {}),
+          model: 'latest_long',
+          enableAutomaticPunctuation: true,
+        },
+        audio: { content },
+      }),
+    });
 
     if (!res.ok) {
       const errText = await res.text().catch(() => '');

@@ -7,7 +7,10 @@ async function callGeminiPro(
   system: string,
   contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
 ): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    null;
   if (!key) return null;
   const preferred = getInterviewConfig().engine.geminiModel || 'gemini-1.5-pro';
   // AI Studio keys often accept flash aliases more reliably than pinned pro ids.
@@ -193,7 +196,10 @@ export async function scoreTranscript(
   transcript: string,
 ): Promise<CoachScoreResult> {
   const { system, user } = buildScoringPrompt(prep, transcript);
-  const key = process.env.GEMINI_API_KEY;
+  const key =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    null;
   if (!key) return heuristicScore(transcript);
 
   try {

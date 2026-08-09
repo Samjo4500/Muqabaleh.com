@@ -12,14 +12,16 @@ export async function GET() {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error('[api/coach/access]', err);
+    // Fail closed — never grant a free start when the gate lookup breaks.
     return NextResponse.json(
       {
-        canStart: true,
-        remaining: 1,
+        canStart: false,
+        remaining: 0,
         gateLabel: 'Free',
         gate: { passportPdf: false, emailPassport: false },
+        error: 'Access check unavailable',
       },
-      { status: 200 },
+      { status: 503 },
     );
   }
 }

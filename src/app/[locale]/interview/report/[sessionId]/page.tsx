@@ -11,11 +11,16 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: {
-      absolute: locale === 'ar' ? 'تقرير المقابلة — مقابلة' : 'Interview Report — Muqabaleh',
-    },
-  };
+  const { pageMetadata } = await import('@/lib/seo');
+  return pageMetadata({
+    locale,
+    path: '/interview/report',
+    titleAr: 'تقرير المقابلة — مقابلة',
+    titleEn: 'Interview Report — Muqabaleh',
+    descAr: 'تقرير مقابلة خاص.',
+    descEn: 'Private interview report.',
+    noIndex: true,
+  });
 }
 
 export default async function ReportPage({ params }: Props) {

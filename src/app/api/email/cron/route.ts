@@ -1,22 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processEmailQueue } from '@/lib/email';
-
-function requireCronSecret(req: NextRequest): NextResponse | null {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return NextResponse.json(
-      { error: 'Service Unavailable — CRON_SECRET not configured' },
-      { status: 503 },
-    );
-  }
-
-  const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  return null;
-}
+import { assertCronAuthorized } from '@/lib/cron-auth';
 
 async function runEmailCron() {
   const result = await processEmailQueue();
@@ -29,7 +13,7 @@ async function runEmailCron() {
 
 // Vercel Cron uses GET
 export async function GET(req: NextRequest) {
-  const authError = requireCronSecret(req);
+  const authError = assertCronAuthorized(req);
   if (authError) return authError;
 
   try {
@@ -41,7 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const authError = requireCronSecret(req);
+  const authError = assertCronAuthorized(req);
   if (authError) return authError;
 
   try {

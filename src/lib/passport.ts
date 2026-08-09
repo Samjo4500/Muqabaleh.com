@@ -155,8 +155,8 @@ export async function buildPassport(
   const score = latestInterview?.overallScore ?? null;
   const hasCompletedInterview = score != null;
 
-  const isPubliclyVisible =
-    Boolean(pool?.isVisible && pool?.isOptedIn) || hasCompletedInterview;
+  // Public only with explicit opt-in — completing an interview must not auto-publish.
+  const isPubliclyVisible = Boolean(pool?.isVisible && pool?.isOptedIn);
 
   if (options?.forPublic && !isPubliclyVisible) {
     return null;

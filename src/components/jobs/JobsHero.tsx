@@ -72,7 +72,11 @@ export function JobsHero({ roleCount }: Props) {
       >
         <motion.div
           className="absolute inset-0"
-          animate={{ scale: [1, 1.05, 1], y: [0, -10, 0] }}
+          animate={
+            reduceMotion
+              ? undefined
+              : { scale: [1, 1.05, 1], y: [0, -10, 0] }
+          }
           transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
         >
           <AnimatePresence mode="sync">

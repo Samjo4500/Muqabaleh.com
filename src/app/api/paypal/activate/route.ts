@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { PaymentStatus, PaymentType } from '@prisma/client';
 import {
   getAllowedPayPalPlanIds,
   getPayPalAccessToken,
   getPayPalSubscription,
+  PLAN_CONFIG,
   planKeyForPayPalPlanId,
 } from '@/lib/paypal';
 import { grantPlan } from '@/lib/plans/entitlements';
@@ -105,9 +107,49 @@ export async function POST(req: NextRequest) {
     });
 
     const planKey = planKeyForPayPalPlanId(planId);
-    await grantPlan({ userId, planKey, sessions: 999 });
+    if (!planKey) {
+      return NextResponse.json(
+        { error: 'Unrecognized PayPal plan id' },
+        { status: 400 },
+      );
+    }
 
-    // Send payment receipt email (fire and forget)
+    const plan = PLAN_CONFIG[planKey];
+    const amountDollars = Number.parseFloat(plan.amount);
+    const amountCents = Math.round(amountDollars * 100);
+    await grantPlan({
+      userId,
+      planKey,
+      sessions: plan.sessions ?? 999,
+    });
+
+    // Record subscription payment once (idempotent on paypalOrderId)
+    try {
+      await db.payment.upsert({
+        where: { paypalOrderId: subscriptionId },
+        create: {
+          userId,
+          amount: amountDollars,
+          currency: plan.currency || 'USD',
+          type: PaymentType.SUBSCRIPTION,
+          status: PaymentStatus.COMPLETED,
+          paypalOrderId: subscriptionId,
+          paypalSubscriptionId: subscriptionId,
+          packageType: planKey,
+          sessionsCredited: plan.sessions ?? 999,
+          capturedAt: new Date(),
+        },
+        update: {
+          status: PaymentStatus.COMPLETED,
+          capturedAt: new Date(),
+          packageType: planKey,
+          sessionsCredited: plan.sessions ?? 999,
+        },
+      });
+    } catch (err) {
+      console.error('[paypal/activate] payment upsert failed', err);
+    }
+
     const planName =
       planKey === 'JEANNIE'
         ? 'Jeannie'
@@ -115,10 +157,13 @@ export async function POST(req: NextRequest) {
           ? 'Jeannie Pro'
           : planKey === 'PRO'
             ? 'Pro'
-            : 'Premium';
-    triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(
-      () => {},
-    );
+            : planKey;
+    triggerPaymentReceiptEmail(
+      userId,
+      planName,
+      amountCents,
+      subscriptionId,
+    ).catch(() => {});
     triggerSubscriptionConfirmationEmail(userId, planName).catch(() => {});
 
     return NextResponse.json({ success: true });

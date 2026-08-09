@@ -12,7 +12,8 @@ export const fontDisplayEn = Syne({
   weight: ['600', '700', '800'],
   display: 'swap',
   variable: '--font-display-en',
-  preload: true,
+  // Preload only on EN routes via layout class; keep false globally to cut LCP bytes.
+  preload: false,
 });
 
 /** Body — English UI */
@@ -21,7 +22,7 @@ export const fontBodyEn = Manrope({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-body-en',
-  preload: true,
+  preload: false,
 });
 
 /** Body — Arabic UI */
@@ -30,6 +31,7 @@ export const fontBodyAr = IBM_Plex_Sans_Arabic({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-body-ar',
+  // Default locale is Arabic — preload Arabic body for LCP text.
   preload: true,
 });
 

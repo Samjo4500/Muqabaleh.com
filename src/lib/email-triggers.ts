@@ -16,7 +16,7 @@ import { interviewerPayoutSentEmail } from '@/emails/interviewer-payout-sent';
 import { adminNewApplicationEmail } from '@/emails/admin-new-application';
 import { adminDailySummaryEmail } from '@/emails/admin-daily-summary';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim() || '';
 const SYSTEM_SENDER = MUQABALEH_BRAND.senders.system;
 
 type Locale = 'en' | 'ar';
@@ -410,7 +410,9 @@ export async function triggerInterviewerApplicationReceivedEmail(
     });
 
     // Notify admin; interviewer confirmation goes via linked User email when available
-    await sendEmail({ to: ADMIN_EMAIL, subject: html ? '' : subject, html: html });
+    if (ADMIN_EMAIL) {
+      await sendEmail({ to: ADMIN_EMAIL, subject, html });
+    }
     if (interviewer.userId) {
       const user = await db.user.findUnique({ where: { id: interviewer.userId } });
       if (user) {
@@ -572,7 +574,9 @@ export async function triggerAdminNewApplicationEmail(interviewerId: string) {
       proposedPrice: `$${(interviewer.hourlyRate / 100).toFixed(2)}/hr`,
     });
 
-    await sendEmail({ to: ADMIN_EMAIL, subject, html });
+    if (ADMIN_EMAIL) {
+      await sendEmail({ to: ADMIN_EMAIL, subject, html });
+    }
   } catch (err) {
     console.error('[EmailTrigger] Admin new application email failed:', err);
   }
@@ -583,17 +587,29 @@ export async function triggerAdminNewApplicationEmail(interviewerId: string) {
  * Call this once after capture-booking-order succeeds.
  */
 export async function scheduleBookingEmails(bookingId: string) {
-  // Fire immediately
-  triggerBookingConfirmationEmail(bookingId, 'ar').catch(() => {});
-  triggerBookingConfirmationEmail(bookingId, 'en').catch(() => {});
-  triggerInterviewerNewBookingEmail(bookingId, 'ar').catch(() => {});
-  triggerInterviewerNewBookingEmail(bookingId, 'en').catch(() => {});
+  // Resolve a single locale — do not double-send AR+EN to the same inbox.
+  let locale: Locale = 'ar';
+  try {
+    const booking = await db.humanBooking.findUnique({
+      where: { id: bookingId },
+      select: { candidateEmail: true },
+    });
+    if (booking?.candidateEmail) {
+      const user = await db.user.findUnique({
+        where: { email: booking.candidateEmail },
+        select: { language: true },
+      });
+      locale = localeFromUserLanguage(user?.language);
+    }
+  } catch {
+    /* keep default ar */
+  }
 
-  // Queue delayed emails (fire and forget, they'll be processed by cron)
-  triggerSessionReminderEmail(bookingId, 'ar').catch(() => {});
-  triggerSessionReminderEmail(bookingId, 'en').catch(() => {});
-  triggerSessionStartingSoonEmail(bookingId, 'ar').catch(() => {});
-  triggerSessionStartingSoonEmail(bookingId, 'en').catch(() => {});
-  triggerReviewRequestEmail(bookingId, 'ar').catch(() => {});
-  triggerReviewRequestEmail(bookingId, 'en').catch(() => {});
+  triggerBookingConfirmationEmail(bookingId, locale).catch(() => {});
+  triggerInterviewerNewBookingEmail(bookingId, locale).catch(() => {});
+
+  // Queue delayed emails (processed by cron)
+  triggerSessionReminderEmail(bookingId, locale).catch(() => {});
+  triggerSessionStartingSoonEmail(bookingId, locale).catch(() => {});
+  triggerReviewRequestEmail(bookingId, locale).catch(() => {});
 }

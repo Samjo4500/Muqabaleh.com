@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { pageMetadata } from '@/lib/seo';
 import { InterviewInterface } from './components/InterviewInterface';
 
 interface Props {
@@ -11,11 +12,15 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: {
-      absolute: locale === 'ar' ? 'جلسة المقابلة — مقابلة' : 'Interview Session — Muqabaleh',
-    },
-  };
+  return pageMetadata({
+    locale,
+    path: '/interview/session',
+    titleAr: 'جلسة المقابلة — مقابلة',
+    titleEn: 'Interview Session — Muqabaleh',
+    descAr: 'جلسة مقابلة خاصة.',
+    descEn: 'Private interview session.',
+    noIndex: true,
+  });
 }
 
 export default async function SessionPage({ params }: Props) {

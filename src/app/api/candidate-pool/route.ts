@@ -17,17 +17,37 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { role, level, industry, location, muqabalehScore, interviewCount, languages, isOptedIn } = body;
+    const { role, level, industry, location, languages, isOptedIn } = body;
 
     if (!role || !level) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const score = muqabalehScore ?? null;
-    const isVisible = isOptedIn && score !== null && score >= 6;
-
     try {
       const { db } = await import('@/lib/db');
+
+      // Derive score/count server-side — never trust client muqabalehScore.
+      const interviews = await db.interview.findMany({
+        where: {
+          userId,
+          status: 'COMPLETED',
+          overallScore: { not: null },
+        },
+        select: { overallScore: true },
+        orderBy: { updatedAt: 'desc' },
+        take: 20,
+      });
+      const interviewCount = interviews.length;
+      const score =
+        interviewCount > 0
+          ? Math.round(
+              interviews.reduce((sum, i) => sum + (i.overallScore || 0), 0) /
+                interviewCount,
+            )
+          : null;
+      // Visibility threshold uses 0–100 coach scores (legacy UI used 0–10).
+      const isVisible = Boolean(isOptedIn) && score !== null && score >= 60;
+
       await db.candidatePool.upsert({
         where: { userId },
         create: {
@@ -40,7 +60,7 @@ export async function POST(req: NextRequest) {
           location: location || null,
           muqabalehScore: score,
           averageScore: score,
-          interviewCount: interviewCount || 0,
+          interviewCount,
           languages: languages || 'AR',
         },
         update: {
@@ -52,12 +72,12 @@ export async function POST(req: NextRequest) {
           location: location || null,
           muqabalehScore: score,
           averageScore: score,
-          interviewCount: interviewCount || 0,
+          interviewCount,
         },
       });
-      return NextResponse.json({ success: true, isVisible });
+      return NextResponse.json({ success: true, isVisible, score, interviewCount });
     } catch {
-      return NextResponse.json({ success: true, isVisible, demo: true });
+      return NextResponse.json({ success: true, isVisible: false, demo: true });
     }
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
@@ -78,24 +98,36 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    // Ignore any client-supplied userId
-    const { isVisible, availability, location, industry } = body;
+    const { isOptedIn, isVisible } = body as {
+      isOptedIn?: boolean;
+      isVisible?: boolean;
+    };
 
     try {
       const { db } = await import('@/lib/db');
-      const updateData: Record<string, unknown> = { updatedAt: new Date() };
-      if (typeof isVisible === 'boolean') updateData.isVisible = isVisible;
-      if (availability) updateData.availability = availability;
-      if (location) updateData.location = location;
-      if (industry) updateData.industry = industry;
+      const existing = await db.candidatePool.findUnique({ where: { userId } });
+      if (!existing) {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      }
+
+      const opted = typeof isOptedIn === 'boolean' ? isOptedIn : existing.isOptedIn;
+      const score = existing.muqabalehScore;
+      const visible =
+        opted &&
+        score !== null &&
+        score >= 60 &&
+        (typeof isVisible === 'boolean' ? isVisible : existing.isVisible);
 
       await db.candidatePool.update({
         where: { userId },
-        data: updateData,
+        data: {
+          isOptedIn: opted,
+          isVisible: visible,
+        },
       });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, isVisible: visible });
     } catch {
-      return NextResponse.json({ success: true, demo: true });
+      return NextResponse.json({ error: 'Update failed' }, { status: 500 });
     }
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

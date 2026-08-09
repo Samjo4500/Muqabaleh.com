@@ -8,31 +8,21 @@ import {
   PayoutStatus,
 } from '@/lib/enums';
 import { sendEmail } from '@/lib/email';
+import { assertCronAuthorized } from '@/lib/cron-auth';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
-
-function requireCronSecret(req: NextRequest): NextResponse | null {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return NextResponse.json(
-      { error: 'Service Unavailable — CRON_SECRET not configured' },
-      { status: 503 },
-    );
-  }
-
-  const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  return null;
-}
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim();
 
 // POST /api/email/daily-summary — generate and send daily summary
 // Called by Vercel Cron at 9:00 AM daily
 export async function POST(req: NextRequest) {
-  const authError = requireCronSecret(req);
+  const authError = assertCronAuthorized(req);
   if (authError) return authError;
+  if (!ADMIN_EMAIL) {
+    return NextResponse.json(
+      { error: 'ADMIN_EMAIL not configured' },
+      { status: 503 },
+    );
+  }
 
   try {
     const yesterday = new Date();
@@ -127,4 +117,9 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+/** Vercel Cron uses GET — mirror POST. */
+export async function GET(req: NextRequest) {
+  return POST(req);
 }

@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hashSync } from 'bcryptjs';
 import { db } from '@/lib/db';
 import { isAdminPassword } from '@/lib/security';
+import { requireConfiguredSecret, secretsMatch } from '@/lib/security-tokens';
 
 /**
  * One-shot Super Admin password reset when email reset is unavailable.
- * Requires ADMIN_BOOTSTRAP_SECRET. Remove that env var after use.
+ * Requires ADMIN_BOOTSTRAP_SECRET (min 24 chars). Remove that env var after use.
  */
 export async function POST(req: NextRequest) {
-  const bootstrap = process.env.ADMIN_BOOTSTRAP_SECRET;
+  const bootstrap = requireConfiguredSecret(
+    process.env.ADMIN_BOOTSTRAP_SECRET,
+    24,
+  );
   if (!bootstrap) {
     return NextResponse.json({ error: 'Not available' }, { status: 404 });
   }
@@ -21,7 +25,7 @@ export async function POST(req: NextRequest) {
       .toLowerCase();
     const newPassword = String(body.newPassword || '');
 
-    if (!secret || secret !== bootstrap) {
+    if (!secretsMatch(secret, bootstrap)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
     if (!email) {
@@ -90,9 +94,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('[bootstrap-admin-reset]', err);
-    return NextResponse.json(
-      { error: 'Reset failed', detail: String(err) },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Reset failed' }, { status: 500 });
   }
 }

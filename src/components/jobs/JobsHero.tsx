@@ -2,9 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import {
+  MENA_JOBS_SKYLINES,
+  prefetchNextImage,
+} from '@/components/landing/crystal/mena-hero-frames';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
 
@@ -14,11 +19,38 @@ type Props = {
 
 /**
  * Full-bleed jobs hero — brand-first, one composition for social-ad landings.
- * No cards, no overlays on media, one headline + one line + CTAs.
+ * MENA skyline carousel (Dubai → Riyadh → Amman → Doha) starts after idle
+ * so LCP stays on the first optimized frame.
  */
 export function JobsHero({ roleCount }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const reduceMotion = useReducedMotion();
+  const [frame, setFrame] = useState(0);
+  const [carouselReady, setCarouselReady] = useState(false);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const warm = window.setTimeout(() => setCarouselReady(true), 2800);
+    return () => window.clearTimeout(warm);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!carouselReady || reduceMotion) return;
+    const id = window.setInterval(() => {
+      setFrame((prev) => (prev + 1) % MENA_JOBS_SKYLINES.length);
+    }, 8000);
+    return () => window.clearInterval(id);
+  }, [carouselReady, reduceMotion]);
+
+  useEffect(() => {
+    if (!carouselReady || reduceMotion) return;
+    prefetchNextImage(
+      MENA_JOBS_SKYLINES[(frame + 1) % MENA_JOBS_SKYLINES.length].src,
+    );
+  }, [carouselReady, reduceMotion, frame]);
+
+  const current = MENA_JOBS_SKYLINES[frame];
 
   const subAr =
     roleCount > 0
@@ -43,19 +75,27 @@ export function JobsHero({ roleCount }: Props) {
           animate={{ scale: [1, 1.05, 1], y: [0, -10, 0] }}
           transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <Image
-            src="/images/jobs-mena-hero.webp"
-            alt={
-              isAr
-                ? 'أفق مدينة عربية — فرص عمل مهنية حقيقية'
-                : 'MENA city skyline — real professional roles'
-            }
-            fill
-            priority
-            sizes="100vw"
-            quality={68}
-            className="object-cover object-[center_35%]"
-          />
+          <AnimatePresence mode="sync">
+            <motion.div
+              key={current.src}
+              className="absolute inset-0"
+              initial={frame === 0 ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.35, ease: 'easeInOut' }}
+            >
+              <Image
+                src={current.src}
+                alt={isAr ? current.altAr : current.altEn}
+                fill
+                priority={frame === 0}
+                fetchPriority={frame === 0 ? 'high' : 'auto'}
+                sizes="100vw"
+                quality={68}
+                className="object-cover object-[center_35%]"
+              />
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
         <div
           className="absolute inset-0"
@@ -86,6 +126,26 @@ export function JobsHero({ roleCount }: Props) {
           <motion.div variants={fadeUp} className="mb-8">
             <BrandLogo size="hero" priority />
           </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-teal-300/90"
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={current.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.35 }}
+                className="inline-block"
+              >
+                {isAr
+                  ? `${current.cityAr} · الخليج والشام`
+                  : `${current.cityEn} · MENA`}
+              </motion.span>
+            </AnimatePresence>
+          </motion.p>
 
           <motion.h1
             variants={fadeUp}

@@ -6,44 +6,18 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
-import { MuqabalehScoreBadge, type ScoreBadgeStatus } from '@/components/brand/muqabaleh-score-badge';
+import { MuqabalehScoreBadge } from '@/components/brand/muqabaleh-score-badge';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { JeannieNameLockup } from './JeannieNameLockup';
+import {
+  MENA_JEANNIE_FRAMES,
+  prefetchNextImage,
+} from './mena-hero-frames';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
 const HERO_SCORE = 86;
-
-const HERO_FRAMES: {
-  src: string;
-  altEn: string;
-  altAr: string;
-  objectPosition: string;
-  badgeStatus: ScoreBadgeStatus;
-}[] = [
-  {
-    src: '/images/hero-interview.webp',
-    altEn: 'Jeannie — Muqabaleh career agent ready to interview you',
-    altAr: 'جيني — وكيلة مقابلة المهنية مستعدة لإجراء مقابلتك',
-    objectPosition: 'center 18%',
-    badgeStatus: 'interview',
-  },
-  {
-    src: '/images/hero-interview-meeting.webp',
-    altEn: 'Jeannie conducting a live bilingual interview on Muqabaleh',
-    altAr: 'جيني تُجري مقابلة ثنائية اللغة مباشرة عبر مقابلة',
-    objectPosition: 'center 20%',
-    badgeStatus: 'scored',
-  },
-  {
-    src: '/images/hero-interview-hired.webp',
-    altEn: 'Candidate hired after Jeannie helped land the interview',
-    altAr: 'مرشّحة تُقبل بعد أن ساعدتها جيني في الوصول للمقابلة',
-    objectPosition: 'center 22%',
-    badgeStatus: 'hired',
-  },
-];
 
 export function CrystalHero() {
   const locale = useLocale();
@@ -52,22 +26,31 @@ export function CrystalHero() {
   const [frame, setFrame] = useState(0);
   const [carouselReady, setCarouselReady] = useState(false);
 
-  // Defer carousel so LCP stays on the first frame; skip when reduced motion.
+  // Defer carousel so LCP stays on Dubai (frame 0); skip when reduced motion.
   useEffect(() => {
     if (reduceMotion) return;
-    const warm = window.setTimeout(() => setCarouselReady(true), 2500);
+    const warm = window.setTimeout(() => setCarouselReady(true), 2800);
     return () => window.clearTimeout(warm);
   }, [reduceMotion]);
 
   useEffect(() => {
     if (!carouselReady || reduceMotion) return;
     const id = window.setInterval(() => {
-      setFrame((prev) => (prev + 1) % HERO_FRAMES.length);
+      setFrame((prev) => (prev + 1) % MENA_JEANNIE_FRAMES.length);
     }, 7000);
     return () => window.clearInterval(id);
   }, [carouselReady, reduceMotion]);
 
-  const current = HERO_FRAMES[frame];
+  // Prefetch only the upcoming city after idle — keeps LCP on Dubai.
+  useEffect(() => {
+    if (!carouselReady || reduceMotion) return;
+    prefetchNextImage(
+      MENA_JEANNIE_FRAMES[(frame + 1) % MENA_JEANNIE_FRAMES.length].src,
+    );
+  }, [carouselReady, reduceMotion, frame]);
+
+  const current = MENA_JEANNIE_FRAMES[frame];
+  const cityLabel = isAr ? current.cityAr : current.cityEn;
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
@@ -182,7 +165,18 @@ export function CrystalHero() {
             variants={fadeUp}
             className="mq-kicker mb-3 text-teal-200/90"
           >
-            <BiInline bi={C.hero.eyebrow} />
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={current.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.35 }}
+                className="inline-block"
+              >
+                {isAr ? `جيني · ${cityLabel}` : `Jeannie · ${cityLabel}`}
+              </motion.span>
+            </AnimatePresence>
           </motion.p>
 
           <motion.div variants={fadeUp} className="mb-3">

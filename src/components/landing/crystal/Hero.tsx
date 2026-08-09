@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
-import { MuqabalehScoreBadge } from '@/components/brand/muqabaleh-score-badge';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
+import { HeroPassportPreview } from './HeroPassportPreview';
 import { JeannieNameLockup } from './JeannieNameLockup';
 import {
   MENA_JEANNIE_FRAMES,
@@ -18,6 +18,7 @@ import {
 import { easeCrystal, fadeUp, stagger } from './motion';
 
 const HERO_SCORE = 86;
+const HERO_GRADE = 'A';
 
 export function CrystalHero() {
   const locale = useLocale();
@@ -117,21 +118,22 @@ export function CrystalHero() {
         ) : null}
       </div>
 
-      {/* Desktop / tablet floating score — kept off the face */}
+      {/* Desktop / tablet — animated passport preview (kept off Jeannie's face) */}
       <div className="mq-hero-score-anchor" aria-hidden={false}>
         <AnimatePresence mode="wait">
           <motion.div
-            key={current.badgeStatus}
-            initial={{ opacity: 0, y: 10, scale: 0.96 }}
+            key={current.id}
+            initial={{ opacity: 0, y: 12, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.45, ease: easeCrystal }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.5, ease: easeCrystal }}
           >
-            <MuqabalehScoreBadge
-              score={HERO_SCORE}
-              status={current.badgeStatus}
+            <HeroPassportPreview
               locale={locale}
-              size="lg"
+              cityEn={current.cityEn}
+              cityAr={current.cityAr}
+              score={HERO_SCORE}
+              grade={HERO_GRADE}
             />
           </motion.div>
         </AnimatePresence>
@@ -199,13 +201,15 @@ export function CrystalHero() {
             />
           </motion.div>
 
-          {/* Mobile score — in content flow so it never covers Jeannie's face */}
+          {/* Mobile passport — in content flow so it never covers Jeannie's face */}
           <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 md:hidden">
-            <MuqabalehScoreBadge
-              score={HERO_SCORE}
-              status={current.badgeStatus}
+            <HeroPassportPreview
               locale={locale}
-              size="md"
+              cityEn={current.cityEn}
+              cityAr={current.cityAr}
+              score={HERO_SCORE}
+              grade={HERO_GRADE}
+              compact
             />
           </motion.div>
 

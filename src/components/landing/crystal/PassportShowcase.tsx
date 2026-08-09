@@ -1,9 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
-import { QrCode, ShieldCheck, Sparkles } from 'lucide-react';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 import { MuqabalehScoreBadge } from '@/components/brand/muqabaleh-score-badge';
 import { localePath } from '@/i18n/navigation';
 import { BiInline, T } from './BiText';
@@ -136,14 +137,20 @@ export function CrystalPassportShowcase() {
 
               <div className="relative flex items-center justify-between border-t border-white/10 px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/70">
-                    <QrCode size={22} />
+                  <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white p-1">
+                    <Image
+                      src="/images/passport-qr-demo.png"
+                      alt=""
+                      width={48}
+                      height={48}
+                      className="h-full w-full object-contain"
+                    />
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold text-white/70">
                       {isAr ? 'تحقق عام' : 'Public verify'}
                     </p>
-                    <p className="font-mono text-[10px] text-white/35">MQBL-86-SAMPLE</p>
+                    <p className="font-mono text-[10px] text-white/35">MQB-DEMO</p>
                   </div>
                 </div>
                 <motion.span

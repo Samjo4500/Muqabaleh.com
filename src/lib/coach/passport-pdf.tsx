@@ -1,4 +1,5 @@
 import React from 'react';
+import path from 'path';
 import {
   Document,
   Page,
@@ -6,6 +7,7 @@ import {
   View,
   Image,
   StyleSheet,
+  Font,
   renderToBuffer,
 } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
@@ -13,58 +15,150 @@ import type { CoachScoreResult } from './types';
 import { getInterviewConfig } from './config';
 
 const colors = {
-  ink: '#0a1220',
-  teal: '#2dd4bf',
+  navy: '#0f172a',
+  teal: '#14b8a6',
+  ink: '#0f172a',
   muted: '#64748b',
   line: '#e2e8f0',
   paper: '#f8fafc',
+  white: '#ffffff',
 };
+
+try {
+  Font.register({
+    family: 'Amiri',
+    fonts: [
+      {
+        src: path.join(process.cwd(), 'public/fonts/Amiri-Regular.ttf'),
+        fontWeight: 'normal',
+      },
+      {
+        src: path.join(process.cwd(), 'public/fonts/Amiri-Bold.ttf'),
+        fontWeight: 'bold',
+      },
+    ],
+  });
+} catch (err) {
+  console.error('[coach/passport-pdf] font register failed', err);
+}
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
-    fontSize: 11,
+    padding: 0,
+    fontSize: 10,
     fontFamily: 'Helvetica',
     color: colors.ink,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
+  },
+  pageAr: {
+    fontFamily: 'Amiri',
+  },
+  header: {
+    backgroundColor: colors.navy,
+    paddingVertical: 22,
+    paddingHorizontal: 36,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   brand: {
-    fontSize: 18,
+    color: colors.white,
+    fontSize: 20,
     fontFamily: 'Helvetica-Bold',
-    color: colors.ink,
-    marginBottom: 4,
   },
-  title: {
-    fontSize: 14,
+  brandAr: {
+    fontFamily: 'Amiri',
+    fontWeight: 'bold',
+  },
+  headerTitle: {
     color: colors.teal,
-    marginBottom: 16,
+    fontSize: 12,
+    marginTop: 4,
     fontFamily: 'Helvetica-Bold',
   },
-  row: { flexDirection: 'row', marginBottom: 4 },
-  label: { width: 110, color: colors.muted },
-  value: { flex: 1, fontFamily: 'Helvetica-Bold' },
-  scoreBox: {
-    marginTop: 16,
-    marginBottom: 16,
-    padding: 14,
-    backgroundColor: colors.paper,
-    borderRadius: 8,
+  body: {
+    paddingHorizontal: 36,
+    paddingTop: 28,
+    paddingBottom: 28,
+  },
+  card: {
     borderWidth: 1,
     borderColor: colors.line,
+    borderRadius: 8,
+    padding: 14,
+    backgroundColor: colors.paper,
+    marginBottom: 16,
   },
-  score: { fontSize: 28, fontFamily: 'Helvetica-Bold', color: colors.teal },
-  section: { marginTop: 14, marginBottom: 6, fontFamily: 'Helvetica-Bold', fontSize: 12 },
-  barTrack: {
-    height: 8,
-    backgroundColor: colors.line,
-    borderRadius: 4,
-    marginTop: 4,
+  row: { flexDirection: 'row', marginBottom: 6 },
+  label: { width: 100, color: colors.muted, fontSize: 9 },
+  value: { flex: 1, fontFamily: 'Helvetica-Bold', fontSize: 10 },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    gap: 18,
+  },
+  scoreNumber: {
+    fontSize: 48,
+    fontFamily: 'Helvetica-Bold',
+    color: colors.navy,
+  },
+  badge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 3,
+    borderColor: colors.teal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+  },
+  badgeText: {
+    fontSize: 18,
+    fontFamily: 'Helvetica-Bold',
+    color: colors.teal,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: colors.navy,
     marginBottom: 8,
+    marginTop: 4,
   },
-  barFill: { height: 8, backgroundColor: colors.teal, borderRadius: 4 },
-  bullet: { marginBottom: 3, paddingLeft: 6 },
-  footer: { marginTop: 24, fontSize: 9, color: colors.muted },
-  share: { marginTop: 10, fontSize: 9, color: colors.ink },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  gridItem: {
+    width: '48%',
+    marginBottom: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 6,
+  },
+  barTrack: {
+    height: 5,
+    backgroundColor: colors.line,
+    borderRadius: 3,
+    marginTop: 4,
+  },
+  barFill: { height: 5, backgroundColor: colors.teal, borderRadius: 3 },
+  twoCol: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  col: { width: '48%' },
+  bullet: { marginBottom: 4, fontSize: 9, color: colors.ink },
+  qrWrap: { alignItems: 'center', marginTop: 18, marginBottom: 10 },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    marginTop: 10,
+    paddingTop: 10,
+    fontSize: 8,
+    color: colors.muted,
+    textAlign: 'center',
+  },
 });
 
 export type PassportPdfInput = {
@@ -77,6 +171,8 @@ export type PassportPdfInput = {
   score: CoachScoreResult;
   verificationId: string;
   verifyUrl: string;
+  /** When true, use Arabic/RTL layout */
+  rtl?: boolean;
 };
 
 function PassportDoc({
@@ -87,94 +183,160 @@ function PassportDoc({
   qrDataUrl: string | null;
 }) {
   const cfg = getInterviewConfig();
-  const linkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(data.verifyUrl)}`;
-  const whatsapp = `https://wa.me/?text=${encodeURIComponent(`My Muqabaleh Interview Passport: ${data.verifyUrl}`)}`;
-  const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My Muqabaleh Interview Passport — score ${data.score.overallScore}`)}&url=${encodeURIComponent(data.verifyUrl)}`;
+  const rtl = Boolean(data.rtl);
+  const title = rtl
+    ? cfg.brand.passportTitleAr || 'جواز المقابلة'
+    : cfg.brand.passportTitle;
+  const L = rtl
+    ? {
+        candidate: 'المرشح',
+        date: 'التاريخ',
+        role: 'الدور',
+        industry: 'القطاع',
+        seniority: 'المستوى',
+        language: 'اللغة',
+        overall: 'الدرجة الكلية',
+        competencies: 'الكفاءات',
+        strengths: 'نقاط القوة',
+        improvements: 'للتحسين',
+        scan: 'امسح للتحقق',
+        generated: 'تم إنشاء هذا الجواز بواسطة مدرب المقابلات الذكي في مقابلة',
+      }
+    : {
+        candidate: 'Candidate',
+        date: 'Date',
+        role: 'Role',
+        industry: 'Industry',
+        seniority: 'Seniority',
+        language: 'Language',
+        overall: 'Overall score',
+        competencies: 'Competencies',
+        strengths: 'Strengths',
+        improvements: 'Improvements',
+        scan: 'Scan to verify',
+        generated: 'This passport was generated by Muqabaleh AI Interview Coach',
+      };
+
+  const comps = [...data.score.competencyBreakdown];
+  while (comps.length < 6) {
+    comps.push({ name: 'Leadership', score: data.score.overallScore });
+  }
+
+  const dirStyle = rtl ? { flexDirection: 'row-reverse' as const } : {};
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.brand}>{cfg.brand.name} · {cfg.brand.nameAr}</Text>
-        <Text style={styles.title}>{cfg.brand.passportTitle}</Text>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Candidate</Text>
-          <Text style={styles.value}>{data.candidateName}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Date</Text>
-          <Text style={styles.value}>{data.interviewDate}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Role</Text>
-          <Text style={styles.value}>{data.role}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Industry</Text>
-          <Text style={styles.value}>{data.industry}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Seniority</Text>
-          <Text style={styles.value}>{data.seniority}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Language</Text>
-          <Text style={styles.value}>{data.language}</Text>
-        </View>
-
-        <View style={styles.scoreBox}>
-          <Text style={styles.score}>
-            {data.score.overallScore} · {data.score.grade}
-          </Text>
-          <Text style={{ color: colors.muted, marginTop: 4 }}>
-            Verification ID: {data.verificationId}
-          </Text>
-          <Text style={{ color: colors.muted, marginTop: 2 }}>
-            Verify: {data.verifyUrl}
-          </Text>
-        </View>
-
-        <Text style={styles.section}>Competency breakdown</Text>
-        {data.score.competencyBreakdown.map((c) => (
-          <View key={c.name}>
-            <Text>
-              {c.name}: {c.score}/100
+      <Page size="A4" style={[styles.page, rtl ? styles.pageAr : {}]}>
+        <View style={[styles.header, dirStyle]}>
+          <View>
+            <Text style={[styles.brand, rtl ? styles.brandAr : {}]}>
+              {rtl ? cfg.brand.nameAr : cfg.brand.name}
             </Text>
-            <View style={styles.barTrack}>
-              <View style={[styles.barFill, { width: `${Math.max(0, Math.min(100, c.score))}%` }]} />
+            <Text style={[styles.headerTitle, rtl ? styles.brandAr : {}]}>
+              {title}
+            </Text>
+          </View>
+          <Text style={{ color: colors.teal, fontSize: 10 }}>
+            {rtl ? 'شهادة موثّقة' : 'Verified credential'}
+          </Text>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.card}>
+            {(
+              [
+                [L.candidate, data.candidateName],
+                [L.date, data.interviewDate],
+                [L.role, data.role],
+                [L.industry, data.industry],
+                [L.seniority, data.seniority],
+                [L.language, data.language],
+              ] as const
+            ).map(([label, value]) => (
+              <View key={label} style={[styles.row, dirStyle]}>
+                <Text style={styles.label}>{label}</Text>
+                <Text style={[styles.value, rtl ? { fontFamily: 'Amiri', fontWeight: 'bold' } : {}]}>
+                  {value}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={[styles.scoreRow, dirStyle]}>
+            <View>
+              <Text style={{ color: colors.muted, fontSize: 9, marginBottom: 4 }}>
+                {L.overall}
+              </Text>
+              <Text style={styles.scoreNumber}>{data.score.overallScore}</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{data.score.grade}</Text>
             </View>
           </View>
-        ))}
 
-        <Text style={styles.section}>Top strengths</Text>
-        {data.score.strengths.slice(0, 3).map((s, i) => (
-          <Text key={i} style={styles.bullet}>
-            • {s}
+          <Text style={[styles.sectionTitle, rtl ? { fontFamily: 'Amiri', fontWeight: 'bold' } : {}]}>
+            {L.competencies}
           </Text>
-        ))}
-
-        <Text style={styles.section}>Improvement areas</Text>
-        {data.score.improvements.slice(0, 3).map((s, i) => (
-          <Text key={i} style={styles.bullet}>
-            • {s}
-          </Text>
-        ))}
-
-        <Text style={styles.section}>Recommended next steps</Text>
-        <Text>{data.score.recommendedNextSteps}</Text>
-
-        <Text style={styles.share}>Share: LinkedIn {linkedIn}</Text>
-        <Text style={styles.share}>WhatsApp {whatsapp}</Text>
-        <Text style={styles.share}>X {xUrl}</Text>
-
-        {qrDataUrl ? (
-          <View style={{ marginTop: 16, alignItems: 'flex-start' }}>
-            <Image src={qrDataUrl} style={{ width: 96, height: 96 }} />
-            <Text style={styles.footer}>Scan to verify on muqabaleh.com</Text>
+          <View style={styles.grid}>
+            {comps.slice(0, 6).map((c) => (
+              <View key={c.name} style={styles.gridItem}>
+                <View style={[{ flexDirection: 'row', justifyContent: 'space-between' }, dirStyle]}>
+                  <Text style={{ fontSize: 9 }}>{c.name}</Text>
+                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 9 }}>
+                    {c.score}
+                  </Text>
+                </View>
+                <View style={styles.barTrack}>
+                  <View
+                    style={[
+                      styles.barFill,
+                      { width: `${Math.max(0, Math.min(100, c.score))}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
           </View>
-        ) : (
-          <Text style={styles.footer}>Verify: {data.verifyUrl}</Text>
-        )}
+
+          <View style={[styles.twoCol, dirStyle]}>
+            <View style={styles.col}>
+              <Text style={[styles.sectionTitle, rtl ? { fontFamily: 'Amiri', fontWeight: 'bold' } : {}]}>
+                {L.strengths}
+              </Text>
+              {data.score.strengths.slice(0, 3).map((s, i) => (
+                <Text key={i} style={[styles.bullet, rtl ? { fontFamily: 'Amiri' } : {}]}>
+                  ✓ {s}
+                </Text>
+              ))}
+            </View>
+            <View style={styles.col}>
+              <Text style={[styles.sectionTitle, rtl ? { fontFamily: 'Amiri', fontWeight: 'bold' } : {}]}>
+                {L.improvements}
+              </Text>
+              {data.score.improvements.slice(0, 3).map((s, i) => (
+                <Text key={i} style={[styles.bullet, rtl ? { fontFamily: 'Amiri' } : {}]}>
+                  → {s}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.qrWrap}>
+            {qrDataUrl ? (
+              <Image src={qrDataUrl} style={{ width: 120, height: 120 }} />
+            ) : null}
+            <Text style={{ marginTop: 6, fontSize: 9, color: colors.muted }}>
+              {L.scan}
+            </Text>
+          </View>
+
+          <View style={styles.footer}>
+            <Text>
+              {data.verificationId} · {data.verifyUrl}
+            </Text>
+            <Text style={{ marginTop: 3 }}>{L.generated}</Text>
+          </View>
+        </View>
       </Page>
     </Document>
   );
@@ -185,12 +347,21 @@ export async function buildPassportPdfBuffer(data: PassportPdfInput): Promise<Bu
   try {
     qrDataUrl = await QRCode.toDataURL(data.verifyUrl, {
       margin: 1,
-      width: 192,
+      width: 240,
       errorCorrectionLevel: 'M',
     });
   } catch (err) {
     console.error('[coach/passport-pdf] QR failed', err);
   }
-  const buf = await renderToBuffer(<PassportDoc data={data} qrDataUrl={qrDataUrl} />);
+
+  const rtl =
+    data.rtl ??
+    (/arabic|عربي|العربية/i.test(data.language) ||
+      data.language === 'ar' ||
+      data.language === 'AR');
+
+  const buf = await renderToBuffer(
+    <PassportDoc data={{ ...data, rtl }} qrDataUrl={qrDataUrl} />,
+  );
   return Buffer.from(buf);
 }

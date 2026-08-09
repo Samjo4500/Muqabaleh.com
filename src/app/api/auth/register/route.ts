@@ -104,8 +104,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Send welcome email (fire and forget)
-    triggerWelcomeEmail(user.id, 'ar').catch(() => {});
-    triggerWelcomeEmail(user.id, 'en').catch(() => {});
+    triggerWelcomeEmail(user.id).catch(() => {});
 
     return NextResponse.json({
       id: user.id,

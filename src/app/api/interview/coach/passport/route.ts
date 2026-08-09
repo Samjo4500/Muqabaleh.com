@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
     };
 
     const email = session.user?.email || '';
+    const rtl = interview.language !== 'EN';
     const pdf = await buildPassportPdfBuffer({
       candidateName: session.user?.name || email.split('@')[0] || 'Candidate',
       role:
@@ -68,6 +69,7 @@ export async function GET(req: NextRequest) {
       score,
       verificationId: interview.verificationId,
       verifyUrl: `${cfg.brand.verifyBaseUrl}/${interview.verificationId}`,
+      rtl,
     });
 
     return new NextResponse(new Uint8Array(pdf), {

@@ -10,8 +10,14 @@ import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { CoachGender, LabeledOption, PrepSelections } from '@/lib/coach/types';
 
+type RolePublic = LabeledOption & {
+  category: string;
+  industries: string[];
+};
+
 type PublicConfig = {
-  roles: LabeledOption[];
+  roleCategories?: LabeledOption[];
+  roles: RolePublic[];
   industries: LabeledOption[];
   seniority: LabeledOption[];
   languages: LabeledOption[];
@@ -32,6 +38,8 @@ export function PrepClient() {
   const [loading, setLoading] = useState(true);
   const [accessBlocked, setAccessBlocked] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [category, setCategory] = useState('');
+  const [roleQuery, setRoleQuery] = useState('');
   const [form, setForm] = useState<PrepSelections>({
     role: '',
     industry: '',
@@ -67,10 +75,14 @@ export function PrepClient() {
           );
         }
         setRemaining(typeof a.remaining === 'number' ? a.remaining : null);
+        const firstCat = c.roleCategories?.[0]?.id || c.roles[0]?.category || '';
+        const rolesInCat = (c.roles || []).filter((r) => r.category === firstCat);
+        const firstRole = rolesInCat[0] || c.roles[0];
+        setCategory(firstCat);
         setForm((prev) => ({
           ...prev,
-          role: c.roles[0]?.id || '',
-          industry: c.industries[0]?.id || '',
+          role: firstRole?.id || '',
+          industry: firstRole?.industries?.[0] || c.industries[0]?.id || '',
           seniority: c.seniority.find((s) => s.id === 'mid')?.id || c.seniority[0]?.id || '',
         }));
       } catch {
@@ -88,6 +100,56 @@ export function PrepClient() {
     () => (opt: LabeledOption) => (isAr ? opt.ar : opt.en),
     [isAr],
   );
+
+  const categories = cfg?.roleCategories?.length
+    ? cfg.roleCategories
+    : Array.from(new Set((cfg?.roles || []).map((r) => r.category))).map((id) => ({
+        id,
+        en: id,
+        ar: id,
+      }));
+
+  const rolesInCategory = useMemo(() => {
+    const list = (cfg?.roles || []).filter((r) => !category || r.category === category);
+    const q = roleQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (r) =>
+        r.en.toLowerCase().includes(q) ||
+        r.ar.includes(roleQuery.trim()) ||
+        r.id.includes(q),
+    );
+  }, [cfg?.roles, category, roleQuery]);
+
+  const industriesForRole = useMemo(() => {
+    const role = (cfg?.roles || []).find((r) => r.id === form.role);
+    if (!role?.industries?.length) return cfg?.industries || [];
+    const allowed = new Set(role.industries);
+    const filtered = (cfg?.industries || []).filter((i) => allowed.has(i.id));
+    return filtered.length ? filtered : cfg?.industries || [];
+  }, [cfg?.roles, cfg?.industries, form.role]);
+
+  const onCategoryChange = (next: string) => {
+    setCategory(next);
+    setRoleQuery('');
+    const first = (cfg?.roles || []).find((r) => r.category === next);
+    if (first) {
+      setForm((f) => ({
+        ...f,
+        role: first.id,
+        industry: first.industries[0] || f.industry,
+      }));
+    }
+  };
+
+  const onRoleChange = (roleId: string) => {
+    const role = (cfg?.roles || []).find((r) => r.id === roleId);
+    setForm((f) => ({
+      ...f,
+      role: roleId,
+      industry: role?.industries?.[0] || f.industry,
+    }));
+  };
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,8 +209,8 @@ export function PrepClient() {
         </h1>
         <p className="mt-2 max-w-2xl text-white/60">
           {isAr
-            ? 'اختر الدور والسياق. لن نكتب في قاعدة البيانات حتى تنتهي المقابلة.'
-            : 'Choose role and context. Nothing is written to the database until the interview ends.'}
+            ? 'اختر الفئة ثم الدور والسياق. لن نكتب في قاعدة البيانات حتى تنتهي المقابلة.'
+            : 'Choose a category, then role and context. Nothing is written to the database until the interview ends.'}
         </p>
 
         {accessBlocked ? (
@@ -164,19 +226,45 @@ export function PrepClient() {
         ) : null}
 
         <form onSubmit={onSubmit} className="mt-8 max-w-2xl space-y-6">
+          <Field label={isAr ? 'الفئة' : 'Category'} required>
+            <select
+              className="min-h-12 w-full rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-white"
+              value={category}
+              onChange={(e) => onCategoryChange(e.target.value)}
+              required
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {label(c)}
+                </option>
+              ))}
+            </select>
+          </Field>
+
           <Field label={isAr ? 'الدور' : 'Role'} required>
+            <input
+              className="mb-2 min-h-11 w-full rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-white placeholder:text-white/35"
+              value={roleQuery}
+              onChange={(e) => setRoleQuery(e.target.value)}
+              placeholder={isAr ? 'ابحث عن دور…' : 'Search roles…'}
+            />
             <select
               className="min-h-12 w-full rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-white"
               value={form.role}
-              onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+              onChange={(e) => onRoleChange(e.target.value)}
               required
             >
-              {(cfg?.roles || []).map((r) => (
+              {rolesInCategory.map((r) => (
                 <option key={r.id} value={r.id}>
                   {label(r)}
                 </option>
               ))}
             </select>
+            <p className="mt-1 text-xs text-white/40">
+              {isAr
+                ? `${rolesInCategory.length} أدوار في هذه الفئة`
+                : `${rolesInCategory.length} roles in this category`}
+            </p>
           </Field>
 
           <Field label={isAr ? 'القطاع' : 'Industry'} required>
@@ -186,7 +274,7 @@ export function PrepClient() {
               onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
               required
             >
-              {(cfg?.industries || []).map((r) => (
+              {industriesForRole.map((r) => (
                 <option key={r.id} value={r.id}>
                   {label(r)}
                 </option>

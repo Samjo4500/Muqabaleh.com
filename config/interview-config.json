@@ -1,35 +1,414 @@
 {
-  "version": 1,
+  "version": 2,
   "site": "muqabaleh.com",
   "brand": {
     "name": "Muqabaleh",
     "nameAr": "مقابلة",
     "passportTitle": "Muqabaleh Interview Passport",
+    "passportTitleAr": "جواز المقابلة — مقابلة",
     "verifyBaseUrl": "https://muqabaleh.com/verify",
     "emailFrom": "Muqabaleh <passport@muqabaleh.com>",
     "passportEmailSubject": "Your Interview Passport is Ready — Muqabaleh Verified"
   },
+  "roleCategories": [
+    { "id": "tech", "en": "Technology", "ar": "التقنية" },
+    { "id": "business", "en": "Business", "ar": "الأعمال" },
+    { "id": "creative", "en": "Creative", "ar": "الإبداع" },
+    { "id": "healthcare", "en": "Healthcare", "ar": "الرعاية الصحية" },
+    { "id": "education", "en": "Education", "ar": "التعليم" },
+    { "id": "engineering", "en": "Engineering", "ar": "الهندسة" },
+    { "id": "operations", "en": "Operations", "ar": "العمليات" }
+  ],
   "roles": [
-    { "id": "software_engineer", "en": "Software Engineer", "ar": "مهندس برمجيات" },
-    { "id": "marketing_manager", "en": "Marketing Manager", "ar": "مدير تسويق" },
-    { "id": "sales_executive", "en": "Sales Executive", "ar": "مسؤول مبيعات" },
-    { "id": "hr_specialist", "en": "HR Specialist", "ar": "أخصائي موارد بشرية" },
-    { "id": "finance_analyst", "en": "Finance Analyst", "ar": "محلل مالي" },
-    { "id": "product_manager", "en": "Product Manager", "ar": "مدير منتج" },
-    { "id": "data_analyst", "en": "Data Analyst", "ar": "محلل بيانات" },
-    { "id": "customer_success", "en": "Customer Success", "ar": "نجاح العملاء" },
-    { "id": "operations_manager", "en": "Operations Manager", "ar": "مدير عمليات" },
-    { "id": "other", "en": "Other", "ar": "أخرى" }
+    {
+      "id": "software-engineer",
+      "en": "Software Engineer",
+      "ar": "مهندس برمجيات",
+      "category": "tech",
+      "industries": ["tech-saas", "finance-banking", "healthcare"],
+      "questionFocus": {
+        "en": "Ask about system design trade-offs, debugging stories, code quality, collaboration with product, and shipping under constraints.",
+        "ar": "اسأل عن موازنات تصميم الأنظمة، قصص تصحيح الأخطاء، جودة الكود، التعاون مع المنتج، والتسليم تحت القيود."
+      },
+      "rubric": {
+        "en": "Score technical depth, problem decomposition, communication of trade-offs, and ownership of delivery outcomes.",
+        "ar": "قيّم العمق التقني، تفكيك المشكلات، شرح الموازنات، وملكية نتائج التسليم."
+      }
+    },
+    {
+      "id": "product-manager",
+      "en": "Product Manager",
+      "ar": "مدير منتج",
+      "category": "tech",
+      "industries": ["tech-saas", "retail-ecommerce"],
+      "questionFocus": {
+        "en": "Prioritization frameworks, discovery with users, stakeholder alignment, metrics, and shipping decisions.",
+        "ar": "أطر تحديد الأولويات، اكتشاف احتياجات المستخدمين، مواءمة أصحاب المصلحة، المقاييس، وقرارات الإطلاق."
+      },
+      "rubric": {
+        "en": "Score product sense, prioritization clarity, metrics literacy, and stakeholder communication.",
+        "ar": "قيّم حس المنتج، وضوح الأولويات، الإلمام بالمقاييس، والتواصل مع أصحاب المصلحة."
+      }
+    },
+    {
+      "id": "data-analyst",
+      "en": "Data Analyst",
+      "ar": "محلل بيانات",
+      "category": "tech",
+      "industries": ["tech-saas", "finance-banking", "consulting"],
+      "questionFocus": {
+        "en": "SQL/analytics workflows, defining KPIs, turning ambiguous asks into analysis, and presenting insights.",
+        "ar": "مسارات التحليل وSQL، تعريف مؤشرات الأداء، تحويل الطلبات الغامضة إلى تحليل، وعرض الرؤى."
+      },
+      "rubric": {
+        "en": "Score analytical rigor, metric definition, storytelling with data, and business impact.",
+        "ar": "قيّم الصرامة التحليلية، تعريف المقاييس، سرد القصة بالبيانات، والأثر التجاري."
+      }
+    },
+    {
+      "id": "marketing-manager",
+      "en": "Marketing Manager",
+      "ar": "مدير تسويق",
+      "category": "business",
+      "industries": ["tech-saas", "retail-ecommerce", "education"],
+      "questionFocus": {
+        "en": "Campaign strategy, funnel metrics, brand positioning, budget trade-offs, and cross-functional launch work.",
+        "ar": "استراتيجية الحملات، مقاييس القمع، تموضع العلامة، موازنات الميزانية، والعمل العابر للفرق عند الإطلاق."
+      },
+      "rubric": {
+        "en": "Score strategic thinking, channel fluency, ROI awareness, and leadership of campaigns.",
+        "ar": "قيّم التفكير الاستراتيجي، إتقان القنوات، الوعي بالعائد، وقيادة الحملات."
+      }
+    },
+    {
+      "id": "sales-executive",
+      "en": "Sales Executive",
+      "ar": "مندوب مبيعات",
+      "category": "business",
+      "industries": ["tech-saas", "retail-ecommerce", "manufacturing"],
+      "questionFocus": {
+        "en": "Pipeline management, discovery calls, objection handling, closing, and quota attainment stories.",
+        "ar": "إدارة خط الأنابيب، مكالمات الاستكشاف، معالجة الاعتراضات، الإغلاق، وقصص تحقيق الحصص."
+      },
+      "rubric": {
+        "en": "Score discovery skill, persuasion, resilience, and quantified sales outcomes.",
+        "ar": "قيّم مهارة الاستكشاف، الإقناع، المرونة، ونتائج المبيعات المقاسة."
+      }
+    },
+    {
+      "id": "hr-specialist",
+      "en": "HR Specialist",
+      "ar": "أخصائي موارد بشرية",
+      "category": "business",
+      "industries": ["tech-saas", "consulting", "government"],
+      "questionFocus": {
+        "en": "Hiring process design, employee relations, policy judgment, and confidentiality under pressure.",
+        "ar": "تصميم عمليات التوظيف، علاقات الموظفين، الحكم على السياسات، والسرية تحت الضغط."
+      },
+      "rubric": {
+        "en": "Score people judgment, process clarity, cultural sensitivity, and ethical decision-making.",
+        "ar": "قيّم الحكم على الأفراد، وضوح العمليات، الحساسية الثقافية، واتخاذ القرار الأخلاقي."
+      }
+    },
+    {
+      "id": "finance-analyst",
+      "en": "Finance Analyst",
+      "ar": "محلل مالي",
+      "category": "business",
+      "industries": ["finance-banking", "consulting"],
+      "questionFocus": {
+        "en": "Forecasting, variance analysis, modeling assumptions, and communicating financial risk.",
+        "ar": "التوقعات، تحليل الانحرافات، افتراضات النماذج، وإيصال المخاطر المالية."
+      },
+      "rubric": {
+        "en": "Score numerical accuracy, modeling logic, risk awareness, and executive communication.",
+        "ar": "قيّم الدقة الرقمية، منطق النمذجة، الوعي بالمخاطر، والتواصل التنفيذي."
+      }
+    },
+    {
+      "id": "accountant",
+      "en": "Accountant",
+      "ar": "محاسب",
+      "category": "business",
+      "industries": ["finance-banking", "retail-ecommerce", "manufacturing"],
+      "questionFocus": {
+        "en": "Close process, reconciliations, controls, audit readiness, and handling discrepancies.",
+        "ar": "عملية الإغلاق، التسويات، الضوابط، جاهزية التدقيق، ومعالجة الفروقات."
+      },
+      "rubric": {
+        "en": "Score accuracy, control mindset, process discipline, and clarity under scrutiny.",
+        "ar": "قيّم الدقة، عقلية الضوابط، انضباط العملية، والوضوح تحت التدقيق."
+      }
+    },
+    {
+      "id": "operations-manager",
+      "en": "Operations Manager",
+      "ar": "مدير عمليات",
+      "category": "business",
+      "industries": ["manufacturing", "retail-ecommerce", "logistics"],
+      "questionFocus": {
+        "en": "Process improvement, SLA ownership, incident response, and cross-team coordination.",
+        "ar": "تحسين العمليات، ملكية اتفاقيات الخدمة، الاستجابة للحوادث، والتنسيق بين الفرق."
+      },
+      "rubric": {
+        "en": "Score operational judgment, process design, crisis handling, and leadership clarity.",
+        "ar": "قيّم الحكم التشغيلي، تصميم العمليات، إدارة الأزمات، ووضوح القيادة."
+      }
+    },
+    {
+      "id": "customer-success",
+      "en": "Customer Success Manager",
+      "ar": "مدير نجاح العملاء",
+      "category": "business",
+      "industries": ["tech-saas", "consulting"],
+      "questionFocus": {
+        "en": "Retention, onboarding, escalation handling, expansion, and quantifying customer outcomes.",
+        "ar": "الاحتفاظ، الإعداد، تصعيد المشكلات، التوسع، وقياس نتائج العميل."
+      },
+      "rubric": {
+        "en": "Score empathy, retention strategy, commercial awareness, and stakeholder management.",
+        "ar": "قيّم التعاطف، استراتيجية الاحتفاظ، الوعي التجاري، وإدارة أصحاب المصلحة."
+      }
+    },
+    {
+      "id": "project-manager",
+      "en": "Project Manager",
+      "ar": "مدير مشروع",
+      "category": "business",
+      "industries": ["tech-saas", "construction", "consulting"],
+      "questionFocus": {
+        "en": "Scope control, risk registers, timeline recovery, and stakeholder reporting.",
+        "ar": "ضبط النطاق، سجلات المخاطر، استعادة الجداول، وتقارير أصحاب المصلحة."
+      },
+      "rubric": {
+        "en": "Score planning, risk management, communication cadence, and delivery ownership.",
+        "ar": "قيّم التخطيط، إدارة المخاطر، انتظام التواصل، وملكية التسليم."
+      }
+    },
+    {
+      "id": "business-development",
+      "en": "Business Development",
+      "ar": "تطوير أعمال",
+      "category": "business",
+      "industries": ["tech-saas", "consulting", "finance-banking"],
+      "questionFocus": {
+        "en": "Partnership sourcing, deal structuring, market entry, and long-cycle relationship building.",
+        "ar": "استقطاب الشراكات، هيكلة الصفقات، دخول الأسواق، وبناء العلاقات طويلة الدورة."
+      },
+      "rubric": {
+        "en": "Score opportunity spotting, negotiation, relationship depth, and commercial judgment.",
+        "ar": "قيّم اكتشاف الفرص، التفاوض، عمق العلاقات، والحكم التجاري."
+      }
+    },
+    {
+      "id": "ux-designer",
+      "en": "UX/UI Designer",
+      "ar": "مصمم تجربة مستخدم",
+      "category": "creative",
+      "industries": ["tech-saas", "retail-ecommerce"],
+      "questionFocus": {
+        "en": "Research methods, usability trade-offs, design critique, and partnering with engineering.",
+        "ar": "أساليب البحث، موازنات سهولة الاستخدام، نقد التصميم، والشراكة مع الهندسة."
+      },
+      "rubric": {
+        "en": "Score user empathy, design rationale, collaboration, and measurable UX outcomes.",
+        "ar": "قيّم التعاطف مع المستخدم، تبرير التصميم، التعاون، ونتائج تجربة المستخدم المقاسة."
+      }
+    },
+    {
+      "id": "graphic-designer",
+      "en": "Graphic Designer",
+      "ar": "مصمم جرافيك",
+      "category": "creative",
+      "industries": ["tech-saas", "retail-ecommerce", "education"],
+      "questionFocus": {
+        "en": "Brief interpretation, brand systems, revision cycles, and deadline craftsmanship.",
+        "ar": "تفسير الموجز، أنظمة الهوية، دورات التعديل، والحرفية تحت المواعيد."
+      },
+      "rubric": {
+        "en": "Score creative judgment, brand consistency, feedback handling, and delivery quality.",
+        "ar": "قيّم الحكم الإبداعي، اتساق العلامة، التعامل مع الملاحظات، وجودة التسليم."
+      }
+    },
+    {
+      "id": "content-writer",
+      "en": "Content Writer",
+      "ar": "كاتب محتوى",
+      "category": "creative",
+      "industries": ["tech-saas", "media", "education"],
+      "questionFocus": {
+        "en": "Audience research, editorial judgment, SEO awareness, and rewriting under critique.",
+        "ar": "بحث الجمهور، الحكم التحريري، الوعي بتحسين البحث، وإعادة الكتابة تحت النقد."
+      },
+      "rubric": {
+        "en": "Score clarity, audience fit, iteration speed, and content impact.",
+        "ar": "قيّم الوضوح، ملاءمة الجمهور، سرعة التعديل، وأثر المحتوى."
+      }
+    },
+    {
+      "id": "digital-marketing",
+      "en": "Digital Marketing Specialist",
+      "ar": "أخصائي تسويق رقمي",
+      "category": "creative",
+      "industries": ["tech-saas", "retail-ecommerce"],
+      "questionFocus": {
+        "en": "Paid/organic channels, experimentation, creative testing, and attribution basics.",
+        "ar": "القنوات المدفوعة والعضوية، التجريب، اختبار الإبداع، وأساسيات الإسناد."
+      },
+      "rubric": {
+        "en": "Score channel fluency, experiment design, analytics literacy, and growth outcomes.",
+        "ar": "قيّم إتقان القنوات، تصميم التجارب، الإلمام بالتحليلات، ونتائج النمو."
+      }
+    },
+    {
+      "id": "nurse",
+      "en": "Nurse",
+      "ar": "ممرض/ممرضة",
+      "category": "healthcare",
+      "industries": ["healthcare"],
+      "questionFocus": {
+        "en": "Patient safety, triage judgment, teamwork with clinicians, and compassionate communication.",
+        "ar": "سلامة المريض، حكم الفرز، العمل مع الطاقم الطبي، والتواصل الرحيم."
+      },
+      "rubric": {
+        "en": "Score clinical judgment, calm under pressure, empathy, and protocol adherence.",
+        "ar": "قيّم الحكم السريري، الهدوء تحت الضغط، التعاطف، والالتزام بالبروتوكولات."
+      }
+    },
+    {
+      "id": "pharmacist",
+      "en": "Pharmacist",
+      "ar": "صيدلي",
+      "category": "healthcare",
+      "industries": ["healthcare", "retail-ecommerce"],
+      "questionFocus": {
+        "en": "Medication safety, counseling patients, inventory/process discipline, and error prevention.",
+        "ar": "سلامة الأدوية، إرشاد المرضى، انضباط المخزون/العمليات، ومنع الأخطاء."
+      },
+      "rubric": {
+        "en": "Score accuracy, counseling clarity, safety mindset, and ethical judgment.",
+        "ar": "قيّم الدقة، وضوح الإرشاد، عقلية السلامة، والحكم الأخلاقي."
+      }
+    },
+    {
+      "id": "doctor",
+      "en": "Doctor",
+      "ar": "طبيب",
+      "category": "healthcare",
+      "industries": ["healthcare"],
+      "questionFocus": {
+        "en": "Clinical reasoning, differential diagnosis, patient communication, and multidisciplinary care.",
+        "ar": "التفكير السريري، التشخيص التفريقي، التواصل مع المريض، والرعاية متعددة التخصصات."
+      },
+      "rubric": {
+        "en": "Score clinical reasoning, communication, responsibility, and evidence-based judgment.",
+        "ar": "قيّم التفكير السريري، التواصل، المسؤولية، والحكم المبني على الدليل."
+      }
+    },
+    {
+      "id": "teacher",
+      "en": "Teacher",
+      "ar": "معلم",
+      "category": "education",
+      "industries": ["education"],
+      "questionFocus": {
+        "en": "Lesson design, classroom management, differentiated learning, and parent communication.",
+        "ar": "تصميم الدروس، إدارة الصف، التعلم المتمايز، والتواصل مع أولياء الأمور."
+      },
+      "rubric": {
+        "en": "Score instructional clarity, student engagement strategy, adaptability, and professionalism.",
+        "ar": "قيّم وضوح التدريس، استراتيجية إشراك الطلاب، القدرة على التكيف، والاحترافية."
+      }
+    },
+    {
+      "id": "university-professor",
+      "en": "University Professor",
+      "ar": "أستاذ جامعي",
+      "category": "education",
+      "industries": ["education"],
+      "questionFocus": {
+        "en": "Curriculum design, research mentoring, assessment fairness, and academic integrity.",
+        "ar": "تصميم المناهج، إرشاد البحث، عدالة التقييم، والنزاهة الأكاديمية."
+      },
+      "rubric": {
+        "en": "Score academic depth, mentoring quality, fairness, and scholarly communication.",
+        "ar": "قيّم العمق الأكاديمي، جودة الإرشاد، العدالة، والتواصل العلمي."
+      }
+    },
+    {
+      "id": "civil-engineer",
+      "en": "Civil Engineer",
+      "ar": "مهندس مدني",
+      "category": "engineering",
+      "industries": ["construction", "government"],
+      "questionFocus": {
+        "en": "Site constraints, safety codes, project coordination, and resolving design/build conflicts.",
+        "ar": "قيود الموقع، أكواد السلامة، تنسيق المشاريع، وحل تعارضات التصميم/التنفيذ."
+      },
+      "rubric": {
+        "en": "Score technical soundness, safety awareness, coordination, and practical problem solving.",
+        "ar": "قيّم السلامة التقنية، الوعي بالسلامة، التنسيق، وحل المشكلات العملي."
+      }
+    },
+    {
+      "id": "mechanical-engineer",
+      "en": "Mechanical Engineer",
+      "ar": "مهندس ميكانيكي",
+      "category": "engineering",
+      "industries": ["manufacturing", "construction"],
+      "questionFocus": {
+        "en": "Design-to-manufacture, failure analysis, maintenance planning, and cross-discipline handoffs.",
+        "ar": "من التصميم إلى التصنيع، تحليل الأعطال، تخطيط الصيانة، والتسليم بين التخصصات."
+      },
+      "rubric": {
+        "en": "Score engineering rigor, root-cause thinking, practicality, and collaboration.",
+        "ar": "قيّم الصرامة الهندسية، التفكير في السبب الجذري، العملية، والتعاون."
+      }
+    },
+    {
+      "id": "electrical-engineer",
+      "en": "Electrical Engineer",
+      "ar": "مهندس كهربائي",
+      "category": "engineering",
+      "industries": ["manufacturing", "construction", "energy"],
+      "questionFocus": {
+        "en": "Power/systems reliability, safety standards, troubleshooting, and documentation quality.",
+        "ar": "موثوقية الطاقة/الأنظمة، معايير السلامة، استكشاف الأعطال، وجودة التوثيق."
+      },
+      "rubric": {
+        "en": "Score systems thinking, safety discipline, diagnostics, and clear technical communication.",
+        "ar": "قيّم التفكير النظمي، انضباط السلامة، التشخيص، والتواصل التقني الواضح."
+      }
+    },
+    {
+      "id": "supply-chain",
+      "en": "Supply Chain Manager",
+      "ar": "مدير سلسلة إمداد",
+      "category": "operations",
+      "industries": ["manufacturing", "retail-ecommerce", "logistics"],
+      "questionFocus": {
+        "en": "Demand planning, supplier risk, inventory trade-offs, and disruption recovery.",
+        "ar": "تخطيط الطلب، مخاطر الموردين، موازنات المخزون، والتعافي من الاضطرابات."
+      },
+      "rubric": {
+        "en": "Score planning foresight, risk management, cost/service balance, and crisis response.",
+        "ar": "قيّم استشراف التخطيط، إدارة المخاطر، موازنة التكلفة/الخدمة، والاستجابة للأزمات."
+      }
+    }
   ],
   "industries": [
-    { "id": "tech_saas", "en": "Tech/SaaS", "ar": "تقنية / SaaS" },
+    { "id": "tech-saas", "en": "Tech/SaaS", "ar": "تقنية / SaaS" },
     { "id": "healthcare", "en": "Healthcare", "ar": "الرعاية الصحية" },
-    { "id": "finance_banking", "en": "Finance/Banking", "ar": "المالية / البنوك" },
-    { "id": "retail_ecommerce", "en": "Retail/E-commerce", "ar": "التجزئة / التجارة الإلكترونية" },
+    { "id": "finance-banking", "en": "Finance/Banking", "ar": "المالية / البنوك" },
+    { "id": "retail-ecommerce", "en": "Retail/E-commerce", "ar": "التجزئة / التجارة الإلكترونية" },
     { "id": "manufacturing", "en": "Manufacturing", "ar": "التصنيع" },
     { "id": "education", "en": "Education", "ar": "التعليم" },
     { "id": "government", "en": "Government", "ar": "الحكومة" },
     { "id": "consulting", "en": "Consulting", "ar": "الاستشارات" },
+    { "id": "logistics", "en": "Logistics", "ar": "اللوجستيات" },
+    { "id": "construction", "en": "Construction", "ar": "الإنشاءات" },
+    { "id": "media", "en": "Media", "ar": "الإعلام" },
+    { "id": "energy", "en": "Energy", "ar": "الطاقة" },
     { "id": "other", "en": "Other", "ar": "أخرى" }
   ],
   "seniority": [
@@ -86,7 +465,8 @@
     "Technical Depth",
     "Problem Solving",
     "Cultural Fit",
-    "Confidence"
+    "Confidence",
+    "Leadership"
   ],
   "accessGates": {
     "Free": {

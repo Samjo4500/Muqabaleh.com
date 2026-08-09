@@ -1,8 +1,27 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import type { InterviewConfig } from './types';
+import type { InterviewConfig, RoleOption } from './types';
 
 let cached: InterviewConfig | null = null;
+
+function normalizeRoles(raw: unknown): RoleOption[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => {
+    const r = item as Record<string, unknown>;
+    const label = (r.label as { en?: string; ar?: string } | undefined) || undefined;
+    return {
+      id: String(r.id || ''),
+      en: String(label?.en || r.en || r.id || ''),
+      ar: String(label?.ar || r.ar || r.id || ''),
+      category: String(r.category || 'business'),
+      industries: Array.isArray(r.industries)
+        ? r.industries.map((x) => String(x))
+        : [],
+      questionFocus: r.questionFocus as RoleOption['questionFocus'],
+      rubric: r.rubric as RoleOption['rubric'],
+    };
+  });
+}
 
 /** Load /config/interview-config.json — safe fallback if file missing. */
 export function getInterviewConfig(): InterviewConfig {
@@ -10,7 +29,10 @@ export function getInterviewConfig(): InterviewConfig {
   try {
     const path = join(process.cwd(), 'config', 'interview-config.json');
     const raw = readFileSync(path, 'utf8');
-    cached = JSON.parse(raw) as InterviewConfig;
+    const parsed = JSON.parse(raw) as InterviewConfig;
+    parsed.roles = normalizeRoles(parsed.roles);
+    if (!parsed.roleCategories) parsed.roleCategories = [];
+    cached = parsed;
     return cached;
   } catch (err) {
     console.error('[coach/config] failed to load interview-config.json', err);
@@ -19,11 +41,22 @@ export function getInterviewConfig(): InterviewConfig {
   }
 }
 
+export function getRoleById(roleId: string): RoleOption | undefined {
+  return getInterviewConfig().roles.find((r) => r.id === roleId);
+}
+
 /** Client-safe subset (no secrets). */
 export function getPublicInterviewConfig() {
   const c = getInterviewConfig();
   return {
-    roles: c.roles,
+    roleCategories: c.roleCategories,
+    roles: c.roles.map((r) => ({
+      id: r.id,
+      en: r.en,
+      ar: r.ar,
+      category: r.category,
+      industries: r.industries,
+    })),
     industries: c.industries,
     seniority: c.seniority,
     languages: c.languages,
@@ -33,11 +66,13 @@ export function getPublicInterviewConfig() {
       minQuestions: c.engine.minQuestions,
       maxQuestions: c.engine.maxQuestions,
     },
+    competencies: c.competencies,
     storageKey: c.storageKey,
     brand: {
       name: c.brand.name,
       nameAr: c.brand.nameAr,
       passportTitle: c.brand.passportTitle,
+      passportTitleAr: c.brand.passportTitleAr,
     },
   };
 }
@@ -49,11 +84,21 @@ const FALLBACK_CONFIG: InterviewConfig = {
     name: 'Muqabaleh',
     nameAr: 'مقابلة',
     passportTitle: 'Muqabaleh Interview Passport',
+    passportTitleAr: 'جواز المقابلة — مقابلة',
     verifyBaseUrl: 'https://muqabaleh.com/verify',
     emailFrom: 'Muqabaleh <noreply@muqabaleh.com>',
     passportEmailSubject: 'Your Interview Passport is Ready — Muqabaleh',
   },
-  roles: [{ id: 'other', en: 'Other', ar: 'أخرى' }],
+  roleCategories: [{ id: 'business', en: 'Business', ar: 'الأعمال' }],
+  roles: [
+    {
+      id: 'other',
+      en: 'Other',
+      ar: 'أخرى',
+      category: 'business',
+      industries: ['other'],
+    },
+  ],
   industries: [{ id: 'other', en: 'Other', ar: 'أخرى' }],
   seniority: [{ id: 'mid', en: 'Mid-level', ar: 'متوسط' }],
   languages: [
@@ -82,7 +127,7 @@ const FALLBACK_CONFIG: InterviewConfig = {
   },
   heygen: { enabled: false, iframeBaseUrl: '' },
   engine: {
-    geminiModel: 'gemini-1.5-pro',
+    geminiModel: 'gemini-flash-latest',
     minQuestions: 5,
     maxQuestions: 7,
     speechProvider: 'google-cloud-stt',
@@ -95,6 +140,7 @@ const FALLBACK_CONFIG: InterviewConfig = {
     'Problem Solving',
     'Cultural Fit',
     'Confidence',
+    'Leadership',
   ],
   accessGates: {
     Free: {

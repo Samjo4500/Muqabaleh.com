@@ -9,7 +9,10 @@ import {
   planKeyForPayPalPlanId,
 } from '@/lib/paypal';
 import { grantPlan } from '@/lib/plans/entitlements';
-import { triggerPaymentReceiptEmail } from '@/lib/email-triggers';
+import {
+  triggerPaymentReceiptEmail,
+  triggerSubscriptionConfirmationEmail,
+} from '@/lib/email-triggers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -116,6 +119,7 @@ export async function POST(req: NextRequest) {
     triggerPaymentReceiptEmail(userId, planName, 999, subscriptionId).catch(
       () => {},
     );
+    triggerSubscriptionConfirmationEmail(userId, planName).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (err) {

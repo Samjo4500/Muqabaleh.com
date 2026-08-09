@@ -60,8 +60,7 @@ export async function POST(req: NextRequest) {
       });
       userId = user.id;
       createdAccount = true;
-      triggerWelcomeEmail(user.id, 'ar').catch(() => {});
-      triggerWelcomeEmail(user.id, 'en').catch(() => {});
+      triggerWelcomeEmail(user.id).catch(() => {});
     }
 
     const role = String(form.get('role') || form.get('desiredRole') || '').trim();

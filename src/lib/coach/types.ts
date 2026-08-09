@@ -1,5 +1,14 @@
 export type LabeledOption = { id: string; en: string; ar: string };
 
+export type LocalizedText = { en: string; ar: string };
+
+export type RoleOption = LabeledOption & {
+  category: string;
+  industries: string[];
+  questionFocus?: LocalizedText;
+  rubric?: LocalizedText;
+};
+
 export type CoachGender = 'female' | 'male' | 'none';
 
 export type AccessTierLabel = 'Free' | 'Pro' | 'Premium';
@@ -48,11 +57,13 @@ export type InterviewConfig = {
     name: string;
     nameAr: string;
     passportTitle: string;
+    passportTitleAr?: string;
     verifyBaseUrl: string;
     emailFrom: string;
     passportEmailSubject: string;
   };
-  roles: LabeledOption[];
+  roleCategories: LabeledOption[];
+  roles: RoleOption[];
   industries: LabeledOption[];
   seniority: LabeledOption[];
   languages: LabeledOption[];

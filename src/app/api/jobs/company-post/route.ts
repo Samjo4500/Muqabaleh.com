@@ -130,8 +130,7 @@ export async function POST(req: NextRequest) {
       companyId = company.id;
       userId = user.id;
       createdAccount = true;
-      triggerWelcomeEmail(user.id, 'ar').catch(() => {});
-      triggerWelcomeEmail(user.id, 'en').catch(() => {});
+      triggerWelcomeEmail(user.id).catch(() => {});
     }
 
     if (!companyId || !userId) {

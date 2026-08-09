@@ -7,7 +7,9 @@ export async function verifyAdmin() {
   const session = await getServerSession(authOptions);
   const role = (session?.user as { role?: string } | undefined)?.role;
 
-  if (!session?.user || role !== UserRole.SUPER_ADMIN) {
+  const isAdmin =
+    role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
+  if (!session?.user || !isAdmin) {
     return {
       authorized: false as const,
       response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),

@@ -225,22 +225,26 @@ export async function completeCoachInterview(opts: {
   let emailed = false;
   if (access.gate.emailPassport && access.gate.passportPdf && interviewId) {
     try {
+      const preferAr = opts.prep.language === 'ar' || opts.prep.language === 'mixed';
+      const roleOpt = cfg.roles.find((r) => r.id === opts.prep.role);
+      const industryOpt = cfg.industries.find((i) => i.id === opts.prep.industry);
+      const seniorityOpt = cfg.seniority.find((s) => s.id === opts.prep.seniority);
+      const languageOpt = cfg.languages.find((l) => l.id === opts.prep.language);
       const pdf = await buildPassportPdfBuffer({
         candidateName: opts.candidateName,
-        role: cfg.roles.find((r) => r.id === opts.prep.role)?.en || opts.prep.role,
+        role: (preferAr ? roleOpt?.ar : roleOpt?.en) || opts.prep.role,
         industry:
-          cfg.industries.find((i) => i.id === opts.prep.industry)?.en ||
-          opts.prep.industry,
+          (preferAr ? industryOpt?.ar : industryOpt?.en) || opts.prep.industry,
         seniority:
-          cfg.seniority.find((s) => s.id === opts.prep.seniority)?.en ||
+          (preferAr ? seniorityOpt?.ar : seniorityOpt?.en) ||
           opts.prep.seniority,
         language:
-          cfg.languages.find((l) => l.id === opts.prep.language)?.en ||
-          opts.prep.language,
+          (preferAr ? languageOpt?.ar : languageOpt?.en) || opts.prep.language,
         interviewDate: new Date().toISOString().slice(0, 10),
         score,
         verificationId,
         verifyUrl: `${cfg.brand.verifyBaseUrl}/${verificationId}`,
+        rtl: preferAr,
       });
 
       const mail = await sendPassportViaBrevo({

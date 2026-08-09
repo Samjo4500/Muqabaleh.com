@@ -1,6 +1,7 @@
 import { db } from './db';
 import { sendEmail, queueEmail, APP_URL } from './email';
 import { brandedEmailShell, sendBrevoEmail } from './brevo';
+import { MUQABALEH_BRAND, localePath } from '@/lib/brand/comms';
 import { welcomeEmail } from '@/emails/welcome';
 import { paymentReceiptEmail } from '@/emails/payment-receipt';
 import { bookingConfirmationEmail } from '@/emails/booking-confirmation';
@@ -16,6 +17,7 @@ import { adminNewApplicationEmail } from '@/emails/admin-new-application';
 import { adminDailySummaryEmail } from '@/emails/admin-daily-summary';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
+const SYSTEM_SENDER = MUQABALEH_BRAND.senders.system;
 
 type Locale = 'en' | 'ar';
 
@@ -41,13 +43,14 @@ export async function triggerWelcomeEmail(userId: string, locale?: Locale) {
       : 'Welcome to Muqabaleh — Your first interview is free';
     const html = brandedEmailShell({
       locale: lang,
+      eyebrow: isAr ? 'حسابك جاهز' : 'Your account is ready',
       title: isAr ? `مرحباً بك، ${name}` : `Welcome, ${name}`,
       bodyHtml: isAr
-        ? `<p>حسابك في Muqabaleh جاهز. مقابلتك الأولى مع جيني مجانية — ابدأ الآن وحسّن فرصك المهنية.</p>
-           <p style="color:#64748b;font-size:14px;">يمكنك أيضاً مراجعة الباقات للترقية لاحقاً.</p>`
-        : `<p>Your Muqabaleh account is ready. Your first interview with Jeannie is free — start now and sharpen your interview edge.</p>
-           <p style="color:#64748b;font-size:14px;">You can also review pricing plans when you are ready to upgrade.</p>`,
-      ctaHref: `${APP_URL}/${isAr ? '' : 'en/'}interview/prep`.replace('com//', 'com/'),
+        ? `<p style="margin:0 0 12px;">حسابك في <strong>مقابلة</strong> جاهز. مقابلتك الأولى مع جيني مجانية — تدرّب، احصل على درجة، وابنِ جواز مقابلة موثّقاً.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">يمكنك مراجعة الباقات لاحقاً لفتح إرسال الجواز بالبريد ومزيد من الجلسات.</p>`
+        : `<p style="margin:0 0 12px;">Your <strong>Muqabaleh</strong> account is ready. Your first interview with Jeannie is free — practice, get scored, and earn a verified Interview Passport.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">Review plans anytime to unlock passport email delivery and more sessions.</p>`,
+      ctaHref: localePath('/interview/prep', lang),
       ctaLabel: isAr ? 'ابدأ مقابلتك المجانية' : 'Start your free interview',
     });
 
@@ -55,7 +58,7 @@ export async function triggerWelcomeEmail(userId: string, locale?: Locale) {
       to: user.email,
       subject,
       html,
-      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+      sender: SYSTEM_SENDER,
     });
     if (!brevo.success) {
       // Fallback to legacy Resend path if configured
@@ -81,34 +84,38 @@ export async function triggerSubscriptionConfirmationEmail(
     const lang = locale || localeFromUserLanguage(user.language);
     const isAr = lang === 'ar';
     const subject = isAr
-      ? 'أصبحت الآن مشترك Pro في مقابلة'
-      : "You're now a Muqabaleh Pro — here's what's next";
+      ? `تم تفعيل ${planName} — مقابلة`
+      : `You're on ${planName} — Muqabaleh`;
     const html = brandedEmailShell({
       locale: lang,
-      title: isAr
-        ? `تم تفعيل ${planName}`
-        : `You're on ${planName}`,
+      eyebrow: isAr ? 'تأكيد الاشتراك' : 'Subscription confirmed',
+      title: isAr ? `تم تفعيل ${planName}` : `You're on ${planName}`,
       bodyHtml: isAr
-        ? `<p>شكراً لترقيتك. يمكنك الآن تحميل جواز المقابلة بالبريد، وإجراء مقابلات إضافية مع جيني.</p>
-           <ul style="color:#334155;line-height:1.7;">
-             <li>جواز PDF بالبريد</li>
+        ? `<p style="margin:0 0 12px;">شكراً لترقيتك. جواز المقابلة يصل الآن بالبريد بعد كل جلسة مؤهّلة، مع جلسات إضافية مع جيني.</p>
+           <ul style="margin:0;padding-right:18px;color:#334155;line-height:1.75;">
+             <li>جواز PDF بالبريد من passport@muqabaleh.com</li>
              <li>مقابلات أكثر هذا الشهر</li>
              <li>دعم عبر support@muqabaleh.com</li>
            </ul>`
-        : `<p>Thanks for upgrading. You can now receive passport PDFs by email and run more Jeannie interviews.</p>
-           <ul style="color:#334155;line-height:1.7;">
-             <li>Passport PDF by email</li>
+        : `<p style="margin:0 0 12px;">Thanks for upgrading. Passport PDFs now arrive by email after eligible sessions, with more Jeannie interviews each month.</p>
+           <ul style="margin:0;padding-left:18px;color:#334155;line-height:1.75;">
+             <li>Passport PDF by email from passport@muqabaleh.com</li>
              <li>More interviews this month</li>
              <li>Support at support@muqabaleh.com</li>
            </ul>`,
-      ctaHref: `${APP_URL}/${isAr ? '' : 'en/'}interview/prep`.replace('com//', 'com/'),
+      highlight: {
+        label: isAr ? 'خطتك' : 'Your plan',
+        value: planName,
+        sublabel: isAr ? 'مفعّل' : 'Active',
+      },
+      ctaHref: localePath('/dashboard', lang),
       ctaLabel: isAr ? 'افتح لوحة التحكم' : 'Open dashboard',
     });
     await sendBrevoEmail({
       to: user.email,
       subject,
       html,
-      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+      sender: SYSTEM_SENDER,
     });
   } catch (err) {
     console.error('[EmailTrigger] Subscription confirmation failed:', err);
@@ -348,25 +355,32 @@ export async function triggerPasswordResetEmail(
 ) {
   try {
     const isAr = locale === 'ar';
+    const name = userName || (isAr ? 'مرحباً' : 'Hello');
     const subject = isAr
-      ? 'إعادة تعيين كلمة المرور'
+      ? 'إعادة تعيين كلمة المرور — مقابلة'
       : 'Reset your Muqabaleh password';
     const html = brandedEmailShell({
       locale,
+      eyebrow: isAr ? 'أمان الحساب' : 'Account security',
       title: isAr
-        ? `${userName}، أعد تعيين كلمة المرور`
-        : `${userName}, reset your password`,
+        ? `${name}، أعد تعيين كلمة المرور`
+        : `${name}, reset your password`,
       bodyHtml: isAr
-        ? `<p>استلمنا طلباً لإعادة تعيين كلمة المرور. الرابط صالح لمدة ساعة واحدة.</p>`
-        : `<p>We received a password reset request. This link expires in 1 hour.</p>`,
+        ? `<p style="margin:0 0 12px;">استلمنا طلباً لإعادة تعيين كلمة المرور لحسابك على مقابلة.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">الرابط صالح لمدة ساعة واحدة. إذا لم تطلب هذا، تجاهل الرسالة — لن تتغير كلمة مرورك.</p>`
+        : `<p style="margin:0 0 12px;">We received a request to reset your Muqabaleh password.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">This link expires in 1 hour. If you didn't ask for this, ignore the email — your password stays the same.</p>`,
       ctaHref: resetLink,
       ctaLabel: isAr ? 'إعادة تعيين كلمة المرور' : 'Reset password',
+      footnote: isAr
+        ? 'لأمانك لا نشارك هذا الرابط مع أي جهة أخرى.'
+        : 'For your security, we never share this link with anyone else.',
     });
     const brevo = await sendBrevoEmail({
       to: userEmail,
       subject,
       html,
-      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+      sender: SYSTEM_SENDER,
     });
     if (!brevo.success) {
       const legacy = await passwordResetEmail({ userName, resetLink, locale });

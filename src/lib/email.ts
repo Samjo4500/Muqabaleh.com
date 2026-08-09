@@ -1,8 +1,10 @@
 import { Resend } from 'resend';
 import { db } from './db';
+import { MUQABALEH_BRAND } from '@/lib/brand/comms';
 
-const DEFAULT_FROM = 'Muqabaleh <noreply@muqabaleh.com>';
-const REPLY_TO = 'support@muqabaleh.com';
+const DEFAULT_FROM = `Muqabaleh <${MUQABALEH_BRAND.senders.system.email}>`;
+const REPLY_TO = MUQABALEH_BRAND.supportEmail;
+const C = MUQABALEH_BRAND.colors;
 
 function getResendClient(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY;
@@ -135,16 +137,19 @@ export async function processEmailQueue(): Promise<{ sent: number; failed: numbe
   return { sent, failed };
 }
 
-// ─── Shared email layout helpers ───
+// ─── Shared email layout helpers (aligned with Brevo brandedEmailShell) ───
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://muqabaleh.com';
-const LOGO_URL = `${APP_URL}/logo.svg`;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || MUQABALEH_BRAND.siteUrl;
 
 export function emailBaseHtml(body: string, locale: 'en' | 'ar' = 'en'): string {
-  const dir = locale === 'ar' ? 'rtl' : 'ltr';
-  const fontFamily = locale === 'ar'
-    ? "'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif"
-    : "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  const isAr = locale === 'ar';
+  const dir = isAr ? 'rtl' : 'ltr';
+  const align = isAr ? 'right' : 'left';
+  const brand = isAr ? MUQABALEH_BRAND.nameAr : MUQABALEH_BRAND.name;
+  const tagline = isAr ? MUQABALEH_BRAND.taglineAr : MUQABALEH_BRAND.taglineEn;
+  const fontFamily = isAr
+    ? "'Noto Naskh Arabic','Segoe UI',Tahoma,Arial,sans-serif"
+    : "'Segoe UI','Helvetica Neue',Arial,sans-serif";
 
   return `<!DOCTYPE html>
 <html dir="${dir}" lang="${locale}">
@@ -153,30 +158,27 @@ export function emailBaseHtml(body: string, locale: 'en' | 'ar' = 'en'): string 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Muqabaleh</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:${fontFamily};-webkit-font-smoothing:antialiased;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:24px 0;">
+<body style="margin:0;padding:0;background:${C.paper};font-family:${fontFamily};-webkit-font-smoothing:antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};padding:28px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-          <!-- Header -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:${C.white};border-radius:14px;overflow:hidden;border:1px solid ${C.line};">
+          <tr><td style="height:4px;background:${C.teal};font-size:0;line-height:0;">&nbsp;</td></tr>
           <tr>
-            <td style="padding:24px 0 16px;text-align:center;">
-              <a href="${APP_URL}" target="_blank">
-                <img src="${LOGO_URL}" alt="Muqabaleh" width="140" style="height:auto;" />
-              </a>
+            <td style="background:${C.navy};padding:22px 28px;text-align:${align};">
+              <div style="font-size:22px;font-weight:700;color:${C.white};">${brand}</div>
+              <div style="margin-top:4px;font-size:12px;color:${C.tealSoft};font-weight:600;">${tagline}</div>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
-            <td style="background-color:#ffffff;border-radius:12px;padding:32px 40px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <td style="padding:32px 28px 18px;text-align:${align};color:${C.ink};">
               ${body}
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
-            <td style="padding:20px 0 8px;text-align:center;color:#71717a;font-size:13px;">
-              <p style="margin:0 0 4px;">&copy; ${new Date().getFullYear()} Muqabaleh (مقابلة). All rights reserved.</p>
-              <p style="margin:0;"><a href="${APP_URL}" style="color:#18181b;text-decoration:underline;">${APP_URL}</a></p>
+            <td style="padding:18px 28px 26px;border-top:1px solid ${C.line};text-align:center;color:${C.muted};font-size:12px;">
+              <p style="margin:0 0 4px;">&copy; ${new Date().getFullYear()} Muqabaleh (مقابلة)</p>
+              <p style="margin:0;"><a href="${APP_URL}" style="color:${C.navy};text-decoration:none;font-weight:600;">${APP_URL}</a></p>
             </td>
           </tr>
         </table>
@@ -187,19 +189,19 @@ export function emailBaseHtml(body: string, locale: 'en' | 'ar' = 'en'): string 
 </html>`;
 }
 
-export function buttonHtml(url: string, label: string, bgColor = '#18181b'): string {
+export function buttonHtml(url: string, label: string, bgColor: string = C.teal): string {
   return `
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
       <tr>
         <td align="center" style="border-radius:8px;background-color:${bgColor};">
-          <a href="${url}" target="_blank" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px;">${label}</a>
+          <a href="${url}" target="_blank" style="display:inline-block;padding:14px 32px;color:${C.navyDeep};font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;">${label}</a>
         </td>
       </tr>
     </table>`;
 }
 
 export function dividerHtml(): string {
-  return `<hr style="border:none;border-top:1px solid #e4e4e7;margin:24px 0;" />`;
+  return `<hr style="border:none;border-top:1px solid ${C.line};margin:24px 0;" />`;
 }
 
 export { APP_URL };

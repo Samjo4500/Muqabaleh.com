@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { sendBrevoEmail, brandedEmailShell } from '@/lib/brevo';
+import { MUQABALEH_BRAND } from '@/lib/brand/comms';
 
 function appUrl() {
   return (
@@ -83,27 +84,33 @@ export async function POST(req: NextRequest) {
         : `${appUrl()}/en/auth/reset-password?token=${encodeURIComponent(token)}`;
 
     const isAr = locale === 'ar';
+    const name = user.name || (isAr ? 'مرحباً' : 'Hello');
     const subject = isAr
-      ? 'إعادة تعيين كلمة المرور'
+      ? 'إعادة تعيين كلمة المرور — مقابلة'
       : 'Reset your Muqabaleh password';
-    const title = isAr
-      ? `${user.name || 'مرحباً'}، أعد تعيين كلمة المرور`
-      : `${user.name || 'Hello'}, reset your password`;
     const html = brandedEmailShell({
       locale,
-      title,
+      eyebrow: isAr ? 'أمان الحساب' : 'Account security',
+      title: isAr
+        ? `${name}، أعد تعيين كلمة المرور`
+        : `${name}, reset your password`,
       bodyHtml: isAr
-        ? `<p>استلمنا طلباً لإعادة تعيين كلمة المرور لحسابك على Muqabaleh. الرابط صالح لمدة ساعة واحدة.</p>`
-        : `<p>We received a request to reset your Muqabaleh password. This link expires in 1 hour.</p>`,
+        ? `<p style="margin:0 0 12px;">استلمنا طلباً لإعادة تعيين كلمة المرور لحسابك على مقابلة.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">الرابط صالح لمدة ساعة واحدة. إذا لم تطلب هذا، تجاهل الرسالة — لن تتغير كلمة مرورك.</p>`
+        : `<p style="margin:0 0 12px;">We received a request to reset your Muqabaleh password.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">This link expires in 1 hour. If you didn't ask for this, ignore the email — your password stays the same.</p>`,
       ctaHref: link,
       ctaLabel: isAr ? 'إعادة تعيين كلمة المرور' : 'Reset password',
+      footnote: isAr
+        ? 'لأمانك لا نشارك هذا الرابط مع أي جهة أخرى.'
+        : 'For your security, we never share this link with anyone else.',
     });
 
     await sendBrevoEmail({
       to: user.email,
       subject,
       html,
-      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+      sender: MUQABALEH_BRAND.senders.system,
     });
 
     return okResponse;

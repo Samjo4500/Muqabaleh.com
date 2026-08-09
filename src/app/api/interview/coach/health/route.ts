@@ -1,16 +1,30 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   getGoogleAccessToken,
   hasGeminiApiKey,
   hasGoogleApiKey,
   hasGoogleServiceAccount,
 } from '@/lib/coach/google-auth';
+import { assertCronAuthorized } from '@/lib/cron-auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { UserRole } from '@prisma/client';
 
 /**
- * Preview/ops health for Jeannie coach providers.
+ * Ops health for Jeannie coach providers.
+ * Restricted to SUPER_ADMIN session or CRON_SECRET Bearer.
  * Never returns secret values — only presence + a tiny live ping.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const cronDenied = assertCronAuthorized(req);
+  if (cronDenied) {
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (role !== UserRole.SUPER_ADMIN) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+  }
+
   const geminiKey = hasGeminiApiKey();
   const googleKey = hasGoogleApiKey();
   const googleServiceAccount = hasGoogleServiceAccount();
@@ -182,8 +196,13 @@ export async function GET() {
     }
   }
 
+  const ok =
+    geminiPing === 'ok' &&
+    sttPing === 'ok' &&
+    (brevoKey ? brevoPing === 'ok' : false);
+
   return NextResponse.json({
-    ok: geminiPing === 'ok' && (sttPing === 'ok' || googleServiceAccount),
+    ok,
     geminiKey,
     googleKey,
     googleServiceAccount,

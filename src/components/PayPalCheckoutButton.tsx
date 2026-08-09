@@ -101,7 +101,8 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
                 body: JSON.stringify({ subscriptionId: data.subscriptionID || '' }),
               });
               if (res.ok) {
-                window.location.href = `/${locale}/payment/success`;
+                window.location.href =
+                  locale === 'ar' ? '/payment/success' : '/en/payment/success';
               } else {
                 setError(t('activateError'));
               }
@@ -137,7 +138,8 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
                 body: JSON.stringify({ orderId: data.orderID || '' }),
               });
               if (res.ok) {
-                window.location.href = `/${locale}/payment/success`;
+                window.location.href =
+                  locale === 'ar' ? '/payment/success' : '/en/payment/success';
               } else {
                 setError(t('activateError'));
               }

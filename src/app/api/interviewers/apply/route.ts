@@ -147,7 +147,8 @@ export async function POST(req: NextRequest) {
     try {
       const { db } = await import('@/lib/db');
 
-      // Find or create a User for this interviewer email (userId is required FK)
+      // Find or create a User for this interviewer email (userId is required FK).
+      // Never escalate an existing candidate account from a public form.
       let user = await db.user.findUnique({ where: { email: email!.trim().toLowerCase() } });
       if (!user) {
         const passwordHash = await hash(randomBytes(32).toString('hex'), 12);
@@ -161,11 +162,12 @@ export async function POST(req: NextRequest) {
             sessionsLeft: 0,
           },
         });
-      } else if (user.role === UserRole.USER) {
-        user = await db.user.update({
-          where: { id: user.id },
-          data: { role: UserRole.INTERVIEWER },
-        });
+      } else if (
+        user.role !== UserRole.INTERVIEWER &&
+        user.role !== UserRole.ADMIN &&
+        user.role !== UserRole.SUPER_ADMIN
+      ) {
+        // Keep USER/PARTNER roles intact — application stays pending until admin approval.
       }
 
       // Reject duplicate interviewer applications for the same user

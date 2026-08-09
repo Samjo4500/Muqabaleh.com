@@ -68,10 +68,38 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'id required' }, { status: 400 });
     }
 
+    const ALLOWED_ROLES = new Set([
+      'USER',
+      'INTERVIEWER',
+      'COMPANY_ADMIN',
+      'PARTNER_ADMIN',
+      'ADMIN',
+      'SUPER_ADMIN',
+    ]);
+    const ALLOWED_TIERS = new Set([
+      'FREE',
+      'PRO',
+      'UNLIMITED',
+      'JEANNIE',
+      'JEANNIE_PRO',
+      'MASTERY_PACK',
+      'PREMIUM',
+    ]);
+
     const data: Record<string, unknown> = {};
     if (typeof body.isActive === 'boolean') data.isActive = body.isActive;
-    if (typeof body.role === 'string') data.role = body.role;
-    if (typeof body.tier === 'string') data.tier = body.tier;
+    if (typeof body.role === 'string') {
+      if (!ALLOWED_ROLES.has(body.role)) {
+        return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+      }
+      data.role = body.role;
+    }
+    if (typeof body.tier === 'string') {
+      if (!ALLOWED_TIERS.has(body.tier)) {
+        return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+      }
+      data.tier = body.tier;
+    }
 
     if (!Object.keys(data).length) {
       return NextResponse.json({ error: 'No updates' }, { status: 400 });

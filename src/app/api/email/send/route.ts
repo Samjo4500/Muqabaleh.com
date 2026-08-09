@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
+import { requireConfiguredSecret, secretsMatch } from '@/lib/security-tokens';
 
-// POST /api/email/send — low-level email send endpoint
+// POST /api/email/send — internal-only email send endpoint (fail closed)
 export async function POST(req: NextRequest) {
   try {
-    // Simple auth: require an internal secret header to prevent abuse
-    const secret = req.headers.get('x-email-secret');
-    if (secret !== process.env.EMAIL_INTERNAL_SECRET) {
+    const expected = requireConfiguredSecret(
+      process.env.EMAIL_INTERNAL_SECRET,
+      24,
+    );
+    if (!expected) {
+      return NextResponse.json(
+        { error: 'Email relay not configured' },
+        { status: 503 },
+      );
+    }
+
+    const provided = req.headers.get('x-email-secret');
+    if (!secretsMatch(provided, expected)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -145,6 +145,39 @@ export const authOptions: NextAuthOptions = {
         } else {
           token.exp = Math.floor(Date.now() / 1000) + DEFAULT_SESSION_SECONDS;
         }
+      } else if (token.id) {
+        // Refresh entitlement fields after PayPal activate / admin grants
+        // without forcing a full re-login. Throttle to once per ~60s.
+        const lastRefresh = Number(token.entitlementRefreshAt || 0);
+        const now = Date.now();
+        if (now - lastRefresh > 60_000) {
+          try {
+            const { db } = await import('./db');
+            const fresh = await db.user.findUnique({
+              where: { id: String(token.id) },
+              select: {
+                tier: true,
+                sessionsLeft: true,
+                role: true,
+                isActive: true,
+                accountType: true,
+                companyId: true,
+                partnerId: true,
+              },
+            });
+            if (fresh && fresh.isActive) {
+              token.tier = fresh.tier;
+              token.sessionsLeft = fresh.sessionsLeft;
+              token.role = fresh.role;
+              token.accountType = fresh.accountType;
+              token.companyId = fresh.companyId ?? undefined;
+              token.partnerId = fresh.partnerId ?? undefined;
+            }
+            token.entitlementRefreshAt = now;
+          } catch {
+            // keep existing token claims if DB is briefly unavailable
+          }
+        }
       }
       return token;
     },

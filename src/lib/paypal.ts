@@ -155,13 +155,13 @@ export function getAllowedPayPalPlanIds(): string[] {
   ].filter((id): id is string => typeof id === 'string' && id.length > 0);
 }
 
-export function planKeyForPayPalPlanId(planId: string): PlanKey {
+export function planKeyForPayPalPlanId(planId: string): PlanKey | null {
   if (planId && planId === process.env.PAYPAL_PLAN_ID_JEANNIE) return 'JEANNIE';
   if (planId && planId === process.env.PAYPAL_PLAN_ID_JEANNIE_PRO) return 'JEANNIE_PRO';
   if (planId && planId === process.env.PAYPAL_PLAN_ID_UNLIMITED) return 'UNLIMITED';
   if (planId && planId === process.env.PAYPAL_PLAN_ID_PRO) return 'PRO';
-  // Default legacy unlimited subscription → Jeannie Pro entitlements
-  return 'JEANNIE_PRO';
+  // Never default unknown plan IDs to a paid tier
+  return null;
 }
 
 /** Map checkout catalog plan codes to PayPal billing plan IDs. */

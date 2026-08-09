@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return pageMetadata({
     locale,
-    path: '/interviewers',
+    path: '/human-interviews',
     titleAr: 'المحاورون — مقابلة',
     titleEn: 'Interviewers — Muqabaleh',
     descAr: 'احجز جلسة مع محاور بشري معتمد من مجال تخصصك.',

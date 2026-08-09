@@ -106,12 +106,22 @@ export async function POST(req: NextRequest) {
         : 'For your security, we never share this link with anyone else.',
     });
 
-    await sendBrevoEmail({
+    const brevo = await sendBrevoEmail({
       to: user.email,
       subject,
       html,
       sender: MUQABALEH_BRAND.senders.system,
     });
+    if (!brevo.success) {
+      // Fall back to Resend path used by other transactional mail
+      const { triggerPasswordResetEmail } = await import('@/lib/email-triggers');
+      await triggerPasswordResetEmail(
+        user.email,
+        user.name || (isAr ? 'مرحباً' : 'Hello'),
+        link,
+        locale,
+      );
+    }
 
     return okResponse;
   } catch (err) {

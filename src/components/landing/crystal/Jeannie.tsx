@@ -315,7 +315,8 @@ export function CrystalJeannie() {
                       style={{ objectPosition: meta.objectPosition }}
                       sizes="(max-width: 1024px) 100vw, 58vw"
                       quality={78}
-                      priority={active === 0}
+                      // Never compete with the home hero LCP image
+                      priority={false}
                     />
                   </motion.div>
                   <div className="mq-jeannie-shade absolute inset-0" />

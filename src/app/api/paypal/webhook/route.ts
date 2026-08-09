@@ -79,11 +79,14 @@ export async function POST(req: NextRequest) {
           data: { status: 'ACTIVE' },
         });
         if (sub) {
-          await grantPlan({
-            userId: sub.userId,
-            planKey: planKeyForPayPalPlanId(sub.paypalPlanId),
-            sessions: 999,
-          });
+          const planKey = planKeyForPayPalPlanId(sub.paypalPlanId);
+          if (planKey) {
+            await grantPlan({
+              userId: sub.userId,
+              planKey,
+              sessions: 999,
+            });
+          }
         }
         break;
       }
@@ -97,9 +100,11 @@ export async function POST(req: NextRequest) {
           const nextBilling = event.resource?.billing_info?.next_billing_time
             ? new Date(event.resource.billing_info.next_billing_time)
             : undefined;
+          const planKey = planKeyForPayPalPlanId(sub.paypalPlanId);
+          if (!planKey) break;
           await grantPlan({
             userId: sub.userId,
-            planKey: planKeyForPayPalPlanId(sub.paypalPlanId),
+            planKey,
             sessions: 999,
             expiresAt: nextBilling,
           });

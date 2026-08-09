@@ -24,9 +24,12 @@ export function PayPalSubscriptionButton({
   const [activating, setActivating] = useState(false);
   const [error, setError] = useState('');
 
-  const isPremium =
-    (session?.user as Record<string, unknown> | undefined)?.tier ===
-    'PREMIUM';
+  const tier = String(
+    (session?.user as Record<string, unknown> | undefined)?.tier || 'FREE',
+  );
+  const isPremium = ['JEANNIE', 'JEANNIE_PRO', 'UNLIMITED', 'PREMIUM', 'PRO'].includes(
+    tier,
+  );
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 

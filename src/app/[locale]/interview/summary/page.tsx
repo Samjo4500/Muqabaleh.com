@@ -12,12 +12,16 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const isAr = locale === 'ar';
-  return {
-    title: {
-      absolute: isAr ? 'ملخص الخطة — مقابلة' : 'Interview Plan Summary — Muqabaleh',
-    },
-  };
+  const { pageMetadata } = await import('@/lib/seo');
+  return pageMetadata({
+    locale,
+    path: '/interview/summary',
+    titleAr: 'ملخص الخطة — مقابلة',
+    titleEn: 'Interview Plan Summary — Muqabaleh',
+    descAr: 'ملخص خطة مقابلة خاصة.',
+    descEn: 'Private interview plan summary.',
+    noIndex: true,
+  });
 }
 
 export default async function SummaryPage({ params, searchParams }: Props) {

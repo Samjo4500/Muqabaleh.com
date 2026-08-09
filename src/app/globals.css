@@ -1028,19 +1028,26 @@
     z-index: 30;
     inset-inline-end: 1.25rem;
     top: auto;
-    bottom: 12%;
-    width: 19.5rem;
+    bottom: 10%;
+    width: 20rem;
   }
 }
 @media (min-width: 1024px) {
   .mq-atelier .mq-hero-score-anchor {
-    inset-inline-end: 2.25rem;
-    bottom: 14%;
-    width: 21.5rem;
+    inset-inline-end: 2.5rem;
+    bottom: 12%;
+    width: 22rem;
   }
 }
+/* Mobile passport sits in the content column under the subcopy */
 .mq-atelier .mq-hero-score-inline {
-  width: min(20rem, 100%);
+  display: block;
+  width: min(22rem, 100%);
+}
+@media (min-width: 768px) {
+  .mq-atelier .mq-hero-score-inline {
+    display: none;
+  }
 }
 .mq-atelier .mq-hero-passport,
 .mq-atelier .mq-score-badge {

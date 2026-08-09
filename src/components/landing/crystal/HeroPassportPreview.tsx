@@ -41,9 +41,9 @@ export function HeroPassportPreview({
     <motion.div
       className="mq-hero-passport pointer-events-none select-none"
       dir={isAr ? 'rtl' : 'ltr'}
-      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.55, ease: easeCrystal }}
+      // Stay visible on SSR / before hydration — never start at opacity 0.
+      initial={false}
+      animate={{ y: 0, scale: 1 }}
       aria-label={
         isAr
           ? `معاينة جواز المقابلة — النتيجة ${score}`

@@ -112,6 +112,7 @@ export const L = {
   legacyOps: { ar: 'عمليات إضافية', en: 'Extra Ops' },
   interviewers: { ar: 'المحاورون', en: 'Interviewers' },
   bookings: { ar: 'الحجوزات', en: 'Bookings' },
+  coachOverview: { ar: 'نظرة جيني / الجواز', en: 'Jeannie / Passport Ops' },
 } as const satisfies Record<string, Bi>;
 
 export type LabelKey = keyof typeof L;

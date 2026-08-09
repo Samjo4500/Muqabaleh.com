@@ -21,7 +21,7 @@ export async function AdminGate({
     redirect(locale === 'ar' ? '/auth/signin' : `/${locale}/auth/signin`);
   }
 
-  if (role !== UserRole.SUPER_ADMIN) {
+  if (role !== UserRole.SUPER_ADMIN && role !== UserRole.ADMIN) {
     redirect(locale === 'ar' ? '/forbidden' : `/${locale}/forbidden`);
   }
 

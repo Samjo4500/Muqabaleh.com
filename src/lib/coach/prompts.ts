@@ -1,11 +1,15 @@
 import type { PrepSelections } from './types';
-import { getInterviewConfig } from './config';
+import { getInterviewConfig, getRoleById } from './config';
 
 function labelFor(
-  list: { id: string; en: string }[],
+  list: { id: string; en: string; ar?: string }[],
   id: string,
+  preferAr = false,
 ): string {
-  return list.find((x) => x.id === id)?.en || id;
+  const hit = list.find((x) => x.id === id);
+  if (!hit) return id;
+  if (preferAr && hit.ar) return hit.ar;
+  return hit.en;
 }
 
 export function resolveCoachName(coachGender: PrepSelections['coachGender']): string {
@@ -19,14 +23,31 @@ export function buildCoachSystemPrompt(
   candidateName: string,
 ): string {
   const cfg = getInterviewConfig();
-  const role = labelFor(cfg.roles, prep.role);
-  const industry = labelFor(cfg.industries, prep.industry);
-  const seniority = labelFor(cfg.seniority, prep.seniority);
-  const language = labelFor(cfg.languages, prep.language);
+  const roleMeta = getRoleById(prep.role);
+  const preferAr = prep.language === 'ar' || prep.language === 'mixed';
+  const role = labelFor(cfg.roles, prep.role, preferAr);
+  const industry = labelFor(cfg.industries, prep.industry, preferAr);
+  const seniority = labelFor(cfg.seniority, prep.seniority, preferAr);
+  const language = labelFor(cfg.languages, prep.language, preferAr);
   const coachName = resolveCoachName(prep.coachGender);
   const company =
     prep.companyName?.trim() ||
     `a company in the ${industry} sector`;
+  const focus =
+    (preferAr ? roleMeta?.questionFocus?.ar : roleMeta?.questionFocus?.en) ||
+    roleMeta?.questionFocus?.en ||
+    '';
+  const rubric =
+    (preferAr ? roleMeta?.rubric?.ar : roleMeta?.rubric?.en) ||
+    roleMeta?.rubric?.en ||
+    '';
+
+  const languageRule =
+    prep.language === 'ar'
+      ? 'Conduct the ENTIRE interview in Arabic with correct grammar and natural MENA professional tone.'
+      : prep.language === 'mixed'
+        ? "Ask questions in Arabic. Accept answers in Arabic or English and respond in the candidate's language."
+        : 'Conduct the interview in clear professional English.';
 
   return `You are ${coachName}, a professional interview coach for muqabaleh.com.
 Candidate: ${candidateName}
@@ -36,8 +57,15 @@ Seniority: ${seniority}
 Language: ${language}
 Company: ${company}
 
-Conduct a realistic ${seniority} ${role} interview in ${language}.
-Ask 5 to 7 questions total.
+Role question bank focus:
+${focus}
+
+Role scoring rubric guidance:
+${rubric}
+
+${languageRule}
+Conduct a realistic ${seniority} ${role} interview.
+Ask 5 to 7 questions total, tailored to this role's question bank focus.
 After each answer, give 1-2 sentences of brief feedback before the next question.
 If the answer is vague, ask for a specific example with numbers or outcomes.
 If the answer is strong, raise the difficulty slightly.
@@ -53,11 +81,24 @@ export function buildScoringPrompt(
   transcript: string,
 ): { system: string; user: string } {
   const cfg = getInterviewConfig();
+  const roleMeta = getRoleById(prep.role);
   const role = labelFor(cfg.roles, prep.role);
   const seniority = labelFor(cfg.seniority, prep.seniority);
+  const rubric = roleMeta?.rubric?.en || '';
+  const competencies = cfg.competencies.length
+    ? cfg.competencies
+    : [
+        'Communication',
+        'Technical Depth',
+        'Problem Solving',
+        'Cultural Fit',
+        'Confidence',
+        'Leadership',
+      ];
 
   const system = `You are an interview evaluator for muqabaleh.com. Return ONLY valid JSON. No markdown, no explanation.`;
   const user = `Evaluate this interview transcript for a ${role} position at ${seniority} level.
+Role rubric: ${rubric}
 Score each competency from 0 to 100.
 Return ONLY valid JSON. No markdown, no explanation.
 
@@ -65,11 +106,7 @@ Return ONLY valid JSON. No markdown, no explanation.
   "overallScore": number,
   "grade": "A" | "B+" | "B" | "C" | "D",
   "competencyBreakdown": [
-    { "name": "Communication", "score": number },
-    { "name": "Technical Depth", "score": number },
-    { "name": "Problem Solving", "score": number },
-    { "name": "Cultural Fit", "score": number },
-    { "name": "Confidence", "score": number }
+${competencies.map((c) => `    { "name": "${c}", "score": number }`).join(',\n')}
   ],
   "strengths": [string, string, string],
   "improvements": [string, string, string],

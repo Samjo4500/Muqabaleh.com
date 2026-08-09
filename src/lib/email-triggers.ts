@@ -1,5 +1,6 @@
 import { db } from './db';
 import { sendEmail, queueEmail, APP_URL } from './email';
+import { brandedEmailShell, sendBrevoEmail } from './brevo';
 import { welcomeEmail } from '@/emails/welcome';
 import { paymentReceiptEmail } from '@/emails/payment-receipt';
 import { bookingConfirmationEmail } from '@/emails/booking-confirmation';
@@ -18,24 +19,99 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
 
 type Locale = 'en' | 'ar';
 
+function localeFromUserLanguage(language?: string | null): Locale {
+  return String(language || '').toUpperCase().startsWith('AR') ? 'ar' : 'en';
+}
+
 // ─── USER EMAILS ───
 
 /**
- * Trigger: Immediately after user registration
+ * Trigger: Immediately after user registration (Brevo).
  */
-export async function triggerWelcomeEmail(userId: string, locale: Locale = 'en') {
+export async function triggerWelcomeEmail(userId: string, locale?: Locale) {
   try {
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) return;
 
-    const { subject, html } = await welcomeEmail({
-      userName: user.name || 'User',
-      locale,
+    const lang = locale || localeFromUserLanguage(user.language);
+    const isAr = lang === 'ar';
+    const name = user.name || (isAr ? 'مرحباً' : 'there');
+    const subject = isAr
+      ? 'مرحباً بك في مقابلة — مقابلتك الأولى مجانية'
+      : 'Welcome to Muqabaleh — Your first interview is free';
+    const html = brandedEmailShell({
+      locale: lang,
+      title: isAr ? `مرحباً بك، ${name}` : `Welcome, ${name}`,
+      bodyHtml: isAr
+        ? `<p>حسابك في Muqabaleh جاهز. مقابلتك الأولى مع جيني مجانية — ابدأ الآن وحسّن فرصك المهنية.</p>
+           <p style="color:#64748b;font-size:14px;">يمكنك أيضاً مراجعة الباقات للترقية لاحقاً.</p>`
+        : `<p>Your Muqabaleh account is ready. Your first interview with Jeannie is free — start now and sharpen your interview edge.</p>
+           <p style="color:#64748b;font-size:14px;">You can also review pricing plans when you are ready to upgrade.</p>`,
+      ctaHref: `${APP_URL}/${isAr ? '' : 'en/'}interview/prep`.replace('com//', 'com/'),
+      ctaLabel: isAr ? 'ابدأ مقابلتك المجانية' : 'Start your free interview',
     });
 
-    await sendEmail({ to: user.email, subject, html });
+    const brevo = await sendBrevoEmail({
+      to: user.email,
+      subject,
+      html,
+      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+    });
+    if (!brevo.success) {
+      // Fallback to legacy Resend path if configured
+      const legacy = await welcomeEmail({ userName: user.name || 'User', locale: lang });
+      await sendEmail({ to: user.email, subject: legacy.subject, html: legacy.html });
+    }
   } catch (err) {
     console.error('[EmailTrigger] Welcome email failed:', err);
+  }
+}
+
+/**
+ * Trigger: User upgrades to Pro/Premium (Brevo).
+ */
+export async function triggerSubscriptionConfirmationEmail(
+  userId: string,
+  planName: string,
+  locale?: Locale,
+) {
+  try {
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user) return;
+    const lang = locale || localeFromUserLanguage(user.language);
+    const isAr = lang === 'ar';
+    const subject = isAr
+      ? 'أصبحت الآن مشترك Pro في مقابلة'
+      : "You're now a Muqabaleh Pro — here's what's next";
+    const html = brandedEmailShell({
+      locale: lang,
+      title: isAr
+        ? `تم تفعيل ${planName}`
+        : `You're on ${planName}`,
+      bodyHtml: isAr
+        ? `<p>شكراً لترقيتك. يمكنك الآن تحميل جواز المقابلة بالبريد، وإجراء مقابلات إضافية مع جيني.</p>
+           <ul style="color:#334155;line-height:1.7;">
+             <li>جواز PDF بالبريد</li>
+             <li>مقابلات أكثر هذا الشهر</li>
+             <li>دعم عبر support@muqabaleh.com</li>
+           </ul>`
+        : `<p>Thanks for upgrading. You can now receive passport PDFs by email and run more Jeannie interviews.</p>
+           <ul style="color:#334155;line-height:1.7;">
+             <li>Passport PDF by email</li>
+             <li>More interviews this month</li>
+             <li>Support at support@muqabaleh.com</li>
+           </ul>`,
+      ctaHref: `${APP_URL}/${isAr ? '' : 'en/'}interview/prep`.replace('com//', 'com/'),
+      ctaLabel: isAr ? 'افتح لوحة التحكم' : 'Open dashboard',
+    });
+    await sendBrevoEmail({
+      to: user.email,
+      subject,
+      html,
+      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+    });
+  } catch (err) {
+    console.error('[EmailTrigger] Subscription confirmation failed:', err);
   }
 }
 
@@ -271,13 +347,31 @@ export async function triggerPasswordResetEmail(
   locale: Locale = 'en',
 ) {
   try {
-    const { subject, html } = await passwordResetEmail({
-      userName,
-      resetLink,
+    const isAr = locale === 'ar';
+    const subject = isAr
+      ? 'إعادة تعيين كلمة المرور'
+      : 'Reset your Muqabaleh password';
+    const html = brandedEmailShell({
       locale,
+      title: isAr
+        ? `${userName}، أعد تعيين كلمة المرور`
+        : `${userName}, reset your password`,
+      bodyHtml: isAr
+        ? `<p>استلمنا طلباً لإعادة تعيين كلمة المرور. الرابط صالح لمدة ساعة واحدة.</p>`
+        : `<p>We received a password reset request. This link expires in 1 hour.</p>`,
+      ctaHref: resetLink,
+      ctaLabel: isAr ? 'إعادة تعيين كلمة المرور' : 'Reset password',
     });
-
-    await sendEmail({ to: userEmail, subject, html });
+    const brevo = await sendBrevoEmail({
+      to: userEmail,
+      subject,
+      html,
+      sender: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+    });
+    if (!brevo.success) {
+      const legacy = await passwordResetEmail({ userName, resetLink, locale });
+      await sendEmail({ to: userEmail, subject: legacy.subject, html: legacy.html });
+    }
   } catch (err) {
     console.error('[EmailTrigger] Password reset email failed:', err);
   }

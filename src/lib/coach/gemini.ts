@@ -217,6 +217,7 @@ function heuristicScore(transcript: string): CoachScoreResult {
       mk('Problem Solving', 0),
       mk('Cultural Fit', 3),
       mk('Confidence', -1),
+      mk('Leadership', 1),
     ],
     strengths: [
       'Clear structure in answers',

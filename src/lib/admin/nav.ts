@@ -35,6 +35,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: 'interviews',
     label: 'interviews',
     items: [
+      { href: '/admin/coach', label: 'coachOverview' },
       { href: '/admin/interviews/templates', label: 'templates' },
       { href: '/admin/interviews/questions', label: 'questions' },
       { href: '/admin/interviews/sessions', label: 'sessions' },

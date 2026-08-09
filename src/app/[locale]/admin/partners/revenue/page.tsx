@@ -20,10 +20,13 @@ export default function Page() {
   const [summary, setSummary] = useState({ lifetimeCents: 0, pendingCents: 0 });
 
   useEffect(() => {
-    // Uses demo partner revenue when DB empty — same source as partner console
-    void fetch('/api/auth/demo-partner-login', { method: 'POST' })
-      .then(() => fetch('/api/partner/revenue'))
-      .then((r) => r.json())
+    // Prefer real partner revenue for the signed-in admin/partner session.
+    // Demo partner minting is disabled unless DEMO_PARTNER_LOGIN_SECRET is set.
+    void fetch('/api/partner/revenue')
+      .then(async (r) => {
+        if (r.ok) return r.json();
+        return { payouts: [], commissionBps: 0, summary: { lifetimeCents: 0, pendingCents: 0 } };
+      })
       .then((d) => {
         setPayouts(d.payouts || []);
         setCommissionBps(d.commissionBps || 0);

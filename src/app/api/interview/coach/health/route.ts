@@ -158,6 +158,30 @@ export async function GET() {
     }
   }
 
+  const brevoKey = Boolean(process.env.BREVO_API_KEY?.trim());
+  let brevoPing: 'ok' | 'fail' | 'skipped' = 'skipped';
+  let brevoError: string | null = null;
+  if (brevoKey) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/account', {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY!.trim(),
+          Accept: 'application/json',
+        },
+      });
+      if (res.ok) {
+        brevoPing = 'ok';
+      } else {
+        brevoPing = 'fail';
+        const errText = await res.text().catch(() => '');
+        brevoError = `${res.status}: ${errText.slice(0, 160)}`;
+      }
+    } catch (err) {
+      brevoPing = 'fail';
+      brevoError = err instanceof Error ? err.message.slice(0, 160) : 'exception';
+    }
+  }
+
   return NextResponse.json({
     ok: geminiPing === 'ok' && (sttPing === 'ok' || googleServiceAccount),
     geminiKey,
@@ -169,12 +193,19 @@ export async function GET() {
     sttPing,
     sttAuth,
     sttError,
+    brevoKey,
+    brevoPing,
+    brevoError,
     hint:
       geminiPing === 'fail'
         ? 'Gemini failed. Prefer GOOGLE_APPLICATION_CREDENTIALS_JSON (service account) with Generative Language API enabled, or a valid AI Studio GEMINI_API_KEY.'
         : sttPing === 'fail'
           ? 'Speech API rejected API key auth. Add GOOGLE_APPLICATION_CREDENTIALS_JSON (service account) with Speech-to-Text enabled.'
-          : null,
+          : !brevoKey
+            ? 'BREVO_API_KEY missing — Pro/Premium passport emails will not send.'
+            : brevoPing === 'fail'
+              ? 'BREVO_API_KEY rejected by Brevo. Rotate the key and confirm muqabaleh.com / passport@muqabaleh.com is authenticated.'
+              : null,
     vercelEnv: process.env.VERCEL_ENV || null,
   });
 }

@@ -1,13 +1,13 @@
 import { randomUUID } from 'crypto';
 import { db } from '@/lib/db';
 import { generateVerificationId } from '@/lib/ai';
-import { sendEmail } from '@/lib/email';
 import { debitPractice } from '@/lib/plans/entitlements';
 import { getInterviewConfig } from './config';
 import { getCoachAccess } from './access';
 import { scoreTranscript } from './gemini';
 import { resolveCoachName } from './prompts';
 import { buildPassportPdfBuffer } from './passport-pdf';
+import { sendPassportViaBrevo } from './brevo-passport';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from './types';
 
 export type CompleteResult = {
@@ -221,6 +221,7 @@ export async function completeCoachInterview(opts: {
     };
   }
 
+  // Pro/Premium only — Free never emails; always keep passport on-screen.
   let emailed = false;
   if (access.gate.emailPassport && access.gate.passportPdf && interviewId) {
     try {
@@ -242,24 +243,18 @@ export async function completeCoachInterview(opts: {
         verifyUrl: `${cfg.brand.verifyBaseUrl}/${verificationId}`,
       });
 
-      const mail = await sendEmail({
+      const mail = await sendPassportViaBrevo({
         to: opts.userEmail,
-        from: cfg.brand.emailFrom,
-        subject: cfg.brand.passportEmailSubject,
-        html: `<p>Your Muqabaleh Interview Passport is ready.</p>
-<p>Score: <strong>${score.overallScore}</strong> (${score.grade})</p>
-<p>Verify: <a href="${cfg.brand.verifyBaseUrl}/${verificationId}">${cfg.brand.verifyBaseUrl}/${verificationId}</a></p>`,
-        attachments: [
-          {
-            filename: 'muqabaleh-interview-passport.pdf',
-            content: pdf,
-            contentType: 'application/pdf',
-          },
-        ],
+        language: opts.prep.language,
+        name: opts.candidateName,
+        overallScore: score.overallScore,
+        grade: score.grade,
+        pdf,
       });
       emailed = !!mail.success;
     } catch (err) {
-      console.error('[coach/complete] email failed', err);
+      // Never block passport display / interview completion.
+      console.error('[coach/complete] passport email failed', err);
     }
   }
 

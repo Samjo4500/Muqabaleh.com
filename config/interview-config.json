@@ -6,8 +6,8 @@
     "nameAr": "مقابلة",
     "passportTitle": "Muqabaleh Interview Passport",
     "verifyBaseUrl": "https://muqabaleh.com/verify",
-    "emailFrom": "Muqabaleh <noreply@muqabaleh.com>",
-    "passportEmailSubject": "Your Interview Passport is Ready — Muqabaleh"
+    "emailFrom": "Muqabaleh <passport@muqabaleh.com>",
+    "passportEmailSubject": "Your Interview Passport is Ready — Muqabaleh Verified"
   },
   "roles": [
     { "id": "software_engineer", "en": "Software Engineer", "ar": "مهندس برمجيات" },

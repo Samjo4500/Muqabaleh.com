@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
-import { MuqabalehJobsHero } from '@/components/jobs/MuqabalehJobsHero';
+import { JobsHero } from '@/components/jobs/JobsHero';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { db } from '@/lib/db';
 import { DEMO_JOBS } from '@/lib/jobs/demo-listings';
@@ -81,7 +81,7 @@ export default async function JobsPage() {
         transparent
       />
 
-      <MuqabalehJobsHero roleCount={jobs.length} />
+      <JobsHero roleCount={jobs.length} />
       <JobsBrowserClient initialJobs={jobs} />
 
       <div className="mq-wrap pb-12 text-center">

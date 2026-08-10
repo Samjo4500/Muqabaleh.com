@@ -376,7 +376,7 @@ function CountryFlagTile({
           active ? 'text-teal-100' : muted ? 'text-white/25' : 'text-white/85'
         }`}
       >
-        {count}
+        {muted && count === 0 ? '—' : count}
       </span>
     </button>
   );

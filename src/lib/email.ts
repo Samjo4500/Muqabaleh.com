@@ -131,6 +131,21 @@ export async function processEmailQueue(): Promise<{ sent: number; failed: numbe
         data: { error: result.error },
       });
       failed++;
+      try {
+        const { writeAdminNotification } = await import('@/lib/admin/notify');
+        await writeAdminNotification({
+          channel: 'EMAIL',
+          recipient: email.to,
+          subject: `Queue failed: ${email.subject}`,
+          body: result.error || 'Send failed',
+          status: 'FAILED',
+          href: '/admin/content/email-queue',
+          kind: 'queue',
+          severity: 'critical',
+        });
+      } catch {
+        /* ignore notify failures */
+      }
     }
   }
 

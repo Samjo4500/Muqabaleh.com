@@ -21,6 +21,7 @@ import {
   truncateText,
 } from '@/lib/jobs/job-details';
 import { isMenaListedRole } from '@/lib/jobs/mena';
+import { LISTED_COMPANY_CATALOG } from '@/lib/jobs/listed-company-catalog';
 import {
   resolveSalary,
   salaryFromGreenhouse,
@@ -358,7 +359,10 @@ async function fetchForCompany(company: {
 
   // Board is MENA-only — drop Ghana/India/Pakistan noise; keep Remote/Hybrid for regional HQs
   parsed = parsed.filter((j) =>
-    isMenaListedRole(j.location, j.title, company.country),
+    isMenaListedRole(j.location, j.title, company.country, {
+      department: j.department,
+      description: j.description,
+    }),
   );
   if (!parsed.length) {
     return { upserted: 0, deactivated: 0, skipped: 'no_mena_locations' };
@@ -444,8 +448,38 @@ async function fetchForCompany(company: {
   return { upserted, deactivated: stale.length };
 }
 
-export async function runAtsFetchTick(opts?: { limit?: number }) {
+/** Upsert verified catalog boards so production picks up new MENA employers without a manual seed. */
+export async function syncListedCompanyCatalog() {
+  let upserted = 0;
+  for (const c of LISTED_COMPANY_CATALOG) {
+    await db.listedCompany.upsert({
+      where: { slug: c.slug },
+      create: {
+        name: c.name,
+        slug: c.slug,
+        ats: c.ats,
+        country: c.country,
+        industry: c.industry,
+        isActive: true,
+      },
+      update: {
+        name: c.name,
+        ats: c.ats,
+        country: c.country,
+        industry: c.industry,
+        isActive: true,
+      },
+    });
+    upserted += 1;
+  }
+  return { catalogSize: LISTED_COMPANY_CATALOG.length, upserted };
+}
+
+export async function runAtsFetchTick(opts?: { limit?: number; syncCatalog?: boolean }) {
   const limit = opts?.limit ?? 40;
+  const synced =
+    opts?.syncCatalog === false ? null : await syncListedCompanyCatalog();
+
   const companies = await db.listedCompany.findMany({
     where: { isActive: true, ats: { not: null } },
     orderBy: { updatedAt: 'asc' },
@@ -455,6 +489,8 @@ export async function runAtsFetchTick(opts?: { limit?: number }) {
 
   const summary = {
     companies: companies.length,
+    catalogSynced: synced?.upserted ?? 0,
+    catalogSize: synced?.catalogSize ?? LISTED_COMPANY_CATALOG.length,
     upserted: 0,
     deactivated: 0,
     skipped: 0,

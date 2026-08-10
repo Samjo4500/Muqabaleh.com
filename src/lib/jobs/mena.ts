@@ -4,7 +4,11 @@
  */
 
 const MENA_RE =
-  /\b(dubai|abu dhabi|sharjah|ajman|ras al khaimah|fujairah|uae|united arab emirates|riyadh|jeddah|dammam|khobar|neom|saudi|ksa|kingdom of saudi|qatar|doha|kuwait|bahrain|manama|oman|muscat|cairo|giza|alexandria|egypt|amman|jordan|beirut|lebanon|casablanca|rabat|marrakech|morocco|tunis|tunisia|algiers|algeria|baghdad|iraq|ramallah|palestine|gaza|west bank|tripoli|libya|sana'?a|yemen|khartoum|sudan|mena|middle east|gcc|gcc region)\b/i;
+  /\b(dubai|abu dhabi|abu-dhabi|sharjah|ajman|ras al khaimah|ras alkhaimah|fujairah|umm al quwain|al ain|al-ain|uae|u\.a\.e\.|united arab emirates|emirates|riyadh|jeddah|dammam|khobar|dhahran|jubail|yanbu|madinah|medina|makkah|mecca|taif|abha|tabuk|hail|neom|qiddiya|diriyah|red sea|saudi|ksa|kingdom of saudi|qatar|doha|lusail|kuwait|kuwait city|bahrain|manama|oman|muscat|salalah|sohar|cairo|giza|alexandria|new cairo|6th of october|nasr city|heliopolis|maadi|mansoura|tanta|assiut|ismailia|port said|suez|hurghada|sharm|egypt|amman|irbid|zarqa|aqaba|jordan|beirut|lebanon|casablanca|rabat|marrakech|marrakesh|tangier|fez|fes|agadir|morocco|tunis|sfax|sousse|tunisia|algiers|oran|constantine|algeria|baghdad|basra|erbil|mosul|najaf|sulaymaniyah|iraq|ramallah|palestine|gaza|west bank|tripoli|libya|sana'?a|yemen|khartoum|sudan|mena|middle east|gcc|gcc region|levant|maghreb)\b/i;
+
+/** Extra signals often present in titles/descriptions for MENA-facing roles. */
+const MENA_ROLE_RE =
+  /\b(mena|middle east|gcc|gulf|arabic[- ]speaking|arabic speaker|based in (the )?uae|based in (saudi|ksa|egypt|qatar|dubai|riyadh|cairo|doha)|uae & oman|ksa & uae|egypt & gulf)\b/i;
 
 export function isMenaLocation(...parts: Array<string | null | undefined>): boolean {
   const hay = parts.filter(Boolean).join(' ');
@@ -62,19 +66,20 @@ export function classifyMenaCountry(
   // Include title — Greenhouse often puts "Egypt" / "UAE & Oman" only in the title
   // when location is a vague "Hybrid" / "Remote".
   const hay = `${location} ${country || ''} ${title || ''}`.toLowerCase();
-  if (/\b(dubai|abu dhabi|sharjah|ajman|uae|united arab)\b/.test(hay)) return 'uae';
-  if (/\b(riyadh|jeddah|dammam|khobar|neom|saudi|ksa)\b/.test(hay)) return 'ksa';
-  if (/\b(cairo|giza|alexandria|egypt)\b/.test(hay)) return 'egypt';
-  if (/\b(doha|qatar)\b/.test(hay)) return 'qatar';
+  if (/\b(dubai|abu dhabi|sharjah|ajman|uae|united arab|emirates|al ain)\b/.test(hay)) return 'uae';
+  if (/\b(riyadh|jeddah|dammam|khobar|dhahran|neom|qiddiya|saudi|ksa|madinah|makkah)\b/.test(hay))
+    return 'ksa';
+  if (/\b(cairo|giza|alexandria|egypt|new cairo|mansoura)\b/.test(hay)) return 'egypt';
+  if (/\b(doha|qatar|lusail)\b/.test(hay)) return 'qatar';
   if (/\b(kuwait)\b/.test(hay)) return 'kuwait';
   if (/\b(bahrain|manama)\b/.test(hay)) return 'bahrain';
-  if (/\b(muscat|oman)\b/.test(hay)) return 'oman';
-  if (/\b(amman|jordan)\b/.test(hay)) return 'jordan';
+  if (/\b(muscat|oman|salalah|sohar)\b/.test(hay)) return 'oman';
+  if (/\b(amman|jordan|irbid|aqaba)\b/.test(hay)) return 'jordan';
   if (/\b(beirut|lebanon)\b/.test(hay)) return 'lebanon';
-  if (/\b(casablanca|rabat|marrakech|morocco)\b/.test(hay)) return 'morocco';
-  if (/\b(tunis|tunisia)\b/.test(hay)) return 'tunisia';
-  if (/\b(algiers|algeria)\b/.test(hay)) return 'algeria';
-  if (/\b(baghdad|iraq)\b/.test(hay)) return 'iraq';
+  if (/\b(casablanca|rabat|marrakech|marrakesh|tangier|morocco)\b/.test(hay)) return 'morocco';
+  if (/\b(tunis|tunisia|sfax|sousse)\b/.test(hay)) return 'tunisia';
+  if (/\b(algiers|oran|algeria)\b/.test(hay)) return 'algeria';
+  if (/\b(baghdad|basra|erbil|iraq)\b/.test(hay)) return 'iraq';
   if (/\b(ramallah|palestine|gaza|west bank)\b/.test(hay)) return 'palestine';
   if (/\b(tripoli|libya)\b/.test(hay)) return 'libya';
   if (/\b(khartoum|sudan)\b/.test(hay)) return 'sudan';
@@ -135,23 +140,45 @@ export function isRegionalMenaHq(country: string | null | undefined): boolean {
   return isMenaLocation(country);
 }
 
-/** Keep vague Remote/Hybrid rows only when the employer is a concrete MENA HQ. */
+const NON_MENA_CITY_RE =
+  /\b(poland|warsaw|berlin|germany|deutschland|bucharest|romania|london|paris|amsterdam|dublin|toronto|vancouver|sydney|melbourne|singapore|tokyo|seoul|bangalore|bengaluru|hyderabad|mumbai|delhi|nairobi|lagos|accra|cape town|johannesburg|sao paulo|mexico city|stockholm|oslo|helsinki|copenhagen|vienna|prague|budapest|lisbon|madrid|barcelona|milan|rome|athens)\b/i;
+
+/**
+ * Keep a listed role if it is clearly MENA-facing.
+ * Optional description helps catch "Remote — MENA" / "Arabic-speaking" postings.
+ */
 export function isMenaListedRole(
   location: string | null | undefined,
   title?: string | null,
   companyCountry?: string | null,
+  extras?: { department?: string | null; description?: string | null },
 ): boolean {
-  if (isMenaLocation(location, title)) return true;
+  const haystack = [location, title, extras?.department, extras?.description]
+    .filter(Boolean)
+    .join(' ');
+
+  if (isMenaLocation(location, title, extras?.department)) return true;
+  if (MENA_ROLE_RE.test(haystack) && !NON_MENA_CITY_RE.test(haystack)) return true;
+
   if (
     isRegionalMenaHq(companyCountry) &&
-    /\b(remote|hybrid|anywhere)\b/i.test(`${location || ''} ${title || ''}`) &&
-    // Still drop obvious non-MENA cities even for HQ remotes
-    !/\b(poland|warsaw|berlin|germany|deutschland|bucharest|romania|london|paris|amsterdam|dublin)\b/i.test(
-      `${location || ''} ${title || ''}`,
-    )
+    /\b(remote|hybrid|anywhere|emea)\b/i.test(`${location || ''} ${title || ''}`) &&
+    !NON_MENA_CITY_RE.test(`${location || ''} ${title || ''}`)
   ) {
     return true;
   }
+
+  // Global boards: keep remote rows only when MENA is explicit in title/description
+  if (
+    companyCountry &&
+    /global/i.test(companyCountry) &&
+    /\b(remote|hybrid|anywhere|emea)\b/i.test(`${location || ''} ${title || ''}`) &&
+    MENA_ROLE_RE.test(haystack) &&
+    !NON_MENA_CITY_RE.test(haystack)
+  ) {
+    return true;
+  }
+
   return false;
 }
 

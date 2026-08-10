@@ -1,45 +1,18 @@
 /**
  * Seed ListedCompany rows for the MENA ATS aggregator.
- * Only include boards verified live against public ATS APIs (HTTP 200).
- * Global boards (stripe/spotify) are MENA-filtered at fetch time.
+ * Catalog lives in src/lib/jobs/listed-company-catalog.ts (shared with fetch sync).
  *
  * Run: npx tsx prisma/seed-listed-companies.ts
+ * Or: npm run db:seed:listed-companies
  */
 import { PrismaClient } from '@prisma/client';
+import { LISTED_COMPANY_CATALOG } from '../src/lib/jobs/listed-company-catalog';
 
 const db = new PrismaClient();
 
-type SeedCompany = {
-  name: string;
-  slug: string;
-  ats: 'GREENHOUSE' | 'LEVER' | 'WORKABLE';
-  country: string;
-  industry?: string;
-};
-
-/** Verified live against public ATS APIs (Aug 2026). */
-const COMPANIES: SeedCompany[] = [
-  { name: 'Careem', slug: 'careem', ats: 'GREENHOUSE', country: 'UAE', industry: 'Mobility' },
-  { name: 'Tamara', slug: 'tamara', ats: 'GREENHOUSE', country: 'UAE/KSA', industry: 'Fintech' },
-  { name: 'Jumia', slug: 'jumia', ats: 'GREENHOUSE', country: 'Egypt', industry: 'E-commerce' },
-  { name: 'Aldar Properties', slug: 'aldar', ats: 'LEVER', country: 'UAE', industry: 'Real Estate' },
-  { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'UAE/KSA', industry: 'SaaS' },
-  { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA', industry: 'SaaS' },
-  { name: 'Trendyol', slug: 'trendyol', ats: 'LEVER', country: 'KSA/GCC', industry: 'E-commerce' },
-  { name: 'Syarah', slug: 'syarah', ats: 'WORKABLE', country: 'KSA/Jordan', industry: 'Automotive' },
-  { name: 'Datadog', slug: 'datadog', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
-  { name: 'Cloudflare', slug: 'cloudflare', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Infrastructure' },
-  { name: 'GitLab', slug: 'gitlab', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'DevTools' },
-  { name: 'Elastic', slug: 'elastic', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
-  { name: 'MongoDB', slug: 'mongodb', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Database' },
-  { name: 'Coinbase', slug: 'coinbase', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Crypto' },
-  { name: 'Stripe', slug: 'stripe', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Fintech' },
-  { name: 'Spotify', slug: 'spotify', ats: 'LEVER', country: 'Global→MENA', industry: 'Media' },
-];
-
 async function main() {
   let upserted = 0;
-  for (const c of COMPANIES) {
+  for (const c of LISTED_COMPANY_CATALOG) {
     await db.listedCompany.upsert({
       where: { slug: c.slug },
       create: {

@@ -9,13 +9,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Vercel Cron — every 3 hours.
- * 8 companies/tick × 8 ticks/day ≈ full rotation of a 16-board seed multiple times/day.
+ * Syncs verified MENA catalog, then fetches 12 companies/tick so ~24 boards rotate often.
  */
 export async function GET(req: NextRequest) {
   const authError = assertCronAuthorized(req);
   if (authError) return authError;
   try {
-    const summary = await runAtsFetchTick({ limit: 8 });
+    const summary = await runAtsFetchTick({ limit: 12, syncCatalog: true });
     if (summary.errors.length > 0 || summary.upserted > 0) {
       await writeAdminNotification({
         channel: 'IN_APP',

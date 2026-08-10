@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { BiInline, BiLabel } from '@/components/admin/BiLabel';
+import { AdminNotificationBell } from '@/components/admin/AdminNotificationBell';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 import { L } from '@/lib/admin/labels';
@@ -197,11 +198,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </Link>
         <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
         <div className="mt-auto space-y-2 border-t border-white/10 p-3">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-300">
               <ShieldCheck size={14} />
               {!collapsed ? <BiInline ar={L.systemAdmin.ar} en={L.systemAdmin.en} /> : null}
             </span>
+            <AdminNotificationBell />
           </div>
           <button
             type="button"
@@ -269,14 +271,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           >
             <BrandLogo size="nav" />
           </Link>
-          <button
-            type="button"
-            onClick={toggle}
-            className="ms-auto rounded-lg p-2 text-white/50 hover:bg-white/5"
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
+          <div className="ms-auto flex items-center gap-1">
+            <AdminNotificationBell />
+            <button
+              type="button"
+              onClick={toggle}
+              className="rounded-lg p-2 text-white/50 hover:bg-white/5"
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+          </div>
         </header>
+        <div className="sticky top-0 z-30 hidden items-center justify-end gap-2 border-b border-white/10 bg-[#070b14]/70 px-6 py-2 backdrop-blur-md lg:flex">
+          <AdminNotificationBell />
+        </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {showGlobalBack ? (
             <div className="mb-4">

@@ -60,7 +60,7 @@ export default function AtsAggregatorPage() {
       const res = await fetch('/api/admin/jobs/aggregator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ limit: 20 }),
+        body: JSON.stringify({ limit: 30 }),
       });
       const json = await res.json();
       if (!res.ok) {

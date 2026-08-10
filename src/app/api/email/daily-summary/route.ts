@@ -9,6 +9,7 @@ import {
 } from '@/lib/enums';
 import { sendEmail } from '@/lib/email';
 import { assertCronAuthorized } from '@/lib/cron-auth';
+import { writeAdminNotification } from '@/lib/admin/notify';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim();
 
@@ -107,7 +108,19 @@ export async function POST(req: NextRequest) {
       pendingPayouts,
     });
 
-    await sendEmail({ to: ADMIN_EMAIL, subject, html });
+    const sent = await sendEmail({ to: ADMIN_EMAIL, subject, html });
+
+    await writeAdminNotification({
+      channel: 'EMAIL',
+      recipient: ADMIN_EMAIL,
+      subject,
+      body: `Daily summary for ${dateStr}: revenue ${totalRevenue}, signups ${newSignups}, bookings ${newBookings}.`,
+      status: sent.success ? 'SENT' : 'FAILED',
+      href: '/admin/dashboard',
+      kind: 'email',
+      severity: sent.success ? 'info' : 'critical',
+      meta: { date: dateStr, totalRevenue, newSignups, newBookings },
+    });
 
     return NextResponse.json({ success: true, date: dateStr });
   } catch (err) {

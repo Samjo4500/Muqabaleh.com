@@ -32,6 +32,8 @@ export type CompetencyScore = {
   score: number;
 };
 
+export type ScoringMode = 'model' | 'provisional';
+
 export type CoachScoreResult = {
   overallScore: number;
   grade: 'A' | 'B+' | 'B' | 'C' | 'D';
@@ -39,6 +41,8 @@ export type CoachScoreResult = {
   strengths: [string, string, string] | string[];
   improvements: [string, string, string] | string[];
   recommendedNextSteps: string;
+  /** model = Gemini rubric; provisional = length-based fallback (not passport-grade) */
+  scoringMode: ScoringMode;
 };
 
 export type AccessGate = {

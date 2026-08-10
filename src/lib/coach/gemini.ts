@@ -203,14 +203,15 @@ export async function generateCoachTurn(opts: {
 
 function heuristicScore(transcript: string): CoachScoreResult {
   const words = transcript.trim().split(/\s+/).filter(Boolean).length;
-  const base = Math.min(88, Math.max(42, Math.round(40 + words / 40)));
+  // Provisional only — deliberately capped and labeled; never sold as passport-grade.
+  const base = Math.min(70, Math.max(40, Math.round(38 + words / 55)));
   const mk = (name: string, delta: number) => ({
     name,
-    score: Math.max(30, Math.min(95, base + delta)),
+    score: Math.max(30, Math.min(75, base + delta)),
   });
   return {
     overallScore: base,
-    grade: base >= 85 ? 'A' : base >= 75 ? 'B+' : base >= 65 ? 'B' : base >= 50 ? 'C' : 'D',
+    grade: base >= 65 ? 'B' : base >= 50 ? 'C' : 'D',
     competencyBreakdown: [
       mk('Communication', 4),
       mk('Technical Depth', -2),
@@ -220,17 +221,18 @@ function heuristicScore(transcript: string): CoachScoreResult {
       mk('Leadership', 1),
     ],
     strengths: [
-      'Clear structure in answers',
-      'Willingness to engage with follow-ups',
-      'Relevant examples shared',
+      'Engaged with the practice conversation',
+      'Provided enough material to continue coaching',
+      'Completed a full mock attempt',
     ],
     improvements: [
-      'Add quantified outcomes',
-      'Tighten STAR stories',
+      'Retry when AI scoring is available for a verified passport',
+      'Add quantified outcomes in STAR stories',
       'Deepen role-specific detail',
     ],
     recommendedNextSteps:
-      'Book another Muqabaleh practice session focused on quantified impact stories.',
+      'This is a provisional length-based estimate, not a verified Muqabaleh passport score. Retry when model scoring is available.',
+    scoringMode: 'provisional',
   };
 }
 
@@ -243,26 +245,23 @@ export async function scoreTranscript(
     process.env.GEMINI_API_KEY?.trim() ||
     process.env.GOOGLE_API_KEY?.trim() ||
     null;
-  if (!key) return heuristicScore(transcript);
+  const hasSa = hasGoogleServiceAccount();
+  if (!key && !hasSa) return heuristicScore(transcript);
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const modelName = getInterviewConfig().engine.geminiModel || 'gemini-1.5-pro';
-    const client = new GoogleGenerativeAI(key);
-    const model = client.getGenerativeModel({
-      model: modelName,
-      systemInstruction: system,
-    });
-    const result = await model.generateContent(user);
-    const text = result.response.text() || '';
+    const text = await callGeminiPro(system, [
+      { role: 'user', parts: [{ text: user }] },
+    ]);
+    if (!text) return heuristicScore(transcript);
     const parsed = extractJsonObject(text);
     if (!parsed) return heuristicScore(transcript);
 
     const overall = Number(parsed.overallScore);
     const grade = String(parsed.grade || 'B') as CoachScoreResult['grade'];
+    const provisional = heuristicScore(transcript);
     const breakdown = Array.isArray(parsed.competencyBreakdown)
       ? (parsed.competencyBreakdown as CoachScoreResult['competencyBreakdown'])
-      : heuristicScore(transcript).competencyBreakdown;
+      : provisional.competencyBreakdown;
 
     return {
       overallScore: Number.isFinite(overall) ? Math.max(0, Math.min(100, Math.round(overall))) : 60,
@@ -270,14 +269,15 @@ export async function scoreTranscript(
       competencyBreakdown: breakdown,
       strengths: Array.isArray(parsed.strengths)
         ? (parsed.strengths as string[]).slice(0, 3)
-        : heuristicScore(transcript).strengths,
+        : provisional.strengths,
       improvements: Array.isArray(parsed.improvements)
         ? (parsed.improvements as string[]).slice(0, 3)
-        : heuristicScore(transcript).improvements,
+        : provisional.improvements,
       recommendedNextSteps:
         typeof parsed.recommendedNextSteps === 'string'
           ? parsed.recommendedNextSteps
-          : heuristicScore(transcript).recommendedNextSteps,
+          : provisional.recommendedNextSteps,
+      scoringMode: 'model',
     };
   } catch (err) {
     console.error('[coach/gemini] score failed', err);

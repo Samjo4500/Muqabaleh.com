@@ -1,15 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import { generateCoachTurn } from '@/lib/coach/gemini';
+import { getCoachAccess } from '@/lib/coach/access';
+import {
+  getCoachSessionForUser,
+  persistCoachHistory,
+  startCoachSession,
+} from '@/lib/coach/session';
+import { trackCoachEvent } from '@/lib/coach/analytics';
 import type { ChatMessage, PrepSelections } from '@/lib/coach/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const { session } = await requireApiAuth();
+    const { userId, session } = await requireApiAuth();
     const body = (await req.json()) as {
       prep?: PrepSelections;
       history?: ChatMessage[];
       userMessage?: string;
+      sessionId?: string;
     };
 
     if (!body.prep?.role || !body.prep?.industry || !body.prep?.seniority) {
@@ -17,16 +25,90 @@ export async function POST(req: NextRequest) {
     }
 
     const email = session.user?.email || '';
+    if (!email) {
+      return NextResponse.json({ error: 'Email required' }, { status: 400 });
+    }
+
+    let sessionId = body.sessionId;
+    if (sessionId) {
+      const loaded = await getCoachSessionForUser(userId, sessionId);
+      if (!loaded.ok) {
+        return NextResponse.json({ error: loaded.error }, { status: loaded.status });
+      }
+      if (loaded.session.status === 'completed') {
+        return NextResponse.json(
+          { error: 'Interview already completed', complete: true },
+          { status: 409 },
+        );
+      }
+    } else {
+      // Auto-start under hard quota — no anonymous burn of Gemini turns.
+      const started = await startCoachSession({
+        userId,
+        userEmail: email,
+        prep: body.prep,
+        resumeIfActive: true,
+      });
+      if (!started.ok) {
+        await trackCoachEvent(userId, 'coach.quota_blocked', { at: 'turn' });
+        return NextResponse.json(
+          {
+            error: started.error,
+            upgradeRequired: started.upgradeRequired,
+          },
+          { status: started.status },
+        );
+      }
+      sessionId = started.session.sessionId;
+    }
+
+    // Soft re-check: completed-count gate (active sessions don't consume).
+    const access = await getCoachAccess(userId);
+    if (
+      !access.canStart &&
+      access.activeSessionId &&
+      access.activeSessionId !== sessionId
+    ) {
+      await trackCoachEvent(userId, 'coach.quota_blocked', { at: 'turn_mismatch' });
+      return NextResponse.json(
+        {
+          error: access.reason || 'Interview quota reached.',
+          upgradeRequired: true,
+        },
+        { status: 402 },
+      );
+    }
+
     const candidateName = session.user?.name || email.split('@')[0] || 'Candidate';
+    const prior = Array.isArray(body.history) ? body.history : [];
 
     const { reply, complete } = await generateCoachTurn({
       prep: body.prep,
       candidateName,
-      history: Array.isArray(body.history) ? body.history : [],
+      history: prior,
       userMessage: body.userMessage,
     });
 
-    return NextResponse.json({ reply, complete });
+    const next: ChatMessage[] = [...prior];
+    if (body.userMessage?.trim()) {
+      next.push({ role: 'user', content: body.userMessage.trim() });
+    }
+    next.push({ role: 'assistant', content: reply });
+
+    await persistCoachHistory({
+      userId,
+      sessionId,
+      history: next,
+      prep: body.prep,
+    });
+
+    await trackCoachEvent(userId, 'coach.turn', {
+      sessionId,
+      turns: next.length,
+      complete,
+    });
+
+    return NextResponse.json({ reply, complete, sessionId, history: next });
   } catch (err) {
     if (err instanceof ApiError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

@@ -8,6 +8,12 @@ import { scoreTranscript } from './gemini';
 import { resolveCoachName } from './prompts';
 import { buildPassportPdfBuffer } from './passport-pdf';
 import { sendPassportViaBrevo } from './brevo-passport';
+import { trackCoachEvent } from './analytics';
+import {
+  COACH_ENGINE,
+  getCoachSessionForUser,
+  startCoachSession,
+} from './session';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from './types';
 
 export type CompleteResult = {
@@ -52,8 +58,8 @@ function transcriptFrom(history: ChatMessage[]): string {
 }
 
 /**
- * Score transcript, persist into existing tables only, optionally email PDF.
- * Never throws — returns safe fallback on DB errors.
+ * Score transcript, finalize an active durable session (or create one under quota),
+ * optionally email PDF. Never throws — returns safe fallback on DB errors.
  */
 export async function completeCoachInterview(opts: {
   userId: string;
@@ -61,36 +67,98 @@ export async function completeCoachInterview(opts: {
   candidateName: string;
   prep: PrepSelections;
   history: ChatMessage[];
+  sessionId?: string;
 }): Promise<CompleteResult> {
   const cfg = getInterviewConfig();
   const access = await getCoachAccess(opts.userId);
 
-  // Free users who already used their interview: still allow viewing if this
-  // is a first completion path; gate checked at start. If somehow past limit,
-  // still score but mark upgrade.
+  let sessionId = opts.sessionId || access.activeSessionId || null;
+
+  if (sessionId) {
+    const loaded = await getCoachSessionForUser(opts.userId, sessionId);
+    if (!loaded.ok) {
+      return {
+        ok: false,
+        error: loaded.error,
+        upgradeRequired: loaded.status === 402,
+      };
+    }
+    if (loaded.session.status === 'completed') {
+      const prior = loaded.session.fullReport.score as CoachScoreResult | undefined;
+      return {
+        ok: true,
+        sessionId,
+        score: prior,
+        gateLabel: access.gateLabel,
+        passportPdfUnlocked:
+          access.gate.passportPdf && prior?.scoringMode === 'model',
+        emailed: false,
+        upgradeRequired: !access.gate.passportPdf || prior?.scoringMode !== 'model',
+      };
+    }
+  } else {
+    // No durable session yet — only allow create+complete if quota remains.
+    if (!access.canStart) {
+      await trackCoachEvent(opts.userId, 'coach.complete_blocked', {
+        reason: access.reason,
+      });
+      return {
+        ok: false,
+        error: access.reason || 'Interview quota reached. Upgrade to continue.',
+        upgradeRequired: true,
+      };
+    }
+    const started = await startCoachSession({
+      userId: opts.userId,
+      userEmail: opts.userEmail,
+      prep: opts.prep,
+      resumeIfActive: false,
+    });
+    if (!started.ok) {
+      return {
+        ok: false,
+        error: started.error,
+        upgradeRequired: started.upgradeRequired,
+      };
+    }
+    sessionId = started.session.sessionId;
+  }
+
   const score = await scoreTranscript(opts.prep, transcriptFrom(opts.history));
   const coachName = resolveCoachName(opts.prep.coachGender);
-  const clientSessionId = randomUUID();
+  // Passport PDF only for model scores on paid passport tiers.
+  const passportPdfUnlocked =
+    access.gate.passportPdf && score.scoringMode === 'model';
 
-  let prequalId: string | null = null;
-  let sessionId: string | null = null;
   let interviewId: string | null = null;
   let verificationId = generateVerificationId();
+  let practiceDebited = false;
 
   try {
-    const prequal = await db.interviewPrequal.create({
+    const existing = await db.interviewSession.findUnique({
+      where: { id: sessionId! },
+      select: {
+        id: true,
+        prequalId: true,
+        practiceDebited: true,
+        startedAt: true,
+        fullReport: true,
+      },
+    });
+    if (!existing) {
+      return { ok: false, error: 'Session missing', upgradeRequired: false };
+    }
+    practiceDebited = existing.practiceDebited;
+
+    const priorReport =
+      existing.fullReport && typeof existing.fullReport === 'object'
+        ? (existing.fullReport as Record<string, unknown>)
+        : {};
+
+    await db.interviewPrequal.update({
+      where: { id: existing.prequalId },
       data: {
-        userId: opts.userId,
-        sessionId: clientSessionId,
-        userEmail: opts.userEmail,
-        targetRole: opts.prep.role,
-        seniorityLevel: opts.prep.seniority,
-        questionTypes: ['behavioral'],
-        interviewRound: 'screening',
-        languagePreference: opts.prep.language,
-        targetIndustry: opts.prep.industry,
-        weaknessFocus: opts.prep.companyName || null,
-        durationPreset: 'standard',
+        completedAt: new Date(),
         numQuestions: Math.min(
           cfg.engine.maxQuestions,
           Math.max(
@@ -98,64 +166,62 @@ export async function completeCoachInterview(opts: {
             opts.history.filter((m) => m.role === 'assistant').length,
           ),
         ),
-        estimatedDurationMin: 20,
         generatedPlan: {
-          engine: 'jeannie-coach',
+          engine: COACH_ENGINE,
           prep: opts.prep,
           coachName,
           history: opts.history,
           score,
         },
-        completedAt: new Date(),
       },
     });
-    prequalId = prequal.id;
 
-    const session = await db.interviewSession.create({
+    await db.interviewSession.update({
+      where: { id: existing.id },
       data: {
-        userId: opts.userId,
-        prequalId: prequal.id,
         status: 'completed',
         language: opts.prep.language,
-        numQuestionsTotal: cfg.engine.maxQuestions,
         numQuestionsAnswered: opts.history.filter((m) => m.role === 'user').length,
-        practiceDebited: false,
-        startedAt: new Date(Date.now() - 20 * 60 * 1000),
+        startedAt: existing.startedAt || new Date(Date.now() - 20 * 60 * 1000),
         completedAt: new Date(),
-        overallScore: score.overallScore / 10, // store 0–10 for existing engine convention
+        overallScore: score.overallScore / 10,
         strengths: score.strengths.slice(0, 3),
         weaknesses: score.improvements.slice(0, 3),
         actionItems: { recommendedNextSteps: score.recommendedNextSteps },
         fullReport: {
-          engine: 'jeannie-coach',
+          ...priorReport,
+          engine: COACH_ENGINE,
           prep: opts.prep,
           coachName,
           score,
           history: opts.history,
           grade: score.grade,
           competencyBreakdown: score.competencyBreakdown,
+          scoringMode: score.scoringMode,
         },
       },
     });
-    sessionId = session.id;
 
-    // Debit practice entitlement when available (never crash)
-    try {
-      const debit = await debitPractice(opts.userId);
-      if (debit.ok && debit.debited) {
-        await db.interviewSession.update({
-          where: { id: session.id },
-          data: { practiceDebited: true },
-        });
+    if (!practiceDebited) {
+      try {
+        const debit = await debitPractice(opts.userId);
+        if (debit.ok && debit.debited) {
+          await db.interviewSession.update({
+            where: { id: existing.id },
+            data: { practiceDebited: true },
+          });
+          practiceDebited = true;
+        }
+      } catch (err) {
+        console.error('[coach/complete] debit failed', err);
       }
-    } catch (err) {
-      console.error('[coach/complete] debit failed', err);
     }
 
     const industryLabel =
       cfg.industries.find((i) => i.id === opts.prep.industry)?.en || opts.prep.industry;
     const roleLabel =
       cfg.roles.find((r) => r.id === opts.prep.role)?.en || opts.prep.role;
+    void roleLabel;
 
     const interview = await db.interview.create({
       data: {
@@ -164,7 +230,7 @@ export async function completeCoachInterview(opts: {
         type: 'BEHAVIORAL',
         industry: industryLabel,
         experience: mapExperience(opts.prep.seniority),
-        position: `coach-session:${session.id}`,
+        position: `coach-session:${existing.id}`,
         language: mapLanguage(opts.prep.language),
         interviewerGender: opts.prep.coachGender === 'male' ? 'MALE' : 'FEMALE',
         status: 'COMPLETED',
@@ -185,13 +251,12 @@ export async function completeCoachInterview(opts: {
         improvements: JSON.stringify(score.improvements.slice(0, 3)),
         recommendation: score.grade,
         verificationId,
-        sessionDebited: true,
+        sessionDebited: practiceDebited,
         expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
       },
     });
     interviewId = interview.id;
 
-    // Persist transcript messages on legacy Interview
     try {
       await db.message.createMany({
         data: opts.history.map((m, i) => ({
@@ -206,14 +271,18 @@ export async function completeCoachInterview(opts: {
     }
   } catch (err) {
     console.error('[coach/complete] persistence failed', err);
-    // Return scored result even if DB write fails — session must not crash
+    await trackCoachEvent(opts.userId, 'coach.complete', {
+      sessionId,
+      scoringMode: score.scoringMode,
+      persisted: false,
+    });
     return {
       ok: true,
       score,
       gateLabel: access.gateLabel,
-      passportPdfUnlocked: access.gate.passportPdf,
+      passportPdfUnlocked,
       emailed: false,
-      upgradeRequired: !access.gate.passportPdf,
+      upgradeRequired: !passportPdfUnlocked,
       error: 'Saved score locally; database write failed safely.',
       verificationId,
       sessionId: sessionId || undefined,
@@ -221,9 +290,8 @@ export async function completeCoachInterview(opts: {
     };
   }
 
-  // Pro/Premium only — Free never emails; always keep passport on-screen.
   let emailed = false;
-  if (access.gate.emailPassport && access.gate.passportPdf && interviewId) {
+  if (access.gate.emailPassport && passportPdfUnlocked && interviewId) {
     try {
       const preferAr = opts.prep.language === 'ar' || opts.prep.language === 'mixed';
       const roleOpt = cfg.roles.find((r) => r.id === opts.prep.role);
@@ -257,12 +325,18 @@ export async function completeCoachInterview(opts: {
       });
       emailed = !!mail.success;
     } catch (err) {
-      // Never block passport display / interview completion.
       console.error('[coach/complete] passport email failed', err);
     }
   }
 
-  void prequalId;
+  await trackCoachEvent(opts.userId, 'coach.complete', {
+    sessionId,
+    interviewId,
+    scoringMode: score.scoringMode,
+    overallScore: score.overallScore,
+    passportPdfUnlocked,
+    emailed,
+  });
 
   return {
     ok: true,
@@ -271,8 +345,13 @@ export async function completeCoachInterview(opts: {
     sessionId: sessionId || undefined,
     score,
     gateLabel: access.gateLabel,
-    passportPdfUnlocked: access.gate.passportPdf,
+    passportPdfUnlocked,
     emailed,
-    upgradeRequired: !access.gate.passportPdf,
+    upgradeRequired: !passportPdfUnlocked,
   };
+}
+
+/** @deprecated kept for rare callers that still invent a client session id */
+export function newClientSessionId(): string {
+  return randomUUID();
 }

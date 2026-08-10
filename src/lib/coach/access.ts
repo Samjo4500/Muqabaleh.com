@@ -11,6 +11,9 @@ export type CoachAccessSnapshot = {
   canStart: boolean;
   remaining: number | null;
   reason?: string;
+  /** Active in-progress coach session, if any (resume without burning a new quota slot). */
+  activeSessionId?: string | null;
+  canResume?: boolean;
 };
 
 function gateLabelForTier(tier: string): AccessTierLabel {
@@ -36,6 +39,30 @@ async function countCompletedSafe(
   }
 }
 
+async function findActiveCoachSessionId(userId: string): Promise<string | null> {
+  try {
+    const rows = await db.interviewSession.findMany({
+      where: {
+        userId,
+        status: { in: ['active', 'pending'] },
+      },
+      select: { id: true, fullReport: true, prequal: { select: { generatedPlan: true } } },
+      orderBy: { updatedAt: 'desc' },
+      take: 8,
+    });
+    for (const row of rows) {
+      const fr = row.fullReport as { engine?: string } | null;
+      const gp = row.prequal.generatedPlan as { engine?: string } | null;
+      if (fr?.engine === 'jeannie-coach' || gp?.engine === 'jeannie-coach') {
+        return row.id;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getCoachAccess(userId: string): Promise<CoachAccessSnapshot> {
   const cfg = getInterviewConfig();
   let tier = 'FREE';
@@ -51,6 +78,7 @@ export async function getCoachAccess(userId: string): Promise<CoachAccessSnapsho
 
   const gateLabel = gateLabelForTier(tier);
   const gate = cfg.accessGates[gateLabel] || cfg.accessGates.Free;
+  const activeSessionId = await findActiveCoachSessionId(userId);
 
   const monthStart = new Date();
   monthStart.setDate(1);
@@ -59,8 +87,16 @@ export async function getCoachAccess(userId: string): Promise<CoachAccessSnapsho
   const completedLifetime = await countCompletedSafe(userId);
   const completedThisMonth = await countCompletedSafe(userId, monthStart);
 
+  const withActive = (
+    base: Omit<CoachAccessSnapshot, 'activeSessionId' | 'canResume'>,
+  ): CoachAccessSnapshot => ({
+    ...base,
+    activeSessionId,
+    canResume: !!activeSessionId,
+  });
+
   if (gate.maxInterviews == null || gate.period === 'unlimited') {
-    return {
+    return withActive({
       tier,
       gateLabel,
       gate,
@@ -68,12 +104,12 @@ export async function getCoachAccess(userId: string): Promise<CoachAccessSnapsho
       completedThisMonth,
       canStart: true,
       remaining: null,
-    };
+    });
   }
 
   if (gate.period === 'lifetime') {
     const remaining = Math.max(0, gate.maxInterviews - completedLifetime);
-    return {
+    return withActive({
       tier,
       gateLabel,
       gate,
@@ -85,12 +121,12 @@ export async function getCoachAccess(userId: string): Promise<CoachAccessSnapsho
         remaining <= 0
           ? 'Free tier includes 1 mock interview. Upgrade to unlock more.'
           : undefined,
-    };
+    });
   }
 
   // monthly
   const remaining = Math.max(0, gate.maxInterviews - completedThisMonth);
-  return {
+  return withActive({
     tier,
     gateLabel,
     gate,
@@ -102,5 +138,5 @@ export async function getCoachAccess(userId: string): Promise<CoachAccessSnapsho
       remaining <= 0
         ? 'Monthly interview limit reached. Upgrade or wait until next month.'
         : undefined,
-  };
+  });
 }

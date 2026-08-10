@@ -5,7 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { User, Lock, AlertTriangle, Loader2, Mail, BadgeCheck } from 'lucide-react';
+import {
+  User,
+  Lock,
+  AlertTriangle,
+  Loader2,
+  Mail,
+  BadgeCheck,
+  FileUp,
+  ImagePlus,
+} from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +76,12 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   const [gender, setGender] = useState(user.interviewerGender ?? 'MALE');
   const [language, setLanguage] = useState(user.language ?? 'AR');
   const [workPreferences, setWorkPreferences] = useState<WorkPreferenceCode[]>([]);
+  const [cvAssetId, setCvAssetId] = useState<string | null>(null);
+  const [cvFileName, setCvFileName] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [pendingCv, setPendingCv] = useState<File | null>(null);
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,10 +90,21 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
         const res = await fetch('/api/talent/me');
         if (!res.ok) return;
         const data = await res.json();
-        const prefs = data.profile?.workPreferences;
-        if (!cancelled && Array.isArray(prefs)) {
-          setWorkPreferences(prefs as WorkPreferenceCode[]);
+        const profile = data.profile as
+          | {
+              workPreferences?: string[];
+              cvAssetId?: string | null;
+              cvFileName?: string | null;
+              photoUrl?: string | null;
+            }
+          | null;
+        if (cancelled || !profile) return;
+        if (Array.isArray(profile.workPreferences)) {
+          setWorkPreferences(profile.workPreferences as WorkPreferenceCode[]);
         }
+        setCvAssetId(profile.cvAssetId || null);
+        setCvFileName(profile.cvFileName || null);
+        setPhotoUrl(profile.photoUrl || null);
       } catch {
         /* ignore */
       }
@@ -87,6 +113,16 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!pendingPhoto) {
+      setPhotoPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(pendingPhoto);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingPhoto]);
 
   /* ---- Password fields ---- */
   const [currentPw, setCurrentPw] = useState('');
@@ -124,20 +160,59 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
         throw new Error(data.error || 'Failed to save');
       }
 
-      await fetch('/api/talent/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name || undefined,
-          country: country || undefined,
-          industry: industry || undefined,
-          level: experience || undefined,
-          role: experience || 'Professional',
-          workPreferences,
-        }),
-      }).catch(() => {});
+      if (pendingCv || pendingPhoto) {
+        const form = new FormData();
+        if (name) form.set('name', name);
+        if (country) form.set('country', country);
+        if (industry) form.set('industry', industry);
+        if (experience) {
+          form.set('level', experience);
+          form.set('role', experience);
+        } else {
+          form.set('role', 'Professional');
+        }
+        for (const pref of workPreferences) form.append('workPreferences', pref);
+        if (pendingCv) form.set('cv', pendingCv);
+        if (pendingPhoto) form.set('photo', pendingPhoto);
 
-      toast.success(t('saved'));
+        const talentRes = await fetch('/api/talent/me', {
+          method: 'PATCH',
+          body: form,
+        });
+        const talentData = await talentRes.json().catch(() => ({}));
+        if (!talentRes.ok) {
+          throw new Error(talentData.error || 'Failed to upload documents');
+        }
+        const profile = talentData.profile as
+          | {
+              cvAssetId?: string | null;
+              cvFileName?: string | null;
+              photoUrl?: string | null;
+            }
+          | undefined;
+        if (profile) {
+          setCvAssetId(profile.cvAssetId || null);
+          setCvFileName(profile.cvFileName || null);
+          setPhotoUrl(profile.photoUrl || null);
+        }
+        setPendingCv(null);
+        setPendingPhoto(null);
+        toast.success(t('documentsSaved'));
+      } else {
+        await fetch('/api/talent/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name || undefined,
+            country: country || undefined,
+            industry: industry || undefined,
+            level: experience || undefined,
+            role: experience || 'Professional',
+            workPreferences,
+          }),
+        }).catch(() => {});
+        toast.success(t('saved'));
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : tCommon('error'));
     } finally {
@@ -260,6 +335,83 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
           <div className="flex items-center gap-2">
             <Mail size={16} strokeWidth={1.5} className="text-[var(--text-faint)]" />
             <span className="text-sm text-[var(--text-muted)]">{user.email}</span>
+          </div>
+        </div>
+
+        {/* CV + profile photo */}
+        <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <div>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">
+              {t('documentsTitle')}
+            </p>
+            <p className="mt-1 text-xs text-[var(--text-faint)]">{t('documentsHint')}</p>
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+              {photoPreview || photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photoPreview || photoUrl || ''}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-white/30">
+                  <User size={28} strokeWidth={1.5} />
+                </div>
+              )}
+            </div>
+
+            <div className="grid min-w-0 flex-1 gap-3">
+              <label className="flex cursor-pointer flex-col gap-1 rounded-xl border border-dashed border-white/15 px-3 py-3 transition-colors hover:border-teal-300/40">
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-white">
+                  <FileUp size={16} className="text-teal-300" />
+                  {cvAssetId || pendingCv ? t('replaceCv') : t('uploadCv')}
+                </span>
+                <span className="text-xs text-white/45">
+                  {pendingCv
+                    ? t('cvSelected', { name: pendingCv.name })
+                    : cvFileName || (cvAssetId ? t('viewCv') : t('noCvYet'))}
+                </span>
+                <span className="text-[11px] text-white/35">{t('uploadCvHint')}</span>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="sr-only"
+                  onChange={(e) => setPendingCv(e.target.files?.[0] || null)}
+                />
+              </label>
+              {cvAssetId && !pendingCv ? (
+                <a
+                  href={`/api/media/${cvAssetId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-medium text-teal-300 hover:underline"
+                >
+                  {t('viewCv')}
+                  {cvFileName ? ` · ${cvFileName}` : ''}
+                </a>
+              ) : null}
+
+              <label className="flex cursor-pointer flex-col gap-1 rounded-xl border border-dashed border-white/15 px-3 py-3 transition-colors hover:border-amber-200/40">
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-white">
+                  <ImagePlus size={16} className="text-amber-200" />
+                  {photoUrl || pendingPhoto ? t('replacePhoto') : t('uploadPhoto')}
+                </span>
+                <span className="text-xs text-white/45">
+                  {pendingPhoto
+                    ? t('photoSelected', { name: pendingPhoto.name })
+                    : t('uploadPhotoHint')}
+                </span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => setPendingPhoto(e.target.files?.[0] || null)}
+                />
+              </label>
+            </div>
           </div>
         </div>
 

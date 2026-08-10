@@ -1143,7 +1143,20 @@
       "langPlaceholder": "Select language",
       "genderAny": "Any",
       "genderMale": "Male",
-      "genderFemale": "Female"
+      "genderFemale": "Female",
+      "documentsTitle": "CV & photo",
+      "documentsHint": "Employers see these when you apply or join the talent pool.",
+      "uploadCv": "Upload CV (PDF / Word)",
+      "uploadCvHint": "Up to 3 MB · PDF, DOC, or DOCX",
+      "replaceCv": "Replace CV",
+      "viewCv": "View current CV",
+      "noCvYet": "No CV uploaded yet",
+      "uploadPhoto": "Upload profile photo",
+      "uploadPhotoHint": "JPEG, PNG, or WebP · under 800 KB",
+      "replacePhoto": "Replace photo",
+      "photoSelected": "Selected: {name}",
+      "cvSelected": "Selected: {name}",
+      "documentsSaved": "CV and photo updated"
     },
     "bookings": {
       "title": "My Sessions",

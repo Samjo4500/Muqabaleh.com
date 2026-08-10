@@ -5,6 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
+      settingKey="ai_providers"
       title={{ ar: 'إعدادات خدمات الذكاء الاصطناعي', en: 'AI Provider Settings' }}
       description={{
         ar: 'Google Gemini ومزوّد الصوت/الأفاتار — مفاتيح، نماذج، استخدام الوحدات (Token)، وتقدير التكلفة.',

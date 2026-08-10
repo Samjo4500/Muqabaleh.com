@@ -59,4 +59,5 @@ tool-results/
 # Database binaries
 db/*.db
 db/*.db-*
-db/*.db.backup-*
+db/*.db.backup-*tmp/
+tmp/

@@ -1,107 +1,124 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { BiInline } from '@/components/admin/BiLabel';
+import { localePath } from '@/i18n/navigation';
+import { Badge } from '@/components/ui/badge';
 
-type Branding = {
+type Partner = {
+  id: string;
   name: string;
+  slug: string;
+  status: string;
   contactEmail: string;
   customDomain: string | null;
   logoUrl: string | null;
   primaryColor: string;
   accentColor: string;
   supportEmail: string | null;
-  slug: string;
-  status: string;
 };
 
 export default function Page() {
-  const [branding, setBranding] = useState<Branding | null>(null);
-  const [msg, setMsg] = useState('');
+  const locale = useLocale();
+  const [items, setItems] = useState<Partner[]>([]);
+  const [active, setActive] = useState<Partner | null>(null);
 
   useEffect(() => {
-    // Prefer live partner branding from demo/API when available via partner resolve
-    void fetch('/api/partner/resolve?slug=atlas-talent')
+    void fetch('/api/admin/partners/manage')
       .then((r) => r.json())
       .then((d) => {
-        if (d.partner) {
-          setBranding({
-            name: d.partner.name,
-            contactEmail: d.partner.contactEmail,
-            customDomain: d.partner.customDomain,
-            logoUrl: d.partner.logoUrl,
-            primaryColor: d.partner.primaryColor,
-            accentColor: d.partner.accentColor,
-            supportEmail: d.partner.supportEmail,
-            slug: d.partner.slug,
-            status: d.partner.status,
-          });
-        }
-      });
+        const list = Array.isArray(d.items) ? d.items : [];
+        setItems(list);
+        setActive(list.find((p: Partner) => p.status === 'ACTIVE') ?? list[0] ?? null);
+      })
+      .catch(() => undefined);
   }, []);
 
-  const save = async () => {
-    if (!branding) return;
-    // Persist via demo partner branding endpoint when logged in as super admin
-    // Falls back to messaging ops to update after provision
-    setMsg('Open the partner console Branding studio as the partner admin to persist live changes. This panel previews the active partner brand.');
-  };
-
-  if (!branding) {
-    return (
-      <div className="p-6">
-        <AdminPageHeader
-          title={{ ar: 'العلامة البيضاء', en: 'Whitelabel' }}
-          description={{
-            ar: 'لا يوجد شريك مفعّل بعد — وافق على طلب ثم اضبط الهوية من لوحة الشريك.',
-            en: 'No active partner yet — approve an application, then tune brand in the partner console.',
-          }}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <AdminPageHeader
         title={{ ar: 'العلامة البيضاء', en: 'Whitelabel' }}
         description={{
-          ar: 'معاينة هوية الشريك النشط. التعديل الحي يتم من لوحة الشريك.',
-          en: 'Preview the active partner brand. Live edits happen in the partner console.',
+          ar: 'معاينة هوية كل شريك من المحفظة. التعديل التشغيلي من محفظة الشركاء أو لوحة الشريك.',
+          en: 'Preview each partner brand from the portfolio. Operational edits via Partner Portfolio or partner console.',
         }}
+        actions={
+          <Link
+            href={localePath('/admin/partners/list', locale)}
+            className="inline-flex h-9 items-center rounded-md border border-white/10 px-3 text-sm"
+          >
+            <BiInline ar="محفظة الشركاء" en="Partner portfolio" />
+          </Link>
+        }
       />
 
-      <div className="grid max-w-3xl gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
-        {(
-          [
-            ['name', 'Brand name'],
-            ['slug', 'Slug'],
-            ['contactEmail', 'Contact email'],
-            ['customDomain', 'Custom domain'],
-            ['logoUrl', 'Logo URL'],
-            ['primaryColor', 'Primary'],
-            ['accentColor', 'Accent'],
-            ['supportEmail', 'Support email'],
-            ['status', 'Status'],
-          ] as const
-        ).map(([key, label]) => (
-          <div key={key} className="space-y-1.5">
-            <Label>{label}</Label>
-            <Input
-              value={String(branding[key] ?? '')}
-              onChange={(e) => setBranding({ ...branding, [key]: e.target.value })}
-              readOnly={key === 'slug' || key === 'status'}
-            />
-          </div>
-        ))}
-        <div className="flex items-center gap-3">
-          <Button onClick={save}>Save / guidance</Button>
-          {msg ? <p className="text-sm text-white/50">{msg}</p> : null}
+      {!items.length ? (
+        <p className="text-sm text-[var(--text-muted)]">
+          No partners yet — approve an application to provision branding.
+        </p>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
+          <aside className="max-h-[480px] overflow-auto rounded-2xl border border-white/10">
+            {items.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setActive(p)}
+                className={`block w-full border-b border-white/5 px-3 py-3 text-start text-sm hover:bg-white/5 ${
+                  active?.id === p.id ? 'bg-white/5' : ''
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.primaryColor }} />
+                  <span className="font-medium">{p.name}</span>
+                </div>
+                <div className="text-xs text-[var(--text-muted)]">{p.slug}</div>
+              </button>
+            ))}
+          </aside>
+          {active ? (
+            <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-medium">{active.name}</h3>
+                <Badge variant="outline">{active.status}</Badge>
+              </div>
+              <div
+                className="mb-5 rounded-xl border border-white/10 p-6"
+                style={{
+                  background: `linear-gradient(135deg, ${active.primaryColor}33, ${active.accentColor}22)`,
+                }}
+              >
+                <div className="text-sm text-white/70">Preview surface</div>
+                <div className="mt-2 text-2xl font-semibold">{active.name}</div>
+                <div className="mt-1 text-sm text-white/60">{active.customDomain || `${active.slug}.partner`}</div>
+              </div>
+              <dl className="grid gap-3 text-sm md:grid-cols-2">
+                <div>
+                  <dt className="text-[var(--text-muted)]">Contact</dt>
+                  <dd>{active.contactEmail}</dd>
+                </div>
+                <div>
+                  <dt className="text-[var(--text-muted)]">Support</dt>
+                  <dd>{active.supportEmail || '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-[var(--text-muted)]">Logo</dt>
+                  <dd className="break-all">{active.logoUrl || '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-[var(--text-muted)]">Colors</dt>
+                  <dd>
+                    {active.primaryColor} / {active.accentColor}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          ) : null}
         </div>
-      </div>
+      )}
     </div>
   );
 }

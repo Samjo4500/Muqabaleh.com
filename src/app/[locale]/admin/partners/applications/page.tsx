@@ -8,8 +8,8 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'طلبات الانضمام للشراكة', en: 'Partner Applications' }}
       description={{
-        ar: 'مراجعة الطلبات، موافقة مع تهيئة حساب الشريك، رفض، وتتبع الحالة.',
-        en: 'Review requests, approve with partner provisioning, reject, and track status.',
+        ar: 'مراجعة الطلبات، موافقة مع تهيئة حساب الشريك، أو رفض مع ملاحظة.',
+        en: 'Review requests, approve with partner provisioning, or reject with a note.',
       }}
       resource="partner_applications"
       columns={[
@@ -58,7 +58,17 @@ export default function Page() {
           id: 'reject',
           label: { ar: 'رفض', en: 'Reject' },
           onRun: async (row) => {
-            alert(`Marked for rejection: ${row.companyName}. Update status in DB / support workflow.`);
+            const notes = window.prompt('Rejection note (optional)', '') ?? '';
+            const res = await fetch('/api/admin/partners/applications', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ applicationId: row.id, status: 'REJECTED', notes }),
+            });
+            if (!res.ok) {
+              alert((await res.json()).error || 'Failed');
+              return;
+            }
+            window.location.reload();
           },
         },
         {

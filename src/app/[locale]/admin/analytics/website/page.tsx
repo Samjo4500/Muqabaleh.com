@@ -1,47 +1,78 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminStatCard } from '@/components/admin/AdminStatCard';
 import { BiLabel } from '@/components/admin/BiLabel';
-import { Eye, Users, MousePointerClick, Smartphone } from 'lucide-react';
+import { Users, UserPlus, CreditCard, BadgeDollarSign } from 'lucide-react';
+
+type Data = {
+  website?: {
+    usersTotal: number;
+    signups24h: number;
+    signups7d: number;
+    activeSubs: number;
+    revenue30dUsd: number;
+    paymentsOk: number;
+    paymentsFailed: number;
+    refundRate: number;
+  };
+};
 
 export default function Page() {
+  const [data, setData] = useState<Data | null>(null);
+
+  useEffect(() => {
+    void fetch('/api/admin/analytics/overview')
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => null);
+  }, []);
+
+  const w = data?.website;
+
   return (
     <div>
       <AdminPageHeader
         title={{ ar: 'تحليلات أداء الموقع', en: 'Website Analytics' }}
         description={{
-          ar: 'المشاهدات، الزوار الفريدون، نسبة الارتداد، مصادر الزيارات، الأجهزة، والدول — GA4: KM7T1T22WW.',
-          en: 'Page views, unique visitors, bounce rate, traffic sources, devices, countries — GA4 ID: KM7T1T22WW.',
+          ar: 'أرقام حقيقية من قاعدة البيانات (مستخدمون، اشتراكات، إيرادات، استردادات).',
+          en: 'Live database metrics (users, subscriptions, revenue, refunds).',
         }}
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label={{ ar: 'عدد مشاهدات الصفحات', en: 'Page views' }} value="12,480" icon={Eye} />
-        <AdminStatCard label={{ ar: 'الزيارات الفريدة', en: 'Unique visitors' }} value="4,210" icon={Users} />
-        <AdminStatCard label={{ ar: 'نسبة الارتداد', en: 'Bounce rate' }} value="38%" icon={MousePointerClick} />
-        <AdminStatCard label={{ ar: 'الجوال', en: 'Mobile share' }} value="64%" icon={Smartphone} />
+        <AdminStatCard label={{ ar: 'إجمالي المستخدمين', en: 'Total users' }} value={String(w?.usersTotal ?? '—')} icon={Users} />
+        <AdminStatCard label={{ ar: 'تسجيلات ٢٤ ساعة', en: 'Signups 24h' }} value={String(w?.signups24h ?? '—')} icon={UserPlus} />
+        <AdminStatCard label={{ ar: 'اشتراكات نشطة', en: 'Active subs' }} value={String(w?.activeSubs ?? '—')} icon={CreditCard} />
+        <AdminStatCard label={{ ar: 'إيراد ٣٠ يوماً', en: 'Revenue 30d' }} value={w ? `$${Number(w.revenue30dUsd).toFixed(0)}` : '—'} icon={BadgeDollarSign} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
-          <BiLabel ar="مصادر الزيارات" en="Traffic sources" />
+          <BiLabel ar="المدفوعات" en="Payments" />
           <ul className="mt-4 space-y-2 text-sm">
-            {[
-              ['Organic', '41%'],
-              ['Direct', '28%'],
-              ['Social', '18%'],
-              ['Referral', '13%'],
-            ].map(([k, v]) => (
-              <li key={k} className="flex justify-between border-b border-white/5 py-2">
-                <span>{k}</span>
-                <span className="text-cyan-300">{v}</span>
-              </li>
-            ))}
+            <li className="flex justify-between border-b border-white/5 py-2">
+              <span>Completed</span>
+              <span className="text-cyan-300">{w?.paymentsOk ?? 0}</span>
+            </li>
+            <li className="flex justify-between border-b border-white/5 py-2">
+              <span>Failed</span>
+              <span className="text-cyan-300">{w?.paymentsFailed ?? 0}</span>
+            </li>
+            <li className="flex justify-between border-b border-white/5 py-2">
+              <span>Refund rate</span>
+              <span className="text-cyan-300">{w?.refundRate ?? 0}%</span>
+            </li>
+            <li className="flex justify-between border-b border-white/5 py-2">
+              <span>Signups 7d</span>
+              <span className="text-cyan-300">{w?.signups7d ?? 0}</span>
+            </li>
           </ul>
         </section>
         <section className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
-          <BiLabel ar="تكامل GA4" en="GA4 integration" />
-          <p className="mt-3 text-sm text-[var(--text-secondary)]">Measurement ID: <code className="text-cyan-300">KM7T1T22WW</code></p>
-          <p className="mt-2 text-xs text-[var(--text-muted)]">Connect property in production to replace demo metrics.</p>
+          <BiLabel ar="ملاحظة" en="Note" />
+          <p className="mt-3 text-sm text-[var(--text-secondary)]">
+            GA4 pageviews are not mixed into these cards. Product metrics come from Postgres so Super Admin decisions stay accurate offline of analytics cookies.
+          </p>
         </section>
       </div>
     </div>

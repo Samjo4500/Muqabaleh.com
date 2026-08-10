@@ -5,6 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
+      settingKey="general"
       title={{ ar: 'الإعدادات العامة', en: 'General Settings' }}
       description={{
         ar: 'اسم الموقع، الشعار، اللغة الافتراضية، المنطقة الزمنية، العملة، ووضع الصيانة.',

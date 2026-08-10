@@ -8,8 +8,8 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'الجلسات المباشرة', en: 'Live Sessions' }}
       description={{
-        ar: 'عرض فوري للمقابلات الجارية، مراقبة للقراءة فقط، إنهاء إجبارياً، وسجل الجلسات.',
-        en: 'Real-time ongoing interviews, read-only monitor, force-stop, session logs.',
+        ar: 'صفوف Interview القديمة — إنهاء إجباري أو إعادة فتح. لجلسات المحاكاة الجديدة انظر Mock Sessions.',
+        en: 'Legacy Interview rows — force-stop or reopen. For the new mock engine see Mock Sessions.',
       }}
       resource="sessions"
       creatable={false}
@@ -40,14 +40,37 @@ export default function Page() {
       ]}
       rowActions={[
         {
-          id: 'monitor',
-          label: { ar: 'مراقبة', en: 'Monitor' },
-          onRun: async (row) => alert(`Monitor (read-only): ${row.id}`),
-        },
-        {
           id: 'force-stop',
           label: { ar: 'إنهاء إجبارياً', en: 'Force-stop' },
-          onRun: async (row) => alert(`Force-stop queued: ${row.id}`),
+          onRun: async (row) => {
+            if (!confirm('Force-stop this interview?')) return;
+            const res = await fetch('/api/admin/sessions', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ interviewId: row.id, action: 'force_stop' }),
+            });
+            if (!res.ok) {
+              alert((await res.json()).error || 'Failed');
+              return;
+            }
+            window.location.reload();
+          },
+        },
+        {
+          id: 'reopen',
+          label: { ar: 'إعادة فتح', en: 'Reopen' },
+          onRun: async (row) => {
+            const res = await fetch('/api/admin/sessions', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ interviewId: row.id, action: 'reopen' }),
+            });
+            if (!res.ok) {
+              alert((await res.json()).error || 'Failed');
+              return;
+            }
+            window.location.reload();
+          },
         },
       ]}
     />

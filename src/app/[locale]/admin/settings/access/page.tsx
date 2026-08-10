@@ -8,8 +8,8 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'إدارة صلاحيات الوصول', en: 'Admin Passwords & Access' }}
       description={{
-        ar: 'قائمة حسابات المسؤولين، إعادة تعيين كلمة المرور، إنهاء الجلسات النشطة، وسجل الدخول.',
-        en: 'List admin accounts, reset passwords, revoke sessions, login history log.',
+        ar: 'إعادة تعيين كلمة المرور أو تعطيل الحساب لإنهاء جلسات JWT.',
+        en: 'Reset passwords or deactivate accounts to end JWT sessions.',
       }}
       resource="admins"
       creatable={false}
@@ -35,12 +35,37 @@ export default function Page() {
         {
           id: 'reset',
           label: { ar: 'إعادة تعيين كلمة المرور', en: 'Reset password' },
-          onRun: async (row) => alert(`Secure password generated & emailed to ${row.email}`),
+          onRun: async (row) => {
+            const res = await fetch('/api/admin/admins', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'reset_password', userId: row.id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Failed');
+              return;
+            }
+            alert(`New password for ${data.email}:\n${data.tempPassword}`);
+          },
         },
         {
           id: 'revoke',
-          label: { ar: 'إنهاء الجلسات النشطة', en: 'Revoke sessions' },
-          onRun: async (row) => alert(`Sessions revoked for ${row.email}`),
+          label: { ar: 'إنهاء الجلسات (تعطيل)', en: 'Revoke sessions' },
+          onRun: async (row) => {
+            if (!confirm('Deactivate this admin and rotate password?')) return;
+            const res = await fetch('/api/admin/admins', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'revoke_sessions', userId: row.id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Failed');
+              return;
+            }
+            alert(`${data.note}\nTemp password if reactivated: ${data.tempPassword}`);
+          },
         },
       ]}
     />

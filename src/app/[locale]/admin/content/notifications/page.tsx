@@ -5,6 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
+      settingKey="content_notifications"
       title={{ ar: 'رسائل التنبيهات', en: 'Notification Messages' }}
       description={{
         ar: 'قوالب تنبيهات داخل التطبيق، التنبيهات الفورية، والرسائل النصية إن وُجدت.',

@@ -8,8 +8,8 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'حسابات الشركات', en: 'Company Accounts' }}
       description={{
-        ar: 'ملف الشركة، عدد المرشحين، باقة الاشتراك، وحالة العلامة التجارية الخاصة.',
-        en: 'Company profile, candidates count, subscription tier, whitelabel status.',
+        ar: 'حقول Company الحقيقية: الباقة، الرصيد، الحالة، الشريك المرتبط، وعدد المستخدمين.',
+        en: 'Real Company fields: plan, credits, status, linked partner, user count.',
       }}
       resource="companies"
       creatable={false}
@@ -17,31 +17,30 @@ export default function Page() {
         { key: 'name', label: { ar: 'اسم الشركة', en: 'Company name' } },
         { key: 'industry', label: { ar: 'القطاع', en: 'Industry' } },
         { key: 'country', label: { ar: 'الدولة', en: 'Country' } },
-        { key: 'plan', label: { ar: 'الباقة', en: 'Subscription tier' } },
+        { key: 'size', label: { ar: 'الحجم', en: 'Size' } },
+        { key: 'plan', label: { ar: 'الباقة', en: 'Plan' } },
         {
-          key: 'employees',
-          label: { ar: 'الموظفون/المرشحون', en: 'Employees/Candidates' },
-          render: (row) => String(row.credits ?? row.employees ?? '—'),
+          key: 'credits',
+          label: { ar: 'الرصيد', en: 'Credits' },
+          render: (row) => String(row.credits ?? 0),
         },
         {
-          key: 'whitelabel',
-          label: { ar: 'العلامة التجارية الخاصة', en: 'Whitelabel' },
-          render: (row) => (
-            <Badge variant="outline">{String(row.whitelabelStatus ?? 'Pending')}</Badge>
-          ),
+          key: 'status',
+          label: { ar: 'الحالة', en: 'Status' },
+          render: (row) => <Badge variant="outline">{String(row.status ?? 'ACTIVE')}</Badge>,
         },
-        { key: 'domain', label: { ar: 'النطاق', en: 'Domain' }, render: (row) => String(row.domain ?? '—') },
-      ]}
-      demoRows={[
         {
-          id: 'demo-co-1',
-          name: 'NEOM Tech',
-          industry: 'Technology',
-          country: 'SA',
-          plan: 'B2B_BUSINESS',
-          credits: 42,
-          whitelabelStatus: 'Active',
-          domain: 'hire.neomtech.sa',
+          key: 'partnerId',
+          label: { ar: 'الشريك', en: 'Partner' },
+          render: (row) => String(row.partnerId ?? '—'),
+        },
+        {
+          key: 'users',
+          label: { ar: 'المستخدمون', en: 'Users' },
+          render: (row) => {
+            const c = row._count as { users?: number } | undefined;
+            return String(c?.users ?? '—');
+          },
         },
       ]}
     />

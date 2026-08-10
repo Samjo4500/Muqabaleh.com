@@ -7,6 +7,7 @@ export default function Page() {
   return (
     <div className="space-y-10">
       <AdminConfigPanel
+        settingKey="backup"
         title={{ ar: 'النسخ الاحتياطي والصيانة', en: 'Backup & Maintenance' }}
         description={{
           ar: 'نسخ قاعدة البيانات، تصدير البيانات، فحص الصحة، مسح الكاش، وعارض سجلات الأخطاء.',

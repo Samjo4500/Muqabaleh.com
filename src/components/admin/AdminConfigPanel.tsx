@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { BiInline, BiLabel } from '@/components/admin/BiLabel';
 import { L, type Bi } from '@/lib/admin/labels';
@@ -15,19 +15,7 @@ export type ConfigField =
   | { key: string; label: Bi; type: 'toggle'; value?: boolean }
   | { key: string; label: Bi; type: 'select'; value?: string; options: { value: string; label: string }[] };
 
-export function AdminConfigPanel({
-  title,
-  description,
-  sections,
-  onSave,
-  footerNote,
-}: {
-  title: Bi;
-  description?: Bi;
-  sections: { title: Bi; fields: ConfigField[]; note?: Bi }[];
-  onSave?: (values: Record<string, string | boolean>) => Promise<void> | void;
-  footerNote?: Bi;
-}) {
+function buildInitial(sections: { fields: ConfigField[] }[]) {
   const initial: Record<string, string | boolean> = {};
   for (const s of sections) {
     for (const f of s.fields) {
@@ -35,16 +23,65 @@ export function AdminConfigPanel({
       else initial[f.key] = String(f.value ?? '');
     }
   }
-  const [values, setValues] = useState(initial);
+  return initial;
+}
+
+export function AdminConfigPanel({
+  title,
+  description,
+  sections,
+  onSave,
+  footerNote,
+  /** When set, load/save values via AdminSetting (DB) instead of localStorage-only. */
+  settingKey,
+}: {
+  title: Bi;
+  description?: Bi;
+  sections: { title: Bi; fields: ConfigField[]; note?: Bi }[];
+  onSave?: (values: Record<string, string | boolean>) => Promise<void> | void;
+  footerNote?: Bi;
+  settingKey?: string;
+}) {
+  const [values, setValues] = useState(() => buildInitial(sections));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    if (!settingKey) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/admin/settings?key=${encodeURIComponent(settingKey)}`);
+        if (!res.ok) throw new Error('load failed');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.value && typeof data.value === 'object') {
+          setValues((prev) => ({ ...prev, ...(data.value as Record<string, string | boolean>) }));
+        }
+      } catch {
+        if (!cancelled) setLoadError('Could not load saved settings');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [settingKey]);
 
   const save = async () => {
     setSaving(true);
     try {
+      if (settingKey) {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: settingKey, value: values }),
+        });
+        if (!res.ok) throw new Error('save failed');
+      }
       await onSave?.(values);
-      // Persist locally for operational review when no backend key store yet
-      window.localStorage.setItem(`muqabaleh-admin-config:${title.en}`, JSON.stringify(values));
+      // Keep local cache for offline review
+      window.localStorage.setItem(`muqabaleh-admin-config:${settingKey || title.en}`, JSON.stringify(values));
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } finally {
@@ -63,6 +100,15 @@ export function AdminConfigPanel({
           </Button>
         }
       />
+      {settingKey ? (
+        <p className="mb-3 text-xs text-[var(--text-muted)]">
+          <BiInline
+            ar={`يُحفظ في قاعدة البيانات · المفتاح: ${settingKey}`}
+            en={`Persisted to database · key: ${settingKey}`}
+          />
+        </p>
+      ) : null}
+      {loadError ? <p className="mb-3 text-xs text-amber-400">{loadError}</p> : null}
       {saved ? (
         <p className="mb-4 text-sm text-emerald-400">
           <BiInline ar={L.success.ar} en={L.success.en} />

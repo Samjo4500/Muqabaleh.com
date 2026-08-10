@@ -34,6 +34,7 @@ export default function Page() {
         ]}
       />
       <AdminConfigPanel
+        settingKey="billing_plans"
         title={{ ar: 'محرر الباقة', en: 'Plan editor' }}
         sections={[
           {

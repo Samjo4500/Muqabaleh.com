@@ -3,13 +3,24 @@
 import { AdminDataTable } from '@/components/admin/AdminDataTable';
 import { Badge } from '@/components/ui/badge';
 
+async function patchTicket(body: Record<string, unknown>) {
+  const res = await fetch('/api/admin/tickets', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed');
+  return data;
+}
+
 export default function Page() {
   return (
     <AdminDataTable
       title={{ ar: 'طلبات الدعم الفني', en: 'All Tickets' }}
       description={{
-        ar: 'المعرّف، المستخدم، الموضوع، الأولوية، الحالة، آخر تحديث، والمُعيَّن — مع ملاحظات داخلية ورد بالبريد.',
-        en: 'Ticket ID, user, subject, priority, status, last update, assigned to — internal notes & email reply.',
+        ar: 'تعيين لنفسك، إغلاق، ورد بالبريد على منشئ التذكرة.',
+        en: 'Assign to self, close, and email-reply to the ticket creator.',
       }}
       resource="support_tickets"
       columns={[
@@ -40,32 +51,46 @@ export default function Page() {
             row.updatedAt ? new Date(String(row.updatedAt)).toLocaleString() : '—',
         },
         {
-          key: 'assigneeId',
+          key: 'assignee',
           label: { ar: 'مسؤول الطلب', en: 'Assigned to' },
-          render: (row) => String(row.assigneeId ?? 'Unassigned'),
+          render: (row) => {
+            const a = row.assignee as { email?: string } | undefined;
+            return a?.email ?? String(row.assigneeId ?? 'Unassigned');
+          },
         },
       ]}
       rowActions={[
         {
           id: 'assign',
-          label: { ar: 'تعيين', en: 'Assign' },
-          onRun: async (row) => alert(`Assign ticket ${row.id}`),
+          label: { ar: 'تعيين لي', en: 'Assign to me' },
+          onRun: async (row) => {
+            await patchTicket({ ticketId: row.id, assigneeId: undefined, status: 'IN_PROGRESS' });
+            window.location.reload();
+          },
+        },
+        {
+          id: 'close',
+          label: { ar: 'إغلاق', en: 'Close' },
+          onRun: async (row) => {
+            await patchTicket({ ticketId: row.id, status: 'CLOSED' });
+            window.location.reload();
+          },
         },
         {
           id: 'reply',
           label: { ar: 'رد بالبريد', en: 'Reply via email' },
-          onRun: async (row) => alert(`Email reply for ${row.id}`),
-        },
-      ]}
-      demoRows={[
-        {
-          id: 'TCK-1001',
-          subject: 'Payment failed / فشل الدفع',
-          priority: 'HIGH',
-          status: 'OPEN',
-          updatedAt: new Date().toISOString(),
-          assigneeId: null,
-          createdById: 'user-1',
+          onRun: async (row) => {
+            const replyBody = window.prompt('Reply message / نص الرد');
+            if (!replyBody) return;
+            const data = await patchTicket({
+              ticketId: row.id,
+              status: 'IN_PROGRESS',
+              replyBody,
+              replySubject: `Re: ${String(row.subject || 'Support')}`,
+            });
+            alert(data.emailed ? 'Email sent' : 'Saved — email not sent (no creator email or mail config)');
+            window.location.reload();
+          },
         },
       ]}
     />

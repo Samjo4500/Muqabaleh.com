@@ -19,12 +19,12 @@ export const C = {
   hero: {
     eyebrow: { en: 'Jeannie · Muqabaleh', ar: 'جيني · مقابلة' },
     headline: {
-      en: 'Train with Jeannie. Leave with proof.',
-      ar: 'تدرب مع جيني. اخرج بإثبات.',
+      en: 'Train with Jeannie. Walk into the interview ready.',
+      ar: 'تدرّب مع جيني. ادخل المقابلة وأنت جاهز.',
     },
     sub: {
-      en: 'She runs your interview drill in Arabic or English. You walk away with a verified scorecard — then hit any job portal with confidence.',
-      ar: 'تجري معها محاكاة المقابلة بالعربية أو الإنجليزية. تحصل على تقرير مهني موثق — وتتقدم لأي وظيفة وأنت واثق.',
+      en: 'Train in Arabic or English, get a verified score, and apply to any job with confidence.',
+      ar: 'تدرّب بالعربية أو الإنجليزية، احصل على درجة موثّقة، وقدّم بثقة لأي وظيفة.',
     },
     dialectNote: {
       en: 'Jeannie understands and fairly scores Arabic regional dialects (Gulf, Levantine, Egyptian), professional English with local accents, and natural bilingual code-switching — accent is not a penalty.',

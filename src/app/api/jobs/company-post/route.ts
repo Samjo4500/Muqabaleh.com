@@ -30,7 +30,7 @@ const schema = z.object({
   description: z.string().max(20000).optional().nullable(),
   requirements: z.string().max(10000).optional().nullable(),
   employmentType: z
-    .enum(['fulltime', 'contract', 'remote', 'hybrid'])
+    .enum(['fulltime', 'parttime', 'contract', 'remote', 'hybrid'])
     .default('fulltime'),
   careerLevel: z
     .enum(['JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'])

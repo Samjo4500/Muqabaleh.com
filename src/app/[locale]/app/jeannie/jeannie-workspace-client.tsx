@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { Bot, Loader2, FileText, Sparkles, Upload } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
+import { WorkPreferencesField } from '@/components/profile/WorkPreferencesField';
+import type { WorkPreferenceCode } from '@/lib/constants';
 
 type Entitlements = {
   tier: string;
@@ -22,6 +24,7 @@ type Profile = {
   targetCountries: string[];
   seniority: string | null;
   notes: string | null;
+  workModes?: string[];
 };
 
 export function JeannieWorkspaceClient() {
@@ -34,6 +37,7 @@ export function JeannieWorkspaceClient() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState('');
   const [cities, setCities] = useState('');
+  const [workPreferences, setWorkPreferences] = useState<WorkPreferenceCode[]>([]);
   const [cvText, setCvText] = useState('');
   const [cvOut, setCvOut] = useState('');
   const [coverCompany, setCoverCompany] = useState('');
@@ -53,10 +57,14 @@ export function JeannieWorkspaceClient() {
       setEntitlements(ent);
 
       if (profileRes.ok) {
-        const p = (await profileRes.json()) as Profile;
+        const raw = await profileRes.json();
+        const p = ((raw as { profile?: Profile }).profile || raw) as Profile;
         setProfile(p);
         setRoles((p.targetRoles || []).join(', '));
         setCities((p.targetCities || []).join(', '));
+        if (Array.isArray(p.workModes)) {
+          setWorkPreferences(p.workModes as WorkPreferenceCode[]);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Load failed');
@@ -74,7 +82,7 @@ export function JeannieWorkspaceClient() {
     setError('');
     try {
       const res = await fetch('/api/jeannie/profile', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           targetRoles: roles
@@ -85,10 +93,18 @@ export function JeannieWorkspaceClient() {
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
+          workModes: workPreferences,
         }),
       });
       if (!res.ok) throw new Error('Failed to save profile');
-      const p = (await res.json()) as Profile;
+      // Keep CandidatePool in sync for employer search
+      await fetch('/api/talent/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workPreferences }),
+      }).catch(() => {});
+      const raw = await res.json();
+      const p = ((raw as { profile?: Profile }).profile || raw) as Profile;
       setProfile(p);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
@@ -221,6 +237,11 @@ export function JeannieWorkspaceClient() {
             />
           </label>
         </div>
+        <WorkPreferencesField
+          locale={locale}
+          value={workPreferences}
+          onChange={setWorkPreferences}
+        />
         <button
           type="button"
           disabled={busy === 'profile'}

@@ -7,6 +7,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { triggerWelcomeEmail } from '@/lib/email-triggers';
 import { serializeTalent } from '@/lib/ats/serialize';
+import { syncWorkPreferences } from '@/lib/jobs/work-preferences';
 
 /**
  * Create (or update) a full talent-pool profile with CV + photo.
@@ -128,6 +129,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const workPrefRaw = form.getAll('workPreferences').map(String);
+    const workPreferences = await syncWorkPreferences(
+      userId,
+      workPrefRaw.length ? workPrefRaw : String(form.get('workPreferences') || ''),
+    );
+
     const pool = await db.candidatePool.upsert({
       where: { userId },
       create: {
@@ -149,6 +156,7 @@ export async function POST(req: NextRequest) {
         desiredLocations: String(form.get('desiredLocations') || '') || null,
         languages: String(form.get('languages') || 'AR,EN'),
         availability: String(form.get('availability') || 'AVAILABLE'),
+        workPreferences,
         cvAssetId: cvAssetId!,
         cvFileName: cvFileName || null,
         photoAssetId: photoAssetId || null,
@@ -171,6 +179,7 @@ export async function POST(req: NextRequest) {
         desiredLocations: String(form.get('desiredLocations') || '') || null,
         languages: String(form.get('languages') || 'AR,EN'),
         availability: String(form.get('availability') || 'AVAILABLE'),
+        ...(workPreferences !== null ? { workPreferences } : {}),
         ...(cvAssetId ? { cvAssetId, cvFileName } : {}),
         ...(photoAssetId ? { photoAssetId } : {}),
       },

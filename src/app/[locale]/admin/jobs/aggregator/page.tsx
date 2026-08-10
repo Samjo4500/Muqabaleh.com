@@ -102,6 +102,13 @@ export default function AtsAggregatorPage() {
         }
       />
 
+      <p className="mb-4 text-xs leading-relaxed text-white/40">
+        <BiInline
+          ar="تحديث تلقائي: كل ٣ ساعات (Vercel) + مسح يومي كامل عبر GitHub Action الساعة ٠٤:١٥ UTC."
+          en="Auto-refresh: every 3h (Vercel cron) + daily full sweep via GitHub Action at 04:15 UTC."
+        />
+      </p>
+
       {msg ? <p className="mb-4 text-sm text-cyan-300">{msg}</p> : null}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

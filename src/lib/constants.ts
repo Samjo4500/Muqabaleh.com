@@ -54,12 +54,56 @@ export const CAREER_LEVELS = [
   { code: 'EXECUTIVE', en: 'Executive', ar: 'تنفيذي' },
 ] as const;
 
+/** Job listing employment types (employer / ATS side). */
 export const EMPLOYMENT_TYPES = [
   { code: 'fulltime', en: 'Full-time', ar: 'دوام كامل' },
+  { code: 'parttime', en: 'Part-time', ar: 'دوام جزئي' },
   { code: 'contract', en: 'Contract', ar: 'تعاقد' },
   { code: 'hybrid', en: 'Hybrid', ar: 'هجين' },
   { code: 'remote', en: 'Remote', ar: 'عن بُعد' },
 ] as const;
+
+/**
+ * Candidate work preferences (seeker profile / talent pool).
+ * Multi-select — stored as comma-separated codes on CandidatePool.workPreferences
+ * and mirrored to JeannieProfile.workModes.
+ */
+export const WORK_PREFERENCES = [
+  { code: 'fulltime', en: 'Full-time', ar: 'دوام كامل' },
+  { code: 'parttime', en: 'Part-time', ar: 'دوام جزئي' },
+  { code: 'remote', en: 'Remote', ar: 'عن بُعد' },
+] as const;
+
+export type WorkPreferenceCode = (typeof WORK_PREFERENCES)[number]['code'];
+
+export function parseWorkPreferences(raw: string | string[] | null | undefined): WorkPreferenceCode[] {
+  const allowed = new Set<string>(WORK_PREFERENCES.map((w) => w.code));
+  const parts = Array.isArray(raw)
+    ? raw
+    : String(raw || '')
+        .split(/[,|]/)
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+  const out: WorkPreferenceCode[] = [];
+  for (const p of parts) {
+    const code = p.replace(/[\s-]/g, '') === 'fulltime' || p === 'full_time' || p === 'full-time'
+      ? 'fulltime'
+      : p.replace(/[\s-]/g, '') === 'parttime' || p === 'part_time' || p === 'part-time'
+        ? 'parttime'
+        : p === 'remote' || p === 'wfh'
+          ? 'remote'
+          : p;
+    if (allowed.has(code) && !out.includes(code as WorkPreferenceCode)) {
+      out.push(code as WorkPreferenceCode);
+    }
+  }
+  return out;
+}
+
+export function serializeWorkPreferences(prefs: string[] | null | undefined): string | null {
+  const parsed = parseWorkPreferences(prefs);
+  return parsed.length ? parsed.join(',') : null;
+}
 
 export const VACANCY_INDUSTRIES = [
   { code: 'IT', en: 'IT / Technology', ar: 'تقنية المعلومات' },

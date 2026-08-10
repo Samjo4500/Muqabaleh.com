@@ -86,6 +86,7 @@ export function serializeTalent(row: {
   interviewCount: number;
   languages: string;
   availability: string;
+  workPreferences?: string | null;
   openToWork: boolean;
   isVisible: boolean;
   isOptedIn: boolean;
@@ -98,6 +99,12 @@ export function serializeTalent(row: {
     image: string | null;
   };
 }) {
+  const workPreferences = row.workPreferences
+    ? row.workPreferences
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
   return {
     id: row.id,
     userId: row.user.id,
@@ -133,6 +140,7 @@ export function serializeTalent(row: {
     interviewCount: row.interviewCount,
     languages: row.languages,
     availability: row.availability,
+    workPreferences,
     openToWork: row.openToWork,
     isVisible: row.isVisible,
     isOptedIn: row.isOptedIn,

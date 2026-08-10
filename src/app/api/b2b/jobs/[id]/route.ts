@@ -18,7 +18,7 @@ const patchSchema = z.object({
   location: z.string().max(120).optional().nullable(),
   city: z.string().max(80).optional().nullable(),
   department: z.string().max(80).optional().nullable(),
-  employmentType: z.enum(['fulltime', 'contract', 'remote', 'hybrid']).optional(),
+  employmentType: z.enum(['fulltime', 'parttime', 'contract', 'remote', 'hybrid']).optional(),
   careerLevel: z
     .enum(['JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'])
     .optional()

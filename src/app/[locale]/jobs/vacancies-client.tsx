@@ -32,6 +32,8 @@ import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { CrystalNavbar } from '@/components/landing/crystal/CrystalNavbar';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { fadeUp, stagger } from '@/components/landing/crystal/motion';
+import { WorkPreferencesField } from '@/components/profile/WorkPreferencesField';
+import type { WorkPreferenceCode } from '@/lib/constants';
 import {
   CAREER_LEVELS,
   EMPLOYMENT_TYPES,
@@ -827,6 +829,9 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
   const [error, setError] = useState('');
   const [cvName, setCvName] = useState('');
   const [photoName, setPhotoName] = useState('');
+  const [workPreferences, setWorkPreferences] = useState<WorkPreferenceCode[]>([
+    'fulltime',
+  ]);
   const loggedIn = status === 'authenticated';
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -945,6 +950,12 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
         <Field
           label={isAr ? 'المهارات (فواصل)' : 'Skills (comma-separated)'}
           name="skills"
+        />
+        <WorkPreferencesField
+          locale={locale}
+          formMode
+          value={workPreferences}
+          onChange={setWorkPreferences}
         />
         <label className="block space-y-1.5 text-sm">
           <span className="text-white/60">{isAr ? 'نبذة' : 'Summary'}</span>

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { FEATURED_JOBS } from '@/components/jobs/featured-jobs';
+import { JobFlipCard } from '@/components/jobs/JobFlipCard';
 import {
   MENA_JOBS_SKYLINES,
   prefetchNextImage,
@@ -18,9 +20,8 @@ type Props = {
 };
 
 /**
- * Full-bleed jobs hero — brand-first, one composition for social-ad landings.
- * MENA skyline carousel (Dubai → Riyadh → Amman → Doha) starts after idle
- * so LCP stays on the first optimized frame.
+ * Jobs hero — brand-first skyline + animated EN↔AR flip book (6 jobs)
+ * and a marquee strip of featured roles.
  */
 export function JobsHero({ roleCount }: Props) {
   const locale = useLocale();
@@ -54,16 +55,16 @@ export function JobsHero({ roleCount }: Props) {
 
   const subAr =
     roleCount > 0
-      ? `أكثر من ${roleCount} وظيفة حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل، وتتدرّب مع جيني قبل أن تقدّم بنفسك لدى الشركة.`
-      : 'وظائف حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل، وتتدرّب مع جيني قبل أن تقدّم بنفسك لدى الشركة.';
+      ? `أكثر من ${roleCount} وظيفة حقيقية. اقلب البطاقة عربي ⇄ English، تدرّب مع جيني، ثم قدّم بنفسك.`
+      : 'وظائف حقيقية في المنطقة. اقلب البطاقة عربي ⇄ English، تدرّب مع جيني، ثم قدّم بنفسك.';
 
   const subEn =
     roleCount > 0
-      ? `${roleCount}+ live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.`
-      : 'Live openings across MENA — we surface salary when employers publish it, you practice with Jeannie, then apply on their site.';
+      ? `${roleCount}+ live MENA roles. Flip Arabic ⇄ English, practice with Jeannie, then apply yourself.`
+      : 'Live MENA roles. Flip Arabic ⇄ English, practice with Jeannie, then apply yourself.';
 
   return (
-    <section className="relative min-h-[92svh] overflow-hidden">
+    <section className="relative min-h-[92svh] overflow-hidden bg-[#05080f]">
       <motion.div
         className="absolute inset-0"
         initial={{ scale: 1.1, opacity: 0.5 }}
@@ -105,105 +106,125 @@ export function JobsHero({ roleCount }: Props) {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(105deg, rgba(5,8,15,0.92) 0%, rgba(5,8,15,0.62) 46%, rgba(5,8,15,0.35) 100%), linear-gradient(180deg, rgba(5,8,15,0.2) 0%, rgba(5,8,15,0.78) 100%)',
-          }}
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              'radial-gradient(rgba(255,255,255,0.06) 0.6px, transparent 0.6px)',
-            backgroundSize: '3px 3px',
+              'linear-gradient(105deg, rgba(5,8,15,0.92) 0%, rgba(5,8,15,0.68) 46%, rgba(5,8,15,0.45) 100%), linear-gradient(180deg, rgba(5,8,15,0.2) 0%, rgba(5,8,15,0.88) 100%)',
           }}
           aria-hidden
         />
       </motion.div>
 
-      <div className="mq-wrap relative flex min-h-[92svh] flex-col justify-end pb-14 pt-28 md:pb-20 md:pt-32">
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="max-w-3xl"
+      <div className="mq-wrap relative z-10 flex min-h-[92svh] flex-col justify-center pb-8 pt-28 md:pb-10 md:pt-32">
+        <div
+          className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12"
+          dir={isAr ? 'rtl' : 'ltr'}
         >
-          <motion.div variants={fadeUp} className="mb-8">
-            <BrandLogo size="hero" priority />
-          </motion.div>
-
-          <motion.p
-            variants={fadeUp}
-            className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-teal-300/90"
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+            className="max-w-xl"
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={current.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.35 }}
-                className="inline-block"
+            <motion.div variants={fadeUp} className="mb-7">
+              <BrandLogo size="hero" priority />
+            </motion.div>
+
+            <motion.p
+              variants={fadeUp}
+              className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-teal-300/90"
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={current.id}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.35 }}
+                  className="inline-block"
+                >
+                  {isAr
+                    ? `${current.cityAr} · وظيفة اليوم`
+                    : `${current.cityEn} · Job of the Day`}
+                </motion.span>
+              </AnimatePresence>
+            </motion.p>
+
+            <motion.h1
+              variants={fadeUp}
+              className="mq-display text-[clamp(2.2rem,6vw,4rem)] font-bold leading-[0.98] tracking-tight text-white"
+            >
+              {isAr ? (
+                <>
+                  وظائف من المنطقة.
+                  <br />
+                  <span className="text-teal-300">استعد… ثم قدّم.</span>
+                </>
+              ) : (
+                <>
+                  MENA roles.
+                  <br />
+                  <span className="text-teal-300">Practice. Then apply.</span>
+                </>
+              )}
+            </motion.h1>
+
+            <motion.p
+              variants={fadeUp}
+              className="mt-5 max-w-md text-base leading-relaxed text-white/70 md:text-lg"
+            >
+              {isAr ? subAr : subEn}
+            </motion.p>
+
+            <motion.div
+              variants={fadeUp}
+              className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+            >
+              <a
+                href="#roles"
+                className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
               >
-                {isAr
-                  ? `${current.cityAr} · الخليج والشام`
-                  : `${current.cityEn} · MENA`}
-              </motion.span>
-            </AnimatePresence>
-          </motion.p>
-
-          <motion.h1
-            variants={fadeUp}
-            className="mq-display text-[clamp(2.4rem,7vw,4.6rem)] font-bold leading-[0.98] tracking-tight text-white"
-          >
-            {isAr ? (
-              <>
-                وظائف من المنطقة.
-                <br />
-                <span className="text-teal-300">استعد… ثم قدّم.</span>
-              </>
-            ) : (
-              <>
-                MENA roles.
-                <br />
-                <span className="text-teal-300">Practice. Then apply.</span>
-              </>
-            )}
-          </motion.h1>
-
-          <motion.p
-            variants={fadeUp}
-            className="mt-5 max-w-xl text-base leading-relaxed text-white/70 md:text-lg"
-          >
-            {isAr ? subAr : subEn}
-          </motion.p>
+                {isAr ? 'استعرض الوظائف' : 'Browse roles'}
+              </a>
+              <Link
+                href={localePath('/interview/prequal', locale)}
+                className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
+              >
+                {isAr ? 'تدرّب مع جيني' : 'Practice with Jeannie'}
+              </Link>
+            </motion.div>
+          </motion.div>
 
           <motion.div
-            variants={fadeUp}
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.7, ease: easeCrystal }}
+            className="flex justify-center lg:justify-end"
           >
-            <a
-              href="#roles"
-              className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
-            >
-              {isAr ? 'استعرض الوظائف' : 'Browse roles'}
-            </a>
-            <Link
-              href={localePath('/interview/prequal', locale)}
-              className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
-            >
-              {isAr ? 'تدرّب مع جيني' : 'Practice with Jeannie'}
-            </Link>
+            <JobFlipCard locale={locale} roleCount={roleCount} />
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#05080f] to-transparent"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.8 }}
-        aria-hidden
-      />
+      {/* Featured jobs marquee strip */}
+      <div className="relative z-10 border-t border-white/8 bg-black/45 py-3 backdrop-blur-md">
+        <div className="overflow-hidden" dir="ltr">
+          <div
+            className={`flex w-max gap-10 whitespace-nowrap text-xs text-white/55 ${
+              reduceMotion ? '' : 'crystal-marquee'
+            }`}
+          >
+            {[...FEATURED_JOBS, ...FEATURED_JOBS].map((item, i) => (
+              <span
+                key={`${item.id}-${i}`}
+                className="inline-flex items-center gap-2"
+              >
+                <span className="text-cyan-300/70">●</span>
+                {isAr
+                  ? `${item.titleAr} — ${item.company} — ${item.locationAr}`
+                  : `${item.titleEn} — ${item.company} — ${item.locationEn}`}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -30,8 +30,14 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { WorkPreferencesField } from '@/components/profile/WorkPreferencesField';
 
-import { MENA_COUNTRIES, INDUSTRIES, EXPERIENCES } from '@/lib/constants';
+import {
+  MENA_COUNTRIES,
+  INDUSTRIES,
+  EXPERIENCES,
+  type WorkPreferenceCode,
+} from '@/lib/constants';
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -60,6 +66,27 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   const [experience, setExperience] = useState(user.experience ?? '');
   const [gender, setGender] = useState(user.interviewerGender ?? 'MALE');
   const [language, setLanguage] = useState(user.language ?? 'AR');
+  const [workPreferences, setWorkPreferences] = useState<WorkPreferenceCode[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/talent/me');
+        if (!res.ok) return;
+        const data = await res.json();
+        const prefs = data.profile?.workPreferences;
+        if (!cancelled && Array.isArray(prefs)) {
+          setWorkPreferences(prefs as WorkPreferenceCode[]);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* ---- Password fields ---- */
   const [currentPw, setCurrentPw] = useState('');
@@ -96,6 +123,20 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to save');
       }
+
+      await fetch('/api/talent/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name || undefined,
+          country: country || undefined,
+          industry: industry || undefined,
+          level: experience || undefined,
+          role: experience || 'Professional',
+          workPreferences,
+        }),
+      }).catch(() => {});
+
       toast.success(t('saved'));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : tCommon('error'));
@@ -283,6 +324,14 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <WorkPreferencesField
+            locale={locale}
+            value={workPreferences}
+            onChange={setWorkPreferences}
+          />
         </div>
 
         {/* Preferred Interviewer Gender */}

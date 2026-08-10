@@ -3,6 +3,10 @@ import { db } from '@/lib/db';
 import { getAtsSession, unauthorized } from '@/lib/ats/auth';
 import { serializeTalent } from '@/lib/ats/serialize';
 import { fileFromForm, saveMediaAsset } from '@/lib/ats/media';
+import {
+  ensureWorkPreferencesColumn,
+  syncWorkPreferences,
+} from '@/lib/jobs/work-preferences';
 
 export async function GET() {
   const user = await getAtsSession();
@@ -55,8 +59,16 @@ export async function PATCH(req: NextRequest) {
         'isOptedIn',
         'name',
         'country',
+        'workPreferences',
       ]) {
         if (form.has(key)) data[key] = String(form.get(key));
+      }
+      if (form.has('workPreferences')) {
+        const multi = form
+          .getAll('workPreferences')
+          .map(String)
+          .filter(Boolean);
+        data.workPreferences = multi.length ? multi : String(form.get('workPreferences') || '');
       }
       const cv = await fileFromForm(form, 'cv');
       if (cv) {
@@ -104,6 +116,16 @@ export async function PATCH(req: NextRequest) {
         ? Number.parseInt(String(data.yearsExperience), 10)
         : undefined;
 
+    let workPreferences: string | null | undefined;
+    if (data.workPreferences !== undefined || data.workModes !== undefined) {
+      workPreferences = await syncWorkPreferences(
+        user.id,
+        (data.workPreferences ?? data.workModes) as string | string[],
+      );
+    } else {
+      await ensureWorkPreferencesColumn();
+    }
+
     const pool = await db.candidatePool.upsert({
       where: { userId: user.id },
       create: {
@@ -125,6 +147,7 @@ export async function PATCH(req: NextRequest) {
         desiredLocations: (data.desiredLocations as string) || null,
         languages: String(data.languages || 'AR,EN'),
         availability: String(data.availability || 'AVAILABLE'),
+        workPreferences: workPreferences ?? null,
         cvAssetId: cvAssetId || null,
         cvFileName: cvFileName || null,
         photoAssetId: photoAssetId || null,
@@ -150,6 +173,7 @@ export async function PATCH(req: NextRequest) {
           : {}),
         ...(data.languages ? { languages: String(data.languages) } : {}),
         ...(data.availability ? { availability: String(data.availability) } : {}),
+        ...(workPreferences !== undefined ? { workPreferences } : {}),
         ...(data.openToWork !== undefined
           ? { openToWork: data.openToWork !== 'false' && data.openToWork !== false }
           : {}),

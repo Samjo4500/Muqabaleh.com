@@ -14,7 +14,7 @@ export type ApplicationStageValue = (typeof APPLICATION_STAGES)[number];
 export const JOB_STATUSES = ['DRAFT', 'OPEN', 'PAUSED', 'CLOSED'] as const;
 export type JobStatusValue = (typeof JOB_STATUSES)[number];
 
-export const EMPLOYMENT_TYPES = ['fulltime', 'contract', 'remote'] as const;
+export const EMPLOYMENT_TYPES = ['fulltime', 'parttime', 'contract', 'hybrid', 'remote'] as const;
 
 export const PHOTO_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
 export const CV_MIME = new Set([

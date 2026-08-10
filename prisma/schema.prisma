@@ -795,6 +795,8 @@ model CandidatePool {
   interviewCount   Int      @default(0)
   languages        String   @default("AR")
   availability     String   @default("AVAILABLE")
+  /// Comma-separated seeker prefs: fulltime,parttime,remote
+  workPreferences  String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -804,6 +806,7 @@ model CandidatePool {
   @@index([muqabalehScore])
   @@index([industry])
   @@index([location])
+  @@index([workPreferences])
 }
 
 // ─── Super Admin Control Panel (Muqabaleh only) ───

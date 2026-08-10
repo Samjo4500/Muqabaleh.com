@@ -25,6 +25,8 @@ import {
 } from '@/components/auth/PasswordField';
 import { resolvePostAuthPath } from '@/lib/auth-redirect';
 import { localePath } from '@/i18n/navigation';
+import { WorkPreferencesField } from '@/components/profile/WorkPreferencesField';
+import type { WorkPreferenceCode } from '@/lib/constants';
 
 type FieldErrors = Record<string, string>;
 
@@ -61,6 +63,9 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [country, setCountry] = useState('');
+  const [workPreferences, setWorkPreferences] = useState<WorkPreferenceCode[]>([
+    'fulltime',
+  ]);
   const [companyName, setCompanyName] = useState('');
   const [companySize, setCompanySize] = useState('');
   const [companySector, setCompanySector] = useState('');
@@ -143,6 +148,20 @@ function RegisterForm() {
           ),
         );
         return;
+      }
+
+      if (!isCompany && workPreferences.length) {
+        await fetch('/api/talent/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name.trim(),
+            country: country || undefined,
+            role: 'Professional',
+            level: 'MID',
+            workPreferences,
+          }),
+        }).catch(() => {});
       }
 
       const session = await getSession();
@@ -315,6 +334,11 @@ function RegisterForm() {
 
           <TabsContent value="individual" className="mt-5 flex flex-col gap-5">
             {sharedFields}
+            <WorkPreferencesField
+              locale={locale}
+              value={workPreferences}
+              onChange={setWorkPreferences}
+            />
           </TabsContent>
 
           <TabsContent value="company" className="mt-5 flex flex-col gap-5">

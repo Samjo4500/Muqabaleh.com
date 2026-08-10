@@ -23,7 +23,7 @@ const createSchema = z.object({
   country: z.string().max(8).optional().nullable(),
   department: z.string().max(80).optional().nullable(),
   employmentType: z
-    .enum(['fulltime', 'contract', 'remote', 'hybrid'])
+    .enum(['fulltime', 'parttime', 'contract', 'remote', 'hybrid'])
     .default('fulltime'),
   careerLevel: z
     .enum(['JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'])

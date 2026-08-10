@@ -19,10 +19,8 @@ export default async function InterviewLayout({
   return (
     <PartnerBrandProvider hostHint={hostHint}>
       <div className="interview-wl-shell">
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-40">
-          <div className="mq-wrap pointer-events-auto pt-3">
-            <PartnerInterviewChrome />
-          </div>
+        <div className="mq-wrap pt-3 empty:hidden [&:has(.wl-chrome)]:block">
+          <PartnerInterviewChrome />
         </div>
         {children}
       </div>

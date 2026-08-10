@@ -20,7 +20,7 @@ export function OrganizationJsonLd() {
         name: 'مقابلة | Muqabaleh',
         alternateName: 'Muqabaleh',
         url: SITE_URL,
-        logo: `${SITE_URL}/images/logos/v2-balanced-a-T.webp`,
+        logo: `${SITE_URL}/images/logos/muqabaleh-wordmark.webp`,
         description:
           'AI-powered mock interview practice platform for Arabic and English speakers across MENA.',
         foundingLocation: {
@@ -29,10 +29,9 @@ export function OrganizationJsonLd() {
         },
         areaServed: 'MENA',
         sameAs: [
-          'https://x.com/muqabaleh',
-          'https://linkedin.com/company/muqabaleh',
           'https://instagram.com/muqabaleh',
-          'https://facebook.com/muqabaleh',
+          'https://www.tiktok.com/@muqabaleh',
+          'https://linkedin.com/company/muqabaleh',
         ],
       }}
     />
@@ -154,7 +153,7 @@ export function ArticleJsonLd({
           name: 'Muqabaleh',
           logo: {
             '@type': 'ImageObject',
-            url: `${SITE_URL}/images/logos/v2-balanced-a-T.webp`,
+            url: `${SITE_URL}/images/logos/muqabaleh-wordmark.webp`,
           },
         },
         mainEntityOfPage: {

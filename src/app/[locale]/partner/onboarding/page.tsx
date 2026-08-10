@@ -15,7 +15,7 @@ export default function PartnerOnboardingPage() {
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     name: '',
-    logoUrl: '/images/logos/v2-balanced-a-T.webp',
+    logoUrl: '/images/logos/muqabaleh-wordmark.webp',
     primaryColor: '#0D9488',
     accentColor: '#E8C97A',
     customDomain: '',

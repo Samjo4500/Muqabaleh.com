@@ -57,7 +57,7 @@ export function CrystalNavbar() {
     <header className="sticky top-0 z-50 w-full px-3 pt-3 pe-20 md:px-5 md:pe-24">
       <nav
         className={cn(
-          'mq-glass-nav mq-wrap mx-auto flex h-[68px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:px-6',
+          'mq-glass-nav mq-wrap mx-auto flex h-[76px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:h-[84px] md:px-6',
           scrolled && 'border-white/20 bg-[rgba(8,12,22,0.78)] shadow-[0_16px_50px_rgba(0,0,0,0.45)]',
         )}
       >

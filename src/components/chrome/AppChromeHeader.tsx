@@ -34,7 +34,7 @@ export function AppChromeHeader({
   return (
     <header className="relative z-20 px-4 pt-4 md:px-6">
       <div
-        className={`mx-auto flex h-16 items-center justify-between gap-3 rounded-2xl border border-white/12 bg-white/[0.06] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-4 ${maxWidthClass}`}
+        className={`mx-auto flex h-[76px] items-center justify-between gap-3 rounded-2xl border border-white/12 bg-white/[0.06] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-4 md:h-[84px] ${maxWidthClass}`}
       >
         <Link
           href={localePath('/', locale)}

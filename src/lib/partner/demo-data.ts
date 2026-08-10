@@ -32,7 +32,7 @@ export const DEMO_PARTNER: PartnerRecord = {
   contactPhone: '+971500000001',
   website: 'https://atlas-talent.demo',
   country: 'AE',
-  logoUrl: '/images/logos/v2-balanced-a-T.webp',
+  logoUrl: '/images/logos/muqabaleh-wordmark.webp',
   faviconUrl: null,
   primaryColor: '#0D9488',
   accentColor: '#E8C97A',

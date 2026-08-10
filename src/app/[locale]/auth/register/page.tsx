@@ -25,6 +25,8 @@ import {
 } from '@/components/auth/PasswordField';
 import { resolvePostAuthPath } from '@/lib/auth-redirect';
 import { localePath } from '@/i18n/navigation';
+import { attributionPayload } from '@/lib/marketing/attribution';
+import { MENA_COUNTRIES, INDUSTRIES, EXPERIENCES } from '@/lib/constants';
 
 type FieldErrors = Record<string, string>;
 
@@ -61,6 +63,11 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [country, setCountry] = useState('');
+  const [phone, setPhone] = useState('');
+  const [desiredRole, setDesiredRole] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [experience, setExperience] = useState('');
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
   const [companyName, setCompanyName] = useState('');
   const [companySize, setCompanySize] = useState('');
   const [companySector, setCompanySector] = useState('');
@@ -109,10 +116,17 @@ function RegisterForm() {
           password,
           name: name.trim(),
           country: country || undefined,
+          phone: phone.trim() || undefined,
+          role: !isCompany ? desiredRole.trim() || undefined : undefined,
+          industry: !isCompany ? industry || undefined : undefined,
+          experience: !isCompany ? experience || undefined : undefined,
+          marketingOptIn,
+          locale,
           companyName: isCompany ? companyName.trim() : undefined,
           companySize: isCompany ? SIZE_MAP[companySize] || companySize || undefined : undefined,
           companyIndustry: isCompany ? companySector || undefined : undefined,
           companyCountry: isCompany ? country || undefined : undefined,
+          ...attributionPayload(),
         }),
       });
 
@@ -276,17 +290,29 @@ function RegisterForm() {
             <SelectValue placeholder={t('countryPlaceholder')} />
           </SelectTrigger>
           <SelectContent className="border-white/10 bg-[#0a1220]">
-            <SelectItem value="sa">{t('countrySaudi')}</SelectItem>
-            <SelectItem value="ae">{t('countryUAE')}</SelectItem>
-            <SelectItem value="qa">{t('countryQatar')}</SelectItem>
-            <SelectItem value="bh">{t('countryBahrain')}</SelectItem>
-            <SelectItem value="kw">{t('countryKuwait')}</SelectItem>
-            <SelectItem value="om">{t('countryOman')}</SelectItem>
-            <SelectItem value="jo">{t('countryJordan')}</SelectItem>
-            <SelectItem value="eg">{t('countryEgypt')}</SelectItem>
+            {MENA_COUNTRIES.map((c) => (
+              <SelectItem key={c.code} value={c.code}>
+                {locale === 'ar' ? c.name_ar : c.name_en}
+              </SelectItem>
+            ))}
             <SelectItem value="other">{t('countryOther')}</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="reg-phone" className="text-white/60">
+          {t('phone')}
+        </Label>
+        <Input
+          id="reg-phone"
+          type="tel"
+          placeholder={t('phonePlaceholder')}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="glass-input h-11"
+          autoComplete="tel"
+        />
       </div>
     </>
   );
@@ -315,6 +341,50 @@ function RegisterForm() {
 
           <TabsContent value="individual" className="mt-5 flex flex-col gap-5">
             {sharedFields}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="reg-role" className="text-white/60">
+                {t('desiredRole')}
+              </Label>
+              <Input
+                id="reg-role"
+                value={desiredRole}
+                onChange={(e) => setDesiredRole(e.target.value)}
+                placeholder={t('desiredRolePlaceholder')}
+                className="glass-input h-11"
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label className="text-white/60">{t('industryIndividual')}</Label>
+                <Select value={industry} onValueChange={setIndustry}>
+                  <SelectTrigger className="glass-input h-11 w-full border-white/10 text-white/60">
+                    <SelectValue placeholder={t('companySectorPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent className="border-white/10 bg-[#0a1220]">
+                    {INDUSTRIES.map((ind) => (
+                      <SelectItem key={ind} value={ind}>
+                        {ind}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-white/60">{t('experienceIndividual')}</Label>
+                <Select value={experience} onValueChange={setExperience}>
+                  <SelectTrigger className="glass-input h-11 w-full border-white/10 text-white/60">
+                    <SelectValue placeholder={t('experienceIndividual')} />
+                  </SelectTrigger>
+                  <SelectContent className="border-white/10 bg-[#0a1220]">
+                    {EXPERIENCES.map((exp) => (
+                      <SelectItem key={exp} value={exp}>
+                        {exp}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="company" className="mt-5 flex flex-col gap-5">
@@ -383,6 +453,16 @@ function RegisterForm() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-white/65">
+          <input
+            type="checkbox"
+            checked={marketingOptIn}
+            onChange={(e) => setMarketingOptIn(e.target.checked)}
+            className="mt-1 h-4 w-4 accent-teal-400"
+          />
+          <span>{t('marketingOptIn')}</span>
+        </label>
 
         <button
           type="submit"

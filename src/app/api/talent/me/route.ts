@@ -3,6 +3,10 @@ import { db } from '@/lib/db';
 import { getAtsSession, unauthorized } from '@/lib/ats/auth';
 import { serializeTalent } from '@/lib/ats/serialize';
 import { fileFromForm, saveMediaAsset } from '@/lib/ats/media';
+import {
+  attributionFromBody,
+  captureMarketingContact,
+} from '@/lib/marketing/contact';
 
 export async function GET() {
   const user = await getAtsSession();
@@ -168,6 +172,33 @@ export async function PATCH(req: NextRequest) {
         },
       },
     });
+
+    void captureMarketingContact({
+      email: user.email,
+      userId: user.id,
+      name: typeof data.name === 'string' ? data.name : null,
+      phone: typeof data.phone === 'string' ? data.phone : null,
+      country: typeof data.country === 'string' ? data.country : null,
+      location: typeof data.location === 'string' ? data.location : null,
+      industry: typeof data.industry === 'string' ? data.industry : null,
+      experience: typeof data.level === 'string' ? data.level : null,
+      role:
+        typeof data.role === 'string'
+          ? data.role
+          : typeof data.desiredRole === 'string'
+            ? data.desiredRole
+            : null,
+      level: typeof data.level === 'string' ? data.level : null,
+      linkedInUrl: typeof data.linkedInUrl === 'string' ? data.linkedInUrl : null,
+      locale: typeof data.locale === 'string' ? data.locale : null,
+      source: 'PROFILE',
+      marketingOptIn:
+        data.marketingOptIn === undefined
+          ? true
+          : data.marketingOptIn !== 'false' && data.marketingOptIn !== false,
+      ...attributionFromBody(data),
+      meta: { via: 'talent/me' },
+    }).catch(() => {});
 
     return NextResponse.json({ success: true, profile: serializeTalent(pool) });
   } catch (e) {

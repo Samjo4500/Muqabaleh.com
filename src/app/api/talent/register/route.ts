@@ -7,6 +7,10 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { triggerWelcomeEmail } from '@/lib/email-triggers';
 import { serializeTalent } from '@/lib/ats/serialize';
+import {
+  attributionFromBody,
+  captureMarketingContact,
+} from '@/lib/marketing/contact';
 
 /**
  * Create (or update) a full talent-pool profile with CV + photo.
@@ -186,6 +190,39 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    const userRow = await db.user.findUnique({
+      where: { id: userId },
+      select: { email: true, name: true, country: true },
+    });
+    if (userRow?.email) {
+      void captureMarketingContact({
+        email: userRow.email,
+        userId,
+        name: userRow.name || String(form.get('name') || '') || null,
+        phone: String(form.get('phone') || '') || null,
+        country: userRow.country || String(form.get('country') || '') || null,
+        location: String(form.get('location') || '') || null,
+        industry: String(form.get('industry') || '') || null,
+        experience: String(form.get('level') || '') || null,
+        role,
+        level,
+        linkedInUrl: String(form.get('linkedInUrl') || '') || null,
+        locale: String(form.get('locale') || '') || null,
+        source: 'TALENT',
+        marketingOptIn: String(form.get('marketingOptIn') || 'true') !== 'false',
+        ...attributionFromBody({
+          utmSource: form.get('utmSource'),
+          utmMedium: form.get('utmMedium'),
+          utmCampaign: form.get('utmCampaign'),
+          utmContent: form.get('utmContent'),
+          utmTerm: form.get('utmTerm'),
+          landingPath: form.get('landingPath'),
+          referrer: form.get('referrer'),
+        }),
+        meta: { createdAccount, openToWork: true },
+      }).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,

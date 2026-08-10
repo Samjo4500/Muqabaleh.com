@@ -5,6 +5,7 @@ import { useLocale } from 'next-intl';
 import { Mail } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
+import { NewsletterCapture } from '@/components/marketing/NewsletterCapture';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 
@@ -104,7 +105,7 @@ export function CrystalFooter() {
             <Mail size={14} strokeWidth={1.75} />
             <BiInline bi={C.footer.email} />
           </a>
-          <div className="flex items-center gap-2">
+          <div className="mb-5 flex items-center gap-2">
             {SOCIAL_LINKS.map((social) => (
               <a
                 key={social.name}
@@ -118,6 +119,7 @@ export function CrystalFooter() {
               </a>
             ))}
           </div>
+          <NewsletterCapture variant="footer" />
         </div>
 
         {(

@@ -5,6 +5,7 @@ import { routing, type Locale } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
+import { AttributionCapture } from '@/components/marketing/AttributionCapture';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
@@ -114,6 +115,7 @@ export default async function LocaleLayout({
       <body className="min-h-screen bg-void text-[var(--text-primary)] antialiased">
         <Providers>
           <NextIntlClientProvider messages={messages}>
+            <AttributionCapture />
             {children}
             <DeferredMarketingChrome />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />

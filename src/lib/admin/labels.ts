@@ -125,6 +125,7 @@ export const L = {
   mockSessions: { ar: 'جلسات المحاكاة', en: 'Mock Sessions' },
   partnerPayouts: { ar: 'مدفوعات الشركاء', en: 'Partner Payouts' },
   interviewerPayouts: { ar: 'مدفوعات المحاورين', en: 'Interviewer Payouts' },
+  marketingContacts: { ar: 'جهات التسويق', en: 'Marketing Contacts' },
 } as const satisfies Record<string, Bi>;
 
 export type LabelKey = keyof typeof L;

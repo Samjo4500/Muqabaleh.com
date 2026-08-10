@@ -836,10 +836,15 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
     setDone(false);
     const form = new FormData(e.currentTarget);
     form.set('openToWork', 'true');
+    form.set('marketingOptIn', 'true');
+    form.set('locale', locale);
     if (!form.get('desiredRole') && form.get('role')) {
       form.set('desiredRole', String(form.get('role')));
     }
     try {
+      const { attributionPayload } = await import('@/lib/marketing/attribution');
+      const attr = attributionPayload();
+      for (const [k, v] of Object.entries(attr)) form.set(k, v);
       const endpoint = loggedIn ? '/api/talent/me' : '/api/talent/register';
       const method = loggedIn ? 'PATCH' : 'POST';
       const res = await fetch(endpoint, { method, body: form });
@@ -942,6 +947,11 @@ function CandidatePanel({ locale, isAr }: { locale: string; isAr: boolean }) {
           <Field label={isAr ? 'القطاع' : 'Industry'} name="industry" />
           <Field label={isAr ? 'المدينة / الموقع' : 'City / location'} name="location" />
         </div>
+        <Field
+          label={isAr ? 'رابط LinkedIn' : 'LinkedIn URL'}
+          name="linkedInUrl"
+          placeholder="https://linkedin.com/in/…"
+        />
         <Field
           label={isAr ? 'المهارات (فواصل)' : 'Skills (comma-separated)'}
           name="skills"

@@ -16,14 +16,28 @@ interface OptInModalProps {
   muqabalehScore: number;
   interviewId: string;
   onSave: (data: { optIn: boolean }) => void;
+  /** Optional role/level from interview context */
+  role?: string;
+  level?: string;
 }
 
-export function OptInModal({ open, onOpenChange, muqabalehScore, interviewId, onSave }: OptInModalProps) {
+export function OptInModal({
+  open,
+  onOpenChange,
+  muqabalehScore,
+  interviewId,
+  onSave,
+  role,
+  level,
+}: OptInModalProps) {
   const t = useTranslations('optIn');
   const [checked, setChecked] = useState(true);
+  const [marketing, setMarketing] = useState(true);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const isLowScore = muqabalehScore < 6;
+  // Score may be 0–10 (legacy UI) or 0–100 (coach). Treat < 1.5×10 as 0–10 scale.
+  const normalized = muqabalehScore <= 10 ? muqabalehScore * 10 : muqabalehScore;
+  const isLowScore = normalized < 60;
 
   const handleSave = async () => {
     if (!checked) {
@@ -36,13 +50,16 @@ export function OptInModal({ open, onOpenChange, muqabalehScore, interviewId, on
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          isOptedIn: true,
           optIn: true,
-          score: muqabalehScore,
           interviewId,
+          role: role || 'Professional',
+          level: level || 'MID',
+          marketingOptIn: marketing,
         }),
       });
       const data = await res.json();
-      if (data.isVisible) {
+      if (data.isVisible || data.success) {
         setSaved(true);
       }
       onSave({ optIn: true });
@@ -89,6 +106,17 @@ export function OptInModal({ open, onOpenChange, muqabalehScore, interviewId, on
               />
               <span className="text-sm text-[var(--text-primary)]">{t('checkbox')}</span>
             </label>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={marketing}
+                onChange={(e) => setMarketing(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-white/30 accent-[var(--gold)]"
+              />
+              <span className="text-sm text-[var(--text-primary)]">
+                {t('marketingCheckbox')}
+              </span>
+            </label>
             <div className="flex gap-3 pt-2">
               <Button
                 onClick={handleSave}
@@ -100,7 +128,7 @@ export function OptInModal({ open, onOpenChange, muqabalehScore, interviewId, on
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 border-white/10 text-[var(--text-muted)] hover:text-white"
+                className="border-white/20 text-white/70"
               >
                 {t('later')}
               </Button>

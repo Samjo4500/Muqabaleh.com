@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
-import { User, Lock, AlertTriangle, Loader2, Mail, BadgeCheck } from 'lucide-react';
+import { User, Lock, AlertTriangle, Loader2, Mail, BadgeCheck, Briefcase } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { attributionPayload } from '@/lib/marketing/attribution';
 
 import { MENA_COUNTRIES, INDUSTRIES, EXPERIENCES } from '@/lib/constants';
 
@@ -60,6 +61,11 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
   const [experience, setExperience] = useState(user.experience ?? '');
   const [gender, setGender] = useState(user.interviewerGender ?? 'MALE');
   const [language, setLanguage] = useState(user.language ?? 'AR');
+  const [phone, setPhone] = useState('');
+  const [linkedInUrl, setLinkedInUrl] = useState('');
+  const [desiredRole, setDesiredRole] = useState('');
+  const [location, setLocation] = useState('');
+  const [marketingOptIn, setMarketingOptIn] = useState(true);
 
   /* ---- Password fields ---- */
   const [currentPw, setCurrentPw] = useState('');
@@ -73,6 +79,28 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
 
   /* ---- Delete confirmation step ---- */
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/talent/me');
+        if (!res.ok) return;
+        const data = await res.json();
+        const p = data.profile;
+        if (!p || cancelled) return;
+        setPhone(p.phone || '');
+        setLinkedInUrl(p.linkedInUrl || '');
+        setDesiredRole(p.desiredRole || p.role || '');
+        setLocation(p.location || '');
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* ================================================================ */
   /*  Save profile                                                     */
@@ -96,6 +124,27 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to save');
       }
+
+      // Enrich CandidatePool + marketing CRM (phone, LinkedIn, role, consent)
+      await fetch('/api/talent/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name || undefined,
+          country: country || undefined,
+          industry: industry || undefined,
+          level: experience || undefined,
+          role: desiredRole || experience || 'Professional',
+          desiredRole: desiredRole || undefined,
+          phone: phone || undefined,
+          linkedInUrl: linkedInUrl || undefined,
+          location: location || undefined,
+          marketingOptIn,
+          locale,
+          ...attributionPayload(),
+        }),
+      }).catch(() => {});
+
       toast.success(t('saved'));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : tCommon('error'));
@@ -283,6 +332,66 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <Briefcase size={16} className="text-teal-300" />
+            <div>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{t('talentSection')}</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('talentHint')}</p>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm text-[var(--text-muted)]">{t('desiredRole')}</Label>
+            <Input
+              value={desiredRole}
+              onChange={(e) => setDesiredRole(e.target.value)}
+              className="glass-input"
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm text-[var(--text-muted)]">{t('phone')}</Label>
+              <Input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder={t('phonePlaceholder')}
+                className="glass-input"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm text-[var(--text-muted)]">{t('location')}</Label>
+              <Input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="glass-input"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm text-[var(--text-muted)]">{t('linkedIn')}</Label>
+            <Input
+              value={linkedInUrl}
+              onChange={(e) => setLinkedInUrl(e.target.value)}
+              placeholder="https://linkedin.com/in/…"
+              className="glass-input"
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
+              {t('marketingSection')}
+            </p>
+            <label className="flex cursor-pointer items-start gap-3 text-sm text-[var(--text-muted)]">
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                className="mt-1 h-4 w-4 accent-teal-400"
+              />
+              <span>{t('marketingOptIn')}</span>
+            </label>
+          </div>
         </div>
 
         {/* Preferred Interviewer Gender */}

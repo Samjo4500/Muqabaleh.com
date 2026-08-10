@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { submitPartnerApplication } from '@/lib/partner/service';
+import {
+  attributionFromBody,
+  captureMarketingContact,
+} from '@/lib/marketing/contact';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +23,16 @@ export async function POST(req: NextRequest) {
       country: body.country ? String(body.country) : undefined,
       message: body.message ? String(body.message) : undefined,
     });
+    void captureMarketingContact({
+      email,
+      name: contactName,
+      phone: body.phone ? String(body.phone) : null,
+      country: body.country ? String(body.country) : null,
+      source: 'PARTNER',
+      marketingOptIn: true,
+      ...attributionFromBody(body as Record<string, unknown>),
+      meta: { companyName, website: body.website || null },
+    }).catch(() => {});
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     console.error('partner apply', err);

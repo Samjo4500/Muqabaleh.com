@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { UserRole } from '@prisma/client';
 import { triggerAdminNewApplicationEmail } from '@/lib/email-triggers';
+import { captureMarketingContact } from '@/lib/marketing/contact';
 
 // POST /api/interviewers/apply — submit interviewer application (multipart form)
 export async function POST(req: NextRequest) {
@@ -202,6 +203,18 @@ export async function POST(req: NextRequest) {
 
       // Notify admin of new application (fire and forget)
       triggerAdminNewApplicationEmail(application.id).catch(() => {});
+
+      void captureMarketingContact({
+        email: email!.trim().toLowerCase(),
+        userId: user.id,
+        name: fullName!.trim(),
+        phone: phone!.trim(),
+        linkedInUrl: linkedInUrl?.trim() || null,
+        experience: String(years),
+        source: 'INTERVIEWER',
+        marketingOptIn: true,
+        meta: { priceTier, specialties, industries },
+      }).catch(() => {});
 
       return NextResponse.json({
         success: true,

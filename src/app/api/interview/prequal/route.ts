@@ -14,6 +14,7 @@ import {
   SENIORITY_OPTIONS,
   LANGUAGE_OPTIONS,
 } from '@/lib/interview/constants';
+import { captureMarketingContact } from '@/lib/marketing/contact';
 
 const schema = z.object({
   sessionId: z.string().uuid().optional(),
@@ -74,6 +75,23 @@ export async function POST(req: NextRequest) {
       weaknessFocus: body.weaknessFocus,
       durationPreset: body.durationPreset,
     });
+
+    void captureMarketingContact({
+      email,
+      userId,
+      name: session.user.name,
+      role: body.targetRole,
+      level: body.seniorityLevel,
+      industry: body.targetIndustry,
+      locale: body.languagePreference,
+      source: 'PREQUAL',
+      marketingOptIn: true,
+      meta: {
+        interviewRound: body.interviewRound,
+        durationPreset: body.durationPreset,
+        prequalId: saved.prequalId,
+      },
+    }).catch(() => {});
 
     return NextResponse.json({
       prequalId: saved.prequalId,

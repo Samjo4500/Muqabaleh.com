@@ -168,6 +168,7 @@ model User {
   createdB2bJobs         B2BJob[]             @relation("JobCreator")
   paypalSubscriptions    PaypalSubscription[]
   candidatePool          CandidatePool?
+  marketingContact       MarketingContact?
   adminRoleAssignments   AdminRoleAssignment[]
   adminAuditLogs         AdminAuditLog[]      @relation("AdminAuditActor")
   supportTicketsAssigned SupportTicket[]      @relation("TicketAssignee")
@@ -804,6 +805,47 @@ model CandidatePool {
   @@index([muqabalehScore])
   @@index([industry])
   @@index([location])
+}
+
+/// First-party marketing CRM — newsletter + every lead/signup with consent + UTM.
+model MarketingContact {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  userId           String?   @unique
+  user             User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name             String?
+  phone            String?
+  country          String?
+  location         String?
+  industry         String?
+  experience       String?
+  role             String?
+  level            String?
+  linkedInUrl      String?
+  locale           String?
+  /// REGISTER | NEWSLETTER | TALENT | DEMO | PARTNER | INTERVIEWER | OPT_IN | PROFILE | PREQUAL | APPLY
+  source           String
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  utmContent       String?
+  utmTerm          String?
+  landingPath      String?
+  referrer         String?
+  marketingOptIn   Boolean   @default(true)
+  marketingOptInAt DateTime?
+  unsubscribedAt   DateTime?
+  lastSeenAt       DateTime  @default(now())
+  meta             Json      @default("{}")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([marketingOptIn])
+  @@index([source])
+  @@index([country])
+  @@index([createdAt])
+  @@index([lastSeenAt])
+  @@map("marketing_contacts")
 }
 
 // ─── Super Admin Control Panel (Muqabaleh only) ───

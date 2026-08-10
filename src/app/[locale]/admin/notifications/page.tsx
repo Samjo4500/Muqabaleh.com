@@ -10,12 +10,12 @@ export default function Page() {
         settingKey="notification_center"
         title={{ ar: 'مركز التنبيهات', en: 'Notification Center' }}
         description={{
-          ar: 'بث عام أو لشريحة أو لمستخدم محدد، جدولة، وسجل التنبيهات، واختبار الدفع.',
-          en: 'Broadcast to all/segment/user, scheduled notifications, history, push test sender.',
+          ar: 'استخدم جرس التنبيهات أعلى اللوحة للبريد والتنبيهات الفورية. هنا مسودة البث وسجل NotificationLog.',
+          en: 'Use the bell in the admin chrome for live email/ops alerts. This page holds broadcast drafts + NotificationLog history.',
         }}
         footerNote={{
-          ar: 'يُحفظ نموذج البث في AdminSetting. سجل التنبيهات أدناه يعرض السجلات الحقيقية إن وُجدت.',
-          en: 'Broadcast draft persists to AdminSetting. History below shows real logs when present.',
+          ar: 'الجرس يجمع البريد اليومي، فشل الطابور، التذاكر، طلبات الشركاء، وأخطاء ATS.',
+          en: 'The bell aggregates daily summary email, queue failures, tickets, partner apps, and ATS errors.',
         }}
         sections={[
           {

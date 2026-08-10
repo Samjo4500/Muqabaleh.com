@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "db:seed:interview": "npx tsx prisma/seed-interview-questions.ts",
-    "db:seed:listed-companies": "npx tsx prisma/seed-listed-companies.ts"
+    "db:seed:listed-companies": "npx tsx prisma/seed-listed-companies.ts",
+    "jobs:render-faces": "node scripts/render-job-faces.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

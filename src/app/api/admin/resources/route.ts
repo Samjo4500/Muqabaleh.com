@@ -371,6 +371,29 @@ async function createResource(resource: ResourceKey, body: Record<string, unknow
           status: 'QUEUED',
         },
       });
+    case 'admins': {
+      const email = String(body.email || `admin_${Date.now()}@muqabaleh.com`).toLowerCase();
+      const name = String(body.name || 'Admin');
+      const role = body.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN';
+      const tempPassword =
+        typeof body.password === 'string' && body.password.length >= 10
+          ? body.password
+          : `Mq-${Math.random().toString(36).slice(2, 10)}!A1`;
+      const { hash } = await import('bcryptjs');
+      const passwordHash = await hash(tempPassword, 12);
+      const user = await db.user.create({
+        data: {
+          email,
+          name,
+          role,
+          passwordHash,
+          accountType: 'INDIVIDUAL',
+          isActive: true,
+        },
+        select: { id: true, email: true, name: true, role: true, createdAt: true },
+      });
+      return { ...user, tempPassword };
+    }
     default:
       throw new Error('Create not supported');
   }

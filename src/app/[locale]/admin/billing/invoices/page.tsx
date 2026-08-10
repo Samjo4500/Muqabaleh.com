@@ -47,6 +47,7 @@ export default function Page() {
         ]}
       />
       <AdminConfigPanel
+        settingKey="billing_invoices"
         title={{ ar: 'إعدادات الفواتير', en: 'Invoice settings' }}
         sections={[
           {

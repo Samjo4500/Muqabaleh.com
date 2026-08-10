@@ -8,24 +8,15 @@ export default function Page() {
     <AdminDataTable
       title={{ ar: 'المسؤولون والمشرفون', en: 'Admins & Moderators' }}
       description={{
-        ar: 'إنشاء مسؤول، صلاحيات تفصيلية، إعادة تعيين كلمة المرور، وسجل النشاط.',
-        en: 'Create admins, granular permissions, password reset, activity log.',
+        ar: 'إنشاء مسؤول، إعادة تعيين كلمة المرور، وتعطيل الجلسات (JWT).',
+        en: 'Create admins, reset passwords, and revoke access (JWT deactivate).',
       }}
       resource="admins"
-      creatable
+      creatable={false}
       columns={[
         { key: 'name', label: { ar: 'الاسم', en: 'Name' } },
         { key: 'email', label: { ar: 'البريد', en: 'Email' } },
         { key: 'role', label: { ar: 'الدور', en: 'Role' } },
-        {
-          key: 'permissions',
-          label: { ar: 'الصلاحيات', en: 'Permissions' },
-          render: () => (
-            <span className="text-xs text-[var(--text-muted)]">
-              Users · Billing · Content · Support · Settings
-            </span>
-          ),
-        },
         {
           key: 'totpEnabled',
           label: { ar: 'التحقق الثنائي', en: '2FA' },
@@ -42,10 +33,41 @@ export default function Page() {
       ]}
       rowActions={[
         {
+          id: 'create',
+          label: { ar: 'إنشاء مسؤول', en: 'Create admin' },
+          onRun: async () => {
+            const email = window.prompt('Admin email');
+            if (!email) return;
+            const name = window.prompt('Name', 'Admin') || 'Admin';
+            const res = await fetch('/api/admin/admins', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'create', email, name, role: 'ADMIN' }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Failed');
+              return;
+            }
+            alert(`Created ${data.user.email}\nTemp password: ${data.tempPassword}`);
+            window.location.reload();
+          },
+        },
+        {
           id: 'reset',
           label: { ar: 'إعادة تعيين كلمة المرور', en: 'Reset password' },
           onRun: async (row) => {
-            alert(`Password reset queued for ${row.email}`);
+            const res = await fetch('/api/admin/admins', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'reset_password', userId: row.id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Failed');
+              return;
+            }
+            alert(`New password for ${data.email}:\n${data.tempPassword}`);
           },
         },
       ]}

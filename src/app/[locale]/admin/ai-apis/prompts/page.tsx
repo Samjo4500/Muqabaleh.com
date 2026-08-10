@@ -5,6 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
+      settingKey="ai_prompts"
       title={{ ar: 'إدارة التعليمات النصية', en: 'Prompt Management' }}
       description={{
         ar: 'التعليمات الأساسية للنظام لتوليد المقابلات، التقييم، الملاحظات، وحوار الأفاتار — مع اختبار A/B للتعليمات وسجل الإصدارات.',

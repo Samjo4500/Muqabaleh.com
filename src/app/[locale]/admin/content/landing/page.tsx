@@ -5,6 +5,7 @@ import { AdminConfigPanel } from '@/components/admin/AdminConfigPanel';
 export default function Page() {
   return (
     <AdminConfigPanel
+      settingKey="content_landing"
       title={{ ar: 'محتوى الصفحة الهبوط', en: 'Landing Page Content' }}
       description={{
         ar: 'نص البطل عربي/إنجليزي، الأقسام، الشهادات، الأسئلة الشائعة، ووسوم SEO.',

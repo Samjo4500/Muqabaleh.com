@@ -12,7 +12,7 @@ export type AdminNavGroup = {
 };
 
 /**
- * Exact Super Admin sidebar structure from product spec.
+ * Super Admin sidebar — live ops first, then content/config.
  * Paths are under /admin (locale-aware via localePath).
  */
 export const ADMIN_NAV: AdminNavGroup[] = [
@@ -29,6 +29,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { href: '/admin/users/candidates', label: 'candidates' },
       { href: '/admin/users/admins', label: 'admins' },
       { href: '/admin/users/companies', label: 'companies' },
+      { href: '/admin/users/entitlements', label: 'entitlements' },
     ],
   },
   {
@@ -36,18 +37,40 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'interviews',
     items: [
       { href: '/admin/coach', label: 'coachOverview' },
+      { href: '/admin/passports', label: 'passports' },
       { href: '/admin/interviews/templates', label: 'templates' },
       { href: '/admin/interviews/questions', label: 'questions' },
       { href: '/admin/interviews/sessions', label: 'sessions' },
+      { href: '/admin/interviews/mock-sessions', label: 'mockSessions' },
       { href: '/admin/interviews/rubrics', label: 'rubrics' },
+    ],
+  },
+  {
+    id: 'jobs',
+    label: 'jobsBoard',
+    items: [
+      { href: '/admin/jobs/aggregator', label: 'atsAggregator' },
+      { href: '/admin/b2b/jobs', label: 'b2bJobs' },
+      { href: '/admin/b2b/applications', label: 'b2bApplications' },
+      { href: '/admin/applicants', label: 'applicants' },
+    ],
+  },
+  {
+    id: 'marketplace',
+    label: 'legacyOps',
+    items: [
+      { href: '/admin/interviewers', label: 'interviewers' },
+      { href: '/admin/bookings', label: 'bookings' },
+      { href: '/admin/payouts', label: 'interviewerPayouts' },
     ],
   },
   {
     id: 'partners',
     label: 'partners',
     items: [
-      { href: '/admin/partners/whitelabel', label: 'whitelabel' },
+      { href: '/admin/partners/list', label: 'partnersList' },
       { href: '/admin/partners/applications', label: 'applications' },
+      { href: '/admin/partners/whitelabel', label: 'whitelabel' },
       { href: '/admin/partners/revenue', label: 'revenueShare' },
     ],
   },
@@ -65,7 +88,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'payments',
     items: [
       { href: '/admin/payments/transactions', label: 'transactions' },
-      { href: '/admin/payments/payouts', label: 'payouts' },
+      { href: '/admin/payments/payouts', label: 'partnerPayouts' },
       { href: '/admin/payments/overview', label: 'financialOverview' },
     ],
   },
@@ -85,6 +108,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: '/admin/content/landing', label: 'landing' },
       { href: '/admin/content/emails', label: 'emails' },
+      { href: '/admin/content/email-queue', label: 'emailQueue' },
       { href: '/admin/content/notifications', label: 'notifications' },
     ],
   },
@@ -124,11 +148,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: 'audit',
     label: 'audit',
     items: [{ href: '/admin/audit', label: 'audit' }],
-  },
-  {
-    id: 'applicants',
-    label: 'applicants',
-    items: [{ href: '/admin/applicants', label: 'applicants' }],
   },
 ];
 

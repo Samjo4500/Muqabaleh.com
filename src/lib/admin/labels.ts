@@ -113,6 +113,18 @@ export const L = {
   interviewers: { ar: 'المحاورون', en: 'Interviewers' },
   bookings: { ar: 'الحجوزات', en: 'Bookings' },
   coachOverview: { ar: 'نظرة جيني / الجواز', en: 'Jeannie / Passport Ops' },
+  // Expanded ops (2026)
+  jobsBoard: { ar: 'لوحة الوظائف', en: 'Jobs Board' },
+  atsAggregator: { ar: 'مجمّع ATS', en: 'ATS Aggregator' },
+  passports: { ar: 'جوازات المقابلة', en: 'Passports' },
+  partnersList: { ar: 'محفظة الشركاء', en: 'Partner Portfolio' },
+  b2bJobs: { ar: 'وظائف الشركات', en: 'B2B Jobs' },
+  b2bApplications: { ar: 'طلبات التوظيف', en: 'B2B Applications' },
+  entitlements: { ar: 'صلاحيات جيني', en: 'Jeannie Entitlements' },
+  emailQueue: { ar: 'طابور البريد', en: 'Email Queue' },
+  mockSessions: { ar: 'جلسات المحاكاة', en: 'Mock Sessions' },
+  partnerPayouts: { ar: 'مدفوعات الشركاء', en: 'Partner Payouts' },
+  interviewerPayouts: { ar: 'مدفوعات المحاورين', en: 'Interviewer Payouts' },
 } as const satisfies Record<string, Bi>;
 
 export type LabelKey = keyof typeof L;

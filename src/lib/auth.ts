@@ -165,13 +165,22 @@ export const authOptions: NextAuthOptions = {
                 partnerId: true,
               },
             });
-            if (fresh && fresh.isActive) {
-              token.tier = fresh.tier;
-              token.sessionsLeft = fresh.sessionsLeft;
-              token.role = fresh.role;
-              token.accountType = fresh.accountType;
-              token.companyId = fresh.companyId ?? undefined;
-              token.partnerId = fresh.partnerId ?? undefined;
+            if (fresh) {
+              if (!fresh.isActive) {
+                // Force logout when Super Admin deactivates / revokes sessions.
+                // session() callback treats missing role as unauthenticated for admin routes.
+                token.error = 'InactiveUser';
+                token.role = 'USER';
+                token.accountType = 'INDIVIDUAL';
+              } else {
+                token.tier = fresh.tier;
+                token.sessionsLeft = fresh.sessionsLeft;
+                token.role = fresh.role;
+                token.accountType = fresh.accountType;
+                token.companyId = fresh.companyId ?? undefined;
+                token.partnerId = fresh.partnerId ?? undefined;
+                if ('error' in token) delete (token as { error?: string }).error;
+              }
             }
             token.entitlementRefreshAt = now;
           } catch {

@@ -58,33 +58,77 @@ export const MENA_COUNTRY_ORDER: MenaCountryKey[] = [
   'other',
 ];
 
+/**
+ * Match order: smaller / more specific markets BEFORE UAE/KSA.
+ * Otherwise "UAE & Oman" / company HQ "KSA/Jordan" swallows the real city.
+ */
+const COUNTRY_PATTERNS: Array<{ key: MenaCountryKey; re: RegExp }> = [
+  { key: 'kuwait', re: /\b(kuwait|kuwait city)\b/i },
+  { key: 'bahrain', re: /\b(bahrain|manama)\b/i },
+  { key: 'oman', re: /\b(muscat|oman|salalah|sohar)\b/i },
+  { key: 'jordan', re: /\b(amman|jordan|irbid|aqaba|zarqa)\b/i },
+  { key: 'lebanon', re: /\b(beirut|lebanon)\b/i },
+  { key: 'morocco', re: /\b(casablanca|rabat|marrakech|marrakesh|tangier|fez|fes|agadir|morocco)\b/i },
+  { key: 'tunisia', re: /\b(tunis|tunisia|sfax|sousse)\b/i },
+  { key: 'algeria', re: /\b(algiers|oran|constantine|algeria)\b/i },
+  { key: 'iraq', re: /\b(baghdad|basra|erbil|mosul|najaf|sulaymaniyah|iraq)\b/i },
+  { key: 'palestine', re: /\b(ramallah|palestine|gaza|west bank)\b/i },
+  { key: 'libya', re: /\b(tripoli|benghazi|libya)\b/i },
+  { key: 'sudan', re: /\b(khartoum|sudan)\b/i },
+  { key: 'yemen', re: /\b(sana'?a|aden|yemen)\b/i },
+  { key: 'qatar', re: /\b(doha|qatar|lusail)\b/i },
+  { key: 'egypt', re: /\b(cairo|giza|alexandria|egypt|new cairo|mansoura|maadi|heliopolis)\b/i },
+  {
+    key: 'ksa',
+    re: /\b(riyadh|jeddah|dammam|khobar|dhahran|neom|qiddiya|saudi|ksa|madinah|makkah|mecca|jubail|yanbu)\b/i,
+  },
+  {
+    key: 'uae',
+    re: /\b(dubai|abu dhabi|sharjah|ajman|uae|united arab|emirates|al ain|ras al khaimah|fujairah)\b/i,
+  },
+];
+
+const VAGUE_LOCATION_RE =
+  /^\s*(remote|hybrid|anywhere|emea|global|worldwide|multiple locations?|various|n\/?a|—|-)?\s*$/i;
+
+function matchCountry(hay: string): MenaCountryKey | null {
+  if (!hay.trim()) return null;
+  for (const { key, re } of COUNTRY_PATTERNS) {
+    if (re.test(hay)) return key;
+  }
+  return null;
+}
+
 export function classifyMenaCountry(
   location: string,
   country?: string | null,
   title?: string | null,
 ): MenaCountryKey {
-  // Include title — Greenhouse often puts "Egypt" / "UAE & Oman" only in the title
-  // when location is a vague "Hybrid" / "Remote".
-  const hay = `${location} ${country || ''} ${title || ''}`.toLowerCase();
-  if (/\b(dubai|abu dhabi|sharjah|ajman|uae|united arab|emirates|al ain)\b/.test(hay)) return 'uae';
-  if (/\b(riyadh|jeddah|dammam|khobar|dhahran|neom|qiddiya|saudi|ksa|madinah|makkah)\b/.test(hay))
-    return 'ksa';
-  if (/\b(cairo|giza|alexandria|egypt|new cairo|mansoura)\b/.test(hay)) return 'egypt';
-  if (/\b(doha|qatar|lusail)\b/.test(hay)) return 'qatar';
-  if (/\b(kuwait)\b/.test(hay)) return 'kuwait';
-  if (/\b(bahrain|manama)\b/.test(hay)) return 'bahrain';
-  if (/\b(muscat|oman|salalah|sohar)\b/.test(hay)) return 'oman';
-  if (/\b(amman|jordan|irbid|aqaba)\b/.test(hay)) return 'jordan';
-  if (/\b(beirut|lebanon)\b/.test(hay)) return 'lebanon';
-  if (/\b(casablanca|rabat|marrakech|marrakesh|tangier|morocco)\b/.test(hay)) return 'morocco';
-  if (/\b(tunis|tunisia|sfax|sousse)\b/.test(hay)) return 'tunisia';
-  if (/\b(algiers|oran|algeria)\b/.test(hay)) return 'algeria';
-  if (/\b(baghdad|basra|erbil|iraq)\b/.test(hay)) return 'iraq';
-  if (/\b(ramallah|palestine|gaza|west bank)\b/.test(hay)) return 'palestine';
-  if (/\b(tripoli|libya)\b/.test(hay)) return 'libya';
-  if (/\b(khartoum|sudan)\b/.test(hay)) return 'sudan';
-  if (/\b(sana'?a|yemen)\b/.test(hay)) return 'yemen';
-  if (MENA_RE.test(hay)) return 'other';
+  const loc = String(location || '').trim();
+  const titleStr = String(title || '').trim();
+  const companyCountry = String(country || '').trim();
+
+  // 1) Job location wins (Amman must not become KSA because HQ is "KSA/Jordan")
+  if (loc && !VAGUE_LOCATION_RE.test(loc)) {
+    const fromLoc = matchCountry(loc);
+    if (fromLoc) return fromLoc;
+  }
+
+  // 2) Title signals — e.g. "Business Development Manager (Kuwait)" / "UAE & Oman"
+  const fromTitle = matchCountry(titleStr);
+  if (fromTitle) return fromTitle;
+
+  // 3) Vague remote/hybrid: only then use company HQ region
+  if (VAGUE_LOCATION_RE.test(loc) || !loc) {
+    const fromCompany = matchCountry(companyCountry);
+    if (fromCompany) return fromCompany;
+  }
+
+  // 4) Combined fallback (still prefer specific markets via COUNTRY_PATTERNS order)
+  const combined = matchCountry(`${loc} ${titleStr} ${companyCountry}`);
+  if (combined) return combined;
+
+  if (MENA_RE.test(`${loc} ${titleStr} ${companyCountry}`)) return 'other';
   return 'other';
 }
 

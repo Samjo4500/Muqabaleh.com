@@ -42,18 +42,36 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const [q, setQ] = useState('');
   const [salaryOnly, setSalaryOnly] = useState(false);
 
+  const [showEmptyCountries, setShowEmptyCountries] = useState(false);
+
   const countryCounts = useMemo(() => {
     const map = new Map<MenaCountryKey, number>();
     for (const j of initialJobs) {
       const key = classifyMenaCountry(j.location, j.company?.country, j.title);
       map.set(key, (map.get(key) || 0) + 1);
     }
-    // Always render every MENA flag tile — 0 means not covered yet
-    return MENA_COUNTRY_ORDER.map((k) => ({
+    const all = MENA_COUNTRY_ORDER.map((k) => ({
       key: k,
       count: map.get(k) || 0,
     }));
+    // Live markets first; zeros last (still available via "all countries")
+    return all.sort((a, b) => {
+      if (a.count === 0 && b.count > 0) return 1;
+      if (b.count === 0 && a.count > 0) return -1;
+      return MENA_COUNTRY_ORDER.indexOf(a.key) - MENA_COUNTRY_ORDER.indexOf(b.key);
+    });
   }, [initialJobs]);
+
+  const visibleCountryCounts = useMemo(
+    () =>
+      showEmptyCountries ? countryCounts : countryCounts.filter((c) => c.count > 0 || c.key === country),
+    [countryCounts, showEmptyCountries, country],
+  );
+
+  const emptyCountryCount = useMemo(
+    () => countryCounts.filter((c) => c.count === 0 && c.key !== 'other').length,
+    [countryCounts],
+  );
 
   const withSalaryCount = useMemo(
     () => initialJobs.filter((j) => Boolean(j.salaryLabel)).length,
@@ -138,7 +156,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
 
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-white/40">
-              {isAr ? 'حسب الدولة' : 'All MENA countries'}
+              {isAr ? 'حسب الدولة' : 'By country'}
             </p>
             <div className="flex flex-wrap gap-2 pb-1 pt-0.5">
               <CountryFlagTile
@@ -148,7 +166,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                 active={country === 'all'}
                 onClick={() => setCountry('all')}
               />
-              {countryCounts.map((c) => (
+              {visibleCountryCounts.map((c) => (
                 <CountryFlagTile
                   key={c.key}
                   flag={MENA_COUNTRY_FLAGS[c.key]}
@@ -159,7 +177,27 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                   onClick={() => setCountry(c.key)}
                 />
               ))}
+              {emptyCountryCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowEmptyCountries((v) => !v)}
+                  className="inline-flex min-h-[44px] items-center rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-3 text-xs font-semibold text-white/45 transition hover:border-white/25 hover:text-white/70"
+                >
+                  {showEmptyCountries
+                    ? isAr
+                      ? 'إخفاء الدول بلا وظائف'
+                      : 'Hide empty countries'
+                    : isAr
+                      ? `+ ${emptyCountryCount} دول قريباً`
+                      : `+ ${emptyCountryCount} coming soon`}
+                </button>
+              ) : null}
             </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-white/35">
+              {isAr
+                ? 'نعرض فقط الوظائف من لوحات ATS قانونية (Greenhouse / Lever / Workable…). بعض الدول بلا إعلانات عامة بعد.'
+                : 'We only list roles from legal public ATS boards (Greenhouse / Lever / Workable…). Some countries have no public openings yet.'}
+            </p>
           </div>
 
           <button

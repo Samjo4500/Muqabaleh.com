@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, Building2, Briefcase, RefreshCw } from 'lucide-react';
+import { Activity, Building2, Briefcase, RefreshCw, Globe2 } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminStatCard } from '@/components/admin/AdminStatCard';
 import { BiInline } from '@/components/admin/BiLabel';
@@ -11,9 +11,11 @@ import { Badge } from '@/components/ui/badge';
 type Agg = {
   activeJobs: number;
   companyCount: number;
+  catalogSize?: number;
   recentSuccessRate: number | null;
   recent404: number;
   byAts: { ats: string; _count: { _all: number } }[];
+  byCountry?: { country: string; _count: { _all: number } }[];
   companies: {
     id: string;
     name: string;
@@ -53,21 +55,23 @@ export default function AtsAggregatorPage() {
     void load();
   }, [load]);
 
-  const runTick = async () => {
+  const runTick = async (limit = 50) => {
     setRunning(true);
     setMsg('');
     try {
       const res = await fetch('/api/admin/jobs/aggregator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ limit: 30 }),
+        body: JSON.stringify({ limit, action: 'fetch' }),
       });
       const json = await res.json();
       if (!res.ok) {
         setMsg(json.error || 'Fetch failed');
         return;
       }
-      setMsg(`Tick complete · fetched ${JSON.stringify(json.summary ?? json).slice(0, 120)}`);
+      setMsg(
+        `Tick complete · companies ${json.companies ?? '—'} · upserted ${json.upserted ?? 0} · catalog ${json.catalogSize ?? '—'} · errors ${(json.errors || []).length}`,
+      );
       await load();
     } finally {
       setRunning(false);
@@ -79,17 +83,20 @@ export default function AtsAggregatorPage() {
       <AdminPageHeader
         title={{ ar: 'مجمّع ATS', en: 'ATS Aggregator' }}
         description={{
-          ar: 'حالة جلب الوظائف من المجمّعات، الشركات النشطة، وسجلات الجلب — مع تشغيل يدوي.',
-          en: 'Listed-job fetch health, active companies, fetch logs — plus a manual tick.',
+          ar: 'لوحات MENA الموثّقة عبر Greenhouse / Lever / Workable / Recruitee — مزامنة الكتالوج ثم الجلب.',
+          en: 'Verified MENA boards via Greenhouse / Lever / Workable / Recruitee — sync catalog then fetch.',
         }}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" variant="outline" onClick={() => void load()} disabled={loading}>
               <RefreshCw className="me-2 h-4 w-4" />
               <BiInline ar="تحديث" en="Refresh" />
             </Button>
-            <Button type="button" size="sm" onClick={() => void runTick()} disabled={running}>
-              <BiInline ar={running ? 'جارٍ الجلب…' : 'تشغيل جلب'} en={running ? 'Running…' : 'Run fetch tick'} />
+            <Button type="button" size="sm" onClick={() => void runTick(50)} disabled={running}>
+              <BiInline
+                ar={running ? 'جارٍ الجلب عبر MENA…' : 'جلب كل لوحات MENA'}
+                en={running ? 'Fetching MENA…' : 'Fetch all MENA boards'}
+              />
             </Button>
           </div>
         }
@@ -98,16 +105,41 @@ export default function AtsAggregatorPage() {
       {msg ? <p className="mb-4 text-sm text-cyan-300">{msg}</p> : null}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label={{ ar: 'وظائف نشطة', en: 'Active jobs' }} value={String(data?.activeJobs ?? '—')} icon={Briefcase} loading={loading && !data} />
-        <AdminStatCard label={{ ar: 'شركات مدرجة', en: 'Listed companies' }} value={String(data?.companyCount ?? '—')} icon={Building2} loading={loading && !data} />
-        <AdminStatCard label={{ ar: 'نجاح الجلب الأخير', en: 'Recent success rate' }} value={data?.recentSuccessRate != null ? `${data.recentSuccessRate}%` : '—'} icon={Activity} loading={loading && !data} />
-        <AdminStatCard label={{ ar: 'أخطاء 404', en: 'Recent 404s' }} value={String(data?.recent404 ?? '—')} icon={Activity} loading={loading && !data} />
+        <AdminStatCard
+          label={{ ar: 'وظائف نشطة', en: 'Active jobs' }}
+          value={String(data?.activeJobs ?? '—')}
+          icon={Briefcase}
+          loading={loading && !data}
+        />
+        <AdminStatCard
+          label={{ ar: 'شركات مدرجة', en: 'Listed companies' }}
+          value={String(data?.companyCount ?? '—')}
+          icon={Building2}
+          loading={loading && !data}
+        />
+        <AdminStatCard
+          label={{ ar: 'كتالوج MENA', en: 'MENA catalog' }}
+          value={String(data?.catalogSize ?? '—')}
+          icon={Globe2}
+          loading={loading && !data}
+        />
+        <AdminStatCard
+          label={{ ar: 'نجاح الجلب الأخير', en: 'Recent success rate' }}
+          value={data?.recentSuccessRate != null ? `${data.recentSuccessRate}%` : '—'}
+          icon={Activity}
+          loading={loading && !data}
+        />
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
         {(data?.byAts ?? []).map((a) => (
           <Badge key={a.ats} variant="outline">
             {a.ats}: {a._count._all}
+          </Badge>
+        ))}
+        {(data?.byCountry ?? []).map((c) => (
+          <Badge key={c.country} variant="outline">
+            {c.country}: {c._count._all}
           </Badge>
         ))}
       </div>
@@ -117,7 +149,7 @@ export default function AtsAggregatorPage() {
           <h3 className="mb-3 text-sm font-medium">
             <BiInline ar="الشركات" en="Companies" />
           </h3>
-          <ul className="max-h-[420px] space-y-2 overflow-auto text-sm">
+          <ul className="max-h-[480px] space-y-2 overflow-auto text-sm">
             {(data?.companies ?? []).map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 border-b border-white/5 py-2">
                 <div>
@@ -141,7 +173,7 @@ export default function AtsAggregatorPage() {
           <h3 className="mb-3 text-sm font-medium">
             <BiInline ar="سجلات الجلب الأخيرة" en="Recent fetch logs" />
           </h3>
-          <ul className="max-h-[420px] space-y-2 overflow-auto text-sm">
+          <ul className="max-h-[480px] space-y-2 overflow-auto text-sm">
             {(data?.recentLogs ?? []).map((l) => (
               <li key={l.id} className="border-b border-white/5 py-2">
                 <div className="flex justify-between gap-2">

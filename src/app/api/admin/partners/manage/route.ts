@@ -46,6 +46,8 @@ export async function PATCH(req: NextRequest) {
     commissionBps?: number;
     notes?: string;
     plan?: string;
+    customDomainVerified?: boolean;
+    customDomain?: string | null;
   };
   const partnerId = String(body.partnerId || '').trim();
   if (!partnerId) {
@@ -58,6 +60,8 @@ export async function PATCH(req: NextRequest) {
     notes?: string | null;
     plan?: string;
     activatedAt?: Date;
+    customDomainVerified?: boolean;
+    customDomain?: string | null;
   } = {};
 
   if (body.status) {
@@ -73,6 +77,18 @@ export async function PATCH(req: NextRequest) {
   }
   if (typeof body.notes === 'string') data.notes = body.notes;
   if (typeof body.plan === 'string') data.plan = body.plan;
+  if (typeof body.customDomainVerified === 'boolean') {
+    data.customDomainVerified = body.customDomainVerified;
+  }
+  if (body.customDomain !== undefined) {
+    data.customDomain = body.customDomain
+      ? String(body.customDomain)
+          .trim()
+          .toLowerCase()
+          .replace(/^https?:\/\//, '')
+          .replace(/\/.*$/, '')
+      : null;
+  }
 
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: 'No fields' }, { status: 400 });

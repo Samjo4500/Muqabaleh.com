@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getAtsSession, unauthorized, forbidden } from '@/lib/ats/auth';
+import {
+  getAtsSession,
+  unauthorized,
+  forbidden,
+  partnerCompanyIds,
+} from '@/lib/ats/auth';
 import { serializeTalent } from '@/lib/ats/serialize';
 
 /** Employer / partner talent-pool search. */
@@ -25,10 +30,34 @@ export async function GET(req: NextRequest) {
     const industry = searchParams.get('industry') || '';
     const openOnly = searchParams.get('openToWork') !== 'false';
 
+    // Partners only see applicants to their client companies — no global pool.
+    let partnerApplicantFilter: { userId?: { in: string[] } } = {};
+    if (
+      (user.role === 'PARTNER_ADMIN' || user.role === 'PARTNER_MEMBER') &&
+      user.partnerId
+    ) {
+      const companyIds = await partnerCompanyIds(user.partnerId);
+      const applicantIds = companyIds.length
+        ? (
+            await db.jobApplication.findMany({
+              where: { job: { companyId: { in: companyIds } } },
+              select: { candidateId: true },
+              distinct: ['candidateId'],
+              take: 500,
+            })
+          ).map((a) => a.candidateId)
+        : [];
+      if (!applicantIds.length) {
+        return NextResponse.json({ candidates: [], total: 0 });
+      }
+      partnerApplicantFilter = { userId: { in: applicantIds } };
+    }
+
     const rows = await db.candidatePool.findMany({
       where: {
         isOptedIn: true,
         isVisible: true,
+        ...partnerApplicantFilter,
         ...(openOnly ? { openToWork: true } : {}),
         ...(role ? { role: { contains: role, mode: 'insensitive' } } : {}),
         ...(level ? { level } : {}),

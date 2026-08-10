@@ -162,11 +162,12 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Partner APIs — require partner roles (handlers also verify)
+  // Partner public API (API-key auth handled in route) + apply/resolve
   if (
     pathname.startsWith('/api/partner') &&
     !pathname.startsWith('/api/partner/apply') &&
-    !pathname.startsWith('/api/partner/resolve')
+    !pathname.startsWith('/api/partner/resolve') &&
+    !pathname.startsWith('/api/partner/v1')
   ) {
     const role = await getRoleFromRequest(request);
     if (!role) {

@@ -78,11 +78,16 @@ export async function sendPassportViaBrevo(opts: {
   overallScore: number;
   grade: string;
   pdf: Buffer;
+  /** White-label display name / reply-to (sending domain stays Muqabaleh). */
+  partnerBrand?: { fromName?: string | null; replyTo?: string | null };
 }): Promise<{ success: boolean; error?: string }> {
   if (!opts.to?.trim()) {
     console.error('[coach/brevo-passport] recipient missing');
     return { success: false, error: 'recipient missing' };
   }
+
+  const fromName = opts.partnerBrand?.fromName?.trim();
+  const replyEmail = opts.partnerBrand?.replyTo?.trim();
 
   const result = await sendBrevoEmail({
     to: opts.to.trim(),
@@ -93,8 +98,12 @@ export async function sendPassportViaBrevo(opts: {
       overallScore: opts.overallScore,
       grade: opts.grade,
     }),
-    sender: SENDER,
-    replyTo: REPLY_TO,
+    sender: fromName
+      ? { name: fromName, email: SENDER.email }
+      : SENDER,
+    replyTo: replyEmail
+      ? { name: fromName || REPLY_TO.name, email: replyEmail }
+      : REPLY_TO,
     attachment: [
       {
         name: passportPdfFilename(opts.name),

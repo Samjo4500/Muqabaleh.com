@@ -8,14 +8,22 @@ export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 /**
- * Vercel Cron — every 3 hours.
- * Syncs verified MENA catalog, then fetches 12 companies/tick so ~24 boards rotate often.
+ * Vercel Cron — every 3 hours (rotation).
+ * Also invoked by GitHub Action daily for a full catalog sweep (several ticks).
+ *
+ * Query: `?limit=12` (default 12, max 20 per tick to stay under 60s).
  */
 export async function GET(req: NextRequest) {
   const authError = assertCronAuthorized(req);
   if (authError) return authError;
   try {
-    const summary = await runAtsFetchTick({ limit: 12, syncCatalog: true });
+    const rawLimit = Number(req.nextUrl.searchParams.get('limit') || '12');
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(20, Math.max(1, Math.floor(rawLimit)))
+      : 12;
+    const source = req.nextUrl.searchParams.get('source') || 'vercel-cron';
+
+    const summary = await runAtsFetchTick({ limit, syncCatalog: true });
     if (summary.errors.length > 0 || summary.upserted > 0) {
       await writeAdminNotification({
         channel: 'IN_APP',
@@ -23,17 +31,17 @@ export async function GET(req: NextRequest) {
           summary.errors.length > 0
             ? `ATS tick: ${summary.upserted} jobs, ${summary.errors.length} errors`
             : `ATS tick: +${summary.upserted} jobs across ${summary.companies} companies`,
-        body: `Companies ${summary.companies}, upserted ${summary.upserted}, deactivated ${summary.deactivated}, skipped ${summary.skipped}.${
+        body: `[${source}] Companies ${summary.companies}, upserted ${summary.upserted}, deactivated ${summary.deactivated}, skipped ${summary.skipped}.${
           summary.errors.length ? ` Errors: ${summary.errors.slice(0, 3).join('; ')}` : ''
         }`,
         status: summary.errors.length ? 'FAILED' : 'SENT',
         href: '/admin/jobs/aggregator',
         kind: 'jobs',
         severity: summary.errors.length ? 'warn' : 'info',
-        meta: summary,
+        meta: { ...summary, source, limit },
       });
     }
-    return NextResponse.json({ ok: true, ...summary });
+    return NextResponse.json({ ok: true, source, limit, ...summary });
   } catch (err) {
     console.error('GET /api/jobs/fetch-cron', err);
     return NextResponse.json({ error: 'Fetch cron failed' }, { status: 500 });

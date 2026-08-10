@@ -1,0 +1,72 @@
+# Daily full MENA ATS sweep (backup to Vercel’s every-3h rotation).
+# Requires repo secret: CRON_SECRET (same value as Vercel env).
+# Optional repo variable: SITE_URL (default https://muqabaleh.com).
+
+name: Daily MENA jobs fetch
+
+on:
+  schedule:
+    # 04:15 UTC — after backup cron (02:00), before morning traffic
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+    inputs:
+      ticks:
+        description: 'How many fetch ticks (each covers ~12 boards, oldest first)'
+        required: false
+        default: '4'
+
+concurrency:
+  group: mena-jobs-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    name: Sweep ATS boards
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Full catalog sweep
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          TICKS: ${{ github.event.inputs.ticks || '4' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::Missing repo secret CRON_SECRET (must match Vercel CRON_SECRET)"
+            exit 1
+          fi
+          BASE="${SITE_URL:-https://muqabaleh.com}"
+          BASE="${BASE%/}"
+          echo "Target: $BASE  ticks: $TICKS"
+
+          total_upserted=0
+          total_companies=0
+          total_errors=0
+
+          i=1
+          while [ "$i" -le "$TICKS" ]; do
+            echo "── Tick $i/$TICKS ──"
+            resp=$(curl -fsS -X POST \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              -H "Accept: application/json" \
+              --max-time 90 \
+              "${BASE}/api/jobs/fetch-cron?limit=12&source=github-daily")
+            echo "$resp" | tee "/tmp/ats-tick-$i.json"
+            upserted=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('upserted',0))")
+            companies=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('companies',0))")
+            errors=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('errors') or []))")
+            total_upserted=$((total_upserted + upserted))
+            total_companies=$((total_companies + companies))
+            total_errors=$((total_errors + errors))
+            if [ "$i" -lt "$TICKS" ]; then
+              # Let Vercel function cool down; boards also rate-limit ~1 rps
+              sleep 65
+            fi
+            i=$((i + 1))
+          done
+
+          echo "Done. companies_seen≈$total_companies upserted=$total_upserted errors=$total_errors"
+          if [ "$total_errors" -gt 8 ]; then
+            echo "::warning::High error count — check Admin → ATS Aggregator"
+          fi

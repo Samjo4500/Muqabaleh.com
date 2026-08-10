@@ -3,303 +3,439 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 
-type DialogLang = 'en' | 'ar';
+type FeaturedJob = {
+  id: string;
+  company: string;
+  mark: string;
+  markBg: string;
+  titleEn: string;
+  titleAr: string;
+  locationEn: string;
+  locationAr: string;
+  flag: string;
+  deptEn: string;
+  deptAr: string;
+  deptTone: string;
+  blurbEn: string;
+  blurbAr: string;
+  score: number;
+  jeannieSrc: string;
+  skylineSrc: string;
+};
+
+/**
+ * Featured Job-of-the-Day slate from the Muqabaleh design package
+ * (Careem · MongoDB · Tamara · Cloudflare · Careem-Amman · Trendyol).
+ */
+const FEATURED_JOBS: FeaturedJob[] = [
+  {
+    id: 'careem-dubai',
+    company: 'Careem',
+    mark: 'C',
+    markBg: 'bg-[#00E0A0] text-[#04221a]',
+    titleEn: 'Staff Software Engineer',
+    titleAr: 'مهندس برمجيات أول',
+    locationEn: 'Dubai, UAE',
+    locationAr: 'دبي، الإمارات',
+    flag: '🇦🇪',
+    deptEn: 'Technology',
+    deptAr: 'تقنية',
+    deptTone: 'bg-teal-500/15 text-teal-200 border-teal-400/30',
+    blurbEn:
+      'Build products used by millions across the Middle East — and walk in interview-ready.',
+    blurbAr:
+      'ابنِ منتجات يستخدمها ملايين في الشرق الأوسط — وادخل المقابلة جاهزاً.',
+    score: 88,
+    jeannieSrc: '/images/hero-interview.webp',
+    skylineSrc: '/images/jobs-mena-hero.webp',
+  },
+  {
+    id: 'mongodb-dubai',
+    company: 'MongoDB',
+    mark: 'M',
+    markBg: 'bg-[#00ED64] text-[#04160c]',
+    titleEn: 'Enterprise Account Executive',
+    titleAr: 'ممثل حسابات مؤسسي',
+    locationEn: 'Dubai, UAE',
+    locationAr: 'دبي، الإمارات',
+    flag: '🇦🇪',
+    deptEn: 'Sales',
+    deptAr: 'مبيعات',
+    deptTone: 'bg-violet-500/15 text-violet-200 border-violet-400/30',
+    blurbEn:
+      'Grow MongoDB across the Gulf and win major enterprise accounts in the region.',
+    blurbAr: 'نمّ أعمال MongoDB في الخليج وافتح حسابات جديدة كبرى في المنطقة.',
+    score: 84,
+    jeannieSrc: '/images/hero-interview.webp',
+    skylineSrc: '/images/jobs-mena-hero.webp',
+  },
+  {
+    id: 'tamara-riyadh',
+    company: 'Tamara',
+    mark: 'T',
+    markBg: 'bg-[#C8F135] text-[#1a2204]',
+    titleEn: 'Fraud Investigator',
+    titleAr: 'محقق احتيال',
+    locationEn: 'Riyadh, KSA',
+    locationAr: 'الرياض، السعودية',
+    flag: '🇸🇦',
+    deptEn: 'Finance',
+    deptAr: 'مالية',
+    deptTone: 'bg-amber-500/15 text-amber-100 border-amber-400/30',
+    blurbEn:
+      'Monitor transactions and spot suspicious patterns inside a fast-growing payments platform.',
+    blurbAr:
+      'راقب المعاملات واكتشف الأنماط المشبوهة داخل منصة مدفوعات سريعة النمو.',
+    score: 81,
+    jeannieSrc: '/images/hero-jeannie-riyadh.webp',
+    skylineSrc: '/images/jobs-skyline-riyadh.webp',
+  },
+  {
+    id: 'cloudflare-cairo',
+    company: 'Cloudflare',
+    mark: 'C',
+    markBg: 'bg-[#F6821F] text-[#1a0d02]',
+    titleEn: 'Senior Territory AE, Egypt',
+    titleAr: 'مدير حسابات أول — مصر',
+    locationEn: 'Cairo, Egypt',
+    locationAr: 'القاهرة، مصر',
+    flag: '🇪🇬',
+    deptEn: 'Sales',
+    deptAr: 'مبيعات',
+    deptTone: 'bg-violet-500/15 text-violet-200 border-violet-400/30',
+    blurbEn:
+      "Run full enterprise sales cycles with one of the world's strongest web networks.",
+    blurbAr:
+      'قد دورات مبيعات مؤسسية كاملة مع واحدة من أقوى شبكات الويب في العالم.',
+    score: 83,
+    jeannieSrc: '/images/hero-interview.webp',
+    skylineSrc: '/images/jobs-mena-hero.webp',
+  },
+  {
+    id: 'careem-amman',
+    company: 'Careem',
+    mark: 'C',
+    markBg: 'bg-[#00E0A0] text-[#04221a]',
+    titleEn: 'Operations Coordinator',
+    titleAr: 'منسق عمليات',
+    locationEn: 'Amman, Jordan',
+    locationAr: 'عمّان، الأردن',
+    flag: '🇯🇴',
+    deptEn: 'Operations',
+    deptAr: 'عمليات',
+    deptTone: 'bg-rose-500/15 text-rose-200 border-rose-400/30',
+    blurbEn:
+      "Join the Shops team and elevate delivery experiences across the Kingdom's markets.",
+    blurbAr:
+      'انضم لفريق المتاجر وارفع تجارب التوصيل عبر أسواق المملكة.',
+    score: 79,
+    jeannieSrc: '/images/hero-jeannie-amman.webp',
+    skylineSrc: '/images/jobs-skyline-amman.webp',
+  },
+  {
+    id: 'trendyol-riyadh',
+    company: 'Trendyol',
+    mark: 'T',
+    markBg: 'bg-[#F27A1A] text-[#1a0c02]',
+    titleEn: 'Marketing Intern',
+    titleAr: 'متدرّب تسويق',
+    locationEn: 'Riyadh, KSA',
+    locationAr: 'الرياض، السعودية',
+    flag: '🇸🇦',
+    deptEn: 'Marketing',
+    deptAr: 'تسويق',
+    deptTone: 'bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-400/30',
+    blurbEn:
+      "Start your marketing career with the region's biggest e-commerce platform.",
+    blurbAr: 'ابدأ مسيرتك التسويقية مع أكبر منصة تجارة إلكترونية في المنطقة.',
+    score: 76,
+    jeannieSrc: '/images/hero-jeannie-riyadh.webp',
+    skylineSrc: '/images/jobs-skyline-riyadh.webp',
+  },
+];
 
 type Props = {
   roleCount?: number;
 };
 
-const DIALOG_EN =
-  "Hi there! I'm Jeannie, your bilingual AI recruiter. Tell me about a complex project decision you had to make end-to-end. I'll listen, grade your communication structure, and issue your verified Hire-Ready Passport.";
-
-const DIALOG_AR =
-  'أهلاً بك! أنا جيني، مسؤولة التوظيف الذكية. أخبرني عن قرار مشروع معقد قمت باتخاذه من البداية إلى النهاية. سأقوم بتقييم هيكلية تواصلك وإصدار جواز سفرك المهني الموثق.';
-
 /**
- * Jobs hero with Jeannie practice simulator — bilingual typed dialog,
- * voice meter, and CTAs into prequal + register.
+ * Job of the Day hero — rotating featured MENA roles + Jeannie passport,
+ * matching the Muqabaleh design package (EN/AR).
  */
 export function MuqabalehJobsHero({ roleCount = 0 }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
-  const [dialogLang, setDialogLang] = useState<DialogLang>(
-    locale === 'ar' ? 'ar' : 'en',
-  );
-  const [isRecording, setIsRecording] = useState(false);
-  const [animatedText, setAnimatedText] = useState('');
+  const reduceMotion = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const job = FEATURED_JOBS[index];
+  const jobsLabel = roleCount > 0 ? roleCount : 166;
 
   useEffect(() => {
-    setDialogLang(locale === 'ar' ? 'ar' : 'en');
-  }, [locale]);
-
-  useEffect(() => {
-    const text = dialogLang === 'en' ? DIALOG_EN : DIALOG_AR;
-    let index = 0;
-    setAnimatedText('');
-
-    const interval = window.setInterval(() => {
-      index += 1;
-      setAnimatedText(text.slice(0, index));
-      if (index >= text.length) {
-        window.clearInterval(interval);
-      }
-    }, 22);
-
-    return () => window.clearInterval(interval);
-  }, [dialogLang]);
-
-  const subEn =
-    roleCount > 0
-      ? `Your bilingual career agent for MENA. Practice with Jeannie, earn a Hire-Ready Passport, then browse ${roleCount}+ live roles.`
-      : 'Your bilingual career agent for MENA. Practice with Jeannie, earn a Hire-Ready Passport, then apply to live roles.';
-
-  const subAr =
-    roleCount > 0
-      ? `وكيلك المهني الثنائي اللغة لمنطقة الشرق الأوسط. تتمرن مع جيني، تحصل على جوازك المهني الموثق، ثم تستعرض أكثر من ${roleCount} وظيفة حقيقية.`
-      : 'وكيلك المهني الثنائي اللغة لمنطقة الشرق الأوسط. تتمرن مع جيني، تحصل على جوازك المهني الموثق، ثم تقدّم على وظائف حقيقية.';
+    if (reduceMotion || paused) return;
+    const id = window.setInterval(() => {
+      setIndex((prev) => (prev + 1) % FEATURED_JOBS.length);
+    }, 8400);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, paused]);
 
   return (
-    <section className="relative min-h-[92svh] overflow-hidden bg-[#05080f]">
-      <Image
-        src="/images/hero-interview.webp"
-        alt={isAr ? 'جيني — مقابلة ذكية' : 'Jeannie — AI interview'}
-        fill
-        priority
-        sizes="100vw"
-        quality={68}
-        className="object-cover object-[center_28%] opacity-45"
-      />
+    <section
+      className="relative min-h-[92svh] overflow-hidden bg-[#05080f]"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={job.skylineSrc}
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.1 }}
+        >
+          <Image
+            src={job.skylineSrc}
+            alt=""
+            fill
+            priority={index === 0}
+            sizes="100vw"
+            quality={68}
+            className="object-cover object-[center_40%] opacity-55"
+          />
+        </motion.div>
+      </AnimatePresence>
+
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(115deg, rgba(5,8,15,0.94) 0%, rgba(5,8,15,0.72) 48%, rgba(5,8,15,0.55) 100%), linear-gradient(180deg, rgba(5,8,15,0.25) 0%, rgba(5,8,15,0.88) 100%)',
+            'linear-gradient(115deg, rgba(5,8,15,0.94) 0%, rgba(5,8,15,0.78) 45%, rgba(5,8,15,0.55) 100%), linear-gradient(180deg, rgba(5,8,15,0.2) 0%, rgba(5,8,15,0.9) 100%)',
         }}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -left-[15%] top-[-10%] h-[420px] w-[420px] rounded-full bg-teal-400/10 blur-[110px]"
+        className="pointer-events-none absolute -left-24 top-10 h-80 w-80 rounded-full bg-cyan-400/10 blur-[110px]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-[10%] bottom-[-12%] h-[480px] w-[480px] rounded-full bg-cyan-500/10 blur-[130px]"
+        className="pointer-events-none absolute -right-16 bottom-0 h-96 w-96 rounded-full bg-teal-400/10 blur-[120px]"
         aria-hidden
       />
 
-      <div className="mq-wrap relative z-10 flex min-h-[92svh] flex-col items-center justify-center py-24 md:py-28">
+      <div className="mq-wrap relative z-10 flex min-h-[92svh] flex-col justify-center pb-16 pt-28 md:pb-20 md:pt-32">
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3.5 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
+            {isAr
+              ? `وظيفة اليوم · أكثر من ${jobsLabel} وظيفة حقيقية`
+              : `Job of the Day · ${jobsLabel}+ real jobs`}
+          </span>
+          <BrandLogo size="md" priority />
+        </div>
+
         <div
-          className="mb-8 flex gap-1 rounded-full border border-white/10 bg-black/35 p-1 backdrop-blur-md"
-          role="group"
-          aria-label={isAr ? 'لغة حوار جيني' : 'Jeannie dialog language'}
+          className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14"
+          dir={isAr ? 'rtl' : 'ltr'}
         >
-          <button
-            type="button"
-            onClick={() => setDialogLang('en')}
-            className={`rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-              dialogLang === 'en'
-                ? 'bg-teal-400 text-[#041016]'
-                : 'text-white/55 hover:text-white'
-            }`}
-          >
-            English
-          </button>
-          <button
-            type="button"
-            onClick={() => setDialogLang('ar')}
-            className={`rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-              dialogLang === 'ar'
-                ? 'bg-teal-400 text-[#041016]'
-                : 'text-white/55 hover:text-white'
-            }`}
-          >
-            عربي
-          </button>
-        </div>
-
-        <div className="mb-7">
-          <BrandLogo size="hero" priority />
-        </div>
-
-        <div className="mb-10 max-w-3xl text-center">
-          <h1 className="mq-display text-[clamp(2.2rem,6.5vw,4.2rem)] font-bold leading-[1.02] tracking-tight text-white">
-            {dialogLang === 'en' ? (
-              <>
-                Let <span className="text-teal-300">Jeannie</span> interview you.
-                <br />
-                Then get recruited.
-              </>
-            ) : (
-              <>
-                دع <span className="text-teal-300">جيني</span> تختبر مهاراتك.
-                <br />
-                ثم ابدأ مسيرتك المهنية.
-              </>
-            )}
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
-            {dialogLang === 'en' ? subEn : subAr}
-          </p>
-        </div>
-
-        <div className="mb-10 w-full max-w-4xl border border-white/10 bg-black/40 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md md:p-7">
-          <div className="grid grid-cols-1 items-center gap-7 md:grid-cols-12">
-            <div className="flex flex-col gap-4 md:col-span-7">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-400 text-sm font-bold text-[#041016]">
-                  J
+          {/* Job copy — LTR left / RTL right via dir */}
+          <div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={job.id}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="mb-5 flex items-center gap-3">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black ${job.markBg}`}
+                    aria-hidden
+                  >
+                    {job.mark}
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-white">{job.company}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+                      {isAr ? 'على مقابلة' : 'On Muqabaleh'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Jeannie جيني</h3>
-                  <p className="text-xs text-teal-300">
-                    {dialogLang === 'en' ? 'AI Recruiter · Active' : 'مسؤولة توظيف ذكية · نشطة'}
+
+                <h1 className="mq-display text-[clamp(2rem,5.5vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
+                  {isAr ? job.titleAr : job.titleEn}
+                </h1>
+                {isAr ? (
+                  <p className="mt-2 text-sm text-white/45">{job.titleEn}</p>
+                ) : null}
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/85">
+                    <span aria-hidden>{job.flag}</span>
+                    {isAr ? job.locationAr : job.locationEn}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${job.deptTone}`}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+                    {isAr ? job.deptAr : job.deptEn}
+                  </span>
+                </div>
+
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
+                  {isAr ? job.blurbAr : job.blurbEn}
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <Link
+                    href={localePath('/interview/prequal', locale)}
+                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-7 text-sm font-bold text-[#041016] shadow-[0_0_36px_rgba(34,211,238,0.35)] transition-transform hover:scale-[1.02]"
+                  >
+                    {isAr ? 'تدرّب مع جيني مجاناً' : 'Train with Jeannie — Free'}
+                    <span aria-hidden>{isAr ? '←' : '→'}</span>
+                  </Link>
+                  <a
+                    href="#roles"
+                    className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
+                  >
+                    {isAr ? 'استعرض الوظائف' : 'Browse roles'}
+                  </a>
+                </div>
+
+                <p className="mt-4 flex items-center gap-2 text-xs text-white/45">
+                  <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400/80" />
+                  {isAr
+                    ? `أكثر من ${jobsLabel} وظيفة حقيقية في الخليج والشام · الراتب لدى الشركة`
+                    : `${jobsLabel}+ real jobs across the Gulf & Levant · Salary at the company`}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Dots */}
+            <div className="mt-7 flex items-center gap-2" role="tablist" aria-label="Featured jobs">
+              {FEATURED_JOBS.map((item, i) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === index}
+                  aria-label={item.titleEn}
+                  onClick={() => setIndex(i)}
+                  className={`h-2 rounded-full transition-all ${
+                    i === index
+                      ? 'w-7 bg-cyan-300'
+                      : 'w-2 bg-white/25 hover:bg-white/45'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Jeannie + passport */}
+          <div className="relative mx-auto w-full max-w-[340px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${job.id}-portrait`}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.45 }}
+                className="relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[#0a1018] shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
+              >
+                <div className="relative aspect-[3/4] w-full">
+                  <Image
+                    src={job.jeannieSrc}
+                    alt={isAr ? 'جيني — مدربة المقابلات' : 'Jeannie — AI Interview Coach'}
+                    fill
+                    sizes="340px"
+                    className="object-cover object-[center_18%]"
+                    priority={index === 0}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(5,8,15,0.05) 40%, rgba(5,8,15,0.85) 100%)',
+                    }}
+                    aria-hidden
+                  />
+                  <span className="absolute top-4 end-4 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    {isAr ? 'تدرّب الآن' : 'Train now'}
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-4 pb-4">
+                    <div>
+                      <p className="text-lg font-bold text-white">
+                        {isAr ? 'جيني' : 'Jeannie'}
+                      </p>
+                      <p className="text-[11px] font-medium text-white/60">
+                        {isAr ? 'مدربة المقابلات AI' : 'AI Interview Coach'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            <motion.div
+              key={`${job.id}-score`}
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className={`absolute -bottom-3 ${isAr ? '-start-2 sm:-start-4' : '-end-2 sm:-end-4'} w-[min(100%,240px)] rounded-2xl border border-cyan-300/25 bg-[#070b12]/92 p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl`}
+            >
+              <div className="mb-1 flex items-start justify-between gap-2">
+                <span className="text-amber-300" aria-hidden>
+                  ✦
+                </span>
+                <div className="text-end">
+                  <p className="text-3xl font-bold leading-none tracking-tight text-white">
+                    {job.score}
+                    <span className="text-base font-semibold text-white/45">
+                      {' '}
+                      / 100
+                    </span>
                   </p>
                 </div>
               </div>
-
-              <div className="flex min-h-[150px] flex-col justify-between border border-white/8 bg-[#090a0f]/80 p-5">
-                <p
-                  className="text-sm font-medium leading-relaxed text-white/90 md:text-base"
-                  dir={dialogLang === 'ar' ? 'rtl' : 'ltr'}
-                  lang={dialogLang}
-                >
-                  {animatedText}
-                  <span className="ml-1 inline-block h-4 w-1.5 animate-pulse bg-teal-300 align-middle" />
-                </p>
-                <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-4">
-                  <span className="text-xs text-white/40">
-                    {dialogLang === 'en'
-                      ? 'Language mode: English'
-                      : 'لغة المحادثة: العربية'}
-                  </span>
-                  <span className="text-xs font-bold text-teal-300">
-                    {isRecording
-                      ? dialogLang === 'en'
-                        ? '● Recording…'
-                        : '● جاري التسجيل…'
-                      : dialogLang === 'en'
-                        ? '● Listening…'
-                        : '● تستمع…'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center border border-white/8 bg-[#090a0f]/80 p-6 md:col-span-5">
-              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
-                {dialogLang === 'en' ? 'Live voice meter' : 'مقياس الصوت المباشر'}
+              <p className="text-[11px] font-semibold text-white/85">
+                {isAr ? 'جاهزية مقابلة' : 'Interview Readiness'}
               </p>
-
-              <div
-                className="mb-6 flex h-16 items-center justify-center gap-1.5"
-                aria-hidden
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1].map((val, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-1 rounded-full bg-gradient-to-t from-teal-500 to-cyan-300 transition-all duration-300 ${
-                      isRecording ? 'animate-bounce' : 'h-3 opacity-30'
-                    }`}
-                    style={{
-                      height: isRecording ? `${val * 8}px` : '12px',
-                      animationDelay: `${idx * 0.05}s`,
-                    }}
-                  />
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsRecording((v) => !v)}
-                aria-pressed={isRecording}
-                aria-label={
-                  isRecording
-                    ? dialogLang === 'en'
-                      ? 'Stop practice recording'
-                      : 'إيقاف التسجيل'
-                    : dialogLang === 'en'
-                      ? 'Start practice recording'
-                      : 'بدء التسجيل'
-                }
-                className={`flex h-16 w-16 items-center justify-center rounded-full border-4 transition-all duration-300 ${
-                  isRecording
-                    ? 'animate-pulse border-red-400 bg-red-500/20'
-                    : 'border-[#0b121c] bg-teal-400 hover:scale-105'
-                }`}
-              >
-                {isRecording ? (
-                  <span className="h-5 w-5 rounded-sm bg-red-400" />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-7 w-7 text-[#041016]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                    />
-                  </svg>
-                )}
-              </button>
-
-              <p className="mt-4 text-center text-xs font-bold text-white/55">
-                {isRecording
-                  ? dialogLang === 'en'
-                    ? 'Recording… click to stop'
-                    : 'جاري التسجيل… اضغط للتوقف'
-                  : dialogLang === 'en'
-                    ? 'Click microphone to practice'
-                    : 'اضغط على المايكروفون للتمرن'}
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-300/80">
+                Muqabaleh Passport
               </p>
-            </div>
+              <p className="mt-2 text-[10px] text-white/35">muqabaleh.com/jobs</p>
+            </motion.div>
           </div>
-        </div>
-
-        <div className="flex w-full flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            href={localePath('/interview/prequal', locale)}
-            className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] w-full items-center justify-center px-7 text-sm font-bold sm:w-auto"
-          >
-            {dialogLang === 'en'
-              ? 'Start free practice session'
-              : 'ابدأ جلسة تدريب مجانية'}
-          </Link>
-          <a
-            href="#roles"
-            className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] w-full items-center justify-center px-7 text-sm font-bold sm:w-auto"
-          >
-            {dialogLang === 'en'
-              ? roleCount > 0
-                ? `Browse ${roleCount}+ roles`
-                : 'Browse roles'
-              : roleCount > 0
-                ? `استعرض ${roleCount}+ وظيفة`
-                : 'استعرض الوظائف'}
-          </a>
-          <Link
-            href={localePath('/auth/register', locale)}
-            className="inline-flex min-h-[52px] w-full items-center justify-center border border-white/15 px-7 text-sm font-bold text-white/75 transition-colors hover:border-teal-300/50 hover:text-white sm:w-auto"
-          >
-            {dialogLang === 'en'
-              ? 'Register verified passport'
-              : 'تسجيل جواز السفر الموثق'}
-          </Link>
         </div>
       </div>
 
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#05080f] to-transparent"
-        aria-hidden
-      />
+      {/* Marquee */}
+      <div className="relative z-10 border-t border-white/8 bg-black/40 py-3 backdrop-blur-md">
+        <div className="overflow-hidden" dir="ltr">
+          <div
+            className={`flex w-max gap-10 whitespace-nowrap text-xs text-white/55 ${
+              reduceMotion ? '' : 'crystal-marquee'
+            }`}
+          >
+            {[...FEATURED_JOBS, ...FEATURED_JOBS].map((item, i) => (
+              <span key={`${item.id}-${i}`} className="inline-flex items-center gap-2">
+                <span className="text-cyan-300/70">●</span>
+                {isAr
+                  ? `${item.titleAr} — ${item.company} — ${item.locationAr}`
+                  : `${item.titleEn} — ${item.company} — ${item.locationEn}`}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

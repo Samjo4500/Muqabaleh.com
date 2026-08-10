@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -16,75 +15,123 @@ import {
 } from '@/components/ui/select';
 import { GlowCard } from '@/components/brand';
 import { toast } from 'sonner';
+import { B2B_CONSOLE_PREVIEW } from '@/lib/b2b-preview';
 
-const INDUSTRIES = ['sectorTech', 'sectorFinance', 'sectorHealthcare', 'sectorEducation', 'sectorEngineering', 'sectorMarketing', 'sectorHr', 'sectorOther'] as const;
-const COUNTRIES = ['countrySaudi', 'countryUAE', 'countryQatar', 'countryBahrain', 'countryKuwait', 'countryOman', 'countryJordan', 'countryEgypt', 'countryOther'] as const;
-const SIZES = ['sizeSmall', 'sizeMedium', 'sizeLarge'] as const;
-
-const PANEL_INTERVIEWERS = [
-  { name: 'interviewer1Name', role: 'interviewer1Role' },
-  { name: 'interviewer2Name', role: 'interviewer2Role' },
-] as const;
+const SIZES = ['SMALL', 'MEDIUM', 'LARGE'] as const;
 
 export default function SettingsPage() {
   const t = useTranslations('b2b.settings');
-  const tAuth = useTranslations('auth');
-  const tCommon = useTranslations('common');
-
-  const [companyName, setCompanyName] = useState(t('interviewer1Name').includes('هدى') ? 'شركة نيوم التقنية' : 'NEOM Tech Company');
-  const [industry, setIndustry] = useState('sectorTech');
-  const [country, setCountry] = useState('countrySaudi');
-  const [size, setSize] = useState('sizeLarge');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [country, setCountry] = useState('');
+  const [size, setSize] = useState('SMALL');
   const [slaHours, setSlaHours] = useState('72');
-  const [slaText, setSlaText] = useState('');
-  const [interviewers, setInterviewers] = useState([...PANEL_INTERVIEWERS]);
+  const [plan, setPlan] = useState('');
 
-  const removeInterviewer = (i: number) => {
-    setInterviewers((prev) => prev.filter((_, idx) => idx !== i));
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/b2b/company');
+        const data = await res.json();
+        if (cancelled || !res.ok || !data.company) return;
+        setCompanyName(data.company.name || '');
+        setIndustry(data.company.industry || '');
+        setCountry(data.company.country || '');
+        setSize(data.company.size || 'SMALL');
+        setSlaHours(String(data.company.slaHours ?? 72));
+        setPlan(data.company.plan || '');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    if (B2B_CONSOLE_PREVIEW) {
+      toast.info('Preview mode — request a demo to save company settings.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/b2b/company', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: companyName,
+          industry,
+          country,
+          size,
+          slaHours: Number(slaHours) || 72,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Save failed');
+        return;
+      }
+      toast.success('Saved');
+      if (data.company) {
+        setCompanyName(data.company.name);
+        setIndustry(data.company.industry);
+        setCountry(data.company.country);
+        setSize(data.company.size);
+        setSlaHours(String(data.company.slaHours));
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSave = () => {
-    toast.success(tCommon('save'));
-  };
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-white/50">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+        {plan ? (
+          <p className="mt-1 text-sm text-[var(--text-muted)]">{plan}</p>
+        ) : null}
+      </div>
 
-      {/* Company Info */}
-      <GlowCard className="p-6 space-y-5">
+      <GlowCard className="space-y-5 p-6">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">{t('companyInfo')}</h2>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-sm text-[var(--text-muted)]">{t('companyName')}</Label>
-            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="glass-input" />
+            <Input
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              className="glass-input"
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label className="text-sm text-[var(--text-muted)]">{t('industry')}</Label>
-              <Select value={industry} onValueChange={setIndustry}>
-                <SelectTrigger className="glass-input">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDUSTRIES.map((ind) => (
-                    <SelectItem key={ind} value={ind}>{tAuth(ind)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="glass-input"
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-sm text-[var(--text-muted)]">{t('country')}</Label>
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger className="glass-input">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c} value={c}>{tAuth(c)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="glass-input"
+              />
             </div>
           </div>
           <div className="space-y-2">
@@ -95,7 +142,9 @@ export default function SettingsPage() {
               </SelectTrigger>
               <SelectContent>
                 {SIZES.map((s) => (
-                  <SelectItem key={s} value={s}>{tAuth(s)}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -103,62 +152,26 @@ export default function SettingsPage() {
         </div>
       </GlowCard>
 
-      {/* Panel Interviewers */}
-      <GlowCard className="p-6 space-y-4">
-        <div>
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">{t('panelInterviewers')}</h2>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">{t('panelDesc')}</p>
-        </div>
-        <div className="space-y-3">
-          {interviewers.map((intv, i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-              <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{t(intv.name)}</p>
-                <p className="text-xs text-[var(--text-faint)]">{t(intv.role)}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => removeInterviewer(i)}
-                className="rounded-lg p-2 text-[var(--text-faint)] transition-colors hover:bg-red-500/10 hover:text-red-400"
-                aria-label={t('removeInterviewer')}
-              >
-                <Trash2 size={16} strokeWidth={1.75} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </GlowCard>
-
-      {/* SLA Settings */}
-      <GlowCard className="p-6 space-y-4">
+      <GlowCard className="space-y-4 p-6">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">{t('slaSettings')}</h2>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-sm text-[var(--text-muted)]">{t('slaHours')}</Label>
-            <Input
-              type="number"
-              value={slaHours}
-              onChange={(e) => setSlaHours(e.target.value)}
-              placeholder={t('slaHoursPlaceholder')}
-              className="glass-input"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm text-[var(--text-muted)]">{t('slaCustomText')}</Label>
-            <Textarea
-              value={slaText}
-              onChange={(e) => setSlaText(e.target.value)}
-              placeholder={t('slaCustomPlaceholder')}
-              rows={3}
-              className="glass-input min-h-[80px] resize-y"
-            />
-          </div>
+        <div className="space-y-2">
+          <Label className="text-sm text-[var(--text-muted)]">{t('slaHours')}</Label>
+          <Input
+            type="number"
+            value={slaHours}
+            onChange={(e) => setSlaHours(e.target.value)}
+            className="glass-input"
+          />
         </div>
       </GlowCard>
 
-      {/* Save */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="glass-button cursor-pointer">
+        <Button
+          onClick={() => void handleSave()}
+          disabled={saving}
+          className="glass-button cursor-pointer"
+        >
+          {saving ? <Loader2 className="animate-spin" size={16} /> : null}
           {t('save')}
         </Button>
       </div>

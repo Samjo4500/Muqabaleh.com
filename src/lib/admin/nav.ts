@@ -27,6 +27,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: '/admin/users/all', label: 'allUsers' },
       { href: '/admin/users/candidates', label: 'candidates' },
+      { href: '/admin/marketing', label: 'marketingContacts' },
       { href: '/admin/users/admins', label: 'admins' },
       { href: '/admin/users/companies', label: 'companies' },
       { href: '/admin/users/entitlements', label: 'entitlements' },

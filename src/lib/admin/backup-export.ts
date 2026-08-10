@@ -20,6 +20,7 @@ export async function buildOperationalBackup() {
     emailTemplates,
     adminSettings,
     supportTickets,
+    marketingContacts,
   ] = await Promise.all([
     Promise.all([
       db.user.count(),
@@ -32,6 +33,7 @@ export async function buildOperationalBackup() {
       db.payment.count(),
       db.emailQueue.count(),
       db.supportTicket.count(),
+      db.marketingContact.count().catch(() => 0),
     ]).then(
       ([
         users,
@@ -44,10 +46,12 @@ export async function buildOperationalBackup() {
         payments,
         emailQueue,
         tickets,
+        marketingContacts,
       ]) => ({
         users,
         companies,
         partners,
+        marketingContacts,
         interviews,
         mockSessions,
         activeListedJobs,
@@ -183,6 +187,33 @@ export async function buildOperationalBackup() {
         closedAt: true,
       },
     }),
+    db.marketingContact
+      .findMany({
+        take: 10000,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          country: true,
+          location: true,
+          industry: true,
+          experience: true,
+          role: true,
+          level: true,
+          linkedInUrl: true,
+          locale: true,
+          source: true,
+          utmSource: true,
+          utmMedium: true,
+          utmCampaign: true,
+          marketingOptIn: true,
+          createdAt: true,
+          lastSeenAt: true,
+        },
+      })
+      .catch(() => []),
   ]);
 
   return {
@@ -207,6 +238,7 @@ export async function buildOperationalBackup() {
     emailTemplates,
     adminSettings,
     supportTickets,
+    marketingContacts,
   };
 }
 

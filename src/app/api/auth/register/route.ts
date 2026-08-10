@@ -5,6 +5,10 @@ import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getClientIp, sanitizeObject, auditLog } from '@/lib/security';
 import { triggerWelcomeEmail } from '@/lib/email-triggers';
+import {
+  attributionFromBody,
+  captureMarketingContact,
+} from '@/lib/marketing/contact';
 
 const registerSchema = z.object({
   accountType: z.enum(['INDIVIDUAL', 'B2B']),
@@ -20,6 +24,18 @@ const registerSchema = z.object({
   country: z.string().optional(),
   industry: z.string().optional(),
   experience: z.string().optional(),
+  phone: z.string().max(40).optional(),
+  role: z.string().max(120).optional(),
+  linkedInUrl: z.string().max(300).optional(),
+  locale: z.string().max(10).optional(),
+  marketingOptIn: z.boolean().optional(),
+  utmSource: z.string().optional(),
+  utmMedium: z.string().optional(),
+  utmCampaign: z.string().optional(),
+  utmContent: z.string().optional(),
+  utmTerm: z.string().optional(),
+  landingPath: z.string().optional(),
+  referrer: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -75,6 +91,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      void captureMarketingContact({
+        email: user.email,
+        userId: user.id,
+        name: user.name,
+        phone: data.phone,
+        country: data.companyCountry,
+        industry: data.companyIndustry,
+        locale: data.locale,
+        source: 'REGISTER',
+        marketingOptIn: data.marketingOptIn !== false,
+        ...attributionFromBody(body as Record<string, unknown>),
+        meta: { accountType: 'B2B', companyName: data.companyName },
+      }).catch(() => {});
+
       const { B2B_CONSOLE_PREVIEW } = await import('@/lib/b2b-preview');
       return NextResponse.json({
         id: user.id,
@@ -105,6 +135,23 @@ export async function POST(req: NextRequest) {
 
     // Send welcome email (fire and forget)
     triggerWelcomeEmail(user.id).catch(() => {});
+
+    void captureMarketingContact({
+      email: user.email,
+      userId: user.id,
+      name: user.name,
+      phone: data.phone,
+      country: data.country,
+      industry: data.industry,
+      experience: data.experience,
+      role: data.role,
+      linkedInUrl: data.linkedInUrl,
+      locale: data.locale,
+      source: 'REGISTER',
+      marketingOptIn: data.marketingOptIn !== false,
+      ...attributionFromBody(body as Record<string, unknown>),
+      meta: { accountType: 'INDIVIDUAL' },
+    }).catch(() => {});
 
     return NextResponse.json({
       id: user.id,

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sanitizeInput } from '@/lib/security';
+import {
+  attributionFromBody,
+  captureMarketingContact,
+} from '@/lib/marketing/contact';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +56,16 @@ export async function POST(req: NextRequest) {
         category: 'DEMO_REQUEST',
       },
     });
+
+    void captureMarketingContact({
+      email,
+      name,
+      phone: phone || null,
+      source: 'DEMO',
+      marketingOptIn: true,
+      ...attributionFromBody(body as Record<string, unknown>),
+      meta: { company, teamSize, ticketId: ticket.id, leadSource: source },
+    }).catch(() => {});
 
     return NextResponse.json({ ok: true, id: ticket.id });
   } catch (err) {

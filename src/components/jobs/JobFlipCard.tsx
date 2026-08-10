@@ -220,7 +220,7 @@ export function JobFlipCard({ locale, roleCount }: Props) {
         }
       >
         {reduceMotion ? (
-          <div className="relative aspect-[16/11] w-full">
+          <div className="relative aspect-[5/4] min-h-[320px] w-full sm:min-h-[360px]">
             <JobPosterFace
               job={job}
               lang={showEn ? 'en' : 'ar'}
@@ -231,7 +231,7 @@ export function JobFlipCard({ locale, roleCount }: Props) {
         ) : (
           <div
             key={job.id}
-            className="relative aspect-[16/11] w-full transition-transform duration-700 [transform-style:preserve-3d]"
+            className="relative aspect-[5/4] min-h-[320px] w-full transition-transform duration-700 [transform-style:preserve-3d] sm:min-h-[360px]"
             style={{
               transform: showEn ? 'rotateY(180deg)' : 'rotateY(0deg)',
             }}

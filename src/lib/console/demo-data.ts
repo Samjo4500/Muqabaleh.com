@@ -172,7 +172,7 @@ function employerBundle(): TenantBundle {
         avatarUrl: null,
         role: 'Marketing Manager',
         roleAr: 'مديرة تسويق',
-        score: 64,
+        score: 65,
         stageKey: 'NEW',
         jobId: 'job-demo-swe',
         jobTitle: 'Marketing Manager',

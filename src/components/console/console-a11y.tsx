@@ -181,13 +181,15 @@ function ConsoleKeyboardLayer({
         return;
       }
 
-      if (isTypingTarget(e.target)) return;
-
-      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      // Always allow cheat-sheet, even when search/input is focused.
+      if (e.key === '?' || (e.shiftKey && (e.key === '/' || e.code === 'Slash'))) {
         e.preventDefault();
+        (document.activeElement as HTMLElement | null)?.blur?.();
         setCheatOpen((v) => !v);
         return;
       }
+
+      if (isTypingTarget(e.target)) return;
 
       if (e.key === '/') {
         e.preventDefault();
@@ -373,15 +375,18 @@ export function ConsoleA11yMenu() {
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!panelRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node | null;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const onEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
     };
-    document.addEventListener('mousedown', onDoc);
+    // Use click (not mousedown) so the opening click cannot race-close the menu.
+    document.addEventListener('click', onDoc);
     document.addEventListener('keydown', onEsc);
     return () => {
-      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('click', onDoc);
       document.removeEventListener('keydown', onEsc);
     };
   }, [open]);
@@ -393,10 +398,14 @@ export function ConsoleA11yMenu() {
       <button
         type="button"
         className="mq-console-icon-btn"
+        data-console-a11y-menu
         aria-label={t('menuLabel')}
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
       >
         <Accessibility size={15} strokeWidth={1.5} />
       </button>
@@ -404,7 +413,9 @@ export function ConsoleA11yMenu() {
         <div
           role="menu"
           aria-label={t('menuLabel')}
+          data-console-a11y-panel
           className="absolute end-0 z-50 mt-2 w-[min(288px,calc(100vw-2rem))] rounded-xl border border-[var(--c-border)] bg-[var(--c-surface-solid)] p-3 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
         >
           <p className="px-1 text-xs font-medium text-[var(--c-text-2)]">{t('fontSize')}</p>
           <div className="mt-2 flex gap-1" role="group" aria-label={t('fontSize')}>

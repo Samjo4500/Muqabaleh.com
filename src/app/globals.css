@@ -1768,14 +1768,20 @@ html[data-console-reader='1'] .mq-console {
   font-family: var(--font-body-ar), var(--font-body-en), 'Noto Sans Arabic', 'IBM Plex Sans Arabic', system-ui, sans-serif;
 }
 
-.mq-console :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+.mq-console :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus {
   outline: 2px solid #14b8a6;
   outline-offset: 2px;
 }
 
+.mq-console :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid #14b8a6 !important;
+  outline-offset: 2px !important;
+}
+
+.mq-console-input:focus,
 .mq-console-input:focus-visible {
-  outline: 2px solid #14b8a6;
-  outline-offset: 2px;
+  outline: 2px solid #14b8a6 !important;
+  outline-offset: 2px !important;
 }
 
 .mq-console-icon-btn {

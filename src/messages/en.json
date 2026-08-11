@@ -2898,7 +2898,32 @@
     "welcomeSkip": "Continue",
     "welcomeProceed": "Proceed",
     "serviceLine": "I'm Jeannie at your service",
-    "portalWelcome": "Welcome to your portal"
+    "portalWelcome": "Welcome to your portal",
+    "welcomeOs": {
+      "cta": "Enter",
+      "ctaAria": "Enter console",
+      "scanningTitle": "LOADING…",
+      "scanningDetail": "Loading…",
+      "grantedTitle": "ACCESS GRANTED",
+      "grantedDetail": "Opening…",
+      "dialogLabel": "Console welcome",
+      "najmTech": {
+        "title": "NAJM TECH · CONSOLE",
+        "subtitle": "Review interviews. Analyze performance. Hire confidently."
+      },
+      "atlasAgency": {
+        "title": "ATLAS · CONSOLE",
+        "subtitle": "Manage clients. Customize experiences. Track hiring."
+      },
+      "bayanUniversity": {
+        "title": "BAYAN UNIVERSITY · CAREER CENTER",
+        "subtitle": "Track students. Review analytics. Certify scores."
+      },
+      "fallback": {
+        "title": "{orgName} · CONSOLE",
+        "subtitle": "Sign in to continue."
+      }
+    }
   },
   "employers": {
     "heroHeadline": "Hire Smarter. Save Time. Decide with Data.",

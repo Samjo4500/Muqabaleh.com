@@ -2898,7 +2898,32 @@
     "welcomeSkip": "استمرار",
     "welcomeProceed": "متابعة",
     "serviceLine": "أنا جيني في خدمتكم",
-    "portalWelcome": "مرحباً بكم في بوابتكم"
+    "portalWelcome": "مرحباً بكم في بوابتكم",
+    "welcomeOs": {
+      "cta": "دخول",
+      "ctaAria": "دخول لوحة التحكم",
+      "scanningTitle": "جارٍ التحميل…",
+      "scanningDetail": "تحميل البيانات…",
+      "grantedTitle": "تم الدخول",
+      "grantedDetail": "جارٍ الفتح…",
+      "dialogLabel": "شاشة ترحيب لوحة التحكم",
+      "najmTech": {
+        "title": "نجم تك · لوحة التوظيف",
+        "subtitle": "مراجعة المقابلات. تحليل الأداء. توظيف بثقة."
+      },
+      "atlasAgency": {
+        "title": "أطلس · لوحة التحكم",
+        "subtitle": "إدارة العملاء. تخصيص التجربة. متابعة التوظيف."
+      },
+      "bayanUniversity": {
+        "title": "جامعة بيان · مركز المسارات المهنية",
+        "subtitle": "متابعة الطلاب. تحليل المقابلات. اعتماد الدرجات."
+      },
+      "fallback": {
+        "title": "{orgName} · لوحة التحكم",
+        "subtitle": "أدخل للمتابعة."
+      }
+    }
   },
   "employers": {
     "heroHeadline": "وظّف بذكاء. وفر الوقت. قرّر بناءً على بيانات.",

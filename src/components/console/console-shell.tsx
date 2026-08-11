@@ -9,6 +9,7 @@ import {
   Building2,
   FileBadge2,
   GraduationCap,
+  Home,
   KanbanSquare,
   KeyRound,
   LayoutDashboard,
@@ -23,7 +24,13 @@ import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed
 import { localePath } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import type { TenantType } from '@/lib/console/types';
+import {
+  CONSOLE_PRODUCT,
+  consoleFullName,
+  getConsoleEdition,
+} from '@/lib/console/identity';
 import { ConsoleThemeProvider, useConsoleTheme } from './console-theme';
+import { ConsoleWelcome } from './console-welcome';
 
 type NavItem = {
   key: string;
@@ -80,30 +87,52 @@ function ShellInner({
   const pathname = usePathname();
   const isAr = locale === 'ar';
   const base = `/console/${tenantSlug}`;
+  const homeHref = localePath('/', locale);
+  const deskHref = localePath(base, locale);
+  const edition = getConsoleEdition(tenantType);
+  const productName = isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en;
+  const editionName = isAr ? edition.ar : edition.en;
+  const fullName = consoleFullName(tenantType, locale);
+
   const items = NAV.filter(
     (item) => !item.types || item.types.includes(tenantType),
   );
 
-  const badge =
-    tenantType === 'AGENCY'
-      ? t('agencyBadge')
-      : tenantType === 'ACADEMY'
-        ? t('academyBadge')
-        : t('employerBadge');
-
   return (
     <div className="flex min-h-screen flex-col" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
+      <ConsoleWelcome
+        tenantSlug={tenantSlug}
+        orgName={orgName}
+        tenantType={tenantType}
+      />
       <LanguageSwitcherFixed />
       <div className="flex flex-1">
-        <aside className="mq-console-sidebar hidden w-[248px] shrink-0 flex-col lg:flex">
-          <div className="flex items-center gap-3 px-4 pb-3 pt-5">
-            <BrandLogo size="nav" priority />
-            <div className="min-w-0">
-              <p className="truncate text-[13px] font-medium tracking-tight text-[var(--c-text)]">
-                {orgName}
+        <aside className="mq-console-sidebar hidden w-[256px] shrink-0 flex-col lg:flex">
+          <div className="px-3 pb-2 pt-4">
+            <Link
+              href={homeHref}
+              className="mq-console-logo-home group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-[var(--c-surface-2)]"
+              aria-label={isAr ? 'الصفحة الرئيسية — مقابلة' : 'Home — Muqabaleh'}
+            >
+              <BrandLogo size="nav" priority />
+              <span className="flex items-center gap-1 text-[10px] tracking-wide text-[var(--c-text-3)] opacity-0 transition-opacity group-hover:opacity-100">
+                <Home size={11} strokeWidth={1.5} />
+                {isAr ? 'الرئيسية' : 'Home'}
+              </span>
+            </Link>
+
+            <Link
+              href={deskHref}
+              className="mt-2 block rounded-xl border border-[var(--c-border)] bg-[var(--c-surface-2)] px-3 py-2.5 transition-colors hover:border-[var(--c-primary)]/40"
+            >
+              <p className="text-[11px] font-medium tracking-[0.14em] text-[var(--c-primary)] uppercase">
+                {productName}
               </p>
-              <span className="mq-console-chip mt-1 inline-flex">{badge}</span>
-            </div>
+              <p className="mt-0.5 truncate text-[13px] font-medium tracking-tight text-[var(--c-text)]">
+                {editionName}
+                <span className="text-[var(--c-text-3)]"> · {orgName}</span>
+              </p>
+            </Link>
           </div>
 
           <div className="mx-4 mb-2 h-px bg-[var(--c-border)]" />
@@ -143,14 +172,40 @@ function ShellInner({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="mq-console-topbar flex items-center justify-between gap-3 px-4 py-3.5 lg:px-8">
-            <div>
-              <p className="mq-console-eyebrow">{t('commandCenter')}</p>
-              <h1 className="mt-0.5 text-[1.15rem] font-medium tracking-tight text-[var(--c-text)]">
-                {orgName}
-              </h1>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 lg:hidden">
+                <Link
+                  href={homeHref}
+                  className="mq-console-icon-btn"
+                  aria-label={isAr ? 'الرئيسية' : 'Home'}
+                >
+                  <Home size={15} strokeWidth={1.5} />
+                </Link>
+                <Link href={deskHref} className="min-w-0">
+                  <p className="mq-console-eyebrow truncate">{fullName}</p>
+                  <h1 className="mt-0.5 truncate text-[1.05rem] font-medium tracking-tight text-[var(--c-text)]">
+                    {orgName}
+                  </h1>
+                </Link>
+              </div>
+              <div className="hidden lg:block">
+                <p className="mq-console-eyebrow">{fullName}</p>
+                <h1 className="mt-0.5 text-[1.15rem] font-medium tracking-tight text-[var(--c-text)]">
+                  {orgName}
+                </h1>
+              </div>
             </div>
-            <div className="flex items-center gap-2 lg:hidden">
-              <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <Link
+                href={homeHref}
+                className="mq-console-btn-ghost hidden items-center gap-1.5 text-xs sm:inline-flex"
+              >
+                <Home size={13} strokeWidth={1.5} />
+                {isAr ? 'مقابلة' : 'Muqabaleh'}
+              </Link>
+              <div className="lg:hidden">
+                <ThemeToggle />
+              </div>
             </div>
           </header>
 

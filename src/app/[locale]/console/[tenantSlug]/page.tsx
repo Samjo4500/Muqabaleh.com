@@ -12,8 +12,10 @@ import {
   UserPlus,
   BarChart3,
 } from 'lucide-react';
+import Image from 'next/image';
 import { localePath } from '@/i18n/navigation';
 import { scoreColor } from '@/lib/console/defaults';
+import { CONSOLE_PRODUCT, getConsoleEdition } from '@/lib/console/identity';
 import type { ConsoleDashboard, ConsoleOrganization } from '@/lib/console/types';
 import { useParams } from 'next/navigation';
 
@@ -77,13 +79,47 @@ export default function ConsoleDashboardPage() {
     },
   ];
 
+  const edition = getConsoleEdition(org?.tenantType || 'EMPLOYER');
+  const product = isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en;
+
   return (
     <div className="space-y-8">
+      <section className="mq-console-surface relative overflow-hidden p-5 md:p-6">
+        <div
+          className="pointer-events-none absolute -end-16 -top-20 h-48 w-48 rounded-full bg-[var(--c-primary)]/10 blur-3xl"
+          aria-hidden
+        />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-[var(--c-border)] shadow-[0_0_0_4px_var(--c-primary-soft)]">
+            <Image
+              src={edition.jeannieSrc}
+              alt={isAr ? 'جيني' : 'Jeannie'}
+              fill
+              sizes="64px"
+              className="object-cover object-[center_18%]"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="mq-console-eyebrow">
+              {product} · {isAr ? edition.ar : edition.en}
+            </p>
+            <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.7rem]">
+              {isAr
+                ? `أهلاً ${org?.name || ''} — جيني جاهزة`
+                : `Welcome, ${org?.name || 'team'} — Jeannie is ready`}
+            </h2>
+            <p className="mt-1.5 max-w-2xl text-sm text-[var(--c-text-2)]">
+              {isAr ? edition.lineAr : edition.lineEn}
+            </p>
+          </div>
+        </div>
+      </section>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mq-console-eyebrow">{org?.name}</p>
-          <h2 className="mq-console-title mt-1 text-[1.65rem] md:text-[1.85rem]">
-            {t('dashboardTitle')}
+          <p className="mq-console-eyebrow">{t('dashboardTitle')}</p>
+          <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.65rem]">
+            {t('commandCenter')}
           </h2>
           <p className="mt-1.5 max-w-xl text-sm text-[var(--c-text-2)]">
             {t('liveFeedHint')}

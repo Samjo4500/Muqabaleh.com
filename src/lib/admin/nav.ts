@@ -17,6 +17,11 @@ export type AdminNavGroup = {
  */
 export const ADMIN_NAV: AdminNavGroup[] = [
   {
+    id: 'system-health',
+    label: 'systemHealth',
+    items: [{ href: '/admin/system-health', label: 'systemHealth' }],
+  },
+  {
     id: 'dashboard',
     label: 'dashboard',
     items: [{ href: '/admin/dashboard', label: 'dashboard' }],

@@ -28,7 +28,11 @@ export function OrganizationJsonLd() {
           name: 'Saudi Arabia',
         },
         areaServed: 'MENA',
-        sameAs: SOCIAL_PROFILE_URLS,
+        sameAs: [
+          'https://www.instagram.com/muqabaleh2026',
+          'https://www.tiktok.com/@muqabaleh',
+          'https://linkedin.com/company/muqabaleh',
+        ],
       }}
     />
   );

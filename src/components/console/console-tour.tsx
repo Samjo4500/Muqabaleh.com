@@ -37,7 +37,8 @@ export function ConsoleTour({ tenantSlug, enabled }: Props) {
   useEffect(() => {
     if (!enabled) return;
     if (readTourDone(tenantSlug)) return;
-    const tmr = window.setTimeout(() => setOpen(true), 500);
+    // Wait for welcome exit animation + dashboard paint before overlaying.
+    const tmr = window.setTimeout(() => setOpen(true), 700);
     return () => window.clearTimeout(tmr);
   }, [enabled, tenantSlug]);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
@@ -9,42 +9,109 @@ import {
   Loader2,
   Plus,
   Sparkles,
+  Trash2,
   UserPlus,
   BarChart3,
 } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { scoreColor } from '@/lib/console/defaults';
 import { CONSOLE_PRODUCT, getConsoleEdition } from '@/lib/console/identity';
-import type { ConsoleDashboard, ConsoleOrganization } from '@/lib/console/types';
+import { isDemoPassport } from '@/lib/console/onboarding';
+import type {
+  ConsoleDashboard,
+  ConsoleOrganization,
+  OrgMemberRole,
+  TenantType,
+} from '@/lib/console/types';
 import { useParams } from 'next/navigation';
+import { ConsoleEmptyState } from '@/components/console/console-empty-state';
+import { SetupChecklist } from '@/components/console/setup-checklist';
+
+function roleWelcomeKey(
+  role: OrgMemberRole | null,
+  tenantType: TenantType | undefined,
+):
+  | 'welcomeOwner'
+  | 'welcomeHiringManager'
+  | 'welcomeReviewer'
+  | 'welcomeDean'
+  | 'welcomeAgency' {
+  if (tenantType === 'AGENCY') return 'welcomeAgency';
+  if (tenantType === 'ACADEMY') return 'welcomeDean';
+  if (role === 'HIRING_MANAGER') return 'welcomeHiringManager';
+  if (role === 'REVIEWER' || role === 'INTERVIEWER') return 'welcomeReviewer';
+  return 'welcomeOwner';
+}
 
 export default function ConsoleDashboardPage() {
   const params = useParams();
   const tenantSlug = String(params.tenantSlug);
   const t = useTranslations('console');
+  const to = useTranslations('console.onboarding');
   const locale = useLocale();
   const isAr = locale === 'ar';
   const [org, setOrg] = useState<ConsoleOrganization | null>(null);
   const [dash, setDash] = useState<ConsoleDashboard | null>(null);
+  const [role, setRole] = useState<OrgMemberRole | null>(null);
+  const [usingDemo, setUsingDemo] = useState(false);
+  const [jobCount, setJobCount] = useState(0);
+  const [memberCount, setMemberCount] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const load = async () => {
+    const [dashRes, jobsRes, teamRes] = await Promise.all([
+      fetch(`/api/console/${tenantSlug}/dashboard`),
+      fetch(`/api/console/${tenantSlug}/jobs`),
+      fetch(`/api/console/${tenantSlug}/team`),
+    ]);
+    const dashJson = await dashRes.json();
+    const jobsJson = await jobsRes.json();
+    const teamJson = await teamRes.json();
+    setOrg(dashJson.organization || null);
+    setDash(dashJson.dashboard || null);
+    setRole(dashJson.role || null);
+    setUsingDemo(Boolean(dashJson.usingDemo));
+    setJobCount((jobsJson.jobs || []).length);
+    setMemberCount((teamJson.members || []).length);
+    setLoading(false);
+  };
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      const res = await fetch(`/api/console/${tenantSlug}/dashboard`);
-      const json = await res.json();
+    const run = async () => {
+      await load();
       if (cancelled) return;
-      setOrg(json.organization || null);
-      setDash(json.dashboard || null);
-      setLoading(false);
     };
-    void load();
+    void run();
     const timer = setInterval(() => void load(), 20000);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenantSlug]);
+
+  const facts = useMemo(
+    () => ({
+      hasLogo: Boolean(org?.whiteLabel?.logoUrl),
+      hasJob: jobCount > 0,
+      hasInvite: memberCount > 1,
+      hasPassport: (dash?.feed?.length || 0) > 0,
+      hasQuestions: jobCount > 0,
+    }),
+    [org, jobCount, memberCount, dash?.feed?.length],
+  );
+
+  const clearDemo = async () => {
+    setClearing(true);
+    await fetch(`/api/console/${tenantSlug}/demo/clear`, { method: 'POST' });
+    setConfirmClear(false);
+    setClearing(false);
+    await load();
+  };
 
   if (loading) {
     return (
@@ -80,9 +147,24 @@ export default function ConsoleDashboardPage() {
 
   const edition = getConsoleEdition(org?.tenantType || 'EMPLOYER');
   const product = isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en;
+  const welcomeKey = roleWelcomeKey(role, org?.tenantType);
+  const demoCount = (dash?.feed || []).filter((p) => isDemoPassport(p.tags)).length;
+
+  const copyInterviewLink = async () => {
+    const link = `${window.location.origin}/interview/${tenantSlug}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
 
   return (
     <div className="space-y-8">
+      <SetupChecklist tenantSlug={tenantSlug} facts={facts} />
+
       <section className="mq-console-surface relative overflow-hidden p-5 md:p-6">
         <div
           className="pointer-events-none absolute -end-16 -top-20 h-48 w-48 rounded-full bg-[var(--c-primary)]/10 blur-3xl"
@@ -93,15 +175,53 @@ export default function ConsoleDashboardPage() {
             {product} · {isAr ? edition.ar : edition.en}
           </p>
           <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.7rem]">
-            {isAr
-              ? `مرحباً بكم في بوابتكم — ${org?.name || ''}`
-              : `Welcome to your portal — ${org?.name || 'Leadership'}`}
+            {to(welcomeKey)}
           </h2>
           <p className="mt-1.5 max-w-2xl text-sm text-[var(--c-text-2)]">
-            {isAr ? edition.lineAr : edition.lineEn}
+            {org?.name}
+            {usingDemo && demoCount > 0 ? (
+              <span className="ms-2 inline-flex items-center gap-2">
+                <span className="rounded-md bg-[var(--c-primary-soft)] px-2 py-0.5 text-[10px] font-medium text-[var(--c-primary)]">
+                  {to('demoBadge')}
+                </span>
+              </span>
+            ) : null}
           </p>
+          {usingDemo && demoCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => setConfirmClear(true)}
+              className="mq-console-btn-ghost mt-3 inline-flex items-center gap-1.5 text-xs"
+            >
+              <Trash2 size={13} strokeWidth={1.5} />
+              {to('clearDemo')}
+            </button>
+          ) : null}
         </div>
       </section>
+
+      {confirmClear ? (
+        <div className="mq-console-surface border border-amber-500/30 p-4">
+          <p className="text-sm text-[var(--c-text)]">{to('clearDemoConfirm')}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={clearing}
+              onClick={() => void clearDemo()}
+              className="mq-console-btn-primary text-sm"
+            >
+              {clearing ? t('loading') : to('clearDemoConfirmBtn')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmClear(false)}
+              className="mq-console-btn-ghost text-sm"
+            >
+              {to('clearDemoCancel')}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -116,6 +236,7 @@ export default function ConsoleDashboardPage() {
         <div className="flex flex-wrap gap-2">
           <Link
             href={localePath(`/console/${tenantSlug}/jobs/new`, locale)}
+            data-tour="cta-create-job"
             className="mq-console-btn-primary inline-flex items-center gap-2"
           >
             <Plus size={15} strokeWidth={1.5} />
@@ -138,14 +259,21 @@ export default function ConsoleDashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+        data-tour="kpi-cards"
+      >
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
             <div key={k.label} className="mq-console-card p-5">
               <div className="flex items-center justify-between">
                 <p className="mq-console-eyebrow">{k.label}</p>
-                <Icon size={15} strokeWidth={1.5} className="text-[var(--c-primary)] opacity-80" />
+                <Icon
+                  size={15}
+                  strokeWidth={1.5}
+                  className="text-[var(--c-primary)] opacity-80"
+                />
               </div>
               <p className="mq-console-metric mt-3 text-[2rem] text-[var(--c-text)] md:text-[2.25rem]">
                 {k.value}
@@ -155,7 +283,7 @@ export default function ConsoleDashboardPage() {
         })}
       </div>
 
-      <section className="mq-console-surface p-5 md:p-6">
+      <section className="mq-console-surface p-5 md:p-6" data-tour="passport-feed">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
             <h3 className="text-base font-medium tracking-tight text-[var(--c-text)]">
@@ -171,39 +299,59 @@ export default function ConsoleDashboardPage() {
           </Link>
         </div>
         <div className="space-y-2">
-          {(dash?.feed || []).slice(0, 8).map((p) => (
-            <div
-              key={p.id}
-              className="mq-console-card flex flex-wrap items-center gap-3 px-3.5 py-3"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-xs font-normal tracking-wide text-[var(--c-primary)]">
-                {p.candidateName.slice(0, 1)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium tracking-tight text-[var(--c-text)]">
-                  {p.candidateName}
-                </p>
-                <p className="truncate text-xs text-[var(--c-text-3)]">
-                  {isAr ? p.roleAr || p.role : p.role} ·{' '}
-                  {new Date(p.submittedAt).toLocaleString(isAr ? 'ar' : 'en')}
-                </p>
-              </div>
-              <span
-                className="rounded-full px-2.5 py-1 text-xs font-normal tabular-nums tracking-wide"
-                style={{ color: scoreColor(p.score), background: `${scoreColor(p.score)}18` }}
+          {(dash?.feed || []).slice(0, 8).map((p) => {
+            const name =
+              isAr && p.candidateNameAr ? p.candidateNameAr : p.candidateName;
+            return (
+              <div
+                key={p.id}
+                className="mq-console-card flex flex-wrap items-center gap-3 px-3.5 py-3"
               >
-                {p.score}
-              </span>
-              <Link
-                href={localePath(`/console/${tenantSlug}/passports/${p.id}`, locale)}
-                className="mq-console-btn-ghost text-sm"
-              >
-                {t('view')}
-              </Link>
-            </div>
-          ))}
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-xs font-normal tracking-wide text-[var(--c-primary)]">
+                  {name.slice(0, 1)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium tracking-tight text-[var(--c-text)]">
+                    {name}
+                    {isDemoPassport(p.tags) ? (
+                      <span className="ms-2 rounded bg-[var(--c-primary-soft)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--c-primary)]">
+                        {to('demoBadge')}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="truncate text-xs text-[var(--c-text-3)]">
+                    {isAr ? p.roleAr || p.role : p.role} ·{' '}
+                    {new Date(p.submittedAt).toLocaleString(isAr ? 'ar' : 'en')}
+                  </p>
+                </div>
+                <span
+                  className="rounded-full px-2.5 py-1 text-xs font-normal tabular-nums tracking-wide"
+                  style={{
+                    color: scoreColor(p.score),
+                    background: `${scoreColor(p.score)}18`,
+                  }}
+                >
+                  {p.score} · {p.grade}
+                </span>
+                <Link
+                  href={localePath(
+                    `/console/${tenantSlug}/passports/${p.id}`,
+                    locale,
+                  )}
+                  className="mq-console-btn-ghost text-sm"
+                >
+                  {t('view')}
+                </Link>
+              </div>
+            );
+          })}
           {!dash?.feed?.length ? (
-            <p className="py-10 text-center text-sm text-[var(--c-text-3)]">{t('emptyFeed')}</p>
+            <ConsoleEmptyState
+              title={to('emptyPassportsTitle')}
+              body={to('emptyPassportsBody')}
+              ctaLabel={copied ? to('linkCopied') : to('emptyPassportsCta')}
+              onCtaClick={() => void copyInterviewLink()}
+            />
           ) : null}
         </div>
       </section>

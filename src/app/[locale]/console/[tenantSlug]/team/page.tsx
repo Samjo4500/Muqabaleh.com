@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ConsoleMember, OrgMemberRole } from '@/lib/console/types';
+import { ConsoleEmptyState } from '@/components/console/console-empty-state';
 
 const ROLES: OrgMemberRole[] = [
   'OWNER',
@@ -17,18 +18,22 @@ export default function TeamPage() {
   const params = useParams();
   const tenantSlug = String(params.tenantSlug);
   const t = useTranslations('console');
+  const to = useTranslations('console.onboarding');
   const [members, setMembers] = useState<ConsoleMember[]>([]);
   const [seats, setSeats] = useState({ used: 0, cap: 5 });
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<OrgMemberRole>('REVIEWER');
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const inviteRef = useRef<HTMLDivElement>(null);
 
   const reload = async () => {
     const res = await fetch(`/api/console/${tenantSlug}/team`);
     const json = await res.json();
     setMembers(json.members || []);
     setSeats(json.seats || { used: 0, cap: 5 });
+    setLoaded(true);
   };
 
   useEffect(() => {
@@ -53,6 +58,14 @@ export default function TeamPage() {
     await reload();
   };
 
+  const focusInvite = () => {
+    inviteRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const input = inviteRef.current?.querySelector('input');
+    input?.focus();
+  };
+
+  const solo = loaded && members.length <= 1;
+
   return (
     <div className="space-y-5">
       <div>
@@ -62,7 +75,19 @@ export default function TeamPage() {
         </p>
       </div>
 
-      <div className="mq-console-surface grid gap-3 rounded-xl p-4 md:grid-cols-4">
+      {solo ? (
+        <ConsoleEmptyState
+          title={to('emptyTeamTitle')}
+          body={to('emptyTeamBody')}
+          ctaLabel={to('emptyTeamCta')}
+          onCtaClick={focusInvite}
+        />
+      ) : null}
+
+      <div
+        ref={inviteRef}
+        className="mq-console-surface grid gap-3 rounded-xl p-4 md:grid-cols-4"
+      >
         <input
           className="mq-console-input"
           placeholder="email@company.com"

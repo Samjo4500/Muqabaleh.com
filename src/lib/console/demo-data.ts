@@ -144,74 +144,59 @@ function employerBundle(): TenantBundle {
     passports: [
       makePassport(orgId, {
         id: 'pass-demo-1',
-        candidateName: 'Yasmin Al-Harbi',
-        candidateEmail: 'yasmin@example.com',
+        candidateName: 'Khalid Al-Amri',
+        candidateNameAr: 'خالد العمري',
+        candidateEmail: 'khalid.amri@example.com',
         avatarUrl: null,
         role: 'Software Engineer',
         roleAr: 'مهندس برمجيات',
-        score: 86,
-        stageKey: 'SHORTLISTED',
+        score: 78,
+        stageKey: 'REVIEWED',
         jobId: 'job-demo-swe',
         jobTitle: 'Software Engineer',
         submittedAt: isoHoursAgo(2),
         transcript: [
-          { q: 'Walk me through a recent project.', a: 'Led a payments migration that cut latency 35%.' },
-        ],
-        notes: [
           {
-            id: 'n1',
-            author: 'Omar Faris',
-            body: '@Sara strong hire signal.',
-            at: isoHoursAgo(1),
-            mention: 'Sara',
+            q: 'Walk me through a recent project.',
+            a: 'Shipped a payments service that cut latency 30%.',
           },
         ],
-        tags: ['strong-hire'],
+        notes: [],
+        tags: ['demo'],
       }),
       makePassport(orgId, {
         id: 'pass-demo-2',
-        candidateName: 'Karim Nasser',
-        candidateEmail: 'karim@example.com',
+        candidateName: 'Noura Al-Subaie',
+        candidateNameAr: 'نورة السبيعي',
+        candidateEmail: 'noura.subaie@example.com',
         avatarUrl: null,
-        role: 'Software Engineer',
-        score: 72,
-        stageKey: 'REVIEWED',
+        role: 'Marketing Manager',
+        roleAr: 'مديرة تسويق',
+        score: 64,
+        stageKey: 'NEW',
         jobId: 'job-demo-swe',
-        jobTitle: 'Software Engineer',
+        jobTitle: 'Marketing Manager',
         submittedAt: isoHoursAgo(8),
         transcript: [],
         notes: [],
-        tags: [],
+        tags: ['demo'],
       }),
       makePassport(orgId, {
         id: 'pass-demo-3',
-        candidateName: 'Faisal Qureshi',
-        candidateEmail: 'faisal@example.com',
+        candidateName: 'Fahad Al-Dosari',
+        candidateNameAr: 'فهد الدوسري',
+        candidateEmail: 'fahad.dosari@example.com',
         avatarUrl: null,
-        role: 'Software Engineer',
-        score: 48,
-        stageKey: 'NEW',
+        role: 'Data Analyst',
+        roleAr: 'محلل بيانات',
+        score: 52,
+        stageKey: 'REJECTED',
         jobId: 'job-demo-swe',
-        jobTitle: 'Software Engineer',
+        jobTitle: 'Data Analyst',
         submittedAt: isoHoursAgo(20),
         transcript: [],
         notes: [],
-        tags: [],
-      }),
-      makePassport(orgId, {
-        id: 'pass-demo-4',
-        candidateName: 'Zaid Ibrahim',
-        candidateEmail: 'zaid@example.com',
-        avatarUrl: null,
-        role: 'Software Engineer',
-        score: 78,
-        stageKey: 'HIRED',
-        jobId: 'job-demo-swe',
-        jobTitle: 'Software Engineer',
-        submittedAt: isoHoursAgo(90),
-        transcript: [],
-        notes: [],
-        tags: ['hired'],
+        tags: ['demo'],
       }),
     ],
     clients: [],
@@ -357,7 +342,7 @@ function agencyBundle(): TenantBundle {
         submittedAt: isoHoursAgo(4),
         transcript: [],
         notes: [],
-        tags: ['horizon-retail'],
+        tags: ['demo', 'horizon-retail'],
       }),
       makePassport(orgId, {
         id: 'pass-atlas-2',
@@ -372,7 +357,7 @@ function agencyBundle(): TenantBundle {
         submittedAt: isoHoursAgo(11),
         transcript: [],
         notes: [],
-        tags: ['desert-logistics'],
+        tags: ['demo', 'desert-logistics'],
       }),
     ],
     clients,
@@ -563,7 +548,7 @@ function academyBundle(): TenantBundle {
         private: false,
         transcript: [],
         notes: [],
-        tags: ['cs-2026'],
+        tags: ['demo', 'cs-2026'],
       }),
       makePassport(orgId, {
         id: 'pass-bayan-2',
@@ -579,7 +564,7 @@ function academyBundle(): TenantBundle {
         private: true,
         transcript: [],
         notes: [],
-        tags: ['cs-2026', 'private'],
+        tags: ['demo', 'cs-2026', 'private'],
       }),
     ],
     clients: [],
@@ -646,22 +631,18 @@ export function getDemoBundleByOrgId(orgId: string): TenantBundle | null {
 }
 
 export function resetConsoleDemo() {
-  for (const slug of Object.keys(INITIAL)) {
-    demoTenants[slug] = INITIAL[slug] === demoTenants[slug]
-      ? (slug === DEMO_ORG_SLUG
-          ? employerBundle()
-          : slug === DEMO_AGENCY_SLUG
-            ? agencyBundle()
-            : academyBundle())
-      : slug === DEMO_ORG_SLUG
-        ? employerBundle()
-        : slug === DEMO_AGENCY_SLUG
-          ? agencyBundle()
-          : academyBundle();
-  }
   demoTenants[DEMO_ORG_SLUG] = employerBundle();
   demoTenants[DEMO_AGENCY_SLUG] = agencyBundle();
   demoTenants[DEMO_ACADEMY_SLUG] = academyBundle();
+}
+
+/** Remove demo-tagged passports for one tenant (irreversible in-session). */
+export function clearDemoPassports(slug: string): number {
+  const bundle = demoTenants[slug];
+  if (!bundle) return 0;
+  const before = bundle.passports.length;
+  bundle.passports = bundle.passports.filter((p) => !p.tags?.includes('demo'));
+  return before - bundle.passports.length;
 }
 
 export function buildDemoDashboard(orgId: string): ConsoleDashboard {

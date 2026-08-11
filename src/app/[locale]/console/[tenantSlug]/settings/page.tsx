@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ConsoleOrganization, WhiteLabelConfig } from '@/lib/console/types';
+import { useConsoleA11y } from '@/components/console/console-a11y';
 
 export default function SettingsPage() {
   const params = useParams();
   const tenantSlug = String(params.tenantSlug);
   const t = useTranslations('console');
+  const { simpleMode } = useConsoleA11y();
   const [org, setOrg] = useState<ConsoleOrganization | null>(null);
   const [name, setName] = useState('');
   const [industry, setIndustry] = useState('');
@@ -79,46 +81,50 @@ export default function SettingsPage() {
             onChange={(e) => setWl((p) => ({ ...p, logoUrl: e.target.value }))}
           />
         </label>
-        <label className="block text-sm text-[var(--c-text-2)]">
-          {t('primaryColor')}
-          <input
-            type="color"
-            className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-[var(--c-border)] bg-transparent"
-            value={wl.primaryColor || '#14B8A6'}
-            onChange={(e) => setWl((p) => ({ ...p, primaryColor: e.target.value }))}
-          />
-        </label>
-        <label className="block text-sm text-[var(--c-text-2)]">
-          {t('font')}
-          <select
-            className="mq-console-input mt-1 w-full"
-            value={wl.font || 'Inter'}
-            onChange={(e) => setWl((p) => ({ ...p, font: e.target.value }))}
-          >
-            {['Inter', 'Cairo', 'Tajawal', 'IBM Plex Sans Arabic'].map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm text-[var(--c-text-2)]">
-          {t('fromEmail')}
-          <input
-            className="mq-console-input mt-1 w-full"
-            value={wl.fromEmail || ''}
-            onChange={(e) => setWl((p) => ({ ...p, fromEmail: e.target.value }))}
-          />
-        </label>
-        <label className="block text-sm text-[var(--c-text-2)]">
-          {t('customDomain')}
-          <input
-            className="mq-console-input mt-1 w-full"
-            value={wl.customDomain || ''}
-            onChange={(e) => setWl((p) => ({ ...p, customDomain: e.target.value }))}
-            placeholder="hire.company.com"
-          />
-        </label>
+        {!simpleMode ? (
+          <>
+            <label className="block text-sm text-[var(--c-text-2)]">
+              {t('primaryColor')}
+              <input
+                type="color"
+                className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-[var(--c-border)] bg-transparent"
+                value={wl.primaryColor || '#14B8A6'}
+                onChange={(e) => setWl((p) => ({ ...p, primaryColor: e.target.value }))}
+              />
+            </label>
+            <label className="block text-sm text-[var(--c-text-2)]">
+              {t('font')}
+              <select
+                className="mq-console-input mt-1 w-full"
+                value={wl.font || 'Inter'}
+                onChange={(e) => setWl((p) => ({ ...p, font: e.target.value }))}
+              >
+                {['Inter', 'Cairo', 'Tajawal', 'IBM Plex Sans Arabic'].map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm text-[var(--c-text-2)]">
+              {t('fromEmail')}
+              <input
+                className="mq-console-input mt-1 w-full"
+                value={wl.fromEmail || ''}
+                onChange={(e) => setWl((p) => ({ ...p, fromEmail: e.target.value }))}
+              />
+            </label>
+            <label className="block text-sm text-[var(--c-text-2)]">
+              {t('customDomain')}
+              <input
+                className="mq-console-input mt-1 w-full"
+                value={wl.customDomain || ''}
+                onChange={(e) => setWl((p) => ({ ...p, customDomain: e.target.value }))}
+                placeholder="hire.company.com"
+              />
+            </label>
+          </>
+        ) : null}
       </section>
 
       <section className="mq-console-card p-4">

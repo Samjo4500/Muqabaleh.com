@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
@@ -14,7 +14,6 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
-import { scoreColor } from '@/lib/console/defaults';
 import { CONSOLE_PRODUCT, getConsoleEdition } from '@/lib/console/identity';
 import {
   isDemoPassport,
@@ -29,6 +28,8 @@ import type {
 } from '@/lib/console/types';
 import { useParams } from 'next/navigation';
 import { ConsoleEmptyState } from '@/components/console/console-empty-state';
+import { useConsoleA11y } from '@/components/console/console-a11y';
+import { ScoreBadge } from '@/components/console/score-badge';
 import { SetupChecklist } from '@/components/console/setup-checklist';
 
 function roleWelcomeKey(
@@ -52,8 +53,11 @@ export default function ConsoleDashboardPage() {
   const tenantSlug = String(params.tenantSlug);
   const t = useTranslations('console');
   const to = useTranslations('console.onboarding');
+  const ta = useTranslations('console.a11y');
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const { announce } = useConsoleA11y();
+  const seenIds = useRef<Set<string>>(new Set());
   const [org, setOrg] = useState<ConsoleOrganization | null>(null);
   const [dash, setDash] = useState<ConsoleDashboard | null>(null);
   const [role, setRole] = useState<OrgMemberRole | null>(null);
@@ -93,6 +97,20 @@ export default function ConsoleDashboardPage() {
             )
           : 0,
       };
+    }
+    if (nextDash?.feed?.length) {
+      for (const p of nextDash.feed) {
+        if (!seenIds.current.has(p.id) && seenIds.current.size > 0) {
+          announce(
+            ta('announceNewPassport', {
+              name: p.candidateName,
+              role: p.role,
+              score: p.score,
+            }),
+          );
+        }
+        seenIds.current.add(p.id);
+      }
     }
     setDash(nextDash);
     setRole(dashJson.role || null);
@@ -325,16 +343,31 @@ export default function ConsoleDashboardPage() {
             {t('openPipeline')}
           </Link>
         </div>
-        <div className="space-y-2">
+        <div
+          className="space-y-2"
+          role="list"
+          aria-label={ta('candidateList')}
+        >
           {(dash?.feed || []).slice(0, 8).map((p) => {
             const name =
               isAr && p.candidateNameAr ? p.candidateNameAr : p.candidateName;
+            const href = localePath(
+              `/console/${tenantSlug}/passports/${p.id}`,
+              locale,
+            );
             return (
               <div
                 key={p.id}
+                role="listitem"
+                tabIndex={0}
+                data-passport-row
+                data-passport-id={p.id}
+                data-passport-name={name}
+                data-passport-href={href}
+                data-passport-stage={p.stageKey}
                 className="mq-console-card flex flex-wrap items-center gap-3 px-3.5 py-3"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-xs font-normal tracking-wide text-[var(--c-primary)]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-xs font-normal tracking-wide text-[var(--c-primary)]" aria-hidden>
                   {name.slice(0, 1)}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -351,22 +384,8 @@ export default function ConsoleDashboardPage() {
                     {new Date(p.submittedAt).toLocaleString(isAr ? 'ar' : 'en')}
                   </p>
                 </div>
-                <span
-                  className="rounded-full px-2.5 py-1 text-xs font-normal tabular-nums tracking-wide"
-                  style={{
-                    color: scoreColor(p.score),
-                    background: `${scoreColor(p.score)}18`,
-                  }}
-                >
-                  {p.score} · {p.grade}
-                </span>
-                <Link
-                  href={localePath(
-                    `/console/${tenantSlug}/passports/${p.id}`,
-                    locale,
-                  )}
-                  className="mq-console-btn-ghost text-sm"
-                >
+                <ScoreBadge score={p.score} grade={p.grade} />
+                <Link href={href} className="mq-console-btn-ghost text-sm">
                   {t('view')}
                 </Link>
               </div>

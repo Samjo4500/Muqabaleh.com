@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ConsoleMember, OrgMemberRole } from '@/lib/console/types';
 import { ConsoleEmptyState } from '@/components/console/console-empty-state';
+import { useConsoleA11y } from '@/components/console/console-a11y';
 
 const ROLES: OrgMemberRole[] = [
   'OWNER',
@@ -14,11 +15,15 @@ const ROLES: OrgMemberRole[] = [
   'INTERVIEWER',
 ];
 
+const SIMPLE_ROLES: OrgMemberRole[] = ['ADMIN', 'REVIEWER'];
+
 export default function TeamPage() {
   const params = useParams();
   const tenantSlug = String(params.tenantSlug);
   const t = useTranslations('console');
   const to = useTranslations('console.onboarding');
+  const { simpleMode } = useConsoleA11y();
+  const roleOptions = simpleMode ? SIMPLE_ROLES : ROLES.filter((r) => r !== 'OWNER');
   const [members, setMembers] = useState<ConsoleMember[]>([]);
   const [seats, setSeats] = useState({ used: 0, cap: 5 });
   const [email, setEmail] = useState('');
@@ -105,9 +110,9 @@ export default function TeamPage() {
           value={role}
           onChange={(e) => setRole(e.target.value as OrgMemberRole)}
         >
-          {ROLES.filter((r) => r !== 'OWNER').map((r) => (
+          {roleOptions.map((r) => (
             <option key={r} value={r}>
-              {r}
+              {simpleMode ? (r === 'ADMIN' ? 'Admin' : 'Member') : r}
             </option>
           ))}
         </select>

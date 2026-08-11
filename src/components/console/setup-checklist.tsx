@@ -12,6 +12,7 @@ import {
   writeChecklist,
 } from '@/lib/console/onboarding';
 import { cn } from '@/lib/utils';
+import { useConsoleA11y } from './console-a11y';
 
 type Facts = {
   hasLogo: boolean;
@@ -40,6 +41,7 @@ type Props = {
 export function SetupChecklist({ tenantSlug, facts }: Props) {
   const t = useTranslations('console.onboarding');
   const locale = useLocale();
+  const { effectiveReduceMotion } = useConsoleA11y();
   const [manual, setManual] = useState<ChecklistState>({});
   const [dismissed, setDismissed] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -107,7 +109,7 @@ export function SetupChecklist({ tenantSlug, facts }: Props) {
       className="mq-console-surface sticky top-2 z-20 mb-6 overflow-hidden p-4 md:p-5"
       data-tour="setup-checklist"
     >
-      {celebrate ? (
+      {celebrate && !effectiveReduceMotion ? (
         <div className="pointer-events-none absolute inset-0 animate-pulse bg-[var(--c-primary)]/10" />
       ) : null}
       <div className="relative flex flex-wrap items-start justify-between gap-3">

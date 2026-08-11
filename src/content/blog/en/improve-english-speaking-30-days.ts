@@ -98,7 +98,7 @@ const post: BlogPost = {
 
 <h3>Day 22-23: Full Mock Interviews</h3>
 
-<p>Conduct two full-length mock interviews (30-45 minutes each). Treat them as real interviews — dress professionally, set up a quiet space, and do not pause to look up words or restructure answers. The goal is to experience the sustained concentration and communication demands of a real interview. Use <a href="/en/pricing">Muqabaleh's AI interviewer</a> for one session and, if possible, a human coach for the other.</p>
+<p>Conduct two full-length mock interviews (30-45 minutes each). Treat them as real interviews — dress professionally, set up a quiet space, and do not pause to look up words or restructure answers. The goal is to experience the sustained concentration and communication demands of a real interview. Use <a href="/en#pricing">Muqabaleh's AI interviewer</a> for one session and, if possible, a human coach for the other.</p>
 
 <h3>Day 24-25: Weakness Targeting</h3>
 
@@ -120,7 +120,7 @@ const post: BlogPost = {
 
 <blockquote>The best time to start improving your English was a year ago. The second best time is today. Thirty focused days can transform your interview performance and open doors you did not think were possible.</blockquote>
 
-<p>Ready to put this plan into action? Start your <a href="/en/pricing">30-day challenge with Muqabaleh</a> and get unlimited AI interview practice to support every day of your improvement journey.</p>
+<p>Ready to put this plan into action? Start your <a href="/en#pricing">30-day challenge with Muqabaleh</a> and get unlimited AI interview practice to support every day of your improvement journey.</p>
 
 <p><a href="/en/demo" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;">Start Your 30-Day Challenge</a></p>
 `,

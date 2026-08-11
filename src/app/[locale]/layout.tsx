@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       siteName: 'مقابلة | Muqabaleh',
       locale: ogLocale,
+      alternateLocale: locale === 'ar' ? ['en_US'] : ['ar_SA'],
       type: 'website',
       images: [
         {
@@ -77,6 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: meta.title,
       description: meta.description,
       images: ['/og-image.jpg'],
+      site: '@muqabaleh',
     },
     robots: { index: true, follow: true },
     other: {

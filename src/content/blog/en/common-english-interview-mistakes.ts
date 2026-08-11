@@ -70,7 +70,7 @@ const post: BlogPost = {
 
 <p>At the opposite extreme from rambling is sounding like you are reading from a script. Over-rehearsed answers lack spontaneity and feel insincere. Interviewers can tell when you are reciting a memorized response rather than having a genuine conversation. This is especially common when candidates memorize full paragraphs from online guides.</p>
 
-<p><strong>The fix:</strong> Memorize the <em>structure</em> of your answers, not the exact words. Know your key points and examples, but allow yourself flexibility in how you express them. Practice with variable conditions — different interviewers, different question phrasings, different time limits — so your answers remain adaptable. <a href="/en/pricing">AI interview practice</a> is excellent for this because it generates varied follow-up questions that prevent you from relying on a single memorized response.</p>
+<p><strong>The fix:</strong> Memorize the <em>structure</em> of your answers, not the exact words. Know your key points and examples, but allow yourself flexibility in how you express them. Practice with variable conditions — different interviewers, different question phrasings, different time limits — so your answers remain adaptable. <a href="/en#pricing">AI interview practice</a> is excellent for this because it generates varied follow-up questions that prevent you from relying on a single memorized response.</p>
 
 <h2>8. Not Researching the Company</h2>
 

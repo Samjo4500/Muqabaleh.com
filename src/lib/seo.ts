@@ -43,6 +43,7 @@ export function pageMetadata(opts: {
       url,
       siteName: 'مقابلة | Muqabaleh',
       locale: isAr ? 'ar_SA' : 'en_US',
+      alternateLocale: isAr ? ['en_US'] : ['ar_SA'],
       type: 'website',
       images: [{ url: image, width: 1200, height: 630, alt: title }],
     },
@@ -51,6 +52,7 @@ export function pageMetadata(opts: {
       title,
       description,
       images: [image],
+      site: '@muqabaleh',
     },
     category: 'career',
   };

@@ -1047,7 +1047,8 @@
       "premiumLabel": "باقة بريميوم",
       "freeLabel": "باقة مجانية — جلسة واحدة",
       "oneTimeTitle": "باقات الجلسات الفردية",
-      "comingSoon": "قريباً"
+      "comingSoon": "قريباً",
+      "currentPlan": "الخطة الحالية"
     },
     "payments": {
       "title": "الدفعات",

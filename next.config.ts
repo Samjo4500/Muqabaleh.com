@@ -9,6 +9,7 @@ const withNextIntl = createNextIntlPlugin();
  * - PayPal JS SDK + checkout iframes/popups
  * - Daily.co call iframes (human interview rooms)
  * - Microphone / blob media for AI interview recording
+ * - Vercel Web Analytics
  *
  * Prefer tightening further with nonces later; do not invent allowlists for unused CDNs.
  */
@@ -26,7 +27,7 @@ const contentSecurityPolicy = [
   "font-src 'self' data:",
   "media-src 'self' blob: data:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co",
+  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co https://vitals.vercel-analytics.com",
   "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://*.daily.co",
   "upgrade-insecure-requests",
 ].join('; ');

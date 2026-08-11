@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { fontVariables } from '@/lib/fonts';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 
 function isLocale(value: string): value is Locale {
@@ -119,6 +120,7 @@ export default async function LocaleLayout({
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

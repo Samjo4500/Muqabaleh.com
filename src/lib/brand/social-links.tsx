@@ -19,7 +19,7 @@ export const SOCIAL_LINKS: SocialLink[] = [
   },
   {
     name: 'TikTok',
-    href: 'https://www.tiktok.com/@muqabaleh',
+    href: 'https://tiktok.com/@muqabaleh2026',
     svg: (
       <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden>
         <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.49V13a8.27 8.27 0 004.84 1.55V11.1a4.84 4.84 0 01-.26-.01 4.83 4.83 0 01-3.77-4.25z" />

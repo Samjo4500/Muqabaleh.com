@@ -2,15 +2,17 @@ import type { TenantType } from './types';
 
 /**
  * Product identity for Muqabaleh executive consoles.
- * Jeannie Suite — private workspace for decisive leadership.
+ * Jeannie Suite — private portal for decisive leadership.
  */
 export const CONSOLE_PRODUCT = {
   en: 'Jeannie Suite',
   ar: 'جناح جيني',
   taglineEn: 'Private executive workspace for decisive hiring',
   taglineAr: 'مساحة تنفيذية خاصة لتوظيف حاسم',
-  serviceEn: 'Your Jeannie at your service',
-  serviceAr: 'جيني في خدمتكم',
+  portalEn: 'Welcome to your portal',
+  portalAr: 'مرحباً بكم في بوابتكم',
+  serviceEn: "I'm Jeannie at your service",
+  serviceAr: 'أنا جيني في خدمتكم',
 } as const;
 
 export type ConsoleEdition = {
@@ -71,5 +73,5 @@ export function consoleFullName(tenantType: TenantType, locale: string) {
 
 /** Bumped when the welcome experience is redesigned so guests see it again. */
 export function welcomeStorageKey(tenantSlug: string) {
-  return `mq-jeannie-suite-welcome:v5:${tenantSlug}`;
+  return `mq-jeannie-portal-welcome:v6:${tenantSlug}`;
 }

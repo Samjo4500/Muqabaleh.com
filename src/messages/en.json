@@ -2894,10 +2894,11 @@
     "addWebhook": "Add webhook",
     "demoSwitcher": "Demo tenants",
     "productName": "Jeannie Suite",
-    "enterAtelier": "Click to enter",
+    "enterAtelier": "Enter",
     "welcomeSkip": "Continue",
     "welcomeProceed": "Proceed",
-    "serviceLine": "Your Jeannie at your service"
+    "serviceLine": "I'm Jeannie at your service",
+    "portalWelcome": "Welcome to your portal"
   },
   "employers": {
     "heroHeadline": "Hire Smarter. Save Time. Decide with Data.",

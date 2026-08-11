@@ -4,6 +4,7 @@ import {
   IBM_Plex_Sans_Arabic,
   Readex_Pro,
   Cairo,
+  Noto_Naskh_Arabic,
 } from 'next/font/google';
 
 /** Display — English atelier headlines */
@@ -53,10 +54,20 @@ export const fontJeannieAr = Cairo({
   preload: false,
 });
 
+/** Portal / cinematic Arabic — connected Naskh for executive display */
+export const fontPortalAr = Noto_Naskh_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['500', '600', '700'],
+  display: 'swap',
+  variable: '--font-portal-ar',
+  preload: false,
+});
+
 export const fontVariables = [
   fontDisplayEn.variable,
   fontBodyEn.variable,
   fontBodyAr.variable,
   fontDisplayAr.variable,
   fontJeannieAr.variable,
+  fontPortalAr.variable,
 ].join(' ');

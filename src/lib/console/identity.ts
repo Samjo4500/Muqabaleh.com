@@ -73,5 +73,5 @@ export function consoleFullName(tenantType: TenantType, locale: string) {
 
 /** Bumped when the welcome experience is redesigned so guests see it again. */
 export function welcomeStorageKey(tenantSlug: string) {
-  return `mq-os-welcome:v8:${tenantSlug}`;
+  return `mq-os-welcome:v9:${tenantSlug}`;
 }

@@ -71,12 +71,12 @@ export default function CohortsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('cohortsTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('cohortsTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('cohortsHint')}</p>
       </div>
 
       <section className="mq-console-surface space-y-3 rounded-xl p-4">
-        <h3 className="text-sm font-bold text-[var(--c-text)]">{t('csvImport')}</h3>
+        <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('csvImport')}</h3>
         <input
           className="mq-console-input w-full"
           value={name}
@@ -99,7 +99,7 @@ export default function CohortsPage() {
         <section key={c.id} className="mq-console-surface rounded-xl p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="font-bold text-[var(--c-text)]">{c.name}</h3>
+              <h3 className="font-medium text-[var(--c-text)]">{c.name}</h3>
               <p className="text-xs text-[var(--c-text-2)]">
                 {c.major} · {c.year} · {c.students.length} {t('students')}
               </p>

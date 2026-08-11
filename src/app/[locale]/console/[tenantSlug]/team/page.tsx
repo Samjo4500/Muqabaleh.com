@@ -56,7 +56,7 @@ export default function TeamPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('teamTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('teamTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">
           {t('seats', { used: seats.used, cap: seats.cap })}
         </p>

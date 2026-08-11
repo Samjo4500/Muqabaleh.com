@@ -78,12 +78,15 @@ export default function ConsoleDashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('dashboardTitle')}</h2>
-          <p className="mt-1 text-sm text-[var(--c-text-2)]">
-            {org?.name} · {t('liveFeedHint')}
+          <p className="mq-console-eyebrow">{org?.name}</p>
+          <h2 className="mq-console-title mt-1 text-[1.65rem] md:text-[1.85rem]">
+            {t('dashboardTitle')}
+          </h2>
+          <p className="mt-1.5 max-w-xl text-sm text-[var(--c-text-2)]">
+            {t('liveFeedHint')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -91,21 +94,21 @@ export default function ConsoleDashboardPage() {
             href={localePath(`/console/${tenantSlug}/jobs/new`, locale)}
             className="mq-console-btn-primary inline-flex items-center gap-2"
           >
-            <Plus size={16} />
+            <Plus size={15} strokeWidth={1.5} />
             {t('qaCreateJob')}
           </Link>
           <Link
             href={localePath(`/console/${tenantSlug}/team`, locale)}
             className="mq-console-btn-ghost inline-flex items-center gap-2"
           >
-            <UserPlus size={16} />
+            <UserPlus size={15} strokeWidth={1.5} />
             {t('qaInvite')}
           </Link>
           <Link
             href={localePath(`/console/${tenantSlug}/analytics`, locale)}
             className="mq-console-btn-ghost inline-flex items-center gap-2"
           >
-            <BarChart3 size={16} />
+            <BarChart3 size={15} strokeWidth={1.5} />
             {t('qaReport')}
           </Link>
         </div>
@@ -115,14 +118,12 @@ export default function ConsoleDashboardPage() {
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
-            <div key={k.label} className="mq-console-card p-4">
+            <div key={k.label} className="mq-console-card p-5">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--c-text-2)]">
-                  {k.label}
-                </p>
-                <Icon size={16} className="text-[var(--c-primary)]" />
+                <p className="mq-console-eyebrow">{k.label}</p>
+                <Icon size={15} strokeWidth={1.5} className="text-[var(--c-primary)] opacity-80" />
               </div>
-              <p className="mt-2 text-3xl font-bold tabular-nums text-[var(--c-text)]">
+              <p className="mq-console-metric mt-3 text-[2rem] text-[var(--c-text)] md:text-[2.25rem]">
                 {k.value}
               </p>
             </div>
@@ -130,12 +131,17 @@ export default function ConsoleDashboardPage() {
         })}
       </div>
 
-      <section className="mq-console-surface rounded-xl p-4 md:p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-[var(--c-text)]">{t('passportFeed')}</h3>
+      <section className="mq-console-surface p-5 md:p-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-medium tracking-tight text-[var(--c-text)]">
+              {t('passportFeed')}
+            </h3>
+            <p className="mt-0.5 text-xs text-[var(--c-text-3)]">{t('liveFeedHint')}</p>
+          </div>
           <Link
             href={localePath(`/console/${tenantSlug}/pipeline`, locale)}
-            className="text-sm font-semibold text-[var(--c-primary)]"
+            className="text-sm font-normal text-[var(--c-primary)] transition-opacity hover:opacity-80"
           >
             {t('openPipeline')}
           </Link>
@@ -144,21 +150,23 @@ export default function ConsoleDashboardPage() {
           {(dash?.feed || []).slice(0, 8).map((p) => (
             <div
               key={p.id}
-              className="mq-console-card flex flex-wrap items-center gap-3 p-3"
+              className="mq-console-card flex flex-wrap items-center gap-3 px-3.5 py-3"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--c-primary-soft)] text-sm font-bold text-[var(--c-primary)]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-xs font-normal tracking-wide text-[var(--c-primary)]">
                 {p.candidateName.slice(0, 1)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-[var(--c-text)]">{p.candidateName}</p>
-                <p className="truncate text-xs text-[var(--c-text-2)]">
+                <p className="truncate text-sm font-medium tracking-tight text-[var(--c-text)]">
+                  {p.candidateName}
+                </p>
+                <p className="truncate text-xs text-[var(--c-text-3)]">
                   {isAr ? p.roleAr || p.role : p.role} ·{' '}
                   {new Date(p.submittedAt).toLocaleString(isAr ? 'ar' : 'en')}
                 </p>
               </div>
               <span
-                className="rounded-md px-2 py-1 text-sm font-bold tabular-nums"
-                style={{ color: scoreColor(p.score), background: `${scoreColor(p.score)}22` }}
+                className="rounded-full px-2.5 py-1 text-xs font-normal tabular-nums tracking-wide"
+                style={{ color: scoreColor(p.score), background: `${scoreColor(p.score)}18` }}
               >
                 {p.score}
               </span>
@@ -171,7 +179,7 @@ export default function ConsoleDashboardPage() {
             </div>
           ))}
           {!dash?.feed?.length ? (
-            <p className="py-8 text-center text-sm text-[var(--c-text-2)]">{t('emptyFeed')}</p>
+            <p className="py-10 text-center text-sm text-[var(--c-text-3)]">{t('emptyFeed')}</p>
           ) : null}
         </div>
       </section>

@@ -1404,68 +1404,159 @@
   box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
 }
 
-/* ─── Employer Console (Phase 1) ─── */
+
+/* ─── Muqabaleh Console — refined atelier system ─── */
 .mq-console {
-  --c-bg: #0b1120;
-  --c-surface: #0f172a;
-  --c-surface-2: rgba(255, 255, 255, 0.04);
-  --c-border: #1e293b;
-  --c-primary: #14b8a6;
-  --c-primary-soft: rgba(20, 184, 166, 0.14);
+  --c-bg: #070b14;
+  --c-bg-elevated: #0a1220;
+  --c-surface: rgba(15, 23, 42, 0.72);
+  --c-surface-solid: #0f172a;
+  --c-surface-2: rgba(255, 255, 255, 0.035);
+  --c-border: rgba(148, 163, 184, 0.14);
+  --c-border-strong: rgba(148, 163, 184, 0.22);
+  --c-primary: #2dd4bf;
+  --c-primary-deep: #14b8a6;
+  --c-primary-soft: rgba(45, 212, 191, 0.1);
   --c-premium: #d4af37;
-  --c-text: #f8fafc;
-  --c-text-2: #94a3b8;
-  --c-danger: #ef4444;
-  --c-success: #22c55e;
-  --c-warning: #f59e0b;
-  --c-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  --c-radius-card: 12px;
-  --c-radius-btn: 8px;
-  background: var(--c-bg);
+  --c-premium-soft: rgba(212, 175, 55, 0.12);
+  --c-text: #e8eef7;
+  --c-text-2: #8b9bb4;
+  --c-text-3: #64748b;
+  --c-danger: #f87171;
+  --c-success: #34d399;
+  --c-warning: #fbbf24;
+  --c-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 40px rgba(0, 0, 0, 0.28);
+  --c-shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --c-radius-card: 14px;
+  --c-radius-btn: 10px;
+  --c-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --c-hairline: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.35), transparent);
+
+  position: relative;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(45, 212, 191, 0.08), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(212, 175, 55, 0.05), transparent 50%),
+    linear-gradient(180deg, var(--c-bg) 0%, var(--c-bg-elevated) 100%);
   color: var(--c-text);
-  font-family: Inter, 'IBM Plex Sans Arabic', system-ui, sans-serif;
-  transition: background 200ms ease-out, color 200ms ease-out;
+  font-family: var(--font-body-en), var(--font-body-ar), 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-weight: 400;
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+  transition: background 220ms var(--c-ease), color 220ms var(--c-ease);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .mq-console[data-console-theme='light'] {
-  --c-bg: #f1f5f9;
-  --c-surface: #ffffff;
-  --c-surface-2: #f8fafc;
-  --c-border: #e2e8f0;
+  --c-bg: #f4f7fb;
+  --c-bg-elevated: #eef3f9;
+  --c-surface: rgba(255, 255, 255, 0.82);
+  --c-surface-solid: #ffffff;
+  --c-surface-2: rgba(15, 23, 42, 0.03);
+  --c-border: rgba(15, 23, 42, 0.08);
+  --c-border-strong: rgba(15, 23, 42, 0.12);
+  --c-primary: #0d9488;
+  --c-primary-deep: #0f766e;
+  --c-primary-soft: rgba(13, 148, 136, 0.1);
   --c-text: #0f172a;
   --c-text-2: #64748b;
-  --c-primary-soft: rgba(20, 184, 166, 0.12);
-  --c-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --c-text-3: #94a3b8;
+  --c-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px rgba(15, 23, 42, 0.06);
+  --c-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.05);
+  background:
+    radial-gradient(1000px 500px at 15% -15%, rgba(13, 148, 136, 0.08), transparent 55%),
+    linear-gradient(180deg, #f7fafc 0%, #eef3f9 100%);
+}
+
+.mq-console h1,
+.mq-console h2,
+.mq-console h3,
+.mq-console .mq-console-title {
+  font-family: var(--font-display-en), var(--font-display-ar), var(--font-body-en), sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--c-text);
+}
+
+.mq-console .mq-console-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.mq-console .mq-console-metric {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .mq-console-sidebar {
+  position: relative;
   border-inline-end: 1px solid var(--c-border);
-  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--c-surface-solid) 55%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.mq-console-sidebar::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 1px;
+  background: var(--c-hairline);
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .mq-console-topbar {
   border-bottom: 1px solid var(--c-border);
-  background: color-mix(in srgb, var(--c-surface) 80%, transparent);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--c-surface-solid) 45%, transparent);
+  backdrop-filter: blur(16px) saturate(1.15);
 }
 
 .mq-console-surface {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  box-shadow: var(--c-shadow);
-}
-
-.mq-console-card {
+  position: relative;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: var(--c-radius-card);
   box-shadow: var(--c-shadow);
-  transition: transform 200ms ease-out, border-color 200ms ease-out;
+  backdrop-filter: blur(12px);
+}
+
+.mq-console-card {
+  position: relative;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--c-radius-card);
+  box-shadow: var(--c-shadow-soft);
+  backdrop-filter: blur(10px);
+  transition:
+    transform 220ms var(--c-ease),
+    border-color 220ms var(--c-ease),
+    box-shadow 220ms var(--c-ease),
+    background 220ms var(--c-ease);
 }
 
 .mq-console-card:hover {
-  border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border));
+  border-color: var(--c-border-strong);
+  box-shadow: var(--c-shadow);
+  transform: translateY(-1px);
+}
+
+.mq-console-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 40%, transparent);
+  opacity: 0.7;
 }
 
 .mq-console-btn-primary {
@@ -1474,17 +1565,25 @@
   justify-content: center;
   gap: 0.5rem;
   min-height: 40px;
-  padding: 0.55rem 1rem;
+  padding: 0.55rem 1.1rem;
   border-radius: var(--c-radius-btn);
-  background: var(--c-primary);
+  border: 1px solid color-mix(in srgb, var(--c-primary) 55%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-primary) 92%, white),
+    var(--c-primary-deep)
+  );
   color: #042f2e;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.875rem;
-  transition: filter 200ms ease-out, transform 200ms ease-out;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 20px rgba(20, 184, 166, 0.18);
+  transition: filter 200ms var(--c-ease), transform 200ms var(--c-ease), box-shadow 200ms var(--c-ease);
 }
 
 .mq-console-btn-primary:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
+  transform: translateY(-0.5px);
 }
 
 .mq-console-btn-ghost {
@@ -1493,34 +1592,40 @@
   justify-content: center;
   gap: 0.4rem;
   min-height: 36px;
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   border-radius: var(--c-radius-btn);
   border: 1px solid var(--c-border);
   background: var(--c-surface-2);
   color: var(--c-text);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 0.875rem;
-  transition: border-color 200ms ease-out, background 200ms ease-out;
+  letter-spacing: 0.01em;
+  transition: border-color 200ms var(--c-ease), background 200ms var(--c-ease), color 200ms var(--c-ease);
 }
 
 .mq-console-btn-ghost:hover {
-  border-color: var(--c-primary);
+  border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border));
+  background: var(--c-primary-soft);
+  color: var(--c-primary);
 }
 
 .mq-console-input {
   min-height: 40px;
-  padding: 0.55rem 0.75rem;
+  padding: 0.55rem 0.85rem;
   border-radius: var(--c-radius-btn);
   border: 1px solid var(--c-border);
-  background: var(--c-surface-2);
+  background: color-mix(in srgb, var(--c-surface-2) 80%, transparent);
   color: var(--c-text);
   font-size: 0.875rem;
+  font-weight: 400;
   outline: none;
-  transition: border-color 200ms ease-out;
+  transition: border-color 200ms var(--c-ease), box-shadow 200ms var(--c-ease), background 200ms var(--c-ease);
 }
 
 .mq-console-input:focus {
-  border-color: var(--c-primary);
+  border-color: color-mix(in srgb, var(--c-primary) 55%, var(--c-border));
+  box-shadow: 0 0 0 3px var(--c-primary-soft);
+  background: color-mix(in srgb, var(--c-surface-solid) 70%, transparent);
 }
 
 .mq-console-icon-btn {
@@ -1533,6 +1638,13 @@
   border: 1px solid var(--c-border);
   color: var(--c-text-2);
   background: var(--c-surface-2);
+  transition: border-color 200ms var(--c-ease), color 200ms var(--c-ease), background 200ms var(--c-ease);
+}
+
+.mq-console-icon-btn:hover {
+  color: var(--c-primary);
+  border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+  background: var(--c-primary-soft);
 }
 
 .mq-console-bottom-nav {
@@ -1541,6 +1653,75 @@
   z-index: 40;
   display: flex;
   border-top: 1px solid var(--c-border);
-  background: color-mix(in srgb, var(--c-surface) 94%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--c-surface-solid) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.mq-console-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+  border-inline-start: 2px solid transparent;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--c-text-2);
+  transition: color 200ms var(--c-ease), background 200ms var(--c-ease), border-color 200ms var(--c-ease);
+}
+
+.mq-console-nav-link:hover {
+  color: var(--c-text);
+  background: var(--c-surface-2);
+}
+
+.mq-console-nav-link[data-active='true'] {
+  color: var(--c-primary);
+  background: var(--c-primary-soft);
+  border-inline-start-color: var(--c-primary);
+}
+
+.mq-console-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--c-primary-soft);
+  color: var(--c-primary);
+}
+
+.mq-console .font-bold,
+.mq-console .font-semibold {
+  font-weight: 500 !important;
+}
+
+.mq-console .font-medium {
+  font-weight: 500;
+}
+
+.mq-employers {
+  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  background: #070b14;
+  color: #e8eef7;
+}
+
+.mq-employers h1,
+.mq-employers h2,
+.mq-employers h3 {
+  font-family: var(--font-display-en), var(--font-display-ar), sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.mq-employers .font-bold,
+.mq-employers .font-semibold {
+  font-weight: 500 !important;
 }

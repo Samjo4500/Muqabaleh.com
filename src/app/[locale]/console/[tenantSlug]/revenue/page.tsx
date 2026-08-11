@@ -34,23 +34,23 @@ export default function RevenuePage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('revenueTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('revenueTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('revenueHint')}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="mq-console-card p-4">
           <p className="text-xs uppercase text-[var(--c-text-2)]">{t('revenue')}</p>
-          <p className="mt-1 text-3xl font-bold text-[var(--c-text)]">
+          <p className="mt-1 mq-console-metric text-[2rem] text-[var(--c-text)]">
             ${data.totalRevenue.toLocaleString()}
           </p>
         </div>
         <div className="mq-console-card p-4">
           <p className="text-xs uppercase text-[var(--c-text-2)]">{t('interviews')}</p>
-          <p className="mt-1 text-3xl font-bold text-[var(--c-text)]">{data.totalInterviews}</p>
+          <p className="mt-1 mq-console-metric text-[2rem] text-[var(--c-text)]">{data.totalInterviews}</p>
         </div>
         <div className="mq-console-card p-4">
           <p className="text-xs uppercase text-[var(--c-text-2)]">{t('commission')}</p>
-          <p className="mt-1 text-3xl font-bold text-[var(--c-primary)]">
+          <p className="mt-1 mq-console-metric text-[2rem] text-[var(--c-primary)]">
             ${data.commissionUsd.toLocaleString()}
           </p>
         </div>

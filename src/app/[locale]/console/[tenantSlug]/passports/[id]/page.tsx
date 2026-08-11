@@ -53,7 +53,7 @@ export default function PassportViewerPage() {
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
           <ScoreRing score={passport.score} grade={passport.grade} />
           <div className="min-w-0 flex-1 text-center sm:text-start">
-            <h2 className="text-2xl font-bold text-[var(--c-text)]">{passport.candidateName}</h2>
+            <h2 className="mq-console-title text-[1.65rem]">{passport.candidateName}</h2>
             <p className="text-sm text-[var(--c-text-2)]">
               {isAr ? passport.roleAr || passport.role : passport.role}
             </p>
@@ -92,18 +92,18 @@ export default function PassportViewerPage() {
 
       <section className="space-y-4">
         <div className="mq-console-surface rounded-xl p-4">
-          <h3 className="mb-2 text-sm font-bold text-[var(--c-text)]">{t('radar')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-[var(--c-text)]">{t('radar')}</h3>
           <CompetencyRadar data={passport.competencies} />
         </div>
 
         <div className="mq-console-surface rounded-xl p-4">
-          <h3 className="mb-2 text-sm font-bold text-[var(--c-text)]">{t('aiInsights')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-[var(--c-text)]">{t('aiInsights')}</h3>
           <p className="text-sm text-[var(--c-text)]">
             {isAr ? passport.insights.summaryAr : passport.insights.summary}
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <div>
-              <p className="text-xs font-bold uppercase text-[#22C55E]">{t('greenFlags')}</p>
+              <p className="text-xs font-medium uppercase text-[#22C55E]">{t('greenFlags')}</p>
               <ul className="mt-1 space-y-1 text-sm text-[var(--c-text-2)]">
                 {(isAr ? passport.insights.greenFlagsAr : passport.insights.greenFlags).map((f) => (
                   <li key={f}>• {f}</li>
@@ -111,7 +111,7 @@ export default function PassportViewerPage() {
               </ul>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase text-[#EF4444]">{t('redFlags')}</p>
+              <p className="text-xs font-medium uppercase text-[#EF4444]">{t('redFlags')}</p>
               <ul className="mt-1 space-y-1 text-sm text-[var(--c-text-2)]">
                 {(isAr ? passport.insights.redFlagsAr : passport.insights.redFlags).map((f) => (
                   <li key={f}>• {f}</li>
@@ -126,11 +126,11 @@ export default function PassportViewerPage() {
       </section>
 
       <section className="mq-console-surface rounded-xl p-4 lg:col-span-2">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('transcript')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('transcript')}</h3>
         <div className="space-y-3">
           {passport.transcript.map((row, i) => (
             <div key={i} className="rounded-lg border border-[var(--c-border)] p-3">
-              <p className="text-xs font-semibold text-[var(--c-primary)]">
+              <p className="text-xs font-medium text-[var(--c-primary)]">
                 Q: {isAr ? row.qAr || row.q : row.q}
               </p>
               <p className="mt-1 text-sm text-[var(--c-text)]">
@@ -145,7 +145,7 @@ export default function PassportViewerPage() {
       </section>
 
       <section className="mq-console-surface rounded-xl p-4 lg:col-span-2">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('teamNotes')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('teamNotes')}</h3>
         <div className="mb-3 flex gap-2">
           <input
             value={note}
@@ -165,7 +165,7 @@ export default function PassportViewerPage() {
         <div className="space-y-2">
           {passport.notes.map((n) => (
             <div key={n.id} className="rounded-lg bg-[var(--c-surface-2)] p-3 text-sm">
-              <p className="font-semibold text-[var(--c-text)]">
+              <p className="font-medium text-[var(--c-text)]">
                 {n.author}{' '}
                 <span className="text-xs font-normal text-[var(--c-text-2)]">
                   {new Date(n.at).toLocaleString(isAr ? 'ar' : 'en')}

@@ -12,7 +12,7 @@ export default function ConsolePipelinePage() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('pipelineTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('pipelineTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('pipelineHint')}</p>
       </div>
       <PipelineBoard tenantSlug={tenantSlug} />

@@ -42,7 +42,7 @@ export default function EditJobPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <h2 className="text-2xl font-bold text-[var(--c-text)]">{job.title}</h2>
+      <h2 className="mq-console-title text-[1.65rem]">{job.title}</h2>
       <div className="mq-console-surface space-y-3 rounded-xl p-4">
         <p className="break-all text-sm text-[var(--c-text-2)]">{link}</p>
         <label className="block text-sm text-[var(--c-text-2)]">

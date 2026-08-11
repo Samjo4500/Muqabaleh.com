@@ -38,23 +38,23 @@ function Card({
   return (
     <Link
       href={href}
-      className={`mq-console-card block p-3 transition-all duration-200 ${dragging ? 'opacity-80 shadow-lg' : ''}`}
+      className={`mq-console-card block p-3 ${dragging ? 'opacity-85 scale-[1.02]' : ''}`}
     >
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--c-primary-soft)] text-xs font-bold text-[var(--c-primary)]">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-[11px] font-normal tracking-wide text-[var(--c-primary)]">
           {passport.candidateName.slice(0, 1)}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-[var(--c-text)]">
+          <p className="truncate text-[13px] font-medium tracking-tight text-[var(--c-text)]">
             {passport.candidateName}
           </p>
-          <p className="truncate text-xs text-[var(--c-text-2)]">
+          <p className="truncate text-[11px] text-[var(--c-text-3)]">
             {isAr ? passport.roleAr || passport.role : passport.role}
           </p>
         </div>
         <span
-          className="rounded-md px-1.5 py-0.5 text-xs font-bold tabular-nums"
-          style={{ color: scoreColor(passport.score), background: `${scoreColor(passport.score)}22` }}
+          className="rounded-full px-2 py-0.5 text-[11px] font-normal tabular-nums"
+          style={{ color: scoreColor(passport.score), background: `${scoreColor(passport.score)}18` }}
         >
           {passport.score}
         </span>
@@ -100,16 +100,19 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className="mq-console-surface flex w-[260px] shrink-0 flex-col rounded-xl p-3"
+      className="mq-console-surface flex w-[268px] shrink-0 flex-col p-3.5"
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full" style={{ background: stage.color || '#14B8A6' }} />
-          <h3 className="text-sm font-bold text-[var(--c-text)]">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: stage.color || 'var(--c-primary)' }}
+          />
+          <h3 className="text-[13px] font-medium tracking-tight text-[var(--c-text)]">
             {isAr ? stage.labelAr : stage.labelEn}
           </h3>
         </div>
-        <span className="text-xs tabular-nums text-[var(--c-text-2)]">{items.length}</span>
+        <span className="text-[11px] tabular-nums text-[var(--c-text-3)]">{items.length}</span>
       </div>
       <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
         <div className="flex min-h-[120px] flex-col gap-2">

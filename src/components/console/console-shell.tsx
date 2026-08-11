@@ -59,7 +59,7 @@ function ThemeToggle() {
       className="mq-console-icon-btn"
       aria-label={isAr ? 'تبديل المظهر' : 'Toggle theme'}
     >
-      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+      {theme === 'dark' ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
     </button>
   );
 }
@@ -95,17 +95,20 @@ function ShellInner({
     <div className="flex min-h-screen flex-col" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
       <LanguageSwitcherFixed />
       <div className="flex flex-1">
-        <aside className="mq-console-sidebar hidden w-[260px] shrink-0 flex-col lg:flex">
-          <div className="flex items-center gap-3 p-4 pb-2">
+        <aside className="mq-console-sidebar hidden w-[248px] shrink-0 flex-col lg:flex">
+          <div className="flex items-center gap-3 px-4 pb-3 pt-5">
             <BrandLogo size="nav" priority />
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-[var(--c-text)]">{orgName}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--c-primary)]">
-                {badge}
+              <p className="truncate text-[13px] font-medium tracking-tight text-[var(--c-text)]">
+                {orgName}
               </p>
+              <span className="mq-console-chip mt-1 inline-flex">{badge}</span>
             </div>
           </div>
-          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+
+          <div className="mx-4 mb-2 h-px bg-[var(--c-border)]" />
+
+          <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 pb-4">
             {items.map((item) => {
               const href = localePath(`${base}${item.href}`, locale);
               const bare = `${base}${item.href}`;
@@ -120,39 +123,40 @@ function ShellInner({
                 <Link
                   key={item.key}
                   href={href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg border-s-2 px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                    isActive
-                      ? 'border-s-[var(--c-primary)] bg-[var(--c-primary-soft)] text-[var(--c-primary)]'
-                      : 'border-s-transparent text-[var(--c-text-2)] hover:bg-[var(--c-surface-2)] hover:text-[var(--c-text)]',
-                  )}
+                  data-active={isActive ? 'true' : 'false'}
+                  className="mq-console-nav-link"
                 >
-                  <Icon size={18} strokeWidth={1.75} />
+                  <Icon size={17} strokeWidth={1.5} className="opacity-80" />
                   <span>{t(item.key)}</span>
                 </Link>
               );
             })}
           </nav>
-          <div className="flex items-center justify-between border-t border-[var(--c-border)] p-3">
-            <span className="text-xs text-[var(--c-text-2)]">muqabaleh.com</span>
+
+          <div className="flex items-center justify-between border-t border-[var(--c-border)] px-4 py-3">
+            <span className="text-[11px] tracking-wide text-[var(--c-text-3)]">
+              muqabaleh.com
+            </span>
             <ThemeToggle />
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="mq-console-topbar flex items-center justify-between gap-3 px-4 py-3 lg:px-6">
+          <header className="mq-console-topbar flex items-center justify-between gap-3 px-4 py-3.5 lg:px-8">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--c-text-2)]">
-                {t('commandCenter')}
-              </p>
-              <h1 className="text-lg font-bold text-[var(--c-text)]">{orgName}</h1>
+              <p className="mq-console-eyebrow">{t('commandCenter')}</p>
+              <h1 className="mt-0.5 text-[1.15rem] font-medium tracking-tight text-[var(--c-text)]">
+                {orgName}
+              </h1>
             </div>
             <div className="flex items-center gap-2 lg:hidden">
               <ThemeToggle />
             </div>
           </header>
 
-          <main className="flex-1 px-4 pb-24 pt-4 lg:px-6 lg:pb-8">{children}</main>
+          <main className="relative flex-1 px-4 pb-24 pt-5 lg:px-8 lg:pb-10 lg:pt-7">
+            {children}
+          </main>
 
           <nav className="mq-console-bottom-nav lg:hidden">
             {items.slice(0, 5).map((item) => {
@@ -168,11 +172,11 @@ function ShellInner({
                   key={item.key}
                   href={href}
                   className={cn(
-                    'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium',
-                    isActive ? 'text-[var(--c-primary)]' : 'text-[var(--c-text-2)]',
+                    'flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-normal tracking-wide',
+                    isActive ? 'text-[var(--c-primary)]' : 'text-[var(--c-text-3)]',
                   )}
                 >
-                  <Icon size={18} />
+                  <Icon size={17} strokeWidth={1.5} />
                   <span className="truncate px-0.5">{t(item.key)}</span>
                 </Link>
               );

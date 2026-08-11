@@ -35,7 +35,7 @@ export default function ConsoleOnboardingPage() {
   return (
     <div className="mx-auto max-w-xl space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('onboardingTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('onboardingTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('onboardingAsk')}</p>
       </div>
 
@@ -52,7 +52,7 @@ export default function ConsoleOnboardingPage() {
             key={key}
             type="button"
             onClick={() => setPath(key)}
-            className={`mq-console-card p-4 text-start text-sm font-semibold ${
+            className={`mq-console-card p-4 text-start text-sm font-medium ${
               path === key ? 'ring-2 ring-[var(--c-primary)]' : ''
             }`}
           >
@@ -105,7 +105,7 @@ export default function ConsoleOnboardingPage() {
       ) : null}
 
       <div className="mq-console-card p-4 text-sm text-[var(--c-text-2)]">
-        <p className="font-semibold text-[var(--c-text)]">{t('demoSwitcher')}</p>
+        <p className="font-medium text-[var(--c-text)]">{t('demoSwitcher')}</p>
         <ul className="mt-2 space-y-1">
           <li>
             <a className="text-[var(--c-primary)]" href={localePath(`/console/${DEMO_ORG_SLUG}`, locale)}>

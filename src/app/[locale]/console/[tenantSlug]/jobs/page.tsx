@@ -26,7 +26,7 @@ export default function JobsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('jobsTitle')}</h2>
+          <h2 className="mq-console-title text-[1.65rem]">{t('jobsTitle')}</h2>
           <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('jobsHint')}</p>
         </div>
         <Link
@@ -45,14 +45,14 @@ export default function JobsPage() {
             <div key={job.id} className="mq-console-card p-4">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h3 className="font-bold text-[var(--c-text)]">
+                  <h3 className="font-medium text-[var(--c-text)]">
                     {isAr ? job.titleAr || job.title : job.title}
                   </h3>
                   <p className="mt-1 text-xs text-[var(--c-text-2)]">
                     {job.difficulty} · {job.language} · {job.status}
                   </p>
                 </div>
-                <span className="rounded-md bg-[var(--c-primary-soft)] px-2 py-0.5 text-xs font-bold text-[var(--c-primary)]">
+                <span className="rounded-md bg-[var(--c-primary-soft)] px-2 py-0.5 text-xs font-medium text-[var(--c-primary)]">
                   {job.applicantCount ?? 0}
                 </span>
               </div>

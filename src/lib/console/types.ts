@@ -150,6 +150,8 @@ export type ConsolePassport = {
   id: string;
   organizationId: string;
   candidateName: string;
+  /** Optional Arabic display name for bilingual consoles */
+  candidateNameAr?: string | null;
   candidateEmail: string;
   avatarUrl: string | null;
   role: string;

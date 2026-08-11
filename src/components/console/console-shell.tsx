@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -28,8 +29,10 @@ import {
   CONSOLE_PRODUCT,
   consoleFullName,
   getConsoleEdition,
+  welcomeStorageKey,
 } from '@/lib/console/identity';
 import { ConsoleThemeProvider, useConsoleTheme } from './console-theme';
+import { ConsoleTour } from './console-tour';
 import { ConsoleWelcome } from './console-welcome';
 
 type NavItem = {
@@ -98,6 +101,31 @@ function ShellInner({
     (item) => !item.types || item.types.includes(tenantType),
   );
 
+  const [welcomeDone, setWelcomeDone] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      try {
+        if (sessionStorage.getItem(welcomeStorageKey(tenantSlug))) {
+          setWelcomeDone(true);
+        }
+      } catch {
+        setWelcomeDone(true);
+      }
+    };
+    check();
+    const timer = window.setInterval(check, 350);
+    return () => window.clearInterval(timer);
+  }, [tenantSlug]);
+
+  const tourTargetFor = (key: string) => {
+    if (key === 'navPipeline') return 'nav-pipeline';
+    if (key === 'navTeam') return 'nav-team';
+    if (key === 'navDashboard') return 'nav-dashboard';
+    if (key === 'navJobs') return 'nav-jobs';
+    if (key === 'navPassports') return 'nav-passports';
+    return undefined;
+  };
+
   return (
     <div className="flex min-h-screen flex-col" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
       <ConsoleWelcome
@@ -105,6 +133,7 @@ function ShellInner({
         orgName={orgName}
         tenantType={tenantType}
       />
+      <ConsoleTour tenantSlug={tenantSlug} enabled={welcomeDone} />
       <LanguageSwitcherFixed />
       <div className="flex flex-1">
         <aside className="mq-console-sidebar hidden w-[256px] shrink-0 flex-col lg:flex">
@@ -153,6 +182,7 @@ function ShellInner({
                   key={item.key}
                   href={href}
                   data-active={isActive ? 'true' : 'false'}
+                  data-tour={tourTargetFor(item.key)}
                   className="mq-console-nav-link"
                 >
                   <Icon size={17} strokeWidth={1.5} className="opacity-80" />

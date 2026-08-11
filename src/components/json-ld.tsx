@@ -29,7 +29,7 @@ export function OrganizationJsonLd() {
         },
         areaServed: 'MENA',
         sameAs: [
-          'https://instagram.com/muqabaleh',
+          'https://www.instagram.com/muqabaleh2026',
           'https://www.tiktok.com/@muqabaleh',
           'https://linkedin.com/company/muqabaleh',
         ],

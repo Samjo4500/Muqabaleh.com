@@ -1813,12 +1813,12 @@
 }
 
 .mq-reveal-device {
-  width: min(1240px, 100%);
+  width: min(1360px, 100%);
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  max-height: min(78dvh, 820px);
+  max-height: min(82dvh, 900px);
 }
 
 .mq-reveal-chrome-top {
@@ -1846,7 +1846,7 @@
 .mq-reveal-display {
   position: relative;
   flex: 1 1 auto;
-  min-height: min(58dvh, 620px);
+  min-height: min(64dvh, 700px);
   overflow: hidden;
   background: #020617;
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -1902,12 +1902,20 @@
   z-index: 1;
 }
 
+.mq-reveal-portrait-img {
+  object-fit: cover !important;
+  object-position: center 12% !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: scale(1.08);
+}
+
 .mq-reveal-portrait-shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(2, 6, 23, 0.35) 0%, rgba(2, 6, 23, 0.05) 28%, rgba(2, 6, 23, 0.55) 58%, rgba(2, 6, 23, 0.88) 100%),
-    radial-gradient(ellipse at 50% 30%, transparent 20%, rgba(2, 6, 23, 0.45) 100%);
+    linear-gradient(180deg, rgba(2, 6, 23, 0.28) 0%, rgba(2, 6, 23, 0.02) 30%, rgba(2, 6, 23, 0.5) 58%, rgba(2, 6, 23, 0.9) 100%),
+    radial-gradient(ellipse at 50% 28%, transparent 18%, rgba(2, 6, 23, 0.4) 100%);
 }
 
 .mq-reveal-portrait-glow {
@@ -1964,15 +1972,15 @@
 
 .mq-reveal-name {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 0.02em;
+  gap: 0.01em;
   margin: 0;
   font-family: var(--font-display-en), var(--font-display-ar), serif;
-  font-size: clamp(4.2rem, 14vw, 9.5rem);
+  font-size: clamp(5rem, 16vw, 11rem);
   font-weight: 700;
-  line-height: 0.92;
-  letter-spacing: -0.045em;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
   color: #fff;
   text-shadow:
     0 2px 0 rgba(255, 255, 255, 0.08),
@@ -2137,7 +2145,7 @@
     min-height: min(52dvh, 480px);
   }
   .mq-reveal-name {
-    font-size: clamp(3.4rem, 18vw, 5.5rem);
+    font-size: clamp(4rem, 20vw, 6.5rem);
   }
   .mq-reveal-chrome-base {
     display: none;

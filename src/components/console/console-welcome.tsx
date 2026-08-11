@@ -126,9 +126,11 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
             <div className="mq-reveal-vignette" />
           </div>
 
-          <div className="mq-reveal-stage" dir={isAr ? 'rtl' : 'ltr'}>
+          {/* Stage layout stays LTR so curtain transforms never invert under Arabic. */}
+          <div className="mq-reveal-stage" dir="ltr" lang={isAr ? 'ar' : 'en'}>
             <motion.p
               className="mq-reveal-kicker"
+              dir={isAr ? 'rtl' : 'ltr'}
               initial={false}
               animate={{ opacity: beat >= 1 ? 1 : 0, y: beat >= 1 ? 0 : -10 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -157,7 +159,6 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
               </div>
 
               <div className="mq-reveal-display">
-                {/* Power line → fills screen */}
                 <motion.div
                   className="mq-reveal-power"
                   initial={false}
@@ -169,31 +170,30 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
                   aria-hidden
                 />
 
-                {/* Curtains */}
+                {/* Curtains always part outward in physical LTR space */}
                 <motion.div
                   className="mq-reveal-curtain mq-reveal-curtain-a"
                   initial={false}
-                  animate={{ x: beat >= 2 ? (isAr ? '105%' : '-105%') : '0%' }}
-                  transition={{ duration: 1.15, ease: [0.65, 0, 0.35, 1] }}
+                  animate={{ x: beat >= 2 ? '-108%' : '0%' }}
+                  transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
                   aria-hidden
                 />
                 <motion.div
                   className="mq-reveal-curtain mq-reveal-curtain-b"
                   initial={false}
-                  animate={{ x: beat >= 2 ? (isAr ? '-105%' : '105%') : '0%' }}
-                  transition={{ duration: 1.15, ease: [0.65, 0, 0.35, 1] }}
+                  animate={{ x: beat >= 2 ? '108%' : '0%' }}
+                  transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
                   aria-hidden
                 />
 
-                {/* Jeannie portrait */}
                 <motion.div
                   className="mq-reveal-portrait"
                   initial={false}
                   animate={{
                     opacity: beat >= 2 ? 1 : 0,
-                    scale: beat >= 2 ? 1 : 1.08,
+                    scale: beat >= 2 ? 1 : 1.1,
                   }}
-                  transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 1.35, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <Image
                     src={edition.jeannieSrc}
@@ -202,24 +202,22 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
                     priority
                     quality={95}
                     sizes="(max-width: 900px) 100vw, 1400px"
-                    className="object-cover object-[center_14%]"
+                    className="mq-reveal-portrait-img"
                   />
                   <div className="mq-reveal-portrait-shade" aria-hidden />
                   <div className="mq-reveal-portrait-glow" aria-hidden />
                 </motion.div>
 
-                {/* Light sweep across face */}
                 {beat >= 2 && !reduce ? (
                   <motion.div
                     className="mq-reveal-sweep"
-                    initial={{ x: isAr ? '40%' : '-40%', opacity: 0 }}
-                    animate={{ x: isAr ? '-120%' : '120%', opacity: [0, 0.7, 0] }}
-                    transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.15 }}
+                    initial={{ x: '-45%', opacity: 0 }}
+                    animate={{ x: '125%', opacity: [0, 0.75, 0] }}
+                    transition={{ duration: 1.45, ease: 'easeInOut', delay: 0.12 }}
                     aria-hidden
                   />
                 ) : null}
 
-                {/* Giant name + service line ON the display */}
                 <div className="mq-reveal-copy">
                   <motion.div
                     className="mq-reveal-name-wrap"
@@ -230,7 +228,7 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
                     }}
                     transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <p className="mq-reveal-name-eyebrow">
+                    <p className="mq-reveal-name-eyebrow" dir={isAr ? 'rtl' : 'ltr'}>
                       {isAr ? 'مساعدتكم التنفيذية' : 'Your executive aide'}
                     </p>
                     <h1
@@ -247,11 +245,11 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
                           animate={
                             beat >= 3
                               ? { opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }
-                              : { opacity: 0, y: 36, rotateX: -40, filter: 'blur(8px)' }
+                              : { opacity: 0, y: 40, rotateX: -48, filter: 'blur(10px)' }
                           }
                           transition={{
-                            duration: 0.55,
-                            delay: reduce ? 0 : 0.04 * i,
+                            duration: 0.6,
+                            delay: reduce ? 0 : 0.07 * i,
                             ease: [0.16, 1, 0.3, 1],
                           }}
                         >
@@ -285,6 +283,7 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
 
             <motion.div
               className="mq-reveal-cta-block"
+              dir={isAr ? 'rtl' : 'ltr'}
               initial={false}
               animate={{
                 opacity: canEnter ? 1 : 0,

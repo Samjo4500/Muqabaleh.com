@@ -71,5 +71,5 @@ export function consoleFullName(tenantType: TenantType, locale: string) {
 
 /** Bumped when the welcome experience is redesigned so guests see it again. */
 export function welcomeStorageKey(tenantSlug: string) {
-  return `mq-jeannie-suite-welcome:v4:${tenantSlug}`;
+  return `mq-jeannie-suite-welcome:v5:${tenantSlug}`;
 }

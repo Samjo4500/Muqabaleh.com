@@ -37,11 +37,11 @@ type ConsoleTheme = {
 const THEMES: Record<string, ConsoleTheme> = {
   'najm-tech': {
     eyebrowEn: 'NAJM TECH WORKSPACE · ACTIVE',
-    eyebrowAr: 'مساحة نجم تك · نشطة',
+    eyebrowAr: 'مساحة عمل نجم تك · نشطة',
     descEn:
       'Welcome back, Director. Access your AI evaluation boards, analyze candidate performance, and verify skills.',
     descAr:
-      'مرحباً بعودتكم. ادخوا لوحات التقييم الذكية، حلّلوا أداء المرشحين، وتحققوا من المهارات.',
+      'مرحباً بعودتكم. ادخلوا لوحات التقييم بالذكاء الاصطناعي، حلّلوا أداء المرشحين، وتحققوا من المهارات.',
     accent: 'text-cyan-400',
     border: 'border-cyan-500/25',
     glow: 'rgba(34, 211, 238, 0.14)',
@@ -49,11 +49,11 @@ const THEMES: Record<string, ConsoleTheme> = {
   },
   'atlas-agency': {
     eyebrowEn: 'ATLAS AGENCY · PARTNER OS',
-    eyebrowAr: 'أطلس إيجنسي · نظام الشركاء',
+    eyebrowAr: 'وكالة أطلس · نظام الشركاء',
     descEn:
       'Welcome back, Partner. Configure client workspaces, audit branded portals, and track placement commissions.',
     descAr:
-      'مرحباً بعودتكم. هيّئوا مساحات العملاء، راجعوا البوابات ذات العلامة، وتتبعوا العمولات.',
+      'مرحباً بعودتكم. خصّصوا مساحات عمل العملاء، راجعوا بواباتهم ذات الهوية التجارية، وتابعوا عمولات التوظيف.',
     accent: 'text-sky-400',
     border: 'border-sky-500/25',
     glow: 'rgba(56, 189, 248, 0.14)',
@@ -65,7 +65,7 @@ const THEMES: Record<string, ConsoleTheme> = {
     descEn:
       'Welcome back, Dean. Audit cohort readiness, inspect communication analytics, and review scores.',
     descAr:
-      'مرحباً بعودتكم. راجعوا جاهزية الدفعات، افحصوا تحليلات التواصل، واستعرضوا الدرجات.',
+      'مرحباً بعودتكم. راجعوا جاهزية الدفعات للتخرّج، افحصوا تحليلات التواصل، واستعرضوا الدرجات.',
     accent: 'text-[#d3ac65]',
     border: 'border-[#d3ac65]/25',
     glow: 'rgba(211, 172, 101, 0.14)',
@@ -79,7 +79,7 @@ const FALLBACK: ConsoleTheme = {
   descEn:
     'Welcome back. Verify secure credentials and enter your active candidate screening workspace.',
   descAr:
-    'مرحباً بعودتكم. أكّدوا بيانات الدخول الآمنة وادخلوا مساحة فحص المرشحين.',
+    'مرحباً بعودتكم. أكّدوا بيانات الدخول الآمنة وادخلوا مساحة فحص المرشحين النشطة.',
   accent: 'text-[#d3ac65]',
   border: 'border-[#d3ac65]/25',
   glow: 'rgba(211, 172, 101, 0.14)',
@@ -157,11 +157,11 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
   const eyebrow =
     scanState === 'scanning'
       ? isAr
-        ? 'جارٍ المسح البيومتري... التحقق من الصلاحيات'
+        ? 'جارٍ المسح البيومتري · التحقق من الهوية'
         : 'SCANNING BIOMETRICS… VERIFYING CREDENTIALS'
       : scanState === 'granted'
         ? isAr
-          ? 'تم منح الوصول · مصرّح'
+          ? 'تم منح الوصول · مصرّح لكم'
           : 'ACCESS GRANTED · AUTHORIZED'
         : isAr
           ? config.eyebrowAr
@@ -170,11 +170,11 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
   const description =
     scanState === 'scanning'
       ? isAr
-        ? 'تحليل المفتاح البيومتري... الوصول إلى العقدة الآمنة... تأكيد الصلاحيات.'
+        ? 'جارٍ تحليل البصمة… الاتصال بالعقدة الآمنة… تأكيد الصلاحيات.'
         : 'Analyzing biometric key… Accessing secure datastore… Confirming credentials.'
       : scanState === 'granted'
         ? isAr
-          ? 'اكتمل فحص الأمان. جارٍ فتح مساحة العمل...'
+          ? 'اكتمل فحص الأمان. جارٍ فتح مساحة العمل…'
           : 'Security check complete. Opening your workspace…'
         : isAr
           ? config.descAr
@@ -278,21 +278,29 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
 
               <p
                 className={cn(
-                  'mb-3 text-center text-[11px] font-bold uppercase tracking-[0.22em] transition-colors duration-500 md:mb-4 md:text-xs',
+                  'mb-4 text-center font-bold transition-colors duration-500 md:mb-5',
+                  isAr
+                    ? 'text-xl tracking-normal md:text-2xl'
+                    : 'text-xl uppercase tracking-[0.14em] md:text-2xl',
                   scanState === 'granted' ? 'text-emerald-400' : config.accent,
                 )}
               >
                 {eyebrow}
               </p>
 
-              <p className="mb-2 text-center text-sm font-medium text-white/80 md:text-base">
+              <p
+                className={cn(
+                  'mb-3 text-center text-xl font-semibold text-white md:text-2xl',
+                  isAr && 'font-[family-name:var(--font-body-ar)]',
+                )}
+              >
                 {orgName}
               </p>
 
               <p
                 className={cn(
-                  'mb-10 max-w-[500px] text-center text-xs font-medium leading-relaxed text-gray-400 md:mb-12 md:text-sm',
-                  isAr && 'font-[family-name:var(--font-body-ar)] leading-7',
+                  'mb-10 max-w-[560px] text-center text-base font-medium leading-relaxed text-gray-300 md:mb-12 md:text-xl md:leading-8',
+                  isAr && 'font-[family-name:var(--font-body-ar)] leading-8',
                 )}
               >
                 {description}
@@ -346,9 +354,14 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                 />
               </button>
 
-              <p className="mt-6 text-center text-[11px] tracking-wide text-white/35">
+              <p
+                className={cn(
+                  'mt-6 text-center text-xl tracking-wide text-white/55 md:text-2xl',
+                  isAr && 'font-[family-name:var(--font-body-ar)] tracking-normal',
+                )}
+              >
                 {isAr
-                  ? 'اضغط للمصادقة · Enter'
+                  ? 'اضغط للمصادقة · أو Enter'
                   : 'Tap to authenticate · press Enter'}
               </p>
             </div>

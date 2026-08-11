@@ -233,8 +233,8 @@ export function SystemHealthPanel({ compact }: Props) {
             </h2>
             <p className="mt-1 max-w-xl text-sm text-white/50">
               <BiInline
-                ar={"فحص حي لقاعدة البيانات وجيني والصوت والبريد والدفع والمصادقة — بنقرة واحدة}
-                en={"Live probe of database, Jeannie AI, speech, email, payments, and auth in one click."}
+                ar="فحص حي لقاعدة البيانات وجيني والصوت والبريد والدفع والمصادقة — بنقرة واحدة"
+                en="Live probe of database, Jeannie AI, speech, email, payments, and auth in one click."
               />
             </p>
             {report ? (

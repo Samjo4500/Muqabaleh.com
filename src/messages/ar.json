@@ -2746,8 +2746,8 @@
     "backPartners": "العودة للشركاء"
   },
   "console": {
-    "employerBadge": "توظيف",
-    "commandCenter": "أتيليه جيني",
+    "employerBadge": "تنفيذي",
+    "commandCenter": "جناح جيني",
     "navDashboard": "لوحة التحكم",
     "navPipeline": "مسار التوظيف",
     "navPassports": "الجوازات",
@@ -2841,8 +2841,8 @@
     "phase2Later": "افتح وحدة التجربة لهذا النوع",
     "enterConsole": "دخول وحدة صاحب العمل",
     "goSeeker": "الانتقال لتطبيق المرشح",
-    "agencyBadge": "شركاء",
-    "academyBadge": "حرم جامعي",
+    "agencyBadge": "تحالف",
+    "academyBadge": "أكاديمية",
     "navClients": "العملاء",
     "navRevenue": "الإيرادات",
     "navCohorts": "الدفعات",
@@ -2893,9 +2893,10 @@
     "webhookEvents": "الأحداث",
     "addWebhook": "إضافة ويب هوك",
     "demoSwitcher": "مستأجرو التجربة",
-    "productName": "أتيليه جيني",
-    "enterAtelier": "ادخل الأتيليه",
-    "welcomeSkip": "تخطّي"
+    "productName": "جناح جيني",
+    "enterAtelier": "ادخل الجناح",
+    "welcomeSkip": "متابعة مباشرة",
+    "serviceLine": "جيني في خدمتكم"
   },
   "employers": {
     "heroHeadline": "وظّف بذكاء. وفر الوقت. قرّر بناءً على بيانات.",

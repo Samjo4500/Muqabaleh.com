@@ -1,14 +1,16 @@
 import type { TenantType } from './types';
 
 /**
- * Product identity for Muqabaleh consoles.
- * "Jeannie Atelier" — the salon where hiring decisions are composed.
+ * Product identity for Muqabaleh executive consoles.
+ * Jeannie Suite — private workspace for decisive leadership.
  */
 export const CONSOLE_PRODUCT = {
-  en: 'Jeannie Atelier',
-  ar: 'أتيليه جيني',
-  taglineEn: 'Where verified talent meets decisive teams',
-  taglineAr: 'حيث تلتقي المواهب الموثّقة بالفرق الحاسمة',
+  en: 'Jeannie Suite',
+  ar: 'جناح جيني',
+  taglineEn: 'Private executive workspace for decisive hiring',
+  taglineAr: 'مساحة تنفيذية خاصة لتوظيف حاسم',
+  serviceEn: 'Your Jeannie at your service',
+  serviceAr: 'جيني في خدمتكم',
 } as const;
 
 export type ConsoleEdition = {
@@ -24,33 +26,33 @@ export type ConsoleEdition = {
 
 const EDITIONS: Record<TenantType, ConsoleEdition> = {
   EMPLOYER: {
-    key: 'hire',
-    en: 'Hire',
-    ar: 'توظيف',
-    welcomeEn: 'Welcome to your hiring salon',
-    welcomeAr: 'أهلاً بك في صالون التوظيف',
-    lineEn: 'Jeannie gathered tonight’s passports. Decide with signal — not noise.',
-    lineAr: 'جيني جمعت جوازات الليلة. قرّر بإشارة واضحة — لا بضجيج.',
+    key: 'executive',
+    en: 'Executive',
+    ar: 'تنفيذي',
+    welcomeEn: 'Your executive hiring suite',
+    welcomeAr: 'جناحكم التنفيذي للتوظيف',
+    lineEn: 'Verified passports. Clear signal. Decisions at board speed.',
+    lineAr: 'جوازات موثّقة. إشارة واضحة. قرارات بسرعة مجلس الإدارة.',
     jeannieSrc: '/images/hero-jeannie-riyadh.webp',
   },
   AGENCY: {
-    key: 'partners',
-    en: 'Partners',
-    ar: 'شركاء',
-    welcomeEn: 'Welcome to the partners salon',
-    welcomeAr: 'أهلاً بك في صالون الشركاء',
-    lineEn: 'Every client stays isolated. Jeannie keeps the whole house in tempo.',
-    lineAr: 'كل عميل معزول. جيني تحافظ على إيقاع البيت كاملاً.',
+    key: 'alliance',
+    en: 'Alliance',
+    ar: 'تحالف',
+    welcomeEn: 'Your alliance command suite',
+    welcomeAr: 'جناح قيادة التحالف',
+    lineEn: 'Every client isolated. One private floor for your whole practice.',
+    lineAr: 'كل عميل معزول. طابق خاص لممارستكم كاملة.',
     jeannieSrc: '/images/hero-jeannie-doha.webp',
   },
   ACADEMY: {
-    key: 'campus',
-    en: 'Campus',
-    ar: 'حرم جامعي',
-    welcomeEn: 'Welcome to the campus salon',
-    welcomeAr: 'أهلاً بك في صالون الحرم',
-    lineEn: 'Cohorts, readiness, privacy — Jeannie hosts the academic floor.',
-    lineAr: 'دفعات وجاهزية وخصوصية — جيني تستضيف الطابق الأكاديمي.',
+    key: 'academy',
+    en: 'Academy',
+    ar: 'أكاديمية',
+    welcomeEn: 'Your academic readiness suite',
+    welcomeAr: 'جناح الجاهزية الأكاديمية',
+    lineEn: 'Cohorts, readiness, and privacy — composed for academic leadership.',
+    lineAr: 'دفعات وجاهزية وخصوصية — مصمّمة للقيادة الأكاديمية.',
     jeannieSrc: '/images/hero-jeannie-amman.webp',
   },
 };
@@ -67,6 +69,7 @@ export function consoleFullName(tenantType: TenantType, locale: string) {
   return `${CONSOLE_PRODUCT.en} · ${edition.en}`;
 }
 
+/** Bumped when the welcome experience is redesigned so guests see it again. */
 export function welcomeStorageKey(tenantSlug: string) {
-  return `mq-jeannie-atelier-welcome:${tenantSlug}`;
+  return `mq-jeannie-suite-welcome:v3:${tenantSlug}`;
 }

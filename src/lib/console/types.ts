@@ -30,6 +30,64 @@ export type JobBranding = {
   outroMsgAr?: string | null;
 };
 
+export type AgencyClient = {
+  id: string;
+  organizationId: string;
+  name: string;
+  slug: string;
+  industry: string | null;
+  logoUrl: string | null;
+  primaryColor: string | null;
+  contactEmail: string | null;
+  interviewsVolume: number;
+  revenueUsd: number;
+  commissionBps: number;
+  candidateCount: number;
+  status: 'ACTIVE' | 'PAUSED';
+};
+
+export type AcademyStudent = {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
+  major: string;
+  year: string;
+  score: number | null;
+  shareWithCareerCenter: boolean;
+  status: 'INVITED' | 'STARTED' | 'COMPLETED';
+};
+
+export type AcademyCohort = {
+  id: string;
+  organizationId: string;
+  name: string;
+  major: string;
+  year: string;
+  deadline: string | null;
+  facultyEmail: string | null;
+  students: AcademyStudent[];
+};
+
+export type ConsoleApiKey = {
+  id: string;
+  organizationId: string;
+  name: string;
+  prefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  revoked: boolean;
+};
+
+export type ConsoleWebhook = {
+  id: string;
+  organizationId: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  createdAt: string;
+};
+
 export type ConsoleOrganization = {
   id: string;
   slug: string;
@@ -102,6 +160,8 @@ export type ConsolePassport = {
   jobId: string | null;
   jobTitle: string | null;
   submittedAt: string;
+  /** Academy privacy shield */
+  private?: boolean;
   competencies: {
     axis: string;
     axisAr: string;
@@ -131,4 +191,16 @@ export type ConsoleDashboard = {
   };
   feed: ConsolePassport[];
   pipelineCounts: Record<string, number>;
+};
+
+export type TenantBundle = {
+  org: ConsoleOrganization;
+  members: ConsoleMember[];
+  stages: ConsolePipelineStage[];
+  jobs: ConsoleJobPosting[];
+  passports: ConsolePassport[];
+  clients: AgencyClient[];
+  cohorts: AcademyCohort[];
+  apiKeys: ConsoleApiKey[];
+  webhooks: ConsoleWebhook[];
 };

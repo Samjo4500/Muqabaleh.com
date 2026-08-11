@@ -4,10 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { can, type ConsolePermission } from './rbac';
 import {
-  DEMO_ORG_ID,
-  DEMO_ORG_SLUG,
   DEMO_OWNER_USER_ID,
-  demoConsoleStore,
+  getDemoBundle,
   isDemoSlug,
 } from './demo-data';
 import type { ConsoleOrganization, OrgMemberRole } from './types';
@@ -18,6 +16,7 @@ export type ConsoleContext = {
   organizationId: string;
   organization: ConsoleOrganization;
   usingDemo: boolean;
+  slug: string;
 };
 
 function mapOrg(row: {
@@ -50,7 +49,7 @@ function mapOrg(row: {
 
 /**
  * Resolve tenant by slug and enforce membership.
- * Demo slug `najm-tech` is always available for Phase 1 preview.
+ * Demo slugs (najm-tech, atlas-agency, bayan-university) always available for preview.
  * Every subsequent query MUST filter by organizationId (tenantId).
  */
 export async function requireConsoleTenant(
@@ -61,17 +60,14 @@ export async function requireConsoleTenant(
   const sessionRole = (session?.user as { role?: string } | undefined)?.role;
 
   if (isDemoSlug(slug)) {
-    // Preview: allow authenticated users + anonymous read of demo tenant
-    const role: OrgMemberRole =
-      sessionRole === 'SUPER_ADMIN' || sessionRole === 'COMPANY_ADMIN'
-        ? 'OWNER'
-        : 'OWNER';
+    const bundle = getDemoBundle(slug)!;
     return {
       userId: userId || DEMO_OWNER_USER_ID,
-      role,
-      organizationId: DEMO_ORG_ID,
-      organization: demoConsoleStore.org,
+      role: 'OWNER',
+      organizationId: bundle.org.id,
+      organization: bundle.org,
       usingDemo: true,
+      slug,
     };
   }
 
@@ -85,14 +81,6 @@ export async function requireConsoleTenant(
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
     }
 
-    // Phase 1: Employer only
-    if (org.tenantType !== 'EMPLOYER') {
-      return NextResponse.json(
-        { error: 'This tenant type is not available in Phase 1' },
-        { status: 403 },
-      );
-    }
-
     if (sessionRole === 'SUPER_ADMIN') {
       return {
         userId,
@@ -100,6 +88,7 @@ export async function requireConsoleTenant(
         organizationId: org.id,
         organization: mapOrg(org),
         usingDemo: false,
+        slug,
       };
     }
 
@@ -121,19 +110,10 @@ export async function requireConsoleTenant(
       organizationId: org.id,
       organization: mapOrg(org),
       usingDemo: false,
+      slug,
     };
   } catch (err) {
-    // Schema not migrated yet — fall back to demo for preview
-    console.warn('[console/auth] DB unavailable, demo fallback', err);
-    if (slug === DEMO_ORG_SLUG) {
-      return {
-        userId: userId || DEMO_OWNER_USER_ID,
-        role: 'OWNER',
-        organizationId: DEMO_ORG_ID,
-        organization: demoConsoleStore.org,
-        usingDemo: true,
-      };
-    }
+    console.warn('[console/auth] DB unavailable', err);
     return NextResponse.json({ error: 'Console unavailable' }, { status: 503 });
   }
 }
@@ -154,7 +134,15 @@ export function forbidUnless(
   return null;
 }
 
-/** Hard isolation helper — never trust client-supplied tenant ids. */
-export function assertTenantId(ctx: ConsoleContext, tenantId: string): boolean {
-  return ctx.organizationId === tenantId;
+export function requireTenantType(
+  ctx: ConsoleContext,
+  types: ConsoleOrganization['tenantType'][],
+): NextResponse | null {
+  if (!types.includes(ctx.organization.tenantType)) {
+    return NextResponse.json(
+      { error: `Requires tenant type: ${types.join(' | ')}` },
+      { status: 403 },
+    );
+  }
+  return null;
 }

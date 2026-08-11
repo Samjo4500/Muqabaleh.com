@@ -6,29 +6,47 @@ import { usePathname } from 'next/navigation';
 import {
   BarChart3,
   Briefcase,
+  Building2,
   FileBadge2,
+  GraduationCap,
   KanbanSquare,
+  KeyRound,
   LayoutDashboard,
   Moon,
   Settings,
   Sun,
   Users,
+  Wallet,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 import { localePath } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import type { TenantType } from '@/lib/console/types';
 import { ConsoleThemeProvider, useConsoleTheme } from './console-theme';
 
-const NAV = [
+type NavItem = {
+  key: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  types?: TenantType[];
+};
+
+const NAV: NavItem[] = [
   { key: 'navDashboard', href: '', icon: LayoutDashboard },
   { key: 'navPipeline', href: '/pipeline', icon: KanbanSquare },
   { key: 'navPassports', href: '/passports', icon: FileBadge2 },
   { key: 'navJobs', href: '/jobs', icon: Briefcase },
   { key: 'navAnalytics', href: '/analytics', icon: BarChart3 },
+  { key: 'navClients', href: '/clients', icon: Building2, types: ['AGENCY'] },
+  { key: 'navRevenue', href: '/revenue', icon: Wallet, types: ['AGENCY'] },
+  { key: 'navCohorts', href: '/cohorts', icon: GraduationCap, types: ['ACADEMY'] },
+  { key: 'navFaculty', href: '/faculty', icon: Users, types: ['ACADEMY'] },
+  { key: 'navAccreditation', href: '/accreditation', icon: FileBadge2, types: ['ACADEMY'] },
+  { key: 'navDevelopers', href: '/developers', icon: KeyRound },
   { key: 'navTeam', href: '/team', icon: Users },
   { key: 'navSettings', href: '/settings', icon: Settings },
-] as const;
+];
 
 function ThemeToggle() {
   const { theme, toggle } = useConsoleTheme();
@@ -49,10 +67,12 @@ function ThemeToggle() {
 function ShellInner({
   tenantSlug,
   orgName,
+  tenantType,
   children,
 }: {
   tenantSlug: string;
   orgName: string;
+  tenantType: TenantType;
   children: React.ReactNode;
 }) {
   const t = useTranslations('console');
@@ -60,6 +80,16 @@ function ShellInner({
   const pathname = usePathname();
   const isAr = locale === 'ar';
   const base = `/console/${tenantSlug}`;
+  const items = NAV.filter(
+    (item) => !item.types || item.types.includes(tenantType),
+  );
+
+  const badge =
+    tenantType === 'AGENCY'
+      ? t('agencyBadge')
+      : tenantType === 'ACADEMY'
+        ? t('academyBadge')
+        : t('employerBadge');
 
   return (
     <div className="flex min-h-screen flex-col" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
@@ -71,12 +101,12 @@ function ShellInner({
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-[var(--c-text)]">{orgName}</p>
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--c-primary)]">
-                {t('employerBadge')}
+                {badge}
               </p>
             </div>
           </div>
-          <nav className="flex flex-1 flex-col gap-1 p-3">
-            {NAV.map((item) => {
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+            {items.map((item) => {
               const href = localePath(`${base}${item.href}`, locale);
               const bare = `${base}${item.href}`;
               const isActive =
@@ -125,7 +155,7 @@ function ShellInner({
           <main className="flex-1 px-4 pb-24 pt-4 lg:px-6 lg:pb-8">{children}</main>
 
           <nav className="mq-console-bottom-nav lg:hidden">
-            {NAV.slice(0, 5).map((item) => {
+            {items.slice(0, 5).map((item) => {
               const href = localePath(`${base}${item.href}`, locale);
               const Icon = item.icon;
               const bare = `${base}${item.href}`;
@@ -157,15 +187,17 @@ function ShellInner({
 export function ConsoleShell({
   tenantSlug,
   orgName,
+  tenantType,
   children,
 }: {
   tenantSlug: string;
   orgName: string;
+  tenantType: TenantType;
   children: React.ReactNode;
 }) {
   return (
     <ConsoleThemeProvider>
-      <ShellInner tenantSlug={tenantSlug} orgName={orgName}>
+      <ShellInner tenantSlug={tenantSlug} orgName={orgName} tenantType={tenantType}>
         {children}
       </ShellInner>
     </ConsoleThemeProvider>

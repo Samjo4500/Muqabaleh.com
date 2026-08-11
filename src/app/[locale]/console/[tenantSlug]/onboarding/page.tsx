@@ -2,16 +2,25 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { localePath } from '@/i18n/navigation';
+import {
+  DEMO_ACADEMY_SLUG,
+  DEMO_AGENCY_SLUG,
+  DEMO_ORG_SLUG,
+} from '@/lib/console/demo-data';
 
 type Path = 'seeker' | 'employer' | 'agency' | 'academy';
+
+const DEST: Record<Exclude<Path, 'seeker'>, string> = {
+  employer: DEMO_ORG_SLUG,
+  agency: DEMO_AGENCY_SLUG,
+  academy: DEMO_ACADEMY_SLUG,
+};
 
 export default function ConsoleOnboardingPage() {
   const t = useTranslations('console');
   const locale = useLocale();
-  const params = useParams();
-  const tenantSlug = String(params.tenantSlug);
   const router = useRouter();
   const [path, setPath] = useState<Path | null>(null);
   const [company, setCompany] = useState('');
@@ -19,11 +28,8 @@ export default function ConsoleOnboardingPage() {
   const [size, setSize] = useState('11-50');
 
   const continueFlow = () => {
-    if (path === 'employer') {
-      router.push(localePath(`/console/${tenantSlug}`, locale));
-      return;
-    }
-    // Phase 1: agency/academy not built yet
+    if (!path || path === 'seeker') return;
+    router.push(localePath(`/console/${DEST[path]}`, locale));
   };
 
   return (
@@ -51,40 +57,41 @@ export default function ConsoleOnboardingPage() {
             }`}
           >
             {label}
-            {key !== 'employer' && key !== 'seeker' ? (
-              <span className="mt-1 block text-xs font-normal text-[var(--c-text-2)]">
-                {t('phase2Later')}
-              </span>
-            ) : null}
           </button>
         ))}
       </div>
 
-      {path === 'employer' ? (
+      {path && path !== 'seeker' ? (
         <div className="mq-console-surface space-y-3 rounded-xl p-4">
-          <input
-            className="mq-console-input w-full"
-            placeholder={t('company')}
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-          />
-          <input
-            className="mq-console-input w-full"
-            placeholder={t('industry')}
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-          />
-          <select
-            className="mq-console-input w-full"
-            value={size}
-            onChange={(e) => setSize(e.target.value)}
-          >
-            {['1-10', '11-50', '51-200', '201-1000', '1000+'].map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          {path === 'employer' ? (
+            <>
+              <input
+                className="mq-console-input w-full"
+                placeholder={t('company')}
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+              <input
+                className="mq-console-input w-full"
+                placeholder={t('industry')}
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+              />
+              <select
+                className="mq-console-input w-full"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+              >
+                {['1-10', '11-50', '51-200', '201-1000', '1000+'].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <p className="text-sm text-[var(--c-text-2)]">{t('phase2Later')}</p>
+          )}
           <button type="button" className="mq-console-btn-primary w-full" onClick={continueFlow}>
             {t('enterConsole')}
           </button>
@@ -97,9 +104,29 @@ export default function ConsoleOnboardingPage() {
         </a>
       ) : null}
 
-      {path === 'agency' || path === 'academy' ? (
-        <p className="text-sm text-[var(--c-text-2)]">{t('phase2Later')}</p>
-      ) : null}
+      <div className="mq-console-card p-4 text-sm text-[var(--c-text-2)]">
+        <p className="font-semibold text-[var(--c-text)]">{t('demoSwitcher')}</p>
+        <ul className="mt-2 space-y-1">
+          <li>
+            <a className="text-[var(--c-primary)]" href={localePath(`/console/${DEMO_ORG_SLUG}`, locale)}>
+              /console/{DEMO_ORG_SLUG}
+            </a>{' '}
+            — {t('pathEmployer')}
+          </li>
+          <li>
+            <a className="text-[var(--c-primary)]" href={localePath(`/console/${DEMO_AGENCY_SLUG}`, locale)}>
+              /console/{DEMO_AGENCY_SLUG}
+            </a>{' '}
+            — {t('pathAgency')}
+          </li>
+          <li>
+            <a className="text-[var(--c-primary)]" href={localePath(`/console/${DEMO_ACADEMY_SLUG}`, locale)}>
+              /console/{DEMO_ACADEMY_SLUG}
+            </a>{' '}
+            — {t('pathAcademy')}
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

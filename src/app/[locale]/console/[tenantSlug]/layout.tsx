@@ -1,5 +1,6 @@
 import { ConsoleShell } from '@/components/console/console-shell';
-import { DEMO_ORG_SLUG, demoConsoleStore } from '@/lib/console/demo-data';
+import { getDemoBundle, isDemoSlug } from '@/lib/console/demo-data';
+import type { TenantType } from '@/lib/console/types';
 
 type Props = {
   children: React.ReactNode;
@@ -8,11 +9,12 @@ type Props = {
 
 export default async function ConsoleTenantLayout({ children, params }: Props) {
   const { tenantSlug } = await params;
-  const orgName =
-    tenantSlug === DEMO_ORG_SLUG ? demoConsoleStore.org.name : tenantSlug;
+  const demo = isDemoSlug(tenantSlug) ? getDemoBundle(tenantSlug) : null;
+  const orgName = demo?.org.name || tenantSlug;
+  const tenantType: TenantType = demo?.org.tenantType || 'EMPLOYER';
 
   return (
-    <ConsoleShell tenantSlug={tenantSlug} orgName={orgName}>
+    <ConsoleShell tenantSlug={tenantSlug} orgName={orgName} tenantType={tenantType}>
       {children}
     </ConsoleShell>
   );

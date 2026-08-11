@@ -3,21 +3,24 @@ import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import {
   buildDemoDashboard,
-  demoConsoleStore,
-  DEMO_ORG_ID,
+  getDemoBundleByOrgId,
 } from './demo-data';
 import {
   DEFAULT_PIPELINE_STAGES,
   defaultQuestionsForRole,
-  scoreToGrade,
 } from './defaults';
 import type {
+  AcademyCohort,
+  AcademyStudent,
+  AgencyClient,
+  ConsoleApiKey,
   ConsoleDashboard,
   ConsoleJobPosting,
   ConsoleMember,
   ConsoleOrganization,
   ConsolePassport,
   ConsolePipelineStage,
+  ConsoleWebhook,
   InterviewQuestion,
   JobBranding,
   OrgMemberRole,
@@ -29,22 +32,18 @@ function interviewSlug() {
   return randomBytes(6).toString('hex');
 }
 
+function bundle(ctx: ConsoleContext) {
+  return getDemoBundleByOrgId(ctx.organizationId);
+}
+
 export async function getDashboard(ctx: ConsoleContext): Promise<ConsoleDashboard> {
-  if (ctx.usingDemo) return buildDemoDashboard();
+  if (ctx.usingDemo) return buildDemoDashboard(ctx.organizationId);
 
   const tenantId = ctx.organizationId;
-  const [jobs, stages] = await Promise.all([
-    db.jobPosting.findMany({
-      where: { organizationId: tenantId },
-      select: { id: true, title: true },
-    }),
-    db.pipelineStage.findMany({
-      where: { organizationId: tenantId },
-      orderBy: { sortOrder: 'asc' },
-    }),
-  ]);
-
-  // Phase 1 live path: prefer demo-shaped empty feed until submissions wire to JobPosting
+  const stages = await db.pipelineStage.findMany({
+    where: { organizationId: tenantId },
+    orderBy: { sortOrder: 'asc' },
+  });
   const pipelineCounts: Record<string, number> = {};
   for (const s of stages) pipelineCounts[s.key] = 0;
 
@@ -64,9 +63,15 @@ export async function listPassports(
   ctx: ConsoleContext,
 ): Promise<ConsolePassport[]> {
   if (ctx.usingDemo) {
-    return demoConsoleStore.passports.filter(
+    const b = bundle(ctx);
+    let rows = (b?.passports || []).filter(
       (p) => p.organizationId === ctx.organizationId,
     );
+    // Academy privacy shield: hide private student passports from non-owners unless opted in
+    if (ctx.organization.tenantType === 'ACADEMY' && ctx.role === 'REVIEWER') {
+      rows = rows.filter((p) => !p.private);
+    }
+    return rows;
   }
   return [];
 }
@@ -76,11 +81,18 @@ export async function getPassport(
   id: string,
 ): Promise<ConsolePassport | null> {
   if (ctx.usingDemo) {
-    return (
-      demoConsoleStore.passports.find(
-        (p) => p.id === id && p.organizationId === ctx.organizationId,
-      ) || null
+    const p = bundle(ctx)?.passports.find(
+      (x) => x.id === id && x.organizationId === ctx.organizationId,
     );
+    if (!p) return null;
+    if (
+      ctx.organization.tenantType === 'ACADEMY' &&
+      p.private &&
+      ctx.role === 'REVIEWER'
+    ) {
+      return null;
+    }
+    return p;
   }
   return null;
 }
@@ -91,14 +103,13 @@ export async function movePassportStage(
   stageKey: string,
 ): Promise<ConsolePassport | null> {
   if (ctx.usingDemo) {
-    const p = demoConsoleStore.passports.find(
+    const b = bundle(ctx);
+    if (!b) return null;
+    const p = b.passports.find(
       (x) => x.id === passportId && x.organizationId === ctx.organizationId,
     );
     if (!p) return null;
-    const ok = demoConsoleStore.stages.some(
-      (s) => s.organizationId === ctx.organizationId && s.key === stageKey,
-    );
-    if (!ok) return null;
+    if (!b.stages.some((s) => s.key === stageKey)) return null;
     p.stageKey = stageKey;
     return p;
   }
@@ -112,7 +123,7 @@ export async function addPassportNote(
   author: string,
 ): Promise<ConsolePassport | null> {
   if (ctx.usingDemo) {
-    const p = demoConsoleStore.passports.find(
+    const p = bundle(ctx)?.passports.find(
       (x) => x.id === passportId && x.organizationId === ctx.organizationId,
     );
     if (!p) return null;
@@ -131,7 +142,9 @@ export async function addPassportNote(
 
 export async function listJobs(ctx: ConsoleContext): Promise<ConsoleJobPosting[]> {
   if (ctx.usingDemo) {
-    return demoConsoleStore.jobs.filter((j) => j.organizationId === ctx.organizationId);
+    return (bundle(ctx)?.jobs || []).filter(
+      (j) => j.organizationId === ctx.organizationId,
+    );
   }
   const rows = await db.jobPosting.findMany({
     where: { organizationId: ctx.organizationId },
@@ -193,7 +206,7 @@ export async function createJob(
       createdAt: new Date().toISOString(),
       applicantCount: 0,
     };
-    demoConsoleStore.jobs.unshift(job);
+    bundle(ctx)?.jobs.unshift(job);
     return job;
   }
 
@@ -240,7 +253,7 @@ export async function updateJob(
   patch: Partial<ConsoleJobPosting>,
 ): Promise<ConsoleJobPosting | null> {
   if (ctx.usingDemo) {
-    const j = demoConsoleStore.jobs.find(
+    const j = bundle(ctx)?.jobs.find(
       (x) => x.id === jobId && x.organizationId === ctx.organizationId,
     );
     if (!j) return null;
@@ -304,7 +317,7 @@ export async function listStages(
   ctx: ConsoleContext,
 ): Promise<ConsolePipelineStage[]> {
   if (ctx.usingDemo) {
-    return demoConsoleStore.stages
+    return (bundle(ctx)?.stages || [])
       .filter((s) => s.organizationId === ctx.organizationId)
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
@@ -342,7 +355,7 @@ export async function ensureDefaultStages(organizationId: string) {
 
 export async function listMembers(ctx: ConsoleContext): Promise<ConsoleMember[]> {
   if (ctx.usingDemo) {
-    return demoConsoleStore.members.filter(
+    return (bundle(ctx)?.members || []).filter(
       (m) => m.organizationId === ctx.organizationId,
     );
   }
@@ -382,7 +395,7 @@ export async function inviteMember(
       email: input.email,
       lastActiveAt: null,
     };
-    demoConsoleStore.members.push(m);
+    bundle(ctx)?.members.push(m);
     return m;
   }
 
@@ -419,17 +432,16 @@ export async function updateSettings(
   },
 ) {
   if (ctx.usingDemo) {
-    if (patch.name) demoConsoleStore.org.name = patch.name;
-    if (patch.industry !== undefined) demoConsoleStore.org.industry = patch.industry;
-    if (patch.size !== undefined) demoConsoleStore.org.size = patch.size;
-    if (patch.country !== undefined) demoConsoleStore.org.country = patch.country;
+    const org = bundle(ctx)?.org;
+    if (!org) return ctx.organization;
+    if (patch.name) org.name = patch.name;
+    if (patch.industry !== undefined) org.industry = patch.industry;
+    if (patch.size !== undefined) org.size = patch.size;
+    if (patch.country !== undefined) org.country = patch.country;
     if (patch.whiteLabel) {
-      demoConsoleStore.org.whiteLabel = {
-        ...(demoConsoleStore.org.whiteLabel || {}),
-        ...patch.whiteLabel,
-      };
+      org.whiteLabel = { ...(org.whiteLabel || {}), ...patch.whiteLabel };
     }
-    return demoConsoleStore.org;
+    return org;
   }
 
   const row = await db.organization.update({
@@ -467,7 +479,8 @@ export async function getAnalytics(ctx: ConsoleContext) {
 
   const histogram = Array.from({ length: 10 }, (_, i) => ({
     bucket: `${i * 10}-${i * 10 + 9}`,
-    count: passports.filter((p) => p.score >= i * 10 && p.score < i * 10 + 10).length,
+    count: passports.filter((p) => p.score >= i * 10 && p.score < i * 10 + 10)
+      .length,
   }));
   histogram[9].count += passports.filter((p) => p.score === 100).length;
 
@@ -520,6 +533,195 @@ export async function getAnalytics(ctx: ConsoleContext) {
   };
 }
 
-export function demoOrgId() {
-  return DEMO_ORG_ID;
+/* ─── Agency ─── */
+
+export async function listClients(ctx: ConsoleContext): Promise<AgencyClient[]> {
+  if (ctx.usingDemo) {
+    return (bundle(ctx)?.clients || []).filter(
+      (c) => c.organizationId === ctx.organizationId,
+    );
+  }
+  return [];
+}
+
+export async function getAgencyRevenue(ctx: ConsoleContext) {
+  const clients = await listClients(ctx);
+  const totalRevenue = clients.reduce((s, c) => s + c.revenueUsd, 0);
+  const totalInterviews = clients.reduce((s, c) => s + c.interviewsVolume, 0);
+  const commissionUsd = clients.reduce(
+    (s, c) => s + Math.round((c.revenueUsd * c.commissionBps) / 10000),
+    0,
+  );
+  return {
+    totalRevenue,
+    totalInterviews,
+    commissionUsd,
+    clients: clients.map((c) => ({
+      ...c,
+      commissionUsd: Math.round((c.revenueUsd * c.commissionBps) / 10000),
+    })),
+  };
+}
+
+/* ─── Academy ─── */
+
+export async function listCohorts(ctx: ConsoleContext): Promise<AcademyCohort[]> {
+  if (ctx.usingDemo) {
+    return (bundle(ctx)?.cohorts || []).filter(
+      (c) => c.organizationId === ctx.organizationId,
+    );
+  }
+  return [];
+}
+
+export async function importCohortCsv(
+  ctx: ConsoleContext,
+  input: {
+    name: string;
+    major: string;
+    year: string;
+    facultyEmail?: string;
+    deadline?: string;
+    students: Omit<AcademyStudent, 'id' | 'score' | 'status' | 'shareWithCareerCenter'>[];
+  },
+): Promise<AcademyCohort> {
+  const cohort: AcademyCohort = {
+    id: `coh-${Date.now()}`,
+    organizationId: ctx.organizationId,
+    name: input.name,
+    major: input.major,
+    year: input.year,
+    deadline: input.deadline || null,
+    facultyEmail: input.facultyEmail || null,
+    students: input.students.map((s, i) => ({
+      id: `stu-${Date.now()}-${i}`,
+      name: s.name,
+      email: s.email,
+      studentId: s.studentId,
+      major: s.major || input.major,
+      year: s.year || input.year,
+      score: null,
+      shareWithCareerCenter: false,
+      status: 'INVITED' as const,
+    })),
+  };
+  if (ctx.usingDemo) {
+    bundle(ctx)?.cohorts.unshift(cohort);
+  }
+  return cohort;
+}
+
+export async function setStudentShare(
+  ctx: ConsoleContext,
+  cohortId: string,
+  studentId: string,
+  share: boolean,
+) {
+  if (!ctx.usingDemo) return null;
+  const cohort = bundle(ctx)?.cohorts.find(
+    (c) => c.id === cohortId && c.organizationId === ctx.organizationId,
+  );
+  const student = cohort?.students.find((s) => s.id === studentId);
+  if (!student) return null;
+  student.shareWithCareerCenter = share;
+  // Mirror privacy on passport if email matches
+  const pass = bundle(ctx)?.passports.find(
+    (p) =>
+      p.organizationId === ctx.organizationId &&
+      p.candidateEmail === student.email,
+  );
+  if (pass) pass.private = !share;
+  return student;
+}
+
+export async function getAccreditation(ctx: ConsoleContext) {
+  const cohorts = await listCohorts(ctx);
+  const byMajor: Record<
+    string,
+    { major: string; students: number; completed: number; avgScore: number }
+  > = {};
+  for (const c of cohorts) {
+    const key = c.major;
+    const completed = c.students.filter((s) => s.score != null);
+    const avg =
+      completed.length === 0
+        ? 0
+        : Math.round(
+            completed.reduce((s, x) => s + (x.score || 0), 0) / completed.length,
+          );
+    if (!byMajor[key]) {
+      byMajor[key] = { major: key, students: 0, completed: 0, avgScore: 0 };
+    }
+    byMajor[key].students += c.students.length;
+    byMajor[key].completed += completed.length;
+    byMajor[key].avgScore = avg;
+  }
+  return {
+    majors: Object.values(byMajor),
+    yearOverYear: [
+      { year: '2025', readiness: 68 },
+      { year: '2026', readiness: 74 },
+    ],
+  };
+}
+
+/* ─── API keys & webhooks ─── */
+
+export async function listApiKeys(ctx: ConsoleContext): Promise<ConsoleApiKey[]> {
+  if (ctx.usingDemo) {
+    return (bundle(ctx)?.apiKeys || []).filter(
+      (k) => k.organizationId === ctx.organizationId && !k.revoked,
+    );
+  }
+  return [];
+}
+
+export async function createApiKey(ctx: ConsoleContext, name: string) {
+  const key: ConsoleApiKey = {
+    id: `key-${Date.now()}`,
+    organizationId: ctx.organizationId,
+    name,
+    prefix: `mq_live_${randomBytes(4).toString('hex')}`,
+    createdAt: new Date().toISOString(),
+    lastUsedAt: null,
+    revoked: false,
+  };
+  if (ctx.usingDemo) bundle(ctx)?.apiKeys.unshift(key);
+  const raw = `${key.prefix}_${randomBytes(16).toString('hex')}`;
+  return { key, raw };
+}
+
+export async function revokeApiKey(ctx: ConsoleContext, id: string) {
+  if (!ctx.usingDemo) return false;
+  const k = bundle(ctx)?.apiKeys.find(
+    (x) => x.id === id && x.organizationId === ctx.organizationId,
+  );
+  if (!k) return false;
+  k.revoked = true;
+  return true;
+}
+
+export async function listWebhooks(ctx: ConsoleContext): Promise<ConsoleWebhook[]> {
+  if (ctx.usingDemo) {
+    return (bundle(ctx)?.webhooks || []).filter(
+      (w) => w.organizationId === ctx.organizationId,
+    );
+  }
+  return [];
+}
+
+export async function upsertWebhook(
+  ctx: ConsoleContext,
+  input: { url: string; events: string[] },
+) {
+  const wh: ConsoleWebhook = {
+    id: `wh-${Date.now()}`,
+    organizationId: ctx.organizationId,
+    url: input.url,
+    events: input.events,
+    active: true,
+    createdAt: new Date().toISOString(),
+  };
+  if (ctx.usingDemo) bundle(ctx)?.webhooks.unshift(wh);
+  return wh;
 }

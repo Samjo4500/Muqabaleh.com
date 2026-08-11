@@ -55,11 +55,12 @@ function overallFrom(checks: HealthCheckResult[]): 'green' | 'yellow' | 'red' {
 async function checkDatabase(): Promise<HealthCheckResult> {
   const started = Date.now();
   try {
+    // SERIAL queries only — prod DATABASE_URL uses PgBouncer with
+    // connection_limit=1; Promise.all would exhaust the pool and throw
+    // "Timed out fetching a new connection from the connection pool".
     await db.$queryRaw`SELECT 1`;
-    const [users, jobs] = await Promise.all([
-      db.user.count(),
-      db.b2BJob.count().catch(() => 0),
-    ]);
+    const users = await db.user.count();
+    const jobs = await db.b2BJob.count().catch(() => 0);
     return {
       id: 'database',
       label: { ar: 'قاعدة البيانات', en: 'Database' },

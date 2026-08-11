@@ -24,8 +24,8 @@ export function B2BPreviewBanner() {
             </p>
             <p className="mt-0.5 text-xs text-white/55 sm:text-sm">
               {isAr
-                ? 'تصفّح الواجهة ببيانات تجريبية. الوصول الكامل يتطلب طلب عرض توضيحي.'
-                : 'Browse the interface with sample data. Full access requires a demo request.'}
+                ? 'القراءة متاحة. الكتابة (نشر وظائف، دعوات، حفظ الإعدادات) مقفلة حتى تفعيل الوصول الكامل.'
+                : 'Reads are live. Writes (jobs, invites, settings) stay locked until full access is enabled.'}
             </p>
           </div>
         </div>
@@ -40,12 +40,10 @@ export function B2BPreviewBanner() {
   );
 }
 
-/** Soft-blocks pointer interactions on write UI while keeping content readable. */
+/**
+ * Preview shell — keep reads interactive so live stats/jobs are usable.
+ * Write APIs still return B2B_PREVIEW_LOCKED until flags are enabled.
+ */
 export function B2BPreviewContent({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative">
-      <div className="pointer-events-none select-none opacity-80">{children}</div>
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#070b14]/40" />
-    </div>
-  );
+  return <div className="relative">{children}</div>;
 }

@@ -1,19 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -21,16 +14,18 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { B2B_CONSOLE_PREVIEW } from '@/lib/b2b-preview';
 
-const MEMBERS = [
-  { name: 'm1Name', email: 'm1Email', role: 'm1Role', date: 'm1Date' },
-  { name: 'm2Name', email: 'm2Email', role: 'm2Role', date: 'm2Date' },
-  { name: 'm3Name', email: 'm3Email', role: 'm3Role', date: 'm3Date' },
-  { name: 'm4Name', email: 'm4Email', role: 'm4Role', date: 'm4Date' },
-] as const;
+type Member = {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  joinedAt: string;
+};
 
 function roleBadge(role: string) {
-  if (role === 'roleAdmin' || role === 'مدير' || role === 'Admin') {
+  if (role.includes('ADMIN')) {
     return 'border-teal-300/30 bg-teal-400/10 text-teal-300';
   }
   return 'border-white/20 bg-white/5 text-[var(--text-muted)]';
@@ -38,22 +33,78 @@ function roleBadge(role: string) {
 
 export default function TeamPage() {
   const t = useTranslations('b2b.team');
-  const tCommon = useTranslations('common');
+  const [members, setMembers] = useState<Member[]>([]);
+  const [seats, setSeats] = useState<{ used: number; cap: number } | null>(null);
+  const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleInvite = () => {
-    toast.info(tCommon('comingSoon'));
-    setInviteOpen(false);
-    setInviteEmail('');
-    setInviteRole('');
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/b2b/team');
+      const data = await res.json();
+      if (res.ok) {
+        setMembers(data.members || []);
+        setSeats(data.seats || null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const handleInvite = async () => {
+    if (B2B_CONSOLE_PREVIEW) {
+      toast.info('Preview mode — request a demo to invite teammates.');
+      return;
+    }
+    if (!inviteEmail.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/b2b/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          name: inviteName.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Invite failed');
+        return;
+      }
+      if (data.tempPassword) {
+        toast.success(`Invited. Temp password: ${data.tempPassword}`);
+      } else {
+        toast.success('Teammate added');
+      }
+      setInviteOpen(false);
+      setInviteEmail('');
+      setInviteName('');
+      await load();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t('title')}</h1>
+          {seats ? (
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              {seats.used}/{seats.cap} seats
+            </p>
+          ) : null}
+        </div>
         <Button
           onClick={() => setInviteOpen(true)}
           className="glass-button flex items-center gap-2 cursor-pointer"
@@ -63,115 +114,103 @@ export default function TeamPage() {
         </Button>
       </div>
 
-      {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-white/[0.08]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/[0.08] bg-white/[0.02]">
-              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">{t('colName')}</th>
-              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">{t('colEmail')}</th>
-              <th className="px-4 py-3 text-center font-medium text-[var(--text-muted)]">{t('colRole')}</th>
-              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">{t('colJoined')}</th>
+              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">
+                {t('colName')}
+              </th>
+              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">
+                {t('colEmail')}
+              </th>
+              <th className="px-4 py-3 text-center font-medium text-[var(--text-muted)]">
+                {t('colRole')}
+              </th>
+              <th className="px-4 py-3 text-start font-medium text-[var(--text-muted)]">
+                {t('colJoined')}
+              </th>
               <th className="px-4 py-3 text-end font-medium text-[var(--text-muted)]" />
             </tr>
           </thead>
           <tbody>
-            {MEMBERS.map((m, i) => {
-              const roleVal = t(m.role);
-              return (
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-muted)]">
+                  <Loader2 className="mx-auto animate-spin" />
+                </td>
+              </tr>
+            ) : members.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-muted)]">
+                  No teammates yet.
+                </td>
+              </tr>
+            ) : (
+              members.map((m) => (
                 <tr
-                  key={i}
+                  key={m.id}
                   className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.02]"
                 >
-                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{t(m.name)}</td>
-                  <td className="px-4 py-3 text-[var(--text-muted)]">{t(m.email)}</td>
+                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
+                    {m.name || '—'}
+                  </td>
+                  <td className="px-4 py-3 text-[var(--text-muted)]">{m.email}</td>
                   <td className="px-4 py-3 text-center">
-                    <Badge variant="outline" className={roleBadge(roleVal)}>
-                      {roleVal}
+                    <Badge variant="outline" className={roleBadge(m.role)}>
+                      {m.role.replace(/_/g, ' ')}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-[var(--text-faint)]">{t(m.date)}</td>
+                  <td className="px-4 py-3 text-[var(--text-faint)]">
+                    {new Date(m.joinedAt).toLocaleDateString()}
+                  </td>
                   <td className="px-4 py-3 text-end">
                     <button
                       type="button"
-                      className="rounded-lg p-2 text-[var(--text-faint)] transition-colors hover:bg-red-500/10 hover:text-red-400"
+                      className="rounded-lg p-2 text-[var(--text-faint)] opacity-40"
                       aria-label={t('remove')}
+                      disabled
                     >
                       <Trash2 size={16} strokeWidth={1.75} />
                     </button>
                   </td>
                 </tr>
-              );
-            })}
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Mobile Cards */}
-      <div className="space-y-3 md:hidden">
-        {MEMBERS.map((m, i) => {
-          const roleVal = t(m.role);
-          return (
-            <div key={i} className="glass-card rounded-xl p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-bold text-[var(--text-primary)]">{t(m.name)}</p>
-                  <p className="mt-1 text-xs text-[var(--text-faint)]">{t(m.email)}</p>
-                </div>
-                <Badge variant="outline" className={roleBadge(roleVal)}>{roleVal}</Badge>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-[var(--text-muted)]">{t('colJoined')}: {t(m.date)}</span>
-                <button
-                  type="button"
-                  className="rounded-lg p-2 text-[var(--text-faint)] transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  aria-label={t('remove')}
-                >
-                  <Trash2 size={16} strokeWidth={1.75} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="border-white/[0.08] bg-[var(--bg-panel)] sm:max-w-md">
-          <DialogTitle className="text-lg font-bold text-[var(--text-primary)]">{t('inviteTitle')}</DialogTitle>
-          <div className="space-y-4 pt-2">
+        <DialogContent className="border-white/10 bg-[#0b1220] text-white">
+          <DialogTitle>{t('inviteMember')}</DialogTitle>
+          <div className="space-y-3 py-2">
             <div className="space-y-2">
-              <Label className="text-sm text-[var(--text-muted)]">{t('inviteEmail')}</Label>
+              <Label>Name</Label>
               <Input
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder={t('inviteEmailPlaceholder')}
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
                 className="glass-input"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm text-[var(--text-muted)]">{t('inviteRole')}</Label>
-              <Select value={inviteRole} onValueChange={setInviteRole}>
-                <SelectTrigger className="glass-input">
-                  <SelectValue placeholder={t('inviteRolePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">{t('roleAdmin')}</SelectItem>
-                  <SelectItem value="member">{t('roleMember')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="glass-input"
+              />
             </div>
           </div>
-          <DialogFooter className="gap-2 pt-2">
+          <DialogFooter>
             <Button
-              variant="ghost"
-              onClick={() => setInviteOpen(false)}
-              className="text-[var(--text-muted)] hover:text-teal-300 cursor-pointer"
+              onClick={() => void handleInvite()}
+              disabled={saving || !inviteEmail.trim()}
+              className="glass-button"
             >
-              {tCommon('cancel')}
-            </Button>
-            <Button onClick={handleInvite} className="glass-button cursor-pointer">
-              {t('sendInvite')}
+              {saving ? <Loader2 className="animate-spin" size={16} /> : null}
+              {t('inviteMember')}
             </Button>
           </DialogFooter>
         </DialogContent>

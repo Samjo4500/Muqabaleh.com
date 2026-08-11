@@ -70,27 +70,22 @@ async function main() {
   results.hasA11yBtn = Boolean(a11yBtn);
 
   await page.evaluate(() => document.activeElement?.blur?.());
-  await page.keyboard.down('Shift');
-  await page.keyboard.press('Slash');
-  await page.keyboard.up('Shift');
+  await page.evaluate(() => {
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: '?',
+        code: 'Slash',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  });
   await new Promise((r) => setTimeout(r, 500));
   let shortcutsOpen = await page.evaluate(() => {
-    const d = document.querySelector('[data-console-modal="true"], [role="dialog"][aria-modal="true"]');
+    const d = document.querySelector('[data-console-modal="true"]');
     return Boolean(d && /shortcut|اختصار/i.test(d.textContent || ''));
   });
-  if (!shortcutsOpen) {
-    await page.evaluate(() => {
-      document.activeElement?.blur?.();
-      window.dispatchEvent(
-        new KeyboardEvent('keydown', { key: '?', bubbles: true, cancelable: true }),
-      );
-    });
-    await new Promise((r) => setTimeout(r, 500));
-    shortcutsOpen = await page.evaluate(() => {
-      const d = document.querySelector('[data-console-modal="true"], [role="dialog"][aria-modal="true"]');
-      return Boolean(d && /shortcut|اختصار/i.test(d.textContent || ''));
-    });
-  }
   await page.keyboard.press('Escape');
   await new Promise((r) => setTimeout(r, 200));
   const shortcutsClosed = await page.evaluate(() => {
@@ -171,34 +166,28 @@ async function main() {
   await page.goto(EN, { waitUntil: 'networkidle2', timeout: 60000 });
   await dismissOverlays(page);
 
-  // Open a11y menu
-  const menuOpened = await page.evaluate(() => {
-    const btn = document.querySelector('[data-console-a11y-menu], [aria-label="Accessibility options"]');
-    if (!btn) return false;
-    btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    return true;
-  });
-  await new Promise((r) => setTimeout(r, 400));
-
-  results.menuOpen = menuOpened
-    ? await page.evaluate(() => {
-        const menu = document.querySelector('[data-console-a11y-panel], [role="menu"]');
-        return {
-          open: Boolean(menu),
-          text: (menu?.textContent || '').slice(0, 300),
-        };
-      })
-    : { open: false, text: '' };
-
-  // 5 Font size
-  if (!results.menuOpen.open) {
-    await page.click('[data-console-a11y-menu]');
-    await new Promise((r) => setTimeout(r, 400));
-    results.menuOpen = await page.evaluate(() => {
-      const menu = document.querySelector('[data-console-a11y-panel], [role="menu"]');
-      return { open: Boolean(menu), text: (menu?.textContent || '').slice(0, 300) };
-    });
+  // Open a11y menu — prefer a visible unobstructed button (sidebar footer on desktop)
+  async function openA11yMenu() {
+    const handles = await page.$$('[data-console-a11y-menu]');
+    for (const h of handles) {
+      const box = await h.boundingBox();
+      if (!box || box.width < 8 || box.height < 8) continue;
+      await h.click({ delay: 20 });
+      await new Promise((r) => setTimeout(r, 450));
+      const open = await page.evaluate(
+        () => !!document.querySelector('[data-console-a11y-panel]'),
+      );
+      if (open) return true;
+    }
+    return false;
   }
+  const menuOpened = await openA11yMenu();
+  results.menuOpen = {
+    open: menuOpened,
+    text: await page.evaluate(
+      () => document.querySelector('[data-console-a11y-panel]')?.textContent?.slice(0, 300) || '',
+    ),
+  };
   if (results.menuOpen.open) {
     await page.evaluate(() => {
       const btns = [...document.querySelectorAll('[role="menuitemradio"]')];
@@ -216,15 +205,8 @@ async function main() {
     dataset: document.documentElement.dataset.consoleFont || null,
   }));
 
-  // Reopen menu if needed
-  await page.evaluate(() => {
-    const btn = document.querySelector('[aria-label="Accessibility options"]');
-    const menu = document.querySelector('[role="menu"]');
-    if (!menu) btn?.click();
-  });
-  await new Promise((r) => setTimeout(r, 200));
-
   // 6 Reader font
+  if (!(await page.$('[data-console-a11y-panel]'))) await openA11yMenu();
   await page.evaluate(() => {
     const items = [...document.querySelectorAll('[role="menuitemcheckbox"]')];
     const reader = items.find((b) => /Reader|مريح|قراءة/i.test(b.textContent || ''));
@@ -238,11 +220,7 @@ async function main() {
   }));
 
   // 7 Reduce motion
-  await page.evaluate(() => {
-    const btn = document.querySelector('[aria-label="Accessibility options"]');
-    if (!document.querySelector('[role="menu"]')) btn?.click();
-  });
-  await new Promise((r) => setTimeout(r, 150));
+  if (!(await page.$('[data-console-a11y-panel]'))) await openA11yMenu();
   await page.evaluate(() => {
     const items = [...document.querySelectorAll('[role="menuitemcheckbox"]')];
     const motion = items.find((b) => /Reduce motion|تقليل الحركة/i.test(b.textContent || ''));
@@ -255,11 +233,7 @@ async function main() {
   }));
 
   // 8 Simple mode
-  await page.evaluate(() => {
-    const btn = document.querySelector('[aria-label="Accessibility options"]');
-    if (!document.querySelector('[role="menu"]')) btn?.click();
-  });
-  await new Promise((r) => setTimeout(r, 150));
+  if (!(await page.$('[data-console-a11y-panel]'))) await openA11yMenu();
   await page.evaluate(() => {
     const items = [...document.querySelectorAll('[role="menuitemcheckbox"]')];
     const simple = items.find((b) => /Simple mode|الوضع البسيط/i.test(b.textContent || ''));

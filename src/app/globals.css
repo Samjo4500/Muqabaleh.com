@@ -1403,3 +1403,144 @@
   overflow: hidden;
   box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
 }
+
+/* ─── Employer Console (Phase 1) ─── */
+.mq-console {
+  --c-bg: #0b1120;
+  --c-surface: #0f172a;
+  --c-surface-2: rgba(255, 255, 255, 0.04);
+  --c-border: #1e293b;
+  --c-primary: #14b8a6;
+  --c-primary-soft: rgba(20, 184, 166, 0.14);
+  --c-premium: #d4af37;
+  --c-text: #f8fafc;
+  --c-text-2: #94a3b8;
+  --c-danger: #ef4444;
+  --c-success: #22c55e;
+  --c-warning: #f59e0b;
+  --c-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --c-radius-card: 12px;
+  --c-radius-btn: 8px;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: Inter, 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  transition: background 200ms ease-out, color 200ms ease-out;
+}
+
+.mq-console[data-console-theme='light'] {
+  --c-bg: #f1f5f9;
+  --c-surface: #ffffff;
+  --c-surface-2: #f8fafc;
+  --c-border: #e2e8f0;
+  --c-text: #0f172a;
+  --c-text-2: #64748b;
+  --c-primary-soft: rgba(20, 184, 166, 0.12);
+  --c-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+}
+
+.mq-console-sidebar {
+  border-inline-end: 1px solid var(--c-border);
+  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.mq-console-topbar {
+  border-bottom: 1px solid var(--c-border);
+  background: color-mix(in srgb, var(--c-surface) 80%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.mq-console-surface {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--c-shadow);
+}
+
+.mq-console-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--c-radius-card);
+  box-shadow: var(--c-shadow);
+  transition: transform 200ms ease-out, border-color 200ms ease-out;
+}
+
+.mq-console-card:hover {
+  border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border));
+}
+
+.mq-console-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.55rem 1rem;
+  border-radius: var(--c-radius-btn);
+  background: var(--c-primary);
+  color: #042f2e;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: filter 200ms ease-out, transform 200ms ease-out;
+}
+
+.mq-console-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.mq-console-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--c-radius-btn);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: border-color 200ms ease-out, background 200ms ease-out;
+}
+
+.mq-console-btn-ghost:hover {
+  border-color: var(--c-primary);
+}
+
+.mq-console-input {
+  min-height: 40px;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--c-radius-btn);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 200ms ease-out;
+}
+
+.mq-console-input:focus {
+  border-color: var(--c-primary);
+}
+
+.mq-console-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--c-border);
+  color: var(--c-text-2);
+  background: var(--c-surface-2);
+}
+
+.mq-console-bottom-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  border-top: 1px solid var(--c-border);
+  background: color-mix(in srgb, var(--c-surface) 94%, transparent);
+  backdrop-filter: blur(12px);
+}

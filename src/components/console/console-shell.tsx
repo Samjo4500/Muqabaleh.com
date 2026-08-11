@@ -149,7 +149,8 @@ function ShellInner({
         tenantType={tenantType}
       />
       <ConsoleTour tenantSlug={tenantSlug} enabled={welcomeDone} />
-      <LanguageSwitcherFixed />
+      {/* Sit below console topbar so it does not cover a11y/search controls */}
+      <LanguageSwitcherFixed className="!top-[4.75rem] z-[70]" />
       <div className="flex flex-1">
         <aside className="mq-console-sidebar hidden w-[256px] shrink-0 flex-col lg:flex">
           <div className="px-3 pb-2 pt-4">
@@ -211,11 +212,14 @@ function ShellInner({
             })}
           </nav>
 
-          <div className="flex items-center justify-between border-t border-[var(--c-border)] px-4 py-3">
+          <div className="flex items-center justify-between gap-2 border-t border-[var(--c-border)] px-4 py-3">
             <span className="text-[11px] tracking-wide text-[var(--c-text-3)]">
               muqabaleh.com
             </span>
-            <ThemeToggle />
+            <div className="flex items-center gap-1.5">
+              <ConsoleA11yMenu />
+              <ThemeToggle />
+            </div>
           </div>
         </aside>
 

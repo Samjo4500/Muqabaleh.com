@@ -157,6 +157,7 @@ function ConsoleKeyboardLayer({
 }) {
   const t = useTranslations('console.a11y');
   const locale = useLocale();
+  const isAr = locale === 'ar';
   const router = useRouter();
   const pathname = usePathname();
   const [cheatOpen, setCheatOpen] = useState(false);

@@ -38,6 +38,8 @@ export function PrepClient() {
   const [loading, setLoading] = useState(true);
   const [accessBlocked, setAccessBlocked] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [canResume, setCanResume] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [category, setCategory] = useState('');
   const [roleQuery, setRoleQuery] = useState('');
   const [form, setForm] = useState<PrepSelections>({
@@ -63,10 +65,14 @@ export function PrepClient() {
           canStart?: boolean;
           remaining?: number | null;
           reason?: string;
+          canResume?: boolean;
+          activeSessionId?: string | null;
         };
         if (cancelled) return;
         setCfg(c);
-        if (a.canStart === false) {
+        setCanResume(!!a.canResume && !!a.activeSessionId);
+        setActiveSessionId(a.activeSessionId || null);
+        if (a.canStart === false && !a.canResume) {
           setAccessBlocked(
             a.reason ||
               (isAr
@@ -151,6 +157,44 @@ export function PrepClient() {
     }));
   };
 
+  const goToSession = (payload: PrepSelections, mode: 'new' | 'resume') => {
+    const key = cfg?.storageKey || STORAGE_FALLBACK;
+    try {
+      sessionStorage.setItem(key, JSON.stringify(payload));
+      if (mode === 'resume' && activeSessionId) {
+        sessionStorage.setItem('mq_coach_session', activeSessionId);
+        sessionStorage.setItem('mq_coach_resume', '1');
+      } else {
+        sessionStorage.removeItem('mq_coach_session');
+        sessionStorage.setItem('mq_coach_resume', '0');
+      }
+    } catch {
+      /* ignore */
+    }
+    router.push(localePath('/interview/session', locale));
+  };
+
+  const onResume = async () => {
+    setError(null);
+    if (!canResume || !activeSessionId) return;
+    try {
+      const res = await fetch(
+        `/api/interview/coach/session?sessionId=${encodeURIComponent(activeSessionId)}`,
+      );
+      const data = (await res.json()) as {
+        prep?: PrepSelections;
+        error?: string;
+      };
+      if (!data.prep) {
+        setError(data.error || (isAr ? 'تعذّر استئناف الجلسة.' : 'Could not resume session.'));
+        return;
+      }
+      goToSession(data.prep, 'resume');
+    } catch {
+      setError(isAr ? 'تعذّر استئناف الجلسة.' : 'Could not resume session.');
+    }
+  };
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -162,18 +206,12 @@ export function PrepClient() {
       setError(isAr ? 'أكمل جميع الحقول المطلوبة.' : 'Complete all required fields.');
       return;
     }
-    const key = cfg?.storageKey || STORAGE_FALLBACK;
     const payload: PrepSelections = {
       ...form,
       companyName: form.companyName?.trim() || undefined,
       coachGender: form.coachGender === 'none' ? 'none' : form.coachGender,
     };
-    try {
-      sessionStorage.setItem(key, JSON.stringify(payload));
-    } catch {
-      /* ignore */
-    }
-    router.push(localePath('/interview/session', locale));
+    goToSession(payload, 'new');
   };
 
   if (loading) {
@@ -209,9 +247,26 @@ export function PrepClient() {
         </h1>
         <p className="mt-2 max-w-2xl text-white/60">
           {isAr
-            ? 'اختر الفئة ثم الدور والسياق. لن نكتب في قاعدة البيانات حتى تنتهي المقابلة.'
-            : 'Choose a category, then role and context. Nothing is written to the database until the interview ends.'}
+            ? 'اختر الفئة ثم الدور والسياق. تُحفظ جلستك في السحابة ويمكنك المتابعة إذا أُغلق التبويب.'
+            : 'Choose a category, then role and context. Your session is saved in the cloud so you can resume if the tab closes.'}
         </p>
+
+        {canResume ? (
+          <div className="mt-6 rounded-2xl border border-teal-300/30 bg-teal-400/10 p-5">
+            <p className="text-teal-50">
+              {isAr
+                ? 'لديك مقابلة جارية. يمكنك المتابعة من حيث توقفت.'
+                : 'You have an interview in progress. Continue where you left off.'}
+            </p>
+            <button
+              type="button"
+              onClick={onResume}
+              className="mq-btn mq-btn-primary mt-4 inline-flex"
+            >
+              {isAr ? 'متابعة المقابلة' : 'Continue interview'}
+            </button>
+          </div>
+        ) : null}
 
         {accessBlocked ? (
           <div className="mt-8 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-6">

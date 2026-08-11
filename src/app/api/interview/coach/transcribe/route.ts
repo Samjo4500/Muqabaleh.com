@@ -4,14 +4,32 @@ import {
   transcribeWithGoogleStt,
   type SttLanguageMode,
 } from '@/lib/coach/google-stt';
+import { findActiveCoachSession } from '@/lib/coach/session';
+import { getCoachAccess } from '@/lib/coach/access';
 
 /**
  * Legacy coach path — same Google STT backend as /api/speech-to-text.
- * No OpenAI / Whisper.
+ * Hard-gated to active session / remaining quota.
  */
 export async function POST(req: NextRequest) {
   try {
-    await requireApiAuth();
+    const { userId } = await requireApiAuth();
+    const active = await findActiveCoachSession(userId);
+    if (!active) {
+      const access = await getCoachAccess(userId);
+      if (!access.canStart) {
+        return NextResponse.json(
+          {
+            error: 'Interview quota reached',
+            text: '',
+            fallback: true,
+            upgradeRequired: true,
+          },
+          { status: 402 },
+        );
+      }
+    }
+
     const form = await req.formData();
     const file = form.get('audio');
     const langRaw = String(form.get('language') || 'mixed');

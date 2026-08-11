@@ -22,7 +22,8 @@ type ResultState = {
   upgradeRequired?: boolean;
 };
 
-const STORAGE_KEY = 'mq_coach_prep';
+const PREP_KEY = 'mq_coach_prep';
+const SESSION_KEY = 'mq_coach_session';
 
 export function CoachSessionClient({ candidateName }: Props) {
   const locale = useLocale();
@@ -30,6 +31,8 @@ export function CoachSessionClient({ candidateName }: Props) {
   const router = useRouter();
 
   const [prep, setPrep] = useState<PrepSelections | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const historyRef = useRef<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -57,9 +60,19 @@ export function CoachSessionClient({ candidateName }: Props) {
     setHistory(next);
   };
 
+  const setSessionBoth = (id: string) => {
+    sessionIdRef.current = id;
+    setSessionId(id);
+    try {
+      sessionStorage.setItem(SESSION_KEY, id);
+    } catch {
+      /* ignore */
+    }
+  };
+
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = sessionStorage.getItem(PREP_KEY);
       if (!raw) {
         router.replace(localePath('/interview/prep', locale));
         return;
@@ -94,6 +107,29 @@ export function CoachSessionClient({ candidateName }: Props) {
       });
   }, [prep]);
 
+  // Soft anti-cheat: tab blur / visibility hidden → integrity signal
+  useEffect(() => {
+    if (!sessionId) return;
+    const send = (signal: 'tab_blur' | 'visibility_hidden') => {
+      void fetch('/api/interview/coach/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, signal }),
+        keepalive: true,
+      }).catch(() => undefined);
+    };
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') send('visibility_hidden');
+    };
+    const onBlur = () => send('tab_blur');
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [sessionId]);
+
   const speak = useCallback(
     async (
       text: string,
@@ -104,7 +140,12 @@ export function CoachSessionClient({ candidateName }: Props) {
         const res = await fetch('/api/interview/coach/speak', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, coachGender, languageHint }),
+          body: JSON.stringify({
+            text,
+            coachGender,
+            languageHint,
+            sessionId: sessionIdRef.current,
+          }),
         });
         const data = (await res.json()) as { audioBase64?: string | null; mimeType?: string };
         if (!data.audioBase64) return;
@@ -130,9 +171,26 @@ export function CoachSessionClient({ candidateName }: Props) {
         const res = await fetch('/api/interview/coach/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prep: currentPrep, history: currentHistory }),
+          body: JSON.stringify({
+            prep: currentPrep,
+            history: currentHistory,
+            sessionId: sessionIdRef.current,
+          }),
         });
-        const data = (await res.json()) as ResultState & { ok?: boolean; error?: string };
+        const data = (await res.json()) as ResultState & {
+          ok?: boolean;
+          error?: string;
+          upgradeRequired?: boolean;
+        };
+        if (res.status === 402) {
+          setError(
+            data.error ||
+              (isAr
+                ? 'وصلت إلى حد المقابلات. رقِّ حسابك للمتابعة.'
+                : 'Interview quota reached. Upgrade to continue.'),
+          );
+          return;
+        }
         if (data.score) {
           setResult({
             interviewId: data.interviewId,
@@ -143,7 +201,8 @@ export function CoachSessionClient({ candidateName }: Props) {
             upgradeRequired: data.upgradeRequired,
           });
           try {
-            sessionStorage.removeItem(STORAGE_KEY);
+            sessionStorage.removeItem(PREP_KEY);
+            sessionStorage.removeItem(SESSION_KEY);
           } catch {
             /* ignore */
           }
@@ -172,19 +231,43 @@ export function CoachSessionClient({ candidateName }: Props) {
             prep: currentPrep,
             history: prior,
             userMessage,
+            sessionId: sessionIdRef.current,
           }),
         });
-        const data = (await res.json()) as { reply?: string; complete?: boolean; error?: string };
+        const data = (await res.json()) as {
+          reply?: string;
+          complete?: boolean;
+          error?: string;
+          sessionId?: string;
+          history?: ChatMessage[];
+          upgradeRequired?: boolean;
+        };
+        if (res.status === 402) {
+          setError(
+            data.error ||
+              (isAr
+                ? 'وصلت إلى حد المقابلات. رقِّ حسابك للمتابعة.'
+                : 'Interview quota reached. Upgrade to continue.'),
+          );
+          return;
+        }
+        if (data.sessionId) setSessionBoth(data.sessionId);
         if (!data.reply) {
           setError(data.error || (isAr ? 'تعذّر الرد.' : 'Could not get a reply.'));
           return;
         }
 
-        const next: ChatMessage[] = [...prior];
-        if (userMessage?.trim()) {
-          next.push({ role: 'user', content: userMessage.trim() });
-        }
-        next.push({ role: 'assistant', content: data.reply });
+        const next: ChatMessage[] =
+          Array.isArray(data.history) && data.history.length
+            ? data.history
+            : (() => {
+                const built: ChatMessage[] = [...prior];
+                if (userMessage?.trim()) {
+                  built.push({ role: 'user', content: userMessage.trim() });
+                }
+                built.push({ role: 'assistant', content: data.reply! });
+                return built;
+              })();
         setHistoryBoth(next);
 
         await speak(data.reply, currentPrep.coachGender, currentPrep.language);
@@ -204,8 +287,54 @@ export function CoachSessionClient({ candidateName }: Props) {
   useEffect(() => {
     if (!prep || startedRef.current) return;
     startedRef.current = true;
-    void runTurn(prep);
-  }, [prep, runTurn]);
+
+    (async () => {
+      setBusy(true);
+      try {
+        let resumeIfActive = true;
+        try {
+          resumeIfActive = sessionStorage.getItem('mq_coach_resume') !== '0';
+        } catch {
+          /* ignore */
+        }
+        const res = await fetch('/api/interview/coach/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prep, resumeIfActive }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          sessionId?: string;
+          history?: ChatMessage[];
+          prep?: PrepSelections;
+          resumed?: boolean;
+          error?: string;
+        };
+        if (res.status === 402 || !data.sessionId) {
+          setError(
+            data.error ||
+              (isAr
+                ? 'وصلت إلى حد المقابلات. رقِّ حسابك للمتابعة.'
+                : 'Interview quota reached. Upgrade to continue.'),
+          );
+          return;
+        }
+        setSessionBoth(data.sessionId);
+        const activePrep = data.prep || prep;
+        if (data.prep) setPrep(data.prep);
+        if (Array.isArray(data.history) && data.history.length > 0) {
+          setHistoryBoth(data.history);
+          // Resumed mid-session — do not re-open with a fresh kickoff.
+          return;
+        }
+        await runTurn(activePrep);
+      } catch {
+        setError(isAr ? 'تعذّر بدء الجلسة.' : 'Could not start session.');
+      } finally {
+        setBusy(false);
+      }
+    })();
+  }, [prep, runTurn, isAr]);
 
   const submitText = async () => {
     if (!prep || !input.trim() || busy) return;
@@ -259,7 +388,6 @@ export function CoachSessionClient({ candidateName }: Props) {
             setVoiceFallback(false);
             await runTurn(prep, data.text.trim());
           } else {
-            // Text fallback — interview continues without crash
             setVoiceFallback(true);
             setError(
               isAr
@@ -365,6 +493,11 @@ export function CoachSessionClient({ candidateName }: Props) {
             <p className="mt-1 text-center text-sm text-white/50">
               {isAr ? 'مدرب مقابلات مقابلة' : 'Muqabaleh interview coach'}
             </p>
+            {sessionId ? (
+              <p className="mt-3 text-center text-[11px] text-white/30">
+                {isAr ? 'الجلسة محفوظة' : 'Session saved'}
+              </p>
+            ) : null}
           </aside>
 
           <section className="flex min-h-[60vh] flex-col rounded-3xl border border-white/10 bg-white/[0.03]">
@@ -460,6 +593,7 @@ function ResultsView({
   result: ResultState;
 }) {
   const score = result.score;
+  const provisional = score.scoringMode === 'provisional';
   const verifyUrl = result.verificationId
     ? `https://muqabaleh.com/verify/${result.verificationId}`
     : '';
@@ -475,18 +609,31 @@ function ResultsView({
           <BrandLogo size="nav" />
         </Link>
         <h1 className="mq-display mt-8 text-3xl font-bold text-white md:text-5xl">
-          {isAr ? 'جواز مقابلتك جاهز' : 'Your Interview Passport'}
+          {provisional
+            ? isAr
+              ? 'تقدير مؤقت للتدريب'
+              : 'Provisional practice estimate'
+            : isAr
+              ? 'جواز مقابلتك جاهز'
+              : 'Your Interview Passport'}
         </h1>
         <p className="mt-2 text-white/60">
           {candidateName} · {score.overallScore}/100 · {score.grade}
         </p>
+        {provisional ? (
+          <p className="mt-3 max-w-xl text-sm text-amber-200/90">
+            {isAr
+              ? 'هذا تقدير مبدئي مبني على طول الإجابات وليس تقييماً نموذجياً. جواز PDF غير متاح حتى يعمل التقييم بالذكاء الاصطناعي.'
+              : 'This is a length-based provisional estimate, not a model evaluation. Passport PDF unlocks only after AI model scoring succeeds.'}
+          </p>
+        ) : null}
 
         <div
           className={`relative mt-8 max-w-2xl rounded-3xl border border-white/10 bg-white/[0.03] p-6 ${
-            result.upgradeRequired ? 'overflow-hidden' : ''
+            result.upgradeRequired && !provisional ? 'overflow-hidden' : ''
           }`}
         >
-          <div className={result.upgradeRequired ? 'blur-sm select-none' : ''}>
+          <div className={result.upgradeRequired && !provisional ? 'blur-sm select-none' : ''}>
             <p className="text-4xl font-bold text-teal-200">
               {score.overallScore}{' '}
               <span className="text-xl text-white/70">{score.grade}</span>
@@ -532,7 +679,7 @@ function ResultsView({
             <p className="mt-6 text-sm text-white/70">{score.recommendedNextSteps}</p>
           </div>
 
-          {result.upgradeRequired ? (
+          {result.upgradeRequired && !provisional ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#05080f]/55 p-6 text-center backdrop-blur-[2px]">
               <p className="max-w-sm text-lg font-bold text-white">
                 {isAr
@@ -546,7 +693,7 @@ function ResultsView({
           ) : null}
         </div>
 
-        {!result.upgradeRequired && result.interviewId ? (
+        {!result.upgradeRequired && !provisional && result.interviewId ? (
           <div className="mt-6 flex flex-wrap gap-3">
             <a
               href={`/api/interview/coach/passport?interviewId=${result.interviewId}`}

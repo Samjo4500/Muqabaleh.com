@@ -2,16 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import { detectReplyLanguage } from '@/lib/coach/gemini';
 import { resolveTtsVoice, synthesizeSpeech } from '@/lib/coach/tts';
+import { findActiveCoachSession } from '@/lib/coach/session';
+import { getCoachAccess } from '@/lib/coach/access';
 import type { CoachGender } from '@/lib/coach/types';
 
 export async function POST(req: NextRequest) {
   try {
-    await requireApiAuth();
+    const { userId } = await requireApiAuth();
     const body = (await req.json()) as {
       text?: string;
       coachGender?: CoachGender;
       languageHint?: 'ar' | 'en' | 'mixed';
+      sessionId?: string;
     };
+
+    // Hard gate: TTS only during an active coach session (or while user can start).
+    const active = await findActiveCoachSession(userId);
+    if (!active) {
+      const access = await getCoachAccess(userId);
+      if (!access.canStart) {
+        return NextResponse.json(
+          { error: 'Interview quota reached', upgradeRequired: true, audioBase64: null },
+          { status: 402 },
+        );
+      }
+    } else if (body.sessionId && body.sessionId !== active.sessionId) {
+      return NextResponse.json(
+        { error: 'Session mismatch', audioBase64: null },
+        { status: 403 },
+      );
+    }
 
     const text = (body.text || '').trim();
     if (!text) {

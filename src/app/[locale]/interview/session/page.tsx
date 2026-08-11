@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Jeannie coach live session (in-memory until complete).
+ * Jeannie coach live session (durable InterviewSession until complete).
  * Dynamic `/interview/session/[sessionId]` remains the bank-question engine.
  */
 export default async function CoachSessionPage({ params }: Props) {

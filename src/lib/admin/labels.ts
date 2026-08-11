@@ -8,6 +8,8 @@ export const L = {
   signOut: { ar: 'تسجيل الخروج', en: 'Sign Out' },
   back: { ar: 'رجوع', en: 'Back' },
   dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
+  systemHealth: { ar: 'صحة النظام', en: 'System Health' },
+  runSystemsCheck: { ar: 'تشغيل فحص الأنظمة', en: 'Run systems check' },
   search: { ar: 'بحث', en: 'Search' },
   refresh: { ar: 'تحديث', en: 'Refresh' },
   create: { ar: 'إنشاء', en: 'Create' },

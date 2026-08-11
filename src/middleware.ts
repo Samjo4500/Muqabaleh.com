@@ -25,6 +25,7 @@ const ROUTE_ROLES: Record<string, string[]> = {
   '/app': [ROLE.USER, ROLE.SUPER_ADMIN],
   '/interviewer': [ROLE.INTERVIEWER, ROLE.SUPER_ADMIN],
   // /b2b is a public preview console — writes stay locked in app/API layer
+  // /console demo tenant is public for Phase 1 preview; membership enforced in API for real orgs
   '/partner': [ROLE.PARTNER_ADMIN, ROLE.PARTNER_MEMBER, ROLE.SUPER_ADMIN],
   '/admin': [ROLE.SUPER_ADMIN],
   // Gated AI mock interview engine — any authenticated role with email session

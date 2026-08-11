@@ -180,6 +180,7 @@ model User {
   jeannieDocuments       JeannieDocument[]
   manualApplications     ManualApplication[]
   jobMockInterviews      JobMockInterview[]
+  organizationMembers    OrganizationMember[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -202,9 +203,10 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users   User[]
-  panel   CompanyPanel[]
-  b2bJobs B2BJob[]
+  users        User[]
+  panel        CompanyPanel[]
+  b2bJobs      B2BJob[]
+  organization Organization?
 
   @@index([partnerId])
   @@index([status])
@@ -415,6 +417,8 @@ model JobApplication {
   photoAssetId String?
   source       String           @default("DIRECT")
   employerNote String?          @db.Text
+  /// Console team notes/tags/compare metadata — JSON only, no new table.
+  meta         Json?
   score        Int?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
@@ -1292,4 +1296,121 @@ model InterviewResponse {
   @@index([sessionId])
   @@index([questionId])
   @@map("interview_responses")
+}
+
+// ─── Employer Console tenants (Phase 1) ───
+// Minimal additive models. Agency/Academy modules gated by tenantType later.
+
+enum OrgTenantType {
+  EMPLOYER
+  AGENCY
+  ACADEMY
+}
+
+enum OrgPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  HIRING_MANAGER
+  REVIEWER
+  INTERVIEWER
+}
+
+model Organization {
+  id         String        @id @default(cuid())
+  /// URL slug: /console/[slug]
+  slug       String        @unique
+  name       String
+  tenantType OrgTenantType @default(EMPLOYER)
+  plan       OrgPlan       @default(STARTER)
+  industry   String?
+  size       String?
+  country    String?
+  /// Optional bridge to legacy Company ATS rows
+  companyId  String?       @unique
+  company    Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  /// { logoUrl, primaryColor, font, customDomain, fromEmail, faviconUrl }
+  whiteLabel Json?
+  settings   Json?
+  status     String        @default("ACTIVE")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  members        OrganizationMember[]
+  jobPostings    JobPosting[]
+  pipelineStages PipelineStage[]
+
+  @@index([tenantType])
+  @@index([status])
+  @@index([plan])
+}
+
+model OrganizationMember {
+  id             String        @id @default(cuid())
+  /// tenantId — every console query must filter by this
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrgMemberRole @default(REVIEWER)
+  invitedEmail   String?
+  invitedName    String?
+  status         String        @default("ACTIVE")
+  lastActiveAt   DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([invitedEmail])
+}
+
+/// Smart-interview job built in the Employer console (separate from public B2BJob ATS).
+model JobPosting {
+  id             String           @id @default(cuid())
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  title          String
+  titleAr        String?
+  roleKey        String?
+  difficulty     String           @default("MID")
+  language       String           @default("MIXED")
+  /// [{ id, text, textAr?, difficulty? }]
+  questions      Json
+  /// { logoUrl?, welcomeMsg?, welcomeMsgAr?, outroMsg?, outroMsgAr? }
+  branding       Json?
+  interviewSlug  String           @unique @default(cuid())
+  expiresAt      DateTime?
+  maxAttempts    Int              @default(3)
+  status         JobPostingStatus @default(DRAFT)
+  createdById    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([organizationId, status])
+}
+
+model PipelineStage {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  key            String
+  labelEn        String
+  labelAr        String
+  sortOrder      Int          @default(0)
+  isTerminal     Boolean      @default(false)
+  color          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId, sortOrder])
 }

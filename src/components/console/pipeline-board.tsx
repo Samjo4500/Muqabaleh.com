@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
   DragOverlay,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -13,6 +14,7 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
@@ -20,9 +22,11 @@ import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { scoreColor } from '@/lib/console/defaults';
 import { localePath } from '@/i18n/navigation';
 import type { ConsolePassport, ConsolePipelineStage } from '@/lib/console/types';
+import { useConsoleA11y } from './console-a11y';
+import { ScoreBadge } from './score-badge';
+import { StageMarker } from './stage-marker';
 
 function Card({
   passport,
@@ -35,29 +39,31 @@ function Card({
 }) {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const name = isAr && passport.candidateNameAr ? passport.candidateNameAr : passport.candidateName;
   return (
     <Link
       href={href}
+      data-passport-row
+      data-passport-id={passport.id}
+      data-passport-name={name}
+      data-passport-href={href}
+      data-passport-stage={passport.stageKey}
+      tabIndex={0}
       className={`mq-console-card block p-3 ${dragging ? 'opacity-85 scale-[1.02]' : ''}`}
     >
       <div className="flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-[11px] font-normal tracking-wide text-[var(--c-primary)]">
-          {passport.candidateName.slice(0, 1)}
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--c-border)] bg-[var(--c-surface-2)] text-[11px] font-normal tracking-wide text-[var(--c-primary)]" aria-hidden>
+          {name.slice(0, 1)}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium tracking-tight text-[var(--c-text)]">
-            {passport.candidateName}
+            {name}
           </p>
           <p className="truncate text-[11px] text-[var(--c-text-3)]">
             {isAr ? passport.roleAr || passport.role : passport.role}
           </p>
         </div>
-        <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-normal tabular-nums"
-          style={{ color: scoreColor(passport.score), background: `${scoreColor(passport.score)}18` }}
-        >
-          {passport.score}
-        </span>
+        <ScoreBadge score={passport.score} compact />
       </div>
     </Link>
   );
@@ -76,7 +82,7 @@ function SortableCard({
   });
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: transition || undefined,
   };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -103,15 +109,13 @@ function Column({
       className="mq-console-surface flex w-[268px] shrink-0 flex-col p-3.5"
     >
       <div className="mb-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ background: stage.color || 'var(--c-primary)' }}
+        <h3 className="text-[13px] font-medium tracking-tight text-[var(--c-text)]">
+          <StageMarker
+            stageKey={stage.key}
+            label={isAr ? stage.labelAr : stage.labelEn}
+            color={stage.color}
           />
-          <h3 className="text-[13px] font-medium tracking-tight text-[var(--c-text)]">
-            {isAr ? stage.labelAr : stage.labelEn}
-          </h3>
-        </div>
+        </h3>
         <span className="text-[11px] tabular-nums text-[var(--c-text-3)]">{items.length}</span>
       </div>
       <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
@@ -131,6 +135,8 @@ function Column({
 
 export function PipelineBoard({ tenantSlug }: { tenantSlug: string }) {
   const t = useTranslations('console');
+  const ta = useTranslations('console.a11y');
+  const { announce } = useConsoleA11y();
   const [stages, setStages] = useState<ConsolePipelineStage[]>([]);
   const [passports, setPassports] = useState<ConsolePassport[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -155,7 +161,10 @@ export function PipelineBoard({ tenantSlug }: { tenantSlug: string }) {
     };
   }, [tenantSlug]);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const active = useMemo(
     () => passports.find((p) => p.id === activeId) || null,
     [activeId, passports],
@@ -181,6 +190,17 @@ export function PipelineBoard({ tenantSlug }: { tenantSlug: string }) {
 
     setPassports((prev) =>
       prev.map((p) => (p.id === passportId ? { ...p, stageKey: nextStage } : p)),
+    );
+
+    const stageMeta = stages.find((s) => s.key === nextStage);
+    const stageLabel = stageMeta
+      ? stageMeta.labelEn
+      : nextStage;
+    announce(
+      ta('announceMoved', {
+        name: current.candidateName,
+        stage: stageLabel,
+      }),
     );
 
     await fetch(`/api/console/${tenantSlug}/pipeline/${passportId}`, {

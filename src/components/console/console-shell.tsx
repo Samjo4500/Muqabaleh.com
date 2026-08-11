@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -25,12 +25,19 @@ import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed
 import { localePath } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import type { TenantType } from '@/lib/console/types';
+import { SIMPLE_MODE_HIDDEN_NAV } from '@/lib/console/a11y';
 import {
   CONSOLE_PRODUCT,
   consoleFullName,
   getConsoleEdition,
   welcomeStorageKey,
 } from '@/lib/console/identity';
+import {
+  ConsoleA11yMenu,
+  ConsoleA11yProvider,
+  ConsoleSearchField,
+  useConsoleA11y,
+} from './console-a11y';
 import { ConsoleThemeProvider, useConsoleTheme } from './console-theme';
 import { ConsoleTour } from './console-tour';
 import { ConsoleWelcome } from './console-welcome';
@@ -86,9 +93,11 @@ function ShellInner({
   children: React.ReactNode;
 }) {
   const t = useTranslations('console');
+  const ta = useTranslations('console.a11y');
   const locale = useLocale();
   const pathname = usePathname();
   const isAr = locale === 'ar';
+  const { simpleMode } = useConsoleA11y();
   const base = `/console/${tenantSlug}`;
   const homeHref = localePath('/', locale);
   const deskHref = localePath(base, locale);
@@ -97,8 +106,14 @@ function ShellInner({
   const editionName = isAr ? edition.ar : edition.en;
   const fullName = consoleFullName(tenantType, locale);
 
-  const items = NAV.filter(
-    (item) => !item.types || item.types.includes(tenantType),
+  const items = useMemo(
+    () =>
+      NAV.filter((item) => {
+        if (item.types && !item.types.includes(tenantType)) return false;
+        if (simpleMode && SIMPLE_MODE_HIDDEN_NAV.has(item.key)) return false;
+        return true;
+      }),
+    [tenantType, simpleMode],
   );
 
   const [welcomeDone, setWelcomeDone] = useState(false);
@@ -134,7 +149,8 @@ function ShellInner({
         tenantType={tenantType}
       />
       <ConsoleTour tenantSlug={tenantSlug} enabled={welcomeDone} />
-      <LanguageSwitcherFixed />
+      {/* Sit below console topbar so it does not cover a11y/search controls */}
+      <LanguageSwitcherFixed className="!top-[4.75rem] z-[70]" />
       <div className="flex flex-1">
         <aside className="mq-console-sidebar hidden w-[256px] shrink-0 flex-col lg:flex">
           <div className="px-3 pb-2 pt-4">
@@ -166,7 +182,10 @@ function ShellInner({
 
           <div className="mx-4 mb-2 h-px bg-[var(--c-border)]" />
 
-          <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 pb-4">
+          <nav
+            className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 pb-4"
+            aria-label={ta('navLabel')}
+          >
             {items.map((item) => {
               const href = localePath(`${base}${item.href}`, locale);
               const bare = `${base}${item.href}`;
@@ -182,21 +201,25 @@ function ShellInner({
                   key={item.key}
                   href={href}
                   data-active={isActive ? 'true' : 'false'}
+                  aria-current={isActive ? 'page' : undefined}
                   data-tour={tourTargetFor(item.key)}
                   className="mq-console-nav-link"
                 >
-                  <Icon size={17} strokeWidth={1.5} className="opacity-80" />
+                  <Icon size={17} strokeWidth={1.5} className="opacity-80" aria-hidden />
                   <span>{t(item.key)}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center justify-between border-t border-[var(--c-border)] px-4 py-3">
+          <div className="flex items-center justify-between gap-2 border-t border-[var(--c-border)] px-4 py-3">
             <span className="text-[11px] tracking-wide text-[var(--c-text-3)]">
               muqabaleh.com
             </span>
-            <ThemeToggle />
+            <div className="flex items-center gap-1.5">
+              <ConsoleA11yMenu />
+              <ThemeToggle />
+            </div>
           </div>
         </aside>
 
@@ -226,13 +249,15 @@ function ShellInner({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ConsoleSearchField />
               <Link
                 href={homeHref}
                 className="mq-console-btn-ghost hidden items-center gap-1.5 text-xs sm:inline-flex"
               >
-                <Home size={13} strokeWidth={1.5} />
+                <Home size={13} strokeWidth={1.5} aria-hidden />
                 {isAr ? 'مقابلة' : 'Muqabaleh'}
               </Link>
+              <ConsoleA11yMenu />
               <div className="lg:hidden">
                 <ThemeToggle />
               </div>
@@ -243,7 +268,7 @@ function ShellInner({
             {children}
           </main>
 
-          <nav className="mq-console-bottom-nav lg:hidden">
+          <nav className="mq-console-bottom-nav lg:hidden" aria-label={ta('navLabel')}>
             {items.slice(0, 5).map((item) => {
               const href = localePath(`${base}${item.href}`, locale);
               const Icon = item.icon;
@@ -256,12 +281,13 @@ function ShellInner({
                 <Link
                   key={item.key}
                   href={href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-normal tracking-wide',
+                    'flex min-h-[44px] flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-normal tracking-wide',
                     isActive ? 'text-[var(--c-primary)]' : 'text-[var(--c-text-3)]',
                   )}
                 >
-                  <Icon size={17} strokeWidth={1.5} />
+                  <Icon size={17} strokeWidth={1.5} aria-hidden />
                   <span className="truncate px-0.5">{t(item.key)}</span>
                 </Link>
               );
@@ -286,9 +312,11 @@ export function ConsoleShell({
 }) {
   return (
     <ConsoleThemeProvider>
-      <ShellInner tenantSlug={tenantSlug} orgName={orgName} tenantType={tenantType}>
-        {children}
-      </ShellInner>
+      <ConsoleA11yProvider tenantSlug={tenantSlug}>
+        <ShellInner tenantSlug={tenantSlug} orgName={orgName} tenantType={tenantType}>
+          {children}
+        </ShellInner>
+      </ConsoleA11yProvider>
     </ConsoleThemeProvider>
   );
 }

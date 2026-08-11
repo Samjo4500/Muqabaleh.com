@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Download, QrCode, Share2 } from 'lucide-react';
 import { ScoreRing } from '@/components/console/score-ring';
 import { CompetencyRadar } from '@/components/console/competency-radar';
+import { useConsoleA11y } from '@/components/console/console-a11y';
 import type { ConsolePassport } from '@/lib/console/types';
 
 export default function PassportViewerPage() {
@@ -13,8 +14,10 @@ export default function PassportViewerPage() {
   const tenantSlug = String(params.tenantSlug);
   const id = String(params.id);
   const t = useTranslations('console');
+  const ta = useTranslations('console.a11y');
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const { announce } = useConsoleA11y();
   const [passport, setPassport] = useState<ConsolePassport | null>(null);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -67,12 +70,17 @@ export default function PassportViewerPage() {
                 <QrCode size={14} />
                 {t('verifyQr')}
               </a>
-              <button type="button" className="mq-console-btn-ghost inline-flex items-center gap-2 text-sm">
-                <Download size={14} />
+              <button
+                type="button"
+                className="mq-console-btn-ghost inline-flex items-center gap-2 text-sm"
+                aria-label={ta('downloadPdf')}
+                onClick={() => announce(ta('announceReport'))}
+              >
+                <Download size={14} aria-hidden />
                 {t('download')}
               </button>
               <button type="button" className="mq-console-btn-ghost inline-flex items-center gap-2 text-sm">
-                <Share2 size={14} />
+                <Share2 size={14} aria-hidden />
                 {t('share')}
               </button>
             </div>

@@ -5,7 +5,7 @@ export type FeaturedJob = {
   titleAr: string;
   locationEn: string;
   locationAr: string;
-  /** Ultra HQ 1600×1600 poster faces */
+  /** Ultra HQ poster faces (webp for LCP) */
   faceAr: string;
   faceEn: string;
 };
@@ -19,8 +19,8 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'مهندس برمجيات أول',
     locationEn: 'Dubai, UAE',
     locationAr: 'دبي، الإمارات',
-    faceAr: '/images/jobs-hero/faces/01-careem-dubai-ar.png',
-    faceEn: '/images/jobs-hero/faces/01-careem-dubai-en.png',
+    faceAr: '/images/jobs-hero/faces/01-careem-dubai-ar.webp',
+    faceEn: '/images/jobs-hero/faces/01-careem-dubai-en.webp',
   },
   {
     id: '02-mongodb-dubai',
@@ -29,8 +29,8 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'ممثل حسابات مؤسسي',
     locationEn: 'Dubai, UAE',
     locationAr: 'دبي، الإمارات',
-    faceAr: '/images/jobs-hero/faces/02-mongodb-dubai-ar.png',
-    faceEn: '/images/jobs-hero/faces/02-mongodb-dubai-en.png',
+    faceAr: '/images/jobs-hero/faces/02-mongodb-dubai-ar.webp',
+    faceEn: '/images/jobs-hero/faces/02-mongodb-dubai-en.webp',
   },
   {
     id: '03-tamara-riyadh',
@@ -39,8 +39,8 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'محقق احتيال',
     locationEn: 'Riyadh, KSA',
     locationAr: 'الرياض، السعودية',
-    faceAr: '/images/jobs-hero/faces/03-tamara-riyadh-ar.png',
-    faceEn: '/images/jobs-hero/faces/03-tamara-riyadh-en.png',
+    faceAr: '/images/jobs-hero/faces/03-tamara-riyadh-ar.webp',
+    faceEn: '/images/jobs-hero/faces/03-tamara-riyadh-en.webp',
   },
   {
     id: '04-cloudflare-cairo',
@@ -49,8 +49,8 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'مدير حسابات أول — مصر',
     locationEn: 'Cairo, Egypt',
     locationAr: 'القاهرة، مصر',
-    faceAr: '/images/jobs-hero/faces/04-cloudflare-cairo-ar.png',
-    faceEn: '/images/jobs-hero/faces/04-cloudflare-cairo-en.png',
+    faceAr: '/images/jobs-hero/faces/04-cloudflare-cairo-ar.webp',
+    faceEn: '/images/jobs-hero/faces/04-cloudflare-cairo-en.webp',
   },
   {
     id: '05-careem-amman',
@@ -59,8 +59,8 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'منسق عمليات',
     locationEn: 'Amman, Jordan',
     locationAr: 'عمّان، الأردن',
-    faceAr: '/images/jobs-hero/faces/05-careem-amman-ar.png',
-    faceEn: '/images/jobs-hero/faces/05-careem-amman-en.png',
+    faceAr: '/images/jobs-hero/faces/05-careem-amman-ar.webp',
+    faceEn: '/images/jobs-hero/faces/05-careem-amman-en.webp',
   },
   {
     id: '06-trendyol-riyadh',
@@ -69,7 +69,7 @@ export const FEATURED_JOBS: FeaturedJob[] = [
     titleAr: 'متدرّب تسويق',
     locationEn: 'Riyadh, KSA',
     locationAr: 'الرياض، السعودية',
-    faceAr: '/images/jobs-hero/faces/06-trendyol-riyadh-ar.png',
-    faceEn: '/images/jobs-hero/faces/06-trendyol-riyadh-en.png',
+    faceAr: '/images/jobs-hero/faces/06-trendyol-riyadh-ar.webp',
+    faceEn: '/images/jobs-hero/faces/06-trendyol-riyadh-en.webp',
   },
 ];

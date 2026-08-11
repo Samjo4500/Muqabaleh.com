@@ -90,7 +90,7 @@ const post: BlogPost = {
 
 <blockquote>The candidates who perform best in real interviews are those who have combined the repetition and convenience of AI practice with the depth and realism of human coaching. Neither approach alone is sufficient. Together, they create a comprehensive preparation system.</blockquote>
 
-<p>On <a href="/en/pricing">Muqabaleh</a>, you do not have to choose. Our platform offers both AI-powered mock interviews for unlimited daily practice and sessions with experienced human interviewers who provide personalized, in-depth coaching. You can start with AI practice to build your foundation and book a human session when you are ready for the next level.</p>
+<p>On <a href="/en#pricing">Muqabaleh</a>, you do not have to choose. Our platform offers both AI-powered mock interviews for unlimited daily practice and sessions with experienced human interviewers who provide personalized, in-depth coaching. You can start with AI practice to build your foundation and book a human session when you are ready for the next level.</p>
 
 <p><a href="/en/demo" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;">Try Both — Start Free</a></p>
 `,

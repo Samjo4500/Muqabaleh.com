@@ -1,7 +1,25 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { localePath } from '@/i18n/navigation';
+import { pageMetadata } from '@/lib/seo';
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata({
+    locale,
+    path: '/legal/opt-out',
+    titleAr: 'طلب إزالة إعلانات الوظائف | مقابلة',
+    titleEn: 'Job listing opt-out | Muqabaleh',
+    descAr:
+      'اطلب إزالة إعلانات شركتك من لوحة وظائف مقابلة. نعالج طلبات الإزالة خلال ٤٨ ساعة.',
+    descEn:
+      'Request removal of your company listings from the Muqabaleh job board. We honor opt-out requests within 48 hours.',
+  });
+}
 
 export default async function OptOutPage() {
   const locale = await getLocale();

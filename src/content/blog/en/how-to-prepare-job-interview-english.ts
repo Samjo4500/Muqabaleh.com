@@ -119,7 +119,7 @@ const post: BlogPost = {
 
 <p>Preparing for a job interview in English is not about achieving perfect fluency. It is about demonstrating clarity, preparation, and genuine enthusiasm for the role. The candidates who succeed are not always the ones with the best English — they are the ones who prepared the most thoroughly and communicated their value most effectively.</p>
 
-<p>Every interview you take makes you better for the next one. But you can accelerate that improvement dramatically with deliberate practice. On <a href="/en/demo">Muqabaleh</a>, you can practice with an AI-powered interviewer that adapts to your role, industry, and experience level — anytime, anywhere. You receive instant feedback on your answers, communication style, and areas to improve. For those who want personalized guidance, our <a href="/en/pricing">expert interviewers</a> offer one-on-one sessions designed to sharpen your performance for the real thing.</p>
+<p>Every interview you take makes you better for the next one. But you can accelerate that improvement dramatically with deliberate practice. On <a href="/en/demo">Muqabaleh</a>, you can practice with an AI-powered interviewer that adapts to your role, industry, and experience level — anytime, anywhere. You receive instant feedback on your answers, communication style, and areas to improve. For those who want personalized guidance, our <a href="/en#pricing">expert interviewers</a> offer one-on-one sessions designed to sharpen your performance for the real thing.</p>
 
 <p><a href="/en/demo" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;">Start Free Interview Practice</a></p>
 `,

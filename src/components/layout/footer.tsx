@@ -13,7 +13,7 @@ export function Footer() {
   const locale = useLocale();
 
   const productLinks = [
-    { key: 'footerLinkPricing', href: '/pricing' },
+    { key: 'footerLinkPricing', href: '/employers' },
     { key: 'footerLinkBusiness', href: '/business' },
     { key: 'footerLinkInterviewers', href: '/interviewers' },
     { key: 'footerLinkJoin', href: '/join-as-interviewer' },

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
@@ -10,7 +11,20 @@ import { safeJobText } from '@/lib/jobs/job-details';
 import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
-import { JobsBrowserClient } from './jobs-browser-client';
+
+const JobsBrowserClient = dynamic(
+  () =>
+    import('./jobs-browser-client').then((m) => m.JobsBrowserClient),
+  {
+    loading: () => (
+      <div className="mq-wrap grid gap-4 py-10 md:grid-cols-2" aria-hidden>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-36 animate-pulse rounded-xl bg-white/[0.04]" />
+        ))}
+      </div>
+    ),
+  },
+);
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -111,7 +125,8 @@ async function loadJobsSafe() {
         },
       },
       orderBy: { postedAt: 'desc' },
-      take: 400,
+      // Cap payload for first paint — browser filters client-side from this set.
+      take: 160,
     });
     return rows.map((j) => ({
       id: j.id,
@@ -120,8 +135,8 @@ async function loadJobsSafe() {
       location: j.location,
       department: j.department,
       employmentType: j.employmentType,
-      description: safeJobText(j.description),
-      requirements: j.requirements ? safeJobText(j.requirements, 400) : null,
+      description: safeJobText(j.description, 280),
+      requirements: j.requirements ? safeJobText(j.requirements, 220) : null,
       applyUrl: j.applyUrl,
       source: j.source,
       salaryLabel: j.salaryLabel,

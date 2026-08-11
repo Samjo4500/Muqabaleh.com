@@ -83,7 +83,7 @@ export async function welcomeEmail(props: {
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 0;">
       <tr>
         <td align="center" style="border-radius:8px;background-color:transparent;border:2px solid #18181b;">
-          <a href="${APP_URL}/pricing" target="_blank" style="display:inline-block;padding:14px 32px;color:#18181b;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px;">${isAr ? 'عرض الخطط' : 'View Plans'}</a>
+          <a href="${APP_URL}/#pricing" target="_blank" style="display:inline-block;padding:14px 32px;color:#18181b;font-size:15px;font-weight:600;text-decoration:none;border-radius:8px;">${isAr ? 'عرض الخطط' : 'View Plans'}</a>
         </td>
       </tr>
     </table>

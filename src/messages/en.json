@@ -1047,7 +1047,8 @@
       "premiumLabel": "Premium Plan",
       "freeLabel": "Free plan — one session",
       "oneTimeTitle": "One-Time Session Packs",
-      "comingSoon": "Coming Soon"
+      "comingSoon": "Coming Soon",
+      "currentPlan": "Current plan"
     },
     "payments": {
       "title": "Payments",

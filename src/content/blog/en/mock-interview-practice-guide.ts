@@ -90,7 +90,7 @@ const post: BlogPost = {
   <li><strong>Flexibility.</strong> Your interviewer should be willing to tailor the session to your specific needs, whether that means focusing on behavioral questions, technical communication, or English language refinement.</li>
 </ul>
 
-<p>On <a href="/en/pricing">Muqabaleh</a>, you can browse expert interviewers by industry, read reviews from previous candidates, and book sessions that fit your schedule and budget.</p>
+<p>On <a href="/en#pricing">Muqabaleh</a>, you can browse expert interviewers by industry, read reviews from previous candidates, and book sessions that fit your schedule and budget.</p>
 
 <h2>What to Expect in a Mock Interview Session</h2>
 
@@ -115,7 +115,7 @@ const post: BlogPost = {
 
 <blockquote>The difference between candidates who get offers and candidates who do not often comes down to preparation. Mock interview practice is the single highest-ROI activity in your job search. It costs relatively little time and money compared to the potential payoff of a job offer.</blockquote>
 
-<p>Whether you want to start with unlimited AI practice or book a session with an expert human interviewer, <a href="/en/pricing">Muqabaleh</a> has you covered. Start today and walk into your next real interview with the confidence of someone who has already done it a dozen times.</p>
+<p>Whether you want to start with unlimited AI practice or book a session with an expert human interviewer, <a href="/en#pricing">Muqabaleh</a> has you covered. Start today and walk into your next real interview with the confidence of someone who has already done it a dozen times.</p>
 
 <p><a href="/en/demo" style="display:inline-block;padding:12px 28px;background:#0f172a;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;">Book Your First Mock Interview</a></p>
 `,

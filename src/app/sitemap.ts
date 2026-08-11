@@ -7,6 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 const PUBLIC_ROUTES = [
   '',
   '/jobs',
+  '/employers',
   '/business',
   '/request-demo',
   '/demo',
@@ -21,6 +22,7 @@ const PUBLIC_ROUTES = [
   '/blog',
   '/partners',
   '/verify',
+  '/legal/opt-out',
 ] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -31,14 +33,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const priority =
       route === ''
         ? 1
-        : route === '/jobs' || route === '/blog'
+        : route === '/jobs' || route === '/blog' || route === '/employers'
           ? 0.95
           : route === '/demo' || route === '/business'
             ? 0.85
-            : 0.7;
+            : route === '/legal/opt-out'
+              ? 0.3
+              : 0.7;
 
     const freq: MetadataRoute.Sitemap[0]['changeFrequency'] =
-      route === '' || route === '/jobs' || route === '/blog' ? 'daily' : 'monthly';
+      route === '' || route === '/jobs' || route === '/blog' || route === '/employers'
+        ? 'daily'
+        : 'monthly';
 
     entries.push({
       url: `${SITE_URL}${route || '/'}`,

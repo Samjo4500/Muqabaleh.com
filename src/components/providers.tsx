@@ -6,7 +6,7 @@ import { type ReactNode } from 'react';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
       <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
         {children}
       </ThemeProvider>

@@ -106,6 +106,14 @@ const nextConfig: NextConfig = {
       { source: '/en/admin/:path*', headers: noIndex },
       { source: '/b2b/:path*', headers: noIndex },
       { source: '/en/b2b/:path*', headers: noIndex },
+      { source: '/console/:path*', headers: noIndex },
+      { source: '/en/console/:path*', headers: noIndex },
+      { source: '/partner/:path*', headers: noIndex },
+      { source: '/en/partner/:path*', headers: noIndex },
+      { source: '/portal/:path*', headers: noIndex },
+      { source: '/en/portal/:path*', headers: noIndex },
+      { source: '/interviewer/dashboard/:path*', headers: noIndex },
+      { source: '/en/interviewer/dashboard/:path*', headers: noIndex },
     ];
   },
 };

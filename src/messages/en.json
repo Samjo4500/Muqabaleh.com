@@ -2746,8 +2746,8 @@
     "backPartners": "Back to partners"
   },
   "console": {
-    "employerBadge": "Employer",
-    "commandCenter": "Command Center",
+    "employerBadge": "Hire",
+    "commandCenter": "Jeannie Atelier",
     "navDashboard": "Dashboard",
     "navPipeline": "Pipeline",
     "navPassports": "Passports",
@@ -2841,8 +2841,8 @@
     "phase2Later": "Open demo console for this tenant type",
     "enterConsole": "Enter employer console",
     "goSeeker": "Go to candidate app",
-    "agencyBadge": "Agency",
-    "academyBadge": "Academy",
+    "agencyBadge": "Partners",
+    "academyBadge": "Campus",
     "navClients": "Clients",
     "navRevenue": "Revenue",
     "navCohorts": "Cohorts",
@@ -2892,7 +2892,10 @@
     "webhooks": "Webhooks",
     "webhookEvents": "Events",
     "addWebhook": "Add webhook",
-    "demoSwitcher": "Demo tenants"
+    "demoSwitcher": "Demo tenants",
+    "productName": "Jeannie Atelier",
+    "enterAtelier": "Enter the atelier",
+    "welcomeSkip": "Skip"
   },
   "employers": {
     "heroHeadline": "Hire Smarter. Save Time. Decide with Data.",

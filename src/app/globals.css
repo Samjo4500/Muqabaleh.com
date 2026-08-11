@@ -1725,3 +1725,230 @@
 .mq-employers .font-semibold {
   font-weight: 500 !important;
 }
+
+/* ─── Jeannie Atelier welcome ─── */
+.mq-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(4, 8, 16, 0.72);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.mq-welcome-aurora {
+  pointer-events: none;
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(40% 35% at 20% 20%, rgba(45, 212, 191, 0.22), transparent 60%),
+    radial-gradient(35% 40% at 80% 25%, rgba(212, 175, 55, 0.14), transparent 55%),
+    radial-gradient(50% 45% at 50% 90%, rgba(56, 189, 248, 0.1), transparent 60%);
+  animation: mq-welcome-drift 14s ease-in-out infinite alternate;
+}
+
+.mq-welcome-grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+.mq-welcome-particle {
+  pointer-events: none;
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(45, 212, 191, 0.85);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.55);
+}
+
+.mq-welcome-stage {
+  position: relative;
+  width: min(520px, 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.96));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 30px 80px rgba(0, 0, 0, 0.45);
+  padding: 2rem 1.5rem 1.75rem;
+  text-align: center;
+}
+
+.mq-welcome-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  background: rgba(45, 212, 191, 0.08);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5eead4;
+}
+
+.mq-welcome-portrait-wrap {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin: 0 auto;
+}
+
+.mq-welcome-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px dashed rgba(45, 212, 191, 0.28);
+}
+
+.mq-welcome-orbit-a {
+  inset: -10px;
+}
+
+.mq-welcome-orbit-b {
+  inset: -22px;
+  border-color: rgba(212, 175, 55, 0.22);
+  border-style: dotted;
+}
+
+.mq-welcome-portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.08), 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.mq-welcome-portrait-glow {
+  position: absolute;
+  inset: auto 10% -20% 10%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.45), transparent 70%);
+  filter: blur(12px);
+}
+
+.mq-welcome-title {
+  margin-top: 1.35rem;
+  font-family: var(--font-display-en), var(--font-display-ar), sans-serif;
+  font-size: clamp(1.45rem, 3.5vw, 1.85rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: #f1f5f9;
+}
+
+.mq-welcome-org {
+  margin-top: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #2dd4bf;
+}
+
+.mq-welcome-line {
+  margin: 0.85rem auto 0;
+  max-width: 34rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.mq-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+}
+
+.mq-welcome-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  background: linear-gradient(180deg, #5eead4, #14b8a6);
+  color: #042f2e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.25);
+  transition: transform 200ms ease, filter 200ms ease;
+}
+
+.mq-welcome-enter:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.mq-welcome-skip {
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  transition: color 200ms ease;
+}
+
+.mq-welcome-skip:hover {
+  color: #e2e8f0;
+}
+
+.mq-welcome-foot {
+  margin-top: 1.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+@keyframes mq-welcome-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to { transform: translate3d(2%, 2%, 0) scale(1.04); }
+}
+
+.mq-console[data-console-theme='light'] .mq-welcome-overlay {
+  background: rgba(241, 245, 249, 0.72);
+}
+
+.mq-console[data-console-theme='light'] .mq-welcome-stage {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.mq-console[data-console-theme='light'] .mq-welcome-title {
+  color: #0f172a;
+}
+
+.mq-console[data-console-theme='light'] .mq-welcome-line {
+  color: #64748b;
+}
+
+.mq-console-logo-home img {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+
+.mq-console-logo-home:hover img {
+  transform: scale(1.02);
+  opacity: 0.95;
+}

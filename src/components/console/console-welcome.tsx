@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Fingerprint,
   Home,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { welcomeStorageKey } from '@/lib/console/identity';
+import { getWelcomeThemeVisual } from '@/lib/console/welcome-copy';
 import type { TenantType } from '@/lib/console/types';
 import { cn } from '@/lib/utils';
 
@@ -23,84 +24,22 @@ type Props = {
 
 type ScanState = 'idle' | 'scanning' | 'granted';
 
-type ConsoleTheme = {
-  eyebrowEn: string;
-  eyebrowAr: string;
-  descEn: string;
-  descAr: string;
-  accent: string;
-  border: string;
-  glow: string;
-  ring: string;
-};
-
-const THEMES: Record<string, ConsoleTheme> = {
-  'najm-tech': {
-    eyebrowEn: 'NAJM TECH WORKSPACE · ACTIVE',
-    eyebrowAr: 'مساحة عمل نجم تك · نشطة',
-    descEn:
-      'Welcome back, Director. Access your AI evaluation boards, analyze candidate performance, and verify skills.',
-    descAr:
-      'مرحباً بعودتكم. ادخلوا لوحات التقييم بالذكاء الاصطناعي، حلّلوا أداء المرشحين، وتحققوا من المهارات.',
-    accent: 'text-cyan-400',
-    border: 'border-cyan-500/25',
-    glow: 'rgba(34, 211, 238, 0.14)',
-    ring: '#22d3ee',
-  },
-  'atlas-agency': {
-    eyebrowEn: 'ATLAS AGENCY · PARTNER OS',
-    eyebrowAr: 'وكالة أطلس · نظام الشركاء',
-    descEn:
-      'Welcome back, Partner. Configure client workspaces, audit branded portals, and track placement commissions.',
-    descAr:
-      'مرحباً بعودتكم. خصّصوا مساحات عمل العملاء، راجعوا بواباتهم ذات الهوية التجارية، وتابعوا عمولات التوظيف.',
-    accent: 'text-sky-400',
-    border: 'border-sky-500/25',
-    glow: 'rgba(56, 189, 248, 0.14)',
-    ring: '#38bdf8',
-  },
-  'bayan-university': {
-    eyebrowEn: 'BAYAN UNIVERSITY · CAREER TERMINAL',
-    eyebrowAr: 'جامعة بيان · محطة المسار المهني',
-    descEn:
-      'Welcome back, Dean. Audit cohort readiness, inspect communication analytics, and review scores.',
-    descAr:
-      'مرحباً بعودتكم. راجعوا جاهزية الدفعات للتخرّج، افحصوا تحليلات التواصل، واستعرضوا الدرجات.',
-    accent: 'text-[#d3ac65]',
-    border: 'border-[#d3ac65]/25',
-    glow: 'rgba(211, 172, 101, 0.14)',
-    ring: '#d3ac65',
-  },
-};
-
-const FALLBACK: ConsoleTheme = {
-  eyebrowEn: 'JEANNIE SUITE · SECURED',
-  eyebrowAr: 'جناح جيني · مؤمّن',
-  descEn:
-    'Welcome back. Verify secure credentials and enter your active candidate screening workspace.',
-  descAr:
-    'مرحباً بعودتكم. أكّدوا بيانات الدخول الآمنة وادخلوا مساحة فحص المرشحين النشطة.',
-  accent: 'text-[#d3ac65]',
-  border: 'border-[#d3ac65]/25',
-  glow: 'rgba(211, 172, 101, 0.14)',
-  ring: '#d3ac65',
-};
-
 /**
- * Muqabaleh OS — glass workspace welcome with biometric enter.
+ * Muqabaleh OS — glass workspace welcome.
+ * Copy is sourced from i18n (`console.welcomeOs`).
  */
 export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
+  const t = useTranslations('console');
+  const tw = useTranslations('console.welcomeOs');
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
 
-  const config = useMemo(
-    () => THEMES[tenantSlug] || FALLBACK,
-    [tenantSlug],
-  );
+  const theme = useMemo(() => getWelcomeThemeVisual(tenantSlug), [tenantSlug]);
+  const isFallback = theme.i18nKey === 'fallback';
 
   useEffect(() => {
     try {
@@ -125,7 +64,7 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
     setOpen(false);
   };
 
-  const triggerBiometricScan = () => {
+  const triggerEnter = () => {
     if (scanState !== 'idle') return;
     if (reduce) {
       close();
@@ -143,7 +82,7 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        triggerBiometricScan();
+        triggerEnter();
       }
       if (e.key === 'Escape') close();
     };
@@ -154,37 +93,29 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
 
   if (!mounted) return null;
 
-  const eyebrow =
+  const title =
     scanState === 'scanning'
-      ? isAr
-        ? 'جارٍ المسح البيومتري · التحقق من الهوية'
-        : 'SCANNING BIOMETRICS… VERIFYING CREDENTIALS'
+      ? tw('scanningTitle')
       : scanState === 'granted'
-        ? isAr
-          ? 'تم منح الوصول · مصرّح لكم'
-          : 'ACCESS GRANTED · AUTHORIZED'
-        : isAr
-          ? config.eyebrowAr
-          : config.eyebrowEn;
+        ? tw('grantedTitle')
+        : isFallback
+          ? tw('fallback.title', { orgName })
+          : tw(`${theme.i18nKey}.title`);
 
-  const description =
+  const subtitle =
     scanState === 'scanning'
-      ? isAr
-        ? 'جارٍ تحليل البصمة… الاتصال بالعقدة الآمنة… تأكيد الصلاحيات.'
-        : 'Analyzing biometric key… Accessing secure datastore… Confirming credentials.'
+      ? tw('scanningDetail')
       : scanState === 'granted'
-        ? isAr
-          ? 'اكتمل فحص الأمان. جارٍ فتح مساحة العمل…'
-          : 'Security check complete. Opening your workspace…'
-        : isAr
-          ? config.descAr
-          : config.descEn;
+        ? tw('grantedDetail')
+        : isFallback
+          ? tw('fallback.subtitle')
+          : tw(`${theme.i18nKey}.subtitle`);
 
   const nav = [
-    { icon: LayoutDashboard, en: 'Dashboard', ar: 'لوحة التحكم', active: true },
-    { icon: Users, en: 'Candidates', ar: 'المرشحون', active: false },
-    { icon: Home, en: 'Templates', ar: 'القوالب', active: false },
-    { icon: Settings, en: 'Settings', ar: 'الإعدادات', active: false },
+    { icon: LayoutDashboard, key: 'navDashboard' as const, active: true },
+    { icon: Users, key: 'navTeam' as const, active: false },
+    { icon: Home, key: 'navJobs' as const, active: false },
+    { icon: Settings, key: 'navSettings' as const, active: false },
   ];
 
   return (
@@ -199,14 +130,14 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
           exit={{ opacity: 0, transition: { duration: 0.45 } }}
           role="dialog"
           aria-modal="true"
-          aria-label={isAr ? 'مرحباً بكم في جناح جيني' : 'Welcome to Jeannie Suite'}
+          aria-label={tw('dialogLabel')}
         >
           <div
             className="pointer-events-none absolute inset-0"
             aria-hidden
             style={{
               background: `
-                radial-gradient(circle at 20% 30%, ${config.glow} 0%, transparent 50%),
+                radial-gradient(circle at 20% 30%, ${theme.glow} 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(11, 25, 44, 0.9) 0%, transparent 60%),
                 radial-gradient(circle at 50% 50%, #030712 0%, #030712 100%)
               `,
@@ -246,7 +177,7 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                   const Icon = item.icon;
                   return (
                     <li
-                      key={item.en}
+                      key={item.key}
                       className={cn(
                         'flex items-center gap-3 rounded-xl p-3 text-xs transition-colors',
                         item.active
@@ -255,7 +186,7 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                       )}
                     >
                       <Icon size={16} strokeWidth={1.75} />
-                      <span>{isAr ? item.ar : item.en}</span>
+                      <span>{t(item.key)}</span>
                     </li>
                   );
                 })}
@@ -268,12 +199,16 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
             <div className="relative flex flex-1 flex-col items-center justify-center p-8 md:p-16">
               <div
                 className="pointer-events-none absolute h-[200px] w-[200px] rounded-full blur-[30px]"
-                style={{ background: config.glow }}
+                style={{ background: theme.glow }}
                 aria-hidden
               />
 
               <div className="mb-8 w-full max-w-[420px] transition-transform duration-500 hover:scale-[1.02] md:mb-10">
-                <BrandLogo size="hero" priority className="mx-auto drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)]" />
+                <BrandLogo
+                  size="hero"
+                  priority
+                  className="mx-auto drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)]"
+                />
               </div>
 
               <p
@@ -282,20 +217,22 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                   isAr
                     ? 'text-xl tracking-normal md:text-2xl'
                     : 'text-xl uppercase tracking-[0.14em] md:text-2xl',
-                  scanState === 'granted' ? 'text-emerald-400' : config.accent,
+                  scanState === 'granted' ? 'text-emerald-400' : theme.accent,
                 )}
               >
-                {eyebrow}
+                {title}
               </p>
 
-              <p
-                className={cn(
-                  'mb-3 text-center text-xl font-semibold text-white md:text-2xl',
-                  isAr && 'font-[family-name:var(--font-body-ar)]',
-                )}
-              >
-                {orgName}
-              </p>
+              {!isFallback && scanState === 'idle' ? (
+                <p
+                  className={cn(
+                    'mb-3 text-center text-xl font-semibold text-white md:text-2xl',
+                    isAr && 'font-[family-name:var(--font-body-ar)]',
+                  )}
+                >
+                  {orgName}
+                </p>
+              ) : null}
 
               <p
                 className={cn(
@@ -303,13 +240,13 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                   isAr && 'font-[family-name:var(--font-body-ar)] leading-8',
                 )}
               >
-                {description}
+                {subtitle}
               </p>
 
               <button
                 type="button"
-                onClick={triggerBiometricScan}
-                aria-label={isAr ? 'مسح بيومتري للدخول' : 'Biometric scan to enter'}
+                onClick={triggerEnter}
+                aria-label={tw('ctaAria')}
                 className={cn(
                   'relative flex h-20 w-20 items-center justify-center rounded-full border bg-white/[0.02] transition-all duration-500',
                   scanState === 'granted' &&
@@ -319,7 +256,7 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                   scanState === 'idle' &&
                     cn(
                       'border-white/[0.09] hover:scale-105',
-                      config.border,
+                      theme.border,
                       'hover:shadow-[0_0_30px_rgba(211,172,101,0.35)]',
                     ),
                 )}
@@ -334,7 +271,10 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                     )}
                     style={
                       scanState === 'idle'
-                        ? { borderTopColor: config.ring, borderBottomColor: config.ring }
+                        ? {
+                            borderTopColor: theme.ring,
+                            borderBottomColor: theme.ring,
+                          }
                         : undefined
                     }
                     aria-hidden
@@ -350,19 +290,17 @@ export function ConsoleWelcome({ tenantSlug, orgName }: Props) {
                     scanState === 'scanning' && 'text-amber-400',
                     scanState === 'idle' && 'text-[#d3ac65]',
                   )}
-                  style={scanState === 'idle' ? { color: config.ring } : undefined}
+                  style={scanState === 'idle' ? { color: theme.ring } : undefined}
                 />
               </button>
 
               <p
                 className={cn(
-                  'mt-6 text-center text-xl tracking-wide text-white/55 md:text-2xl',
+                  'mt-6 text-center text-xl font-semibold tracking-wide text-white/70 md:text-2xl',
                   isAr && 'font-[family-name:var(--font-body-ar)] tracking-normal',
                 )}
               >
-                {isAr
-                  ? 'اضغط للمصادقة · أو Enter'
-                  : 'Tap to authenticate · press Enter'}
+                {tw('cta')}
               </p>
             </div>
           </motion.div>

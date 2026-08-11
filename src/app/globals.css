@@ -1822,10 +1822,10 @@
 }
 
 .mq-portal-content[dir='rtl'] .mq-portal-title {
-  font-family: var(--font-portal-ar), var(--font-body-ar), 'Noto Naskh Arabic', serif;
+  font-family: var(--font-portal-ar), var(--font-body-ar), Amiri, serif;
   font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.25;
+  line-height: 1.35;
   max-width: 16ch;
 }
 
@@ -1841,10 +1841,10 @@
 }
 
 .mq-portal-content[dir='rtl'] .mq-portal-service {
-  font-family: var(--font-portal-ar), var(--font-body-ar), 'Noto Naskh Arabic', serif;
-  font-weight: 600;
+  font-family: var(--font-portal-ar), var(--font-body-ar), Amiri, serif;
+  font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.45;
+  line-height: 1.5;
   max-width: 18ch;
 }
 

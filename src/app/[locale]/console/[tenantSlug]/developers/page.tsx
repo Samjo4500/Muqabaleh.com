@@ -64,13 +64,13 @@ export default function DevelopersPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('developersTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('developersTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('developersHint')}</p>
       </div>
 
       <section className="mq-console-surface rounded-xl p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--c-text)]">{t('apiKeys')}</h3>
+          <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('apiKeys')}</h3>
           <button type="button" className="mq-console-btn-primary" onClick={() => void createKey()}>
             {t('generateKey')}
           </button>
@@ -84,7 +84,7 @@ export default function DevelopersPage() {
           {apiKeys.map((k) => (
             <div key={k.id} className="mq-console-card flex items-center justify-between gap-3 p-3">
               <div>
-                <p className="font-semibold text-[var(--c-text)]">{k.name}</p>
+                <p className="font-medium text-[var(--c-text)]">{k.name}</p>
                 <p className="font-mono text-xs text-[var(--c-text-2)]">{k.prefix}_••••</p>
               </div>
               <button
@@ -100,7 +100,7 @@ export default function DevelopersPage() {
       </section>
 
       <section className="mq-console-surface rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('webhooks')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('webhooks')}</h3>
         <p className="mb-3 text-xs text-[var(--c-text-2)]">
           {t('webhookEvents')}: {events.join(', ')}
         </p>
@@ -117,7 +117,7 @@ export default function DevelopersPage() {
         <div className="space-y-2">
           {webhooks.map((w) => (
             <div key={w.id} className="mq-console-card p-3 text-sm">
-              <p className="break-all font-semibold text-[var(--c-text)]">{w.url}</p>
+              <p className="break-all font-medium text-[var(--c-text)]">{w.url}</p>
               <p className="mt-1 text-xs text-[var(--c-text-2)]">{w.events.join(' · ')}</p>
             </div>
           ))}

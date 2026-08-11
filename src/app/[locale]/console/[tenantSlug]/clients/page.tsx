@@ -20,7 +20,7 @@ export default function ClientsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('clientsTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('clientsTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('clientsHint')}</p>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -28,13 +28,13 @@ export default function ClientsPage() {
           <div key={c.id} className="mq-console-card p-4">
             <div className="flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium text-white"
                 style={{ background: c.primaryColor || '#14B8A6' }}
               >
                 {c.name.slice(0, 1)}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-bold text-[var(--c-text)]">{c.name}</p>
+                <p className="truncate font-medium text-[var(--c-text)]">{c.name}</p>
                 <p className="text-xs text-[var(--c-text-2)]">
                   {c.industry} · {c.status}
                 </p>
@@ -43,21 +43,21 @@ export default function ClientsPage() {
             <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <dt className="text-[var(--c-text-2)]">{t('interviews')}</dt>
-                <dd className="font-bold text-[var(--c-text)]">{c.interviewsVolume}</dd>
+                <dd className="font-medium text-[var(--c-text)]">{c.interviewsVolume}</dd>
               </div>
               <div>
                 <dt className="text-[var(--c-text-2)]">{t('candidates')}</dt>
-                <dd className="font-bold text-[var(--c-text)]">{c.candidateCount}</dd>
+                <dd className="font-medium text-[var(--c-text)]">{c.candidateCount}</dd>
               </div>
               <div>
                 <dt className="text-[var(--c-text-2)]">{t('revenue')}</dt>
-                <dd className="font-bold text-[var(--c-primary)]">
+                <dd className="font-medium text-[var(--c-primary)]">
                   ${c.revenueUsd.toLocaleString()}
                 </dd>
               </div>
               <div>
                 <dt className="text-[var(--c-text-2)]">{t('commission')}</dt>
-                <dd className="font-bold text-[var(--c-text)]">
+                <dd className="font-medium text-[var(--c-text)]">
                   {(c.commissionBps / 100).toFixed(1)}%
                 </dd>
               </div>

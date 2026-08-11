@@ -51,7 +51,7 @@ export default function AccreditationPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('accreditationTitle')}</h2>
+          <h2 className="mq-console-title text-[1.65rem]">{t('accreditationTitle')}</h2>
           <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('accreditationHint')}</p>
         </div>
         <button type="button" className="mq-console-btn-primary" onClick={exportPdfStub}>
@@ -60,7 +60,7 @@ export default function AccreditationPage() {
       </div>
 
       <section className="mq-console-surface overflow-x-auto rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('readinessByMajor')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('readinessByMajor')}</h3>
         <table className="w-full min-w-[480px] text-sm">
           <thead className="text-[var(--c-text-2)]">
             <tr>
@@ -76,7 +76,7 @@ export default function AccreditationPage() {
                 <td className="p-2">{m.major}</td>
                 <td className="p-2">{m.students}</td>
                 <td className="p-2">{m.completed}</td>
-                <td className="p-2 font-bold text-[var(--c-primary)]">{m.avgScore}</td>
+                <td className="p-2 font-medium text-[var(--c-primary)]">{m.avgScore}</td>
               </tr>
             ))}
           </tbody>
@@ -84,7 +84,7 @@ export default function AccreditationPage() {
       </section>
 
       <section className="mq-console-surface rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('yearOverYear')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('yearOverYear')}</h3>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={report.yearOverYear}>

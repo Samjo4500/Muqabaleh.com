@@ -39,7 +39,7 @@ export default function PassportsListPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('passportsTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('passportsTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('compareHint')}</p>
       </div>
 
@@ -54,13 +54,13 @@ export default function PassportsListPage() {
               aria-label={t('compare')}
             />
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-[var(--c-text)]">{p.candidateName}</p>
+              <p className="font-medium text-[var(--c-text)]">{p.candidateName}</p>
               <p className="text-xs text-[var(--c-text-2)]">
                 {isAr ? p.roleAr || p.role : p.role}
               </p>
             </div>
             <span
-              className="rounded-md px-2 py-1 text-sm font-bold"
+              className="rounded-md px-2 py-1 text-sm font-medium"
               style={{ color: scoreColor(p.score), background: `${scoreColor(p.score)}22` }}
             >
               {p.score} · {p.grade}
@@ -77,7 +77,7 @@ export default function PassportsListPage() {
 
       {compared.length >= 2 ? (
         <section className="mq-console-surface overflow-x-auto rounded-xl p-4">
-          <h3 className="mb-3 text-lg font-bold text-[var(--c-text)]">{t('compareMode')}</h3>
+          <h3 className="mb-3 text-lg font-medium text-[var(--c-text)]">{t('compareMode')}</h3>
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="text-[var(--c-text-2)]">
@@ -93,7 +93,7 @@ export default function PassportsListPage() {
               <tr className="border-t border-[var(--c-border)]">
                 <td className="p-2">{t('kpiAvgScore')}</td>
                 {compared.map((p) => (
-                  <td key={p.id} className="p-2 font-bold" style={{ color: scoreColor(p.score) }}>
+                  <td key={p.id} className="p-2 font-medium" style={{ color: scoreColor(p.score) }}>
                     {p.score}
                   </td>
                 ))}

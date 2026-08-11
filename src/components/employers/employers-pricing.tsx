@@ -129,7 +129,7 @@ export function EmployersPricing() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="text-3xl font-bold tracking-tight text-[#F8FAFC] md:text-5xl"
+            className="text-[1.75rem] font-medium tracking-tight text-[#F8FAFC] md:text-5xl"
           >
             {t('heroHeadline')}
           </motion.h1>
@@ -149,7 +149,7 @@ export function EmployersPricing() {
           >
             <Link
               href={localePath('/console/najm-tech', locale)}
-              className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[#14B8A6] px-6 text-sm font-bold text-[#042f2e] shadow-[0_4px_24px_rgba(0,0,0,0.25)] transition duration-200 hover:brightness-110"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[#14B8A6] px-6 text-sm font-medium text-[#042f2e] shadow-[0_12px_40px_rgba(0,0,0,0.22)] transition duration-200 hover:brightness-110"
             >
               {t('ctaTrial')}
             </Link>
@@ -164,7 +164,7 @@ export function EmployersPricing() {
           {TRUST_LOGOS.map((name) => (
             <span
               key={name}
-              className="text-sm font-semibold tracking-wide text-[#F8FAFC]/40"
+              className="text-sm font-medium tracking-wide text-[#F8FAFC]/40"
             >
               {name}
             </span>
@@ -178,20 +178,20 @@ export function EmployersPricing() {
             <div
               key={tier.id}
               className={cn(
-                'relative rounded-xl border bg-[#0F172A] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.25)]',
+                'relative rounded-xl border bg-[#0F172A] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.22)]',
                 tier.popular
                   ? 'border-[#D4AF37]'
                   : 'border-[#1E293B]',
               )}
             >
               {tier.popular ? (
-                <span className="absolute -top-3 start-6 rounded-md bg-[#D4AF37] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#0B1120]">
+                <span className="absolute -top-3 start-6 rounded-md bg-[#D4AF37] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[#0B1120]">
                   {t('mostPopular')}
                 </span>
               ) : null}
-              <h3 className="text-xl font-bold text-[#F8FAFC]">{t(`${tier.id}Title`)}</h3>
+              <h3 className="text-lg font-medium tracking-tight text-[#F8FAFC]">{t(`${tier.id}Title`)}</h3>
               <p className="mt-1 text-sm text-[#94A3B8]">{t(`${tier.id}Desc`)}</p>
-              <p className="mt-5 text-4xl font-bold text-[#F8FAFC]">
+              <p className="mt-5 text-[2.35rem] font-medium tracking-tight text-[#F8FAFC]">
                 ${tier.price}
                 <span className="text-base font-medium text-[#94A3B8]">{t('perMonth')}</span>
               </p>
@@ -210,7 +210,7 @@ export function EmployersPricing() {
                     : localePath(tier.href, locale)
                 }
                 className={cn(
-                  'mt-6 flex min-h-[44px] items-center justify-center rounded-lg px-4 text-sm font-bold transition duration-200',
+                  'mt-6 flex min-h-[44px] items-center justify-center rounded-lg px-4 text-sm font-medium transition duration-200',
                   tier.popular
                     ? 'bg-[#14B8A6] text-[#042f2e] hover:brightness-110'
                     : 'border border-[#1E293B] bg-white/5 text-[#F8FAFC] hover:border-[#14B8A6]',
@@ -263,7 +263,7 @@ export function EmployersPricing() {
 
       <section className="px-4 pb-16 md:px-8">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-center text-2xl font-bold text-[#F8FAFC]">{t('faqTitle')}</h2>
+          <h2 className="text-center text-[1.5rem] font-medium tracking-tight text-[#F8FAFC]">{t('faqTitle')}</h2>
           <div className="mt-6 space-y-2">
             {FAQS.map((q) => {
               const open = openFaq === q;
@@ -274,7 +274,7 @@ export function EmployersPricing() {
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm font-semibold text-[#F8FAFC]"
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm font-medium text-[#F8FAFC]"
                     onClick={() => setOpenFaq(open ? null : q)}
                   >
                     {t(`${q}Q`)}
@@ -293,8 +293,8 @@ export function EmployersPricing() {
       </section>
 
       <section id="enterprise-form" className="px-4 pb-16 md:px-8">
-        <div className="mx-auto max-w-xl rounded-xl border border-[#1E293B] bg-[#0F172A] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.25)]">
-          <h2 className="text-xl font-bold text-[#F8FAFC]">{t('enterpriseFormTitle')}</h2>
+        <div className="mx-auto max-w-xl rounded-xl border border-[#1E293B] bg-[#0F172A] p-6 shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
+          <h2 className="text-lg font-medium tracking-tight text-[#F8FAFC]">{t('enterpriseFormTitle')}</h2>
           <p className="mt-1 text-sm text-[#94A3B8]">{t('enterpriseFormSub')}</p>
           <div className="mt-4 grid gap-3">
             {(
@@ -329,7 +329,7 @@ export function EmployersPricing() {
               type="button"
               disabled={sending}
               onClick={() => void submitEnterprise()}
-              className="min-h-[44px] rounded-lg bg-[#14B8A6] text-sm font-bold text-[#042f2e] transition duration-200 hover:brightness-110"
+              className="min-h-[44px] rounded-lg bg-[#14B8A6] text-sm font-medium text-[#042f2e] transition duration-200 hover:brightness-110"
             >
               {sending ? t('sending') : t('ctaSales')}
             </button>
@@ -340,10 +340,10 @@ export function EmployersPricing() {
 
       <section className="px-4 pb-20 md:px-8">
         <div className="mx-auto max-w-3xl rounded-xl border border-[#1E293B] bg-gradient-to-br from-[#0F172A] to-[#0B1120] px-6 py-10 text-center">
-          <h2 className="text-2xl font-bold text-[#F8FAFC] md:text-3xl">{t('bottomCta')}</h2>
+          <h2 className="text-[1.5rem] font-medium tracking-tight text-[#F8FAFC] md:text-3xl">{t('bottomCta')}</h2>
           <Link
             href={localePath('/console/najm-tech', locale)}
-            className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[#14B8A6] px-6 text-sm font-bold text-[#042f2e]"
+            className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[#14B8A6] px-6 text-sm font-medium text-[#042f2e]"
           >
             {t('ctaTrial')}
           </Link>

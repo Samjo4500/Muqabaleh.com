@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('analyticsTitle')}</h2>
+          <h2 className="mq-console-title text-[1.65rem]">{t('analyticsTitle')}</h2>
           <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('analyticsHint')}</p>
         </div>
         <button type="button" className="mq-console-btn-ghost" onClick={exportCsv}>
@@ -87,12 +87,12 @@ export default function AnalyticsPage() {
       </div>
 
       <section className="mq-console-surface rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('funnel')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('funnel')}</h3>
         <div className="grid gap-2 sm:grid-cols-5">
           {funnelSteps.map(([key, value], i) => (
             <div key={key} className="mq-console-card p-3 text-center">
               <p className="text-xs uppercase tracking-wider text-[var(--c-text-2)]">{key}</p>
-              <p className="mt-1 text-2xl font-bold text-[var(--c-text)]">{value}</p>
+              <p className="mt-1 mq-console-title text-[1.65rem]">{value}</p>
               {i < funnelSteps.length - 1 ? (
                 <p className="mt-1 text-[10px] text-[var(--c-primary)]">→</p>
               ) : null}
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
       </section>
 
       <section className="mq-console-surface rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('histogram')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('histogram')}</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.histogram}>
@@ -124,7 +124,7 @@ export default function AnalyticsPage() {
       </section>
 
       <section className="mq-console-surface overflow-x-auto rounded-xl p-4">
-        <h3 className="mb-3 text-sm font-bold text-[var(--c-text)]">{t('rolePerf')}</h3>
+        <h3 className="mb-3 text-sm font-medium text-[var(--c-text)]">{t('rolePerf')}</h3>
         <table className="w-full min-w-[520px] text-sm">
           <thead className="text-[var(--c-text-2)]">
             <tr>
@@ -149,13 +149,13 @@ export default function AnalyticsPage() {
 
       <div className="grid gap-3 md:grid-cols-2">
         <section className="mq-console-card p-4">
-          <h3 className="text-sm font-bold text-[var(--c-text)]">{t('timeToHire')}</h3>
-          <p className="mt-2 text-3xl font-bold text-[var(--c-primary)]">
+          <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('timeToHire')}</h3>
+          <p className="mt-2 mq-console-metric text-[2rem] text-[var(--c-primary)]">
             {data.timeToHireDays} {t('days')}
           </p>
         </section>
         <section className="mq-console-card p-4">
-          <h3 className="text-sm font-bold text-[var(--c-text)]">{t('roi')}</h3>
+          <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('roi')}</h3>
           <p className="mt-2 text-sm text-[var(--c-text-2)]">
             {t('roiLine', {
               hours: data.roi.hoursSaved,

@@ -64,7 +64,7 @@ export default function NewJobPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('jobBuilder')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('jobBuilder')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('jobsHint')}</p>
       </div>
 
@@ -146,7 +146,7 @@ export default function NewJobPage() {
 
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-semibold text-[var(--c-text)]">{t('questions')}</p>
+            <p className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('questions')}</p>
             <button
               type="button"
               className="mq-console-btn-ghost text-sm"

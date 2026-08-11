@@ -49,7 +49,7 @@ export default function FacultyPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('facultyTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('facultyTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('facultyHint')}</p>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
@@ -57,7 +57,7 @@ export default function FacultyPage() {
           <div key={c.id} className="mq-console-card p-4">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="font-bold text-[var(--c-text)]">{c.name}</h3>
+                <h3 className="font-medium text-[var(--c-text)]">{c.name}</h3>
                 <p className="text-xs text-[var(--c-text-2)]">
                   {c.facultyEmail || t('unassignedFaculty')}
                 </p>

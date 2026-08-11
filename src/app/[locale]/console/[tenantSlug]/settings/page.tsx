@@ -46,12 +46,12 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-[var(--c-text)]">{t('settingsTitle')}</h2>
+        <h2 className="mq-console-title text-[1.65rem]">{t('settingsTitle')}</h2>
         <p className="mt-1 text-sm text-[var(--c-text-2)]">{t('settingsHint')}</p>
       </div>
 
       <section className="mq-console-surface space-y-3 rounded-xl p-4">
-        <h3 className="text-sm font-bold text-[var(--c-text)]">{t('company')}</h3>
+        <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('company')}</h3>
         <label className="block text-sm text-[var(--c-text-2)]">
           {t('name')}
           <input className="mq-console-input mt-1 w-full" value={name} onChange={(e) => setName(e.target.value)} />
@@ -70,7 +70,7 @@ export default function SettingsPage() {
       </section>
 
       <section className="mq-console-surface space-y-3 rounded-xl p-4">
-        <h3 className="text-sm font-bold text-[var(--c-text)]">{t('whiteLabel')}</h3>
+        <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('whiteLabel')}</h3>
         <label className="block text-sm text-[var(--c-text-2)]">
           Logo URL
           <input
@@ -122,7 +122,7 @@ export default function SettingsPage() {
       </section>
 
       <section className="mq-console-card p-4">
-        <h3 className="text-sm font-bold text-[var(--c-text)]">{t('billing')}</h3>
+        <h3 className="text-sm font-medium tracking-tight text-[var(--c-text)]">{t('billing')}</h3>
         <p className="mt-2 text-sm text-[var(--c-text-2)]">
           {org.plan} · {t('billingHint')}
         </p>

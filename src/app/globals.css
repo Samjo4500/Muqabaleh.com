@@ -1726,182 +1726,20 @@
   font-weight: 500 !important;
 }
 
-/* ─── Jeannie Suite — quiet executive portal gate ─── */
-.mq-gate {
-  position: fixed;
-  inset: 0;
-  z-index: 95;
-  display: grid;
-  place-items: center;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  overflow: auto;
-  background: #071018;
-  color: #f8fafc;
+/* ─── Muqabaleh OS — glass workspace welcome ─── */
+.mq-os-spin {
+  animation: mq-os-spin 2.5s linear infinite;
 }
-
-.mq-gate-bg {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(55% 45% at 50% 0%, rgba(45, 212, 191, 0.12), transparent 60%),
-    radial-gradient(40% 35% at 80% 80%, rgba(212, 175, 55, 0.08), transparent 55%),
-    linear-gradient(180deg, #0c1522 0%, #071018 55%, #050a10 100%);
+.mq-os-spin-fast {
+  animation: mq-os-spin 1.2s linear infinite;
 }
-
-.mq-gate-panel {
-  position: relative;
-  z-index: 1;
-  width: min(640px, 100%);
-  text-align: start;
+@keyframes mq-os-spin {
+  to { transform: rotate(360deg); }
 }
-
-.mq-gate-kicker {
-  margin: 0;
-  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(94, 234, 212, 0.95);
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-kicker {
-  font-family: var(--font-body-ar), system-ui, sans-serif;
-  letter-spacing: 0.04em;
-}
-
-.mq-gate-org {
-  margin: 0.85rem 0 0;
-  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: rgba(226, 232, 240, 0.78);
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-org {
-  font-family: var(--font-body-ar), system-ui, sans-serif;
-}
-
-.mq-gate-title {
-  margin: 1.35rem 0 0;
-  font-family: var(--font-display-en), var(--font-body-en), system-ui, sans-serif;
-  font-size: clamp(2.4rem, 6vw, 3.75rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  color: #fff;
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-title {
-  font-family: var(--font-body-ar), 'IBM Plex Sans Arabic', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0 !important;
-  line-height: 1.45;
-  font-kerning: normal;
-  font-feature-settings: 'liga' 1, 'clig' 1, 'calt' 1;
-  font-variant-ligatures: common-ligatures contextual;
-}
-
-.mq-gate-service {
-  margin: 1rem 0 0;
-  font-family: var(--font-display-en), var(--font-body-en), system-ui, sans-serif;
-  font-size: clamp(1.25rem, 2.8vw, 1.65rem);
-  font-weight: 500;
-  line-height: 1.35;
-  color: rgba(226, 232, 240, 0.9);
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-service {
-  font-family: var(--font-body-ar), 'IBM Plex Sans Arabic', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0 !important;
-  line-height: 1.55;
-  font-kerning: normal;
-  font-feature-settings: 'liga' 1, 'clig' 1, 'calt' 1;
-  font-variant-ligatures: common-ligatures contextual;
-}
-
-.mq-gate-actions {
-  margin-top: 2.25rem;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.85rem;
-}
-
-.mq-gate-enter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  min-height: 64px;
-  width: 100%;
-  max-width: 420px;
-  padding: 1rem 1.75rem;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 236, 179, 0.45);
-  background: linear-gradient(180deg, #ffe9a8 0%, #d4af37 48%, #a8841f 100%);
-  color: #1a1204;
-  font-family: var(--font-body-en), var(--font-body-ar), system-ui, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 16px 40px rgba(212, 175, 55, 0.28);
-  transition: transform 180ms ease, filter 180ms ease;
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-enter {
-  font-family: var(--font-body-ar), system-ui, sans-serif;
-  letter-spacing: 0.04em;
-}
-
-.mq-gate-enter:hover:not(:disabled) {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-}
-
-.mq-gate-enter:disabled,
-.mq-gate-secondary:disabled {
-  cursor: wait;
-}
-
-.mq-gate-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  max-width: 420px;
-}
-
-.mq-gate-secondary {
-  flex: 1 1 140px;
-  min-height: 52px;
-  padding: 0.75rem 1.1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.55);
-  color: #f1f5f9;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: background 160ms ease, border-color 160ms ease;
-}
-
-.mq-gate-panel[dir='rtl'] .mq-gate-secondary {
-  font-family: var(--font-body-ar), system-ui, sans-serif;
-}
-
-.mq-gate-secondary:hover:not(:disabled) {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: rgba(94, 234, 212, 0.4);
-}
-
-@media (max-width: 640px) {
-  .mq-gate-enter,
-  .mq-gate-row {
-    max-width: none;
+@media (prefers-reduced-motion: reduce) {
+  .mq-os-spin,
+  .mq-os-spin-fast {
+    animation: none;
   }
 }
 

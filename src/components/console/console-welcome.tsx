@@ -4,8 +4,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocale } from 'next-intl';
-import { Sparkles, ArrowLeft, ArrowRight } from 'lucide-react';
-import { JeannieNameLockup } from '@/components/landing/crystal/JeannieNameLockup';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   CONSOLE_PRODUCT,
   getConsoleEdition,
@@ -19,6 +18,8 @@ type Props = {
   tenantType: TenantType;
 };
 
+type Phase = 'boot' | 'reveal' | 'speak' | 'ready';
+
 export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
@@ -26,6 +27,7 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
   const edition = getConsoleEdition(tenantType);
   const [open, setOpen] = useState(false);
   const [ready, setReady] = useState(false);
+  const [phase, setPhase] = useState<Phase>(reduce ? 'ready' : 'boot');
 
   useEffect(() => {
     try {
@@ -36,6 +38,22 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
     }
     setReady(true);
   }, [tenantSlug]);
+
+  useEffect(() => {
+    if (!open || reduce) {
+      if (open) setPhase('ready');
+      return;
+    }
+    setPhase('boot');
+    const t1 = window.setTimeout(() => setPhase('reveal'), 900);
+    const t2 = window.setTimeout(() => setPhase('speak'), 1900);
+    const t3 = window.setTimeout(() => setPhase('ready'), 3000);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+    };
+  }, [open, reduce]);
 
   const dismiss = () => {
     try {
@@ -49,159 +67,168 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
   if (!ready) return null;
 
   const EnterIcon = isAr ? ArrowLeft : ArrowRight;
+  const serviceLine = isAr ? CONSOLE_PRODUCT.serviceAr : CONSOLE_PRODUCT.serviceEn;
+  const showPortrait = phase !== 'boot';
+  const showSpeech = phase === 'speak' || phase === 'ready';
+  const showChrome = phase === 'ready';
 
   return (
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="mq-welcome-overlay"
+          className="mq-suite-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.45 } }}
+          exit={{ opacity: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } }}
           role="dialog"
           aria-modal="true"
           aria-label={isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}
         >
-          <div className="mq-welcome-aurora" aria-hidden />
-          <div className="mq-welcome-grid" aria-hidden />
+          <div className="mq-suite-room" aria-hidden>
+            <div className="mq-suite-room-wash" />
+            <div className="mq-suite-room-vignette" />
+            <div className="mq-suite-room-floor" />
+          </div>
 
-          {!reduce
-            ? Array.from({ length: 18 }).map((_, i) => (
-                <motion.span
-                  key={i}
-                  className="mq-welcome-particle"
-                  style={{
-                    left: `${6 + ((i * 17) % 88)}%`,
-                    top: `${10 + ((i * 23) % 75)}%`,
-                  }}
-                  animate={{
-                    y: [0, -14, 0],
-                    opacity: [0.15, 0.55, 0.15],
-                    scale: [0.8, 1.15, 0.8],
-                  }}
-                  transition={{
-                    duration: 3.2 + (i % 5) * 0.35,
-                    repeat: Infinity,
-                    delay: i * 0.12,
-                    ease: 'easeInOut',
-                  }}
-                />
-              ))
-            : null}
-
-          <motion.div
-            className="mq-welcome-stage"
-            initial={reduce ? false : { opacity: 0, y: 28, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.99 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <motion.p
-              className="mq-welcome-kicker"
-              initial={reduce ? false : { opacity: 0, y: 10 }}
+          <div className="mq-suite-composition">
+            <motion.header
+              className="mq-suite-masthead"
+              initial={reduce ? false : { opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.5 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Sparkles size={13} strokeWidth={1.5} />
-              {isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}
-              <span className="opacity-50">·</span>
-              {isAr ? edition.ar : edition.en}
-            </motion.p>
-
-            <div className="mq-welcome-portrait-wrap">
-              <motion.div
-                className="mq-welcome-orbit mq-welcome-orbit-a"
-                animate={reduce ? undefined : { rotate: 360 }}
-                transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
-              />
-              <motion.div
-                className="mq-welcome-orbit mq-welcome-orbit-b"
-                animate={reduce ? undefined : { rotate: -360 }}
-                transition={{ duration: 38, repeat: Infinity, ease: 'linear' }}
-              />
-              <motion.div
-                className="mq-welcome-portrait"
-                initial={reduce ? false : { scale: 0.92, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Image
-                  src={edition.jeannieSrc}
-                  alt={isAr ? 'جيني' : 'Jeannie'}
-                  fill
-                  priority
-                  sizes="280px"
-                  className="object-cover object-[center_18%]"
-                />
-                <span className="mq-welcome-portrait-glow" aria-hidden />
-              </motion.div>
-            </div>
+              <p className="mq-suite-product">
+                {isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}
+              </p>
+              <span className="mq-suite-sep" aria-hidden />
+              <p className="mq-suite-edition">
+                {isAr ? edition.ar : edition.en}
+              </p>
+            </motion.header>
 
             <motion.div
-              className="mt-6"
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.55 }}
+              className="mq-suite-desk"
+              initial={reduce ? false : { opacity: 0, y: 48, rotateX: 8 }}
+              animate={{ opacity: 1, y: 0, rotateX: 0 }}
+              transition={{ duration: 1.05, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             >
-              <JeannieNameLockup
-                size="lg"
-                priority
-                avatarSrc={edition.jeannieSrc}
-                className="justify-center"
-              />
+              <div className="mq-suite-laptop">
+                <div className="mq-suite-lid">
+                  <div className="mq-suite-bezel">
+                    <span className="mq-suite-camera" aria-hidden />
+                    <div className="mq-suite-screen">
+                      <motion.div
+                        className="mq-suite-boot"
+                        initial={false}
+                        animate={{
+                          opacity: showPortrait ? 0 : 1,
+                          scale: showPortrait ? 1.08 : 1,
+                        }}
+                        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                        aria-hidden
+                      />
+
+                      <motion.div
+                        className="mq-suite-portrait"
+                        initial={false}
+                        animate={{
+                          opacity: showPortrait ? 1 : 0,
+                          scale: showPortrait ? 1 : 1.06,
+                          filter: showPortrait
+                            ? 'blur(0px) brightness(1)'
+                            : 'blur(14px) brightness(0.7)',
+                        }}
+                        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <Image
+                          src={edition.jeannieSrc}
+                          alt={isAr ? 'جيني' : 'Jeannie'}
+                          fill
+                          priority
+                          quality={92}
+                          sizes="(max-width: 768px) 92vw, 920px"
+                          className="object-cover object-[center_16%]"
+                        />
+                        <div className="mq-suite-portrait-shade" aria-hidden />
+                        <div className="mq-suite-screen-gloss" aria-hidden />
+                      </motion.div>
+
+                      <AnimatePresence>
+                        {showSpeech ? (
+                          <motion.div
+                            className="mq-suite-speech"
+                            initial={
+                              reduce
+                                ? false
+                                : { opacity: 0, y: 22, filter: 'blur(10px)' }
+                            }
+                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            <div className="mq-suite-speech-plate">
+                              <p className="mq-suite-speech-label">
+                                {isAr ? 'جيني' : 'Jeannie'}
+                              </p>
+                              <p
+                                className="mq-suite-speech-line"
+                                dir={isAr ? 'rtl' : 'ltr'}
+                              >
+                                {serviceLine}
+                              </p>
+                              <span className="mq-suite-speech-rule" aria-hidden />
+                            </div>
+                          </motion.div>
+                        ) : null}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+                <div className="mq-suite-hinge" aria-hidden />
+                <div className="mq-suite-base" aria-hidden>
+                  <div className="mq-suite-deck" />
+                  <div className="mq-suite-trackpad" />
+                </div>
+                <div className="mq-suite-shadow" aria-hidden />
+              </div>
             </motion.div>
-
-            <motion.h2
-              className="mq-welcome-title"
-              initial={reduce ? false : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.55 }}
-            >
-              {isAr ? edition.welcomeAr : edition.welcomeEn}
-            </motion.h2>
-
-            <motion.p
-              className="mq-welcome-org"
-              initial={reduce ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.55, duration: 0.5 }}
-            >
-              {orgName}
-            </motion.p>
-
-            <motion.p
-              className="mq-welcome-line"
-              initial={reduce ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.65, duration: 0.55 }}
-            >
-              {isAr ? edition.lineAr : edition.lineEn}
-            </motion.p>
 
             <motion.div
-              className="mq-welcome-actions"
-              initial={reduce ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
+              className="mq-suite-footer"
+              initial={false}
+              animate={{
+                opacity: showChrome ? 1 : 0,
+                y: showChrome ? 0 : 16,
+              }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             >
-              <button type="button" className="mq-welcome-enter" onClick={dismiss}>
-                <span>{isAr ? 'ادخل الأتيليه' : 'Enter the atelier'}</span>
-                <EnterIcon size={16} strokeWidth={1.5} />
-              </button>
-              <button type="button" className="mq-welcome-skip" onClick={dismiss}>
-                {isAr ? 'تخطّي' : 'Skip'}
-              </button>
-            </motion.div>
+              <p className="mq-suite-org">{orgName}</p>
+              <p className="mq-suite-sub">
+                {isAr ? edition.welcomeAr : edition.welcomeEn}
+              </p>
+              <p className="mq-suite-tagline">
+                {isAr ? CONSOLE_PRODUCT.taglineAr : CONSOLE_PRODUCT.taglineEn}
+              </p>
 
-            <motion.p
-              className="mq-welcome-foot"
-              initial={reduce ? false : { opacity: 0 }}
-              animate={{ opacity: 0.7 }}
-              transition={{ delay: 1, duration: 0.5 }}
-            >
-              {isAr ? CONSOLE_PRODUCT.taglineAr : CONSOLE_PRODUCT.taglineEn}
-            </motion.p>
-          </motion.div>
+              <div className="mq-suite-actions">
+                <button
+                  type="button"
+                  className="mq-suite-enter"
+                  onClick={dismiss}
+                >
+                  <span>{isAr ? 'ادخل الجناح' : 'Enter the Suite'}</span>
+                  <EnterIcon size={16} strokeWidth={1.5} />
+                </button>
+                <button
+                  type="button"
+                  className="mq-suite-skip"
+                  onClick={dismiss}
+                >
+                  {isAr ? 'متابعة مباشرة' : 'Continue'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       ) : null}
     </AnimatePresence>

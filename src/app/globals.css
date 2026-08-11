@@ -1726,222 +1726,427 @@
   font-weight: 500 !important;
 }
 
-/* ─── Jeannie Atelier welcome ─── */
-.mq-welcome-overlay {
+/* ─── Jeannie Suite — executive welcome (laptop reveal) ─── */
+.mq-suite-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 90;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
-  background: rgba(4, 8, 16, 0.72);
-  backdrop-filter: blur(18px) saturate(1.15);
+  padding: clamp(1rem, 3vw, 2.5rem);
+  overflow: hidden;
+  background: #05070c;
 }
 
-.mq-welcome-aurora {
-  pointer-events: none;
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(40% 35% at 20% 20%, rgba(45, 212, 191, 0.22), transparent 60%),
-    radial-gradient(35% 40% at 80% 25%, rgba(212, 175, 55, 0.14), transparent 55%),
-    radial-gradient(50% 45% at 50% 90%, rgba(56, 189, 248, 0.1), transparent 60%);
-  animation: mq-welcome-drift 14s ease-in-out infinite alternate;
-}
-
-.mq-welcome-grid {
+.mq-suite-room {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
 
-.mq-welcome-particle {
-  pointer-events: none;
+.mq-suite-room-wash {
   position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(45, 212, 191, 0.85);
-  box-shadow: 0 0 12px rgba(45, 212, 191, 0.55);
+  inset: -10%;
+  background:
+    radial-gradient(42% 38% at 50% 18%, rgba(45, 212, 191, 0.16), transparent 62%),
+    radial-gradient(36% 32% at 18% 72%, rgba(212, 175, 55, 0.08), transparent 58%),
+    radial-gradient(40% 36% at 86% 64%, rgba(56, 189, 248, 0.07), transparent 60%),
+    linear-gradient(180deg, #0a101c 0%, #05070c 48%, #030508 100%);
+  animation: mq-suite-ambient 16s ease-in-out infinite alternate;
 }
 
-.mq-welcome-stage {
-  position: relative;
-  width: min(520px, 100%);
-  border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+.mq-suite-room-vignette {
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.96));
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 30px 80px rgba(0, 0, 0, 0.45);
-  padding: 2rem 1.5rem 1.75rem;
+    radial-gradient(ellipse at center, transparent 28%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.mq-suite-room-floor {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 38%;
+  background:
+    linear-gradient(180deg, transparent, rgba(8, 14, 24, 0.85) 40%, #020408),
+    repeating-linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.03) 0 1px,
+      transparent 1px 72px
+    );
+  mask-image: linear-gradient(180deg, transparent, black 35%);
+}
+
+.mq-suite-composition {
+  position: relative;
+  z-index: 1;
+  width: min(1080px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2.4vw, 1.75rem);
+  perspective: 1600px;
+}
+
+.mq-suite-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
   text-align: center;
 }
 
-.mq-welcome-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin-bottom: 1.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(45, 212, 191, 0.28);
-  background: rgba(45, 212, 191, 0.08);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.6875rem;
+.mq-suite-product {
+  font-family: var(--font-display-en), var(--font-display-ar), serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #5eead4;
+  color: rgba(248, 250, 252, 0.92);
 }
 
-.mq-welcome-portrait-wrap {
+.mq-suite-sep {
+  width: 1px;
+  height: 0.9rem;
+  background: rgba(212, 175, 55, 0.55);
+}
+
+.mq-suite-edition {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(94, 234, 212, 0.9);
+}
+
+.mq-suite-desk {
+  width: 100%;
+  transform-style: preserve-3d;
+}
+
+.mq-suite-laptop {
   position: relative;
-  width: 168px;
-  height: 168px;
-  margin: 0 auto;
+  width: min(920px, 100%);
+  margin-inline: auto;
 }
 
-.mq-welcome-orbit {
+.mq-suite-lid {
+  position: relative;
+  border-radius: 18px 18px 10px 10px;
+  background: linear-gradient(180deg, #1a2333 0%, #0d1420 100%);
+  padding: 10px 10px 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 28px 80px rgba(0, 0, 0, 0.55);
+}
+
+.mq-suite-bezel {
+  position: relative;
+  border-radius: 10px;
+  background: #020617;
+  padding: 14px 12px 12px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.mq-suite-camera {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #64748b, #0f172a 70%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.mq-suite-screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #020617;
+  isolation: isolate;
+}
+
+.mq-suite-boot {
   position: absolute;
   inset: 0;
-  border-radius: 999px;
-  border: 1px dashed rgba(45, 212, 191, 0.28);
+  z-index: 2;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(45, 212, 191, 0.35), transparent 42%),
+    radial-gradient(circle at 50% 52%, rgba(255, 255, 255, 0.12), transparent 28%),
+    #020617;
 }
 
-.mq-welcome-orbit-a {
-  inset: -10px;
-}
-
-.mq-welcome-orbit-b {
-  inset: -22px;
-  border-color: rgba(212, 175, 55, 0.22);
-  border-style: dotted;
-}
-
-.mq-welcome-portrait {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.08), 0 20px 50px rgba(0, 0, 0, 0.4);
-}
-
-.mq-welcome-portrait-glow {
+.mq-suite-portrait {
   position: absolute;
-  inset: auto 10% -20% 10%;
-  height: 40%;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.45), transparent 70%);
-  filter: blur(12px);
+  inset: 0;
+  z-index: 1;
 }
 
-.mq-welcome-title {
-  margin-top: 1.35rem;
-  font-family: var(--font-display-en), var(--font-display-ar), sans-serif;
-  font-size: clamp(1.45rem, 3.5vw, 1.85rem);
+.mq-suite-portrait-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.18) 0%, rgba(2, 6, 23, 0.05) 32%, rgba(2, 6, 23, 0.78) 100%),
+    radial-gradient(ellipse at 50% 18%, transparent 28%, rgba(2, 6, 23, 0.38) 100%);
+}
+
+.mq-suite-screen-gloss {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.02) 28%,
+    transparent 48%
+  );
+  mix-blend-mode: soft-light;
+}
+
+.mq-suite-speech {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3.5vw, 2.5rem);
+  text-align: center;
+}
+
+.mq-suite-speech-plate {
+  margin-inline: auto;
+  width: min(720px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 14, 26, 0.28) 0%,
+    rgba(8, 14, 26, 0.62) 100%
+  );
+  backdrop-filter: blur(14px) saturate(1.1);
+  padding: clamp(1rem, 2.4vw, 1.5rem) clamp(1.1rem, 2.8vw, 1.85rem);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+.mq-suite-speech-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.25;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.95);
+}
+
+.mq-suite-speech-line {
+  font-family: var(--font-display-en), var(--font-display-ar), var(--font-jeannie-ar), serif;
+  font-size: clamp(1.55rem, 4.2vw, 2.65rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #f8fafc;
+  text-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+}
+
+.mq-suite-speech-rule {
+  display: block;
+  width: 72px;
+  height: 1px;
+  margin: 0.95rem auto 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.85),
+    transparent
+  );
+}
+
+[dir='rtl'] .mq-suite-speech-line,
+.mq-suite-speech-line[dir='rtl'] {
+  font-family: var(--font-jeannie-ar), var(--font-display-ar), serif;
+  letter-spacing: 0;
+}
+
+.mq-suite-hinge {
+  height: 8px;
+  margin-top: -1px;
+  background: linear-gradient(180deg, #243044, #111827 55%, #0b1220);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+.mq-suite-base {
+  position: relative;
+  margin-top: -1px;
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  padding: 10px 14% 16px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.mq-suite-deck {
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.12), transparent);
+}
+
+.mq-suite-trackpad {
+  width: min(180px, 36%);
+  height: 10px;
+  margin: 8px auto 0;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.mq-suite-shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -28px;
+  height: 36px;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+  filter: blur(8px);
+}
+
+.mq-suite-footer {
+  width: min(640px, 100%);
+  text-align: center;
+}
+
+.mq-suite-org {
+  font-family: var(--font-display-en), var(--font-display-ar), sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: #f1f5f9;
 }
 
-.mq-welcome-org {
-  margin-top: 0.45rem;
+.mq-suite-sub {
+  margin-top: 0.35rem;
   font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: #2dd4bf;
+  color: #5eead4;
 }
 
-.mq-welcome-line {
-  margin: 0.85rem auto 0;
-  max-width: 34rem;
-  font-size: 0.92rem;
-  line-height: 1.6;
+.mq-suite-tagline {
+  margin-top: 0.55rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
   color: #94a3b8;
 }
 
-.mq-welcome-actions {
+.mq-suite-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  margin-top: 1.5rem;
+  gap: 0.75rem;
+  margin-top: 1.35rem;
 }
 
-.mq-welcome-enter {
+.mq-suite-enter {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  padding: 0.65rem 1.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(45, 212, 191, 0.45);
-  background: linear-gradient(180deg, #5eead4, #14b8a6);
-  color: #042f2e;
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.25);
-  transition: transform 200ms ease, filter 200ms ease;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0.8rem 1.45rem;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: linear-gradient(180deg, #f5e6b8 0%, #d4af37 48%, #b8922a 100%);
+  color: #1c1405;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 14px 36px rgba(212, 175, 55, 0.22);
+  transition: transform 220ms ease, filter 220ms ease;
 }
 
-.mq-welcome-enter:hover {
-  filter: brightness(1.05);
+.mq-suite-enter:hover {
+  filter: brightness(1.04);
   transform: translateY(-1px);
 }
 
-.mq-welcome-skip {
-  min-height: 40px;
-  padding: 0.5rem 0.9rem;
-  border-radius: 999px;
-  color: #94a3b8;
-  font-size: 0.85rem;
-  transition: color 200ms ease;
+.mq-suite-skip {
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.45);
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
 
-.mq-welcome-skip:hover {
-  color: #e2e8f0;
+.mq-suite-skip:hover {
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.65);
 }
 
-.mq-welcome-foot {
-  margin-top: 1.25rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
+@keyframes mq-suite-ambient {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(0, -1.5%, 0) scale(1.03); }
 }
 
-@keyframes mq-welcome-drift {
-  from { transform: translate3d(-2%, -1%, 0) scale(1); }
-  to { transform: translate3d(2%, 2%, 0) scale(1.04); }
+@media (max-width: 640px) {
+  .mq-suite-lid {
+    border-radius: 14px 14px 8px 8px;
+    padding: 7px 7px 9px;
+  }
+  .mq-suite-bezel {
+    padding: 11px 8px 8px;
+  }
+  .mq-suite-screen {
+    aspect-ratio: 16 / 11;
+  }
+  .mq-suite-base {
+    padding: 8px 12% 12px;
+  }
+  .mq-suite-speech-line {
+    font-size: clamp(1.25rem, 6.2vw, 1.7rem);
+  }
 }
 
-.mq-console[data-console-theme='light'] .mq-welcome-overlay {
-  background: rgba(241, 245, 249, 0.72);
+@media (prefers-reduced-motion: reduce) {
+  .mq-suite-room-wash {
+    animation: none;
+  }
 }
 
-.mq-console[data-console-theme='light'] .mq-welcome-stage {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
-  border-color: rgba(15, 23, 42, 0.08);
+.mq-console[data-console-theme='light'] .mq-suite-overlay {
+  background: #e8eef6;
 }
 
-.mq-console[data-console-theme='light'] .mq-welcome-title {
+.mq-console[data-console-theme='light'] .mq-suite-room-wash {
+  background:
+    radial-gradient(42% 38% at 50% 18%, rgba(13, 148, 136, 0.14), transparent 62%),
+    radial-gradient(36% 32% at 18% 72%, rgba(180, 140, 40, 0.1), transparent 58%),
+    linear-gradient(180deg, #f4f7fb 0%, #e8eef6 55%, #dce5f0 100%);
+}
+
+.mq-console[data-console-theme='light'] .mq-suite-room-vignette {
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(15, 23, 42, 0.18) 100%);
+}
+
+.mq-console[data-console-theme='light'] .mq-suite-product,
+.mq-console[data-console-theme='light'] .mq-suite-org {
   color: #0f172a;
 }
 
-.mq-console[data-console-theme='light'] .mq-welcome-line {
+.mq-console[data-console-theme='light'] .mq-suite-tagline {
   color: #64748b;
+}
+
+.mq-console[data-console-theme='light'] .mq-suite-skip {
+  background: rgba(255, 255, 255, 0.55);
+  color: #334155;
+  border-color: rgba(15, 23, 42, 0.1);
 }
 
 .mq-console-logo-home img {

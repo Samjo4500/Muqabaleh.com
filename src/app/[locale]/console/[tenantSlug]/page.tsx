@@ -105,8 +105,8 @@ export default function ConsoleDashboardPage() {
             </p>
             <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.7rem]">
               {isAr
-                ? `أهلاً ${org?.name || ''} — جيني جاهزة`
-                : `Welcome, ${org?.name || 'team'} — Jeannie is ready`}
+                ? `${org?.name || ''} — جيني في خدمتكم`
+                : `${org?.name || 'Leadership'} — Your Jeannie at your service`}
             </h2>
             <p className="mt-1.5 max-w-2xl text-sm text-[var(--c-text-2)]">
               {isAr ? edition.lineAr : edition.lineEn}

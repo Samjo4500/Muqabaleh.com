@@ -16,7 +16,11 @@ import {
 import { localePath } from '@/i18n/navigation';
 import { scoreColor } from '@/lib/console/defaults';
 import { CONSOLE_PRODUCT, getConsoleEdition } from '@/lib/console/identity';
-import { isDemoPassport } from '@/lib/console/onboarding';
+import {
+  isDemoPassport,
+  markDemoCleared,
+  readDemoCleared,
+} from '@/lib/console/onboarding';
 import type {
   ConsoleDashboard,
   ConsoleOrganization,
@@ -71,7 +75,26 @@ export default function ConsoleDashboardPage() {
     const jobsJson = await jobsRes.json();
     const teamJson = await teamRes.json();
     setOrg(dashJson.organization || null);
-    setDash(dashJson.dashboard || null);
+    const nextDash = dashJson.dashboard || null;
+    if (nextDash && readDemoCleared(tenantSlug)) {
+      nextDash.feed = (nextDash.feed || []).filter(
+        (p: { tags?: string[] | null }) => !isDemoPassport(p.tags),
+      );
+      nextDash.kpis = {
+        ...nextDash.kpis,
+        passportsReceived: nextDash.feed.length,
+        interviewsCompleted: nextDash.feed.length,
+        avgScore: nextDash.feed.length
+          ? Math.round(
+              nextDash.feed.reduce(
+                (s: number, p: { score: number }) => s + p.score,
+                0,
+              ) / nextDash.feed.length,
+            )
+          : 0,
+      };
+    }
+    setDash(nextDash);
     setRole(dashJson.role || null);
     setUsingDemo(Boolean(dashJson.usingDemo));
     setJobCount((jobsJson.jobs || []).length);
@@ -107,7 +130,11 @@ export default function ConsoleDashboardPage() {
 
   const clearDemo = async () => {
     setClearing(true);
-    await fetch(`/api/console/${tenantSlug}/demo/clear`, { method: 'POST' });
+    markDemoCleared(tenantSlug);
+    await fetch(`/api/console/${tenantSlug}/demo/clear`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
     setConfirmClear(false);
     setClearing(false);
     await load();

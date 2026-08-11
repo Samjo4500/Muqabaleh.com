@@ -4,6 +4,31 @@ export function tourStorageKey(tenantSlug: string) {
   return `mq-console-tour:v1:${tenantSlug}`;
 }
 
+/** Durable demo-clear flag (cookie name + localStorage key). Survives Vercel cold starts. */
+export function demoClearedCookieName(tenantSlug: string) {
+  return `mq-demo-cleared-${tenantSlug}`;
+}
+
+export function demoClearedStorageKey(tenantSlug: string) {
+  return `mq-console-demo-cleared:v1:${tenantSlug}`;
+}
+
+export function readDemoCleared(tenantSlug: string): boolean {
+  try {
+    return localStorage.getItem(demoClearedStorageKey(tenantSlug)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markDemoCleared(tenantSlug: string) {
+  try {
+    localStorage.setItem(demoClearedStorageKey(tenantSlug), '1');
+  } catch {
+    /* ignore */
+  }
+}
+
 export function checklistStorageKey(tenantSlug: string) {
   return `mq-console-checklist:v1:${tenantSlug}`;
 }

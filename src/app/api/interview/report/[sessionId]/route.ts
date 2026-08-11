@@ -26,6 +26,37 @@ export async function GET(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
     const report = await finalizeReport(sessionId, userId);
+
+    // Partner white-label webhooks (best-effort)
+    try {
+      const { db } = await import('@/lib/db');
+      const { deliverPartnerWebhooks } = await import('@/lib/partner/webhooks');
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { partnerId: true },
+      });
+      if (user?.partnerId) {
+        const overall =
+          typeof (report as { overallScore?: number })?.overallScore === 'number'
+            ? (report as { overallScore: number }).overallScore
+            : null;
+        await deliverPartnerWebhooks({
+          partnerId: user.partnerId,
+          event: 'interview.completed',
+          payload: { sessionId, userId, overallScore: overall, engine: 'bank' },
+        });
+        if (overall != null) {
+          await deliverPartnerWebhooks({
+            partnerId: user.partnerId,
+            event: 'candidate.scored',
+            payload: { sessionId, userId, overallScore: overall },
+          });
+        }
+      }
+    } catch (hookErr) {
+      console.error('[interview/report] partner webhook failed', hookErr);
+    }
+
     return NextResponse.json({
       sessionId,
       status: 'completed',

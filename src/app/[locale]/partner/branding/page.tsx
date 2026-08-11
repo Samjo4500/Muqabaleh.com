@@ -13,6 +13,8 @@ export default function PartnerBrandingPage() {
   const [partner, setPartner] = useState<PartnerRecord | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
 
   useEffect(() => {
     void fetch('/api/partner/branding')
@@ -43,6 +45,45 @@ export default function PartnerBrandingPage() {
       setSaved(true);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const verifyDomain = async () => {
+    if (!partner?.customDomain) {
+      setVerifyMsg(
+        locale === 'ar' ? 'أدخل نطاقاً مخصصاً أولاً.' : 'Set a custom domain first.',
+      );
+      return;
+    }
+    setVerifying(true);
+    setVerifyMsg(null);
+    try {
+      // Persist domain first so DNS check uses the latest value.
+      await fetch('/api/partner/branding', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(partner),
+      });
+      const res = await fetch('/api/partner/domain/verify', { method: 'POST' });
+      const data = (await res.json()) as {
+        verified?: boolean;
+        message?: string;
+        customDomain?: string;
+      };
+      setVerifyMsg(data.message || (data.verified ? 'Verified' : 'Not verified'));
+      setPartner((p) =>
+        p
+          ? {
+              ...p,
+              customDomainVerified: !!data.verified,
+              customDomain: data.customDomain || p.customDomain,
+            }
+          : p,
+      );
+    } catch {
+      setVerifyMsg(locale === 'ar' ? 'تعذّر التحقق.' : 'Verification failed.');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -78,9 +119,49 @@ export default function PartnerBrandingPage() {
               <input
                 className="pc-input"
                 value={partner.customDomain || ''}
-                onChange={(e) => update({ customDomain: e.target.value })}
+                onChange={(e) =>
+                  update({
+                    customDomain: e.target.value,
+                    customDomainVerified: false,
+                  })
+                }
                 placeholder="hire.yourbrand.com"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="pc-btn pc-btn-ghost text-xs"
+                  onClick={() => void verifyDomain()}
+                  disabled={verifying}
+                >
+                  {verifying ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : null}
+                  {locale === 'ar' ? 'تحقق من DNS' : 'Verify DNS'}
+                </button>
+                <span
+                  className={`text-xs ${
+                    partner.customDomainVerified ? 'text-teal-300' : 'text-amber-200/80'
+                  }`}
+                >
+                  {partner.customDomainVerified
+                    ? locale === 'ar'
+                      ? 'موثّق'
+                      : 'Verified'
+                    : locale === 'ar'
+                      ? 'غير موثّق'
+                      : 'Unverified'}
+                </span>
+              </div>
+              {verifyMsg ? (
+                <p className="mt-2 text-xs text-white/55">{verifyMsg}</p>
+              ) : (
+                <p className="mt-2 text-xs text-white/40">
+                  {locale === 'ar'
+                    ? `CNAME إلى partners.muqabaleh.com أو TXT _muqabaleh-verify = muqabaleh-verify=${partner.slug}`
+                    : `CNAME to partners.muqabaleh.com, or TXT _muqabaleh-verify = muqabaleh-verify=${partner.slug}`}
+                </p>
+              )}
             </Field>
             <Field label={t('fieldLogo')}>
               <input

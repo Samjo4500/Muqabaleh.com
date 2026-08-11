@@ -40,16 +40,35 @@ export async function GET() {
         })
       : 0;
 
-    const talent = await db.candidatePool.findMany({
-      where: { isOptedIn: true, isVisible: true, openToWork: true },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true, country: true, image: true },
-        },
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: 50,
-    });
+    // Isolation: only candidates who applied to this partner's jobs
+    // (no global CandidatePool leak across tenants).
+    const applicantIds = companyIds.length
+      ? (
+          await db.jobApplication.findMany({
+            where: { job: { companyId: { in: companyIds } } },
+            select: { candidateId: true },
+            distinct: ['candidateId'],
+            take: 200,
+          })
+        ).map((a) => a.candidateId)
+      : [];
+
+    const talent = applicantIds.length
+      ? await db.candidatePool.findMany({
+          where: {
+            userId: { in: applicantIds },
+            isOptedIn: true,
+            isVisible: true,
+          },
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, country: true, image: true },
+            },
+          },
+          orderBy: { updatedAt: 'desc' },
+          take: 50,
+        })
+      : [];
 
     return NextResponse.json({
       jobs: jobs.map((j) => ({

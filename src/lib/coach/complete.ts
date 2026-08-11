@@ -315,6 +315,28 @@ export async function completeCoachInterview(opts: {
         rtl: preferAr,
       });
 
+      let partnerBrand: { fromName?: string | null; replyTo?: string | null } | undefined;
+      try {
+        const { db: prisma } = await import('@/lib/db');
+        const u = await prisma.user.findUnique({
+          where: { id: opts.userId },
+          select: {
+            partnerId: true,
+            partner: {
+              select: { fromEmailName: true, supportEmail: true, name: true },
+            },
+          },
+        });
+        if (u?.partner) {
+          partnerBrand = {
+            fromName: u.partner.fromEmailName || u.partner.name,
+            replyTo: u.partner.supportEmail,
+          };
+        }
+      } catch {
+        /* ignore */
+      }
+
       const mail = await sendPassportViaBrevo({
         to: opts.userEmail,
         language: opts.prep.language,
@@ -322,6 +344,7 @@ export async function completeCoachInterview(opts: {
         overallScore: score.overallScore,
         grade: score.grade,
         pdf,
+        partnerBrand,
       });
       emailed = !!mail.success;
     } catch (err) {
@@ -337,6 +360,44 @@ export async function completeCoachInterview(opts: {
     passportPdfUnlocked,
     emailed,
   });
+
+  // Partner webhooks (white-label) — best-effort, never blocks completion.
+  try {
+    const { deliverPartnerWebhooks } = await import('@/lib/partner/webhooks');
+    const { db: prisma } = await import('@/lib/db');
+    const user = await prisma.user.findUnique({
+      where: { id: opts.userId },
+      select: { partnerId: true },
+    });
+    if (user?.partnerId) {
+      await deliverPartnerWebhooks({
+        partnerId: user.partnerId,
+        event: 'interview.completed',
+        payload: {
+          interviewId,
+          sessionId,
+          verificationId,
+          overallScore: score.overallScore,
+          grade: score.grade,
+          role: opts.prep.role,
+          industry: opts.prep.industry,
+          engine: 'jeannie-coach',
+        },
+      });
+      await deliverPartnerWebhooks({
+        partnerId: user.partnerId,
+        event: 'candidate.scored',
+        payload: {
+          interviewId,
+          overallScore: score.overallScore,
+          grade: score.grade,
+          userId: opts.userId,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('[coach/complete] partner webhook failed', err);
+  }
 
   return {
     ok: true,

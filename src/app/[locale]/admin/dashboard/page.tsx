@@ -27,6 +27,7 @@ import {
 } from 'recharts';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminStatCard } from '@/components/admin/AdminStatCard';
+import { SystemHealthPanel } from '@/components/admin/SystemHealthPanel';
 import { BiInline, BiLabel } from '@/components/admin/BiLabel';
 import { L } from '@/lib/admin/labels';
 import { Button } from '@/components/ui/button';
@@ -158,6 +159,8 @@ export default function SuperAdminDashboardPage() {
           </Button>
         }
       />
+
+      <SystemHealthPanel compact />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (

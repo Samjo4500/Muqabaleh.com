@@ -33,23 +33,10 @@ export async function GET(req: NextRequest) {
 
     let userIdFilter: { in: string[] } | undefined;
 
-    if (user.role === 'COMPANY_ADMIN' && user.companyId && scope !== 'marketplace') {
-      const applicantIds = (
-        await db.jobApplication.findMany({
-          where: { job: { companyId: user.companyId } },
-          select: { candidateId: true },
-          distinct: ['candidateId'],
-          take: 500,
-        })
-      ).map((a) => a.candidateId);
-      if (!applicantIds.length) {
-        return NextResponse.json({ candidates: [], total: 0, scope: 'company' });
-      }
-      userIdFilter = { in: applicantIds };
-    } else if (
+    // Partners only see applicants to their client companies — no global pool.
+    if (
       (user.role === 'PARTNER_ADMIN' || user.role === 'PARTNER_MEMBER') &&
-      user.partnerId &&
-      scope !== 'marketplace'
+      user.partnerId
     ) {
       const companyIds = await partnerCompanyIds(user.partnerId);
       const applicantIds = companyIds.length
@@ -63,7 +50,32 @@ export async function GET(req: NextRequest) {
           ).map((a) => a.candidateId)
         : [];
       if (!applicantIds.length) {
-        return NextResponse.json({ candidates: [], total: 0, scope: 'company' });
+        return NextResponse.json({
+          candidates: [],
+          total: 0,
+          scope: 'company',
+        });
+      }
+      userIdFilter = { in: applicantIds };
+    } else if (
+      user.role === 'COMPANY_ADMIN' &&
+      user.companyId &&
+      scope !== 'marketplace'
+    ) {
+      const applicantIds = (
+        await db.jobApplication.findMany({
+          where: { job: { companyId: user.companyId } },
+          select: { candidateId: true },
+          distinct: ['candidateId'],
+          take: 500,
+        })
+      ).map((a) => a.candidateId);
+      if (!applicantIds.length) {
+        return NextResponse.json({
+          candidates: [],
+          total: 0,
+          scope: 'company',
+        });
       }
       userIdFilter = { in: applicantIds };
     }
@@ -104,10 +116,17 @@ export async function GET(req: NextRequest) {
       take: 100,
     });
 
+    const effectiveScope =
+      user.role === 'PARTNER_ADMIN' || user.role === 'PARTNER_MEMBER'
+        ? 'company'
+        : userIdFilter
+          ? 'company'
+          : scope;
+
     return NextResponse.json({
       candidates: rows.map(serializeTalent),
       total: rows.length,
-      scope: userIdFilter ? 'company' : scope,
+      scope: effectiveScope,
     });
   } catch (e) {
     console.error('GET /api/b2b/talent', e);

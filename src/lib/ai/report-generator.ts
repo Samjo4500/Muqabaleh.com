@@ -1,4 +1,4 @@
-import { averageScores, percentileFromScore, scoreToGrade } from '@/lib/interview/scoring';
+import { averageScores, scoreBandLabel, scoreToGrade } from '@/lib/interview/scoring';
 import { evaluateAnswer } from './interviewer';
 
 export type ResponseSummary = {
@@ -67,7 +67,7 @@ export async function generateFinalReport(params: {
     .filter((s): s is number => typeof s === 'number');
   const overallScore = averageScores(scores);
   const grade = scoreToGrade(overallScore);
-  const percentile = percentileFromScore(overallScore);
+  const band = scoreBandLabel(overallScore);
 
   const strengthHints = collectTop(params.strengthHints ?? [], 3);
   const weaknessHints = collectTop(params.weaknessHints ?? [], 2);
@@ -176,9 +176,10 @@ export async function generateFinalReport(params: {
     weaknessesAr: weaknessesAr.slice(0, 2),
     actionItems,
     benchmarkComparison: {
-      percentile,
-      message: `You scored higher than ${percentile}% of candidates at a similar level.`,
-      messageAr: `درجتك أعلى من ${percentile}% من المرشحين في مستوى مشابه.`,
+      // Honest score-band only — no invented peer cohort / fake percentile.
+      percentile: Math.round(overallScore * 10),
+      message: band.message,
+      messageAr: band.messageAr,
     },
     nextSteps:
       'Practice again with a new pre-qual, then browse jobs and apply with your improved score.',

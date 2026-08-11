@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import { completeCoachInterview } from '@/lib/coach/complete';
+import { getCoachAccess } from '@/lib/coach/access';
+import { trackCoachEvent } from '@/lib/coach/analytics';
 import type { ChatMessage, PrepSelections } from '@/lib/coach/types';
 
 export async function POST(req: NextRequest) {
@@ -9,6 +11,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as {
       prep?: PrepSelections;
       history?: ChatMessage[];
+      sessionId?: string;
     };
 
     if (!body.prep || !Array.isArray(body.history) || body.history.length < 2) {
@@ -20,13 +23,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
     }
 
+    const access = await getCoachAccess(userId);
+    const hasActive =
+      !!body.sessionId ||
+      !!access.activeSessionId ||
+      access.canResume;
+    if (!hasActive && !access.canStart) {
+      await trackCoachEvent(userId, 'coach.complete_blocked', {
+        reason: access.reason,
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: access.reason || 'Interview quota reached. Upgrade to continue.',
+          upgradeRequired: true,
+        },
+        { status: 402 },
+      );
+    }
+
     const result = await completeCoachInterview({
       userId,
       userEmail: email,
       candidateName: session.user?.name || email.split('@')[0] || 'Candidate',
       prep: body.prep,
       history: body.history,
+      sessionId: body.sessionId || access.activeSessionId || undefined,
     });
+
+    if (!result.ok) {
+      return NextResponse.json(result, {
+        status: result.upgradeRequired ? 402 : 400,
+      });
+    }
 
     return NextResponse.json(result);
   } catch (err) {

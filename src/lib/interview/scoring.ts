@@ -16,10 +16,40 @@ export function averageScores(scores: number[]): number {
   return Math.round((sum / scores.length) * 10) / 10;
 }
 
+/**
+ * @deprecated Fake cohort math — do not present as real percentiles.
+ * Kept as a private band helper for honest score-band copy only.
+ */
 export function percentileFromScore(score: number): number {
-  // Rough benchmark vs same-level candidates
   const clamped = Math.max(0, Math.min(10, score));
   return Math.round(Math.min(98, Math.max(5, clamped * 9.5)));
+}
+
+/** Honest score-band label (no invented peer cohort). */
+export function scoreBandLabel(score: number): {
+  band: 'strong' | 'solid' | 'developing';
+  message: string;
+  messageAr: string;
+} {
+  if (score >= 8) {
+    return {
+      band: 'strong',
+      message: 'Strong practice band for this mock — keep sharpening quantified examples.',
+      messageAr: 'نطاق أداء قوي لهذه المقابلة التجريبية — واصل تقوية الأمثلة القابلة للقياس.',
+    };
+  }
+  if (score >= 6) {
+    return {
+      band: 'solid',
+      message: 'Solid practice band — tighten STAR structure and outcomes to move up.',
+      messageAr: 'نطاق أداء متين — أحكم هيكل STAR والنتائج للارتقاء.',
+    };
+  }
+  return {
+    band: 'developing',
+    message: 'Developing practice band — prioritize structure and concrete evidence next session.',
+    messageAr: 'نطاق قيد التطوير — أعطِ أولوية للهيكل والأدلة الملموسة في الجلسة التالية.',
+  };
 }
 
 export function getDifficultyRange(

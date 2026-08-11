@@ -1143,7 +1143,20 @@
       "langPlaceholder": "اختر اللغة",
       "genderAny": "لا يهم",
       "genderMale": "ذكر",
-      "genderFemale": "أنثى"
+      "genderFemale": "أنثى",
+      "documentsTitle": "السيرة والصورة",
+      "documentsHint": "يظهرها أصحاب العمل عند التقديم أو الانضمام لقاعدة المواهب.",
+      "uploadCv": "رفع السيرة (PDF / Word)",
+      "uploadCvHint": "حتى ٣ ميجابايت · PDF أو DOC أو DOCX",
+      "replaceCv": "استبدال السيرة",
+      "viewCv": "عرض السيرة الحالية",
+      "noCvYet": "لم تُرفع سيرة بعد",
+      "uploadPhoto": "رفع صورة شخصية",
+      "uploadPhotoHint": "JPEG أو PNG أو WebP · أقل من ٨٠٠ كيلوبايت",
+      "replacePhoto": "استبدال الصورة",
+      "photoSelected": "المحدد: {name}",
+      "cvSelected": "المحدد: {name}",
+      "documentsSaved": "تم تحديث السيرة والصورة"
     },
     "bookings": {
       "title": "جلساتي",

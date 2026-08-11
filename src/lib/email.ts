@@ -25,6 +25,12 @@ export type EmailAttachment = {
   contentType?: string;
 };
 
+export type PartnerEmailBrand = {
+  /** Display name in From header (sending domain stays Muqabaleh-verified). */
+  fromName?: string | null;
+  replyTo?: string | null;
+};
+
 export async function sendEmail(opts: {
   to: string | string[];
   subject: string;
@@ -33,6 +39,8 @@ export async function sendEmail(opts: {
   replyTo?: string;
   cc?: string | string[];
   attachments?: EmailAttachment[];
+  /** Optional white-label display / reply-to overrides. */
+  partnerBrand?: PartnerEmailBrand;
 }) {
   const resend = getResendClient();
   if (!resend) {
@@ -40,13 +48,19 @@ export async function sendEmail(opts: {
     return { success: false, error: 'Email service not configured' };
   }
 
+  const partnerFrom =
+    opts.partnerBrand?.fromName?.trim()
+      ? `${opts.partnerBrand.fromName.trim()} <${MUQABALEH_BRAND.senders.system.email}>`
+      : null;
+  const partnerReply = opts.partnerBrand?.replyTo?.trim() || null;
+
   try {
     const { data, error } = await resend.emails.send({
-      from: opts.from || DEFAULT_FROM,
+      from: opts.from || partnerFrom || DEFAULT_FROM,
       to: Array.isArray(opts.to) ? opts.to : [opts.to],
       subject: opts.subject,
       html: opts.html,
-      replyTo: opts.replyTo || REPLY_TO,
+      replyTo: opts.replyTo || partnerReply || REPLY_TO,
       cc: opts.cc
         ? Array.isArray(opts.cc)
           ? opts.cc

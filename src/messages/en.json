@@ -2894,8 +2894,9 @@
     "addWebhook": "Add webhook",
     "demoSwitcher": "Demo tenants",
     "productName": "Jeannie Suite",
-    "enterAtelier": "Enter the Suite",
+    "enterAtelier": "Click to enter",
     "welcomeSkip": "Continue",
+    "welcomeProceed": "Proceed",
     "serviceLine": "Your Jeannie at your service"
   },
   "employers": {

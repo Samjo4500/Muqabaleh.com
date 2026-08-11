@@ -2894,8 +2894,9 @@
     "addWebhook": "إضافة ويب هوك",
     "demoSwitcher": "مستأجرو التجربة",
     "productName": "جناح جيني",
-    "enterAtelier": "ادخل الجناح",
-    "welcomeSkip": "متابعة مباشرة",
+    "enterAtelier": "اضغط للدخول",
+    "welcomeSkip": "استمرار",
+    "welcomeProceed": "متابعة",
     "serviceLine": "جيني في خدمتكم"
   },
   "employers": {

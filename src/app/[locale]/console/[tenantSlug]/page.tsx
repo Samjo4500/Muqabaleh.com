@@ -12,7 +12,6 @@ import {
   UserPlus,
   BarChart3,
 } from 'lucide-react';
-import Image from 'next/image';
 import { localePath } from '@/i18n/navigation';
 import { scoreColor } from '@/lib/console/defaults';
 import { CONSOLE_PRODUCT, getConsoleEdition } from '@/lib/console/identity';
@@ -89,29 +88,18 @@ export default function ConsoleDashboardPage() {
           className="pointer-events-none absolute -end-16 -top-20 h-48 w-48 rounded-full bg-[var(--c-primary)]/10 blur-3xl"
           aria-hidden
         />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-[var(--c-border)] shadow-[0_0_0_4px_var(--c-primary-soft)]">
-            <Image
-              src={edition.jeannieSrc}
-              alt={isAr ? 'جيني' : 'Jeannie'}
-              fill
-              sizes="64px"
-              className="object-cover object-[center_18%]"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="mq-console-eyebrow">
-              {product} · {isAr ? edition.ar : edition.en}
-            </p>
-            <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.7rem]">
-              {isAr
-                ? `${org?.name || ''} — أنا جيني في خدمتكم`
-                : `${org?.name || 'Leadership'} — I'm Jeannie at your service`}
-            </h2>
-            <p className="mt-1.5 max-w-2xl text-sm text-[var(--c-text-2)]">
-              {isAr ? edition.lineAr : edition.lineEn}
-            </p>
-          </div>
+        <div className="relative min-w-0">
+          <p className="mq-console-eyebrow">
+            {product} · {isAr ? edition.ar : edition.en}
+          </p>
+          <h2 className="mq-console-title mt-1 text-[1.45rem] md:text-[1.7rem]">
+            {isAr
+              ? `مرحباً بكم في بوابتكم — ${org?.name || ''}`
+              : `Welcome to your portal — ${org?.name || 'Leadership'}`}
+          </h2>
+          <p className="mt-1.5 max-w-2xl text-sm text-[var(--c-text-2)]">
+            {isAr ? edition.lineAr : edition.lineEn}
+          </p>
         </div>
       </section>
 

@@ -1794,10 +1794,13 @@
 }
 
 .mq-gate-panel[dir='rtl'] .mq-gate-title {
-  font-family: var(--font-portal-ar), var(--font-body-ar), Amiri, serif;
+  font-family: var(--font-body-ar), 'IBM Plex Sans Arabic', sans-serif;
   font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.4;
+  letter-spacing: 0 !important;
+  line-height: 1.45;
+  font-kerning: normal;
+  font-feature-settings: 'liga' 1, 'clig' 1, 'calt' 1;
+  font-variant-ligatures: common-ligatures contextual;
 }
 
 .mq-gate-service {
@@ -1810,10 +1813,13 @@
 }
 
 .mq-gate-panel[dir='rtl'] .mq-gate-service {
-  font-family: var(--font-portal-ar), var(--font-body-ar), Amiri, serif;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-family: var(--font-body-ar), 'IBM Plex Sans Arabic', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0 !important;
   line-height: 1.55;
+  font-kerning: normal;
+  font-feature-settings: 'liga' 1, 'clig' 1, 'calt' 1;
+  font-variant-ligatures: common-ligatures contextual;
 }
 
 .mq-gate-actions {

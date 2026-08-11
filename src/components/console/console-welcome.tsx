@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocale } from 'next-intl';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MousePointerClick } from 'lucide-react';
 import {
   CONSOLE_PRODUCT,
   getConsoleEdition,
@@ -18,7 +18,8 @@ type Props = {
   tenantType: TenantType;
 };
 
-type Phase = 'boot' | 'reveal' | 'speak' | 'ready';
+/** Cinematic beat markers — deliberately paced for executive first impression. */
+type Beat = 0 | 1 | 2 | 3 | 4 | 5;
 
 export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
   const locale = useLocale();
@@ -26,8 +27,8 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
   const reduce = useReducedMotion();
   const edition = getConsoleEdition(tenantType);
   const [open, setOpen] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [phase, setPhase] = useState<Phase>(reduce ? 'ready' : 'boot');
+  const [mounted, setMounted] = useState(false);
+  const [beat, setBeat] = useState<Beat>(reduce ? 5 : 0);
 
   useEffect(() => {
     try {
@@ -36,26 +37,28 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
     } catch {
       setOpen(true);
     }
-    setReady(true);
+    setMounted(true);
   }, [tenantSlug]);
 
   useEffect(() => {
-    if (!open || reduce) {
-      if (open) setPhase('ready');
+    if (!open) return;
+    if (reduce) {
+      setBeat(5);
       return;
     }
-    setPhase('boot');
-    const t1 = window.setTimeout(() => setPhase('reveal'), 900);
-    const t2 = window.setTimeout(() => setPhase('speak'), 1900);
-    const t3 = window.setTimeout(() => setPhase('ready'), 3000);
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
-    };
+    setBeat(0);
+    const timers = [
+      window.setTimeout(() => setBeat(1), 280), // device rises
+      window.setTimeout(() => setBeat(2), 1100), // curtains part / power
+      window.setTimeout(() => setBeat(3), 2100), // Jeannie name locks
+      window.setTimeout(() => setBeat(4), 3000), // service line
+      window.setTimeout(() => setBeat(5), 3800), // CTA ready
+    ];
+    return () => timers.forEach((id) => window.clearTimeout(id));
   }, [open, reduce]);
 
   const dismiss = () => {
+    if (beat < 5 && !reduce) return;
     try {
       sessionStorage.setItem(welcomeStorageKey(tenantSlug), '1');
     } catch {
@@ -64,169 +67,259 @@ export function ConsoleWelcome({ tenantSlug, orgName, tenantType }: Props) {
     setOpen(false);
   };
 
-  if (!ready) return null;
+  useEffect(() => {
+    if (!open || beat < 5) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        try {
+          sessionStorage.setItem(welcomeStorageKey(tenantSlug), '1');
+        } catch {
+          /* ignore */
+        }
+        setOpen(false);
+      }
+      if (e.key === 'Escape') {
+        try {
+          sessionStorage.setItem(welcomeStorageKey(tenantSlug), '1');
+        } catch {
+          /* ignore */
+        }
+        setOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, beat, tenantSlug]);
+
+  if (!mounted) return null;
 
   const EnterIcon = isAr ? ArrowLeft : ArrowRight;
   const serviceLine = isAr ? CONSOLE_PRODUCT.serviceAr : CONSOLE_PRODUCT.serviceEn;
-  const showPortrait = phase !== 'boot';
-  const showSpeech = phase === 'speak' || phase === 'ready';
-  const showChrome = phase === 'ready';
+  const canEnter = beat >= 5;
+  const nameLetters = (isAr ? 'جيني' : 'Jeannie').split('');
 
   return (
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="mq-suite-overlay"
+          className="mq-reveal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } }}
+          exit={{
+            opacity: 0,
+            scale: 1.02,
+            filter: 'blur(8px)',
+            transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+          }}
           role="dialog"
           aria-modal="true"
           aria-label={isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}
+          onClick={() => {
+            if (canEnter) dismiss();
+          }}
         >
-          <div className="mq-suite-room" aria-hidden>
-            <div className="mq-suite-room-wash" />
-            <div className="mq-suite-room-vignette" />
-            <div className="mq-suite-room-floor" />
+          <div className="mq-reveal-atmosphere" aria-hidden>
+            <div className="mq-reveal-wash" />
+            <div className="mq-reveal-beams" />
+            <div className="mq-reveal-grain" />
+            <div className="mq-reveal-vignette" />
           </div>
 
-          <div className="mq-suite-composition">
-            <motion.header
-              className="mq-suite-masthead"
-              initial={reduce ? false : { opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          <div className="mq-reveal-stage" dir={isAr ? 'rtl' : 'ltr'}>
+            <motion.p
+              className="mq-reveal-kicker"
+              initial={false}
+              animate={{ opacity: beat >= 1 ? 1 : 0, y: beat >= 1 ? 0 : -10 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="mq-suite-product">
-                {isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}
-              </p>
-              <span className="mq-suite-sep" aria-hidden />
-              <p className="mq-suite-edition">
-                {isAr ? edition.ar : edition.en}
-              </p>
-            </motion.header>
+              <span>{isAr ? CONSOLE_PRODUCT.ar : CONSOLE_PRODUCT.en}</span>
+              <span className="mq-reveal-kicker-dot" aria-hidden />
+              <span>{isAr ? edition.ar : edition.en}</span>
+              <span className="mq-reveal-kicker-dot" aria-hidden />
+              <span>{orgName}</span>
+            </motion.p>
 
             <motion.div
-              className="mq-suite-desk"
-              initial={reduce ? false : { opacity: 0, y: 48, rotateX: 8 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ duration: 1.05, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="mq-reveal-device"
+              initial={false}
+              animate={{
+                opacity: beat >= 1 ? 1 : 0,
+                y: beat >= 1 ? 0 : 64,
+                scale: beat >= 1 ? 1 : 0.94,
+              }}
+              transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="mq-suite-laptop">
-                <div className="mq-suite-lid">
-                  <div className="mq-suite-bezel">
-                    <span className="mq-suite-camera" aria-hidden />
-                    <div className="mq-suite-screen">
-                      <motion.div
-                        className="mq-suite-boot"
-                        initial={false}
-                        animate={{
-                          opacity: showPortrait ? 0 : 1,
-                          scale: showPortrait ? 1.08 : 1,
-                        }}
-                        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                        aria-hidden
-                      />
+              <div className="mq-reveal-chrome-top" aria-hidden>
+                <span />
+                <span />
+                <span />
+              </div>
 
-                      <motion.div
-                        className="mq-suite-portrait"
-                        initial={false}
-                        animate={{
-                          opacity: showPortrait ? 1 : 0,
-                          scale: showPortrait ? 1 : 1.06,
-                          filter: showPortrait
-                            ? 'blur(0px) brightness(1)'
-                            : 'blur(14px) brightness(0.7)',
-                        }}
-                        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <Image
-                          src={edition.jeannieSrc}
-                          alt={isAr ? 'جيني' : 'Jeannie'}
-                          fill
-                          priority
-                          quality={92}
-                          sizes="(max-width: 768px) 92vw, 920px"
-                          className="object-cover object-[center_16%]"
-                        />
-                        <div className="mq-suite-portrait-shade" aria-hidden />
-                        <div className="mq-suite-screen-gloss" aria-hidden />
-                      </motion.div>
+              <div className="mq-reveal-display">
+                {/* Power line → fills screen */}
+                <motion.div
+                  className="mq-reveal-power"
+                  initial={false}
+                  animate={{
+                    opacity: beat >= 2 ? 0 : beat >= 1 ? 1 : 0,
+                    scaleX: beat >= 1 ? 1 : 0.05,
+                  }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  aria-hidden
+                />
 
-                      <AnimatePresence>
-                        {showSpeech ? (
-                          <motion.div
-                            className="mq-suite-speech"
-                            initial={
-                              reduce
-                                ? false
-                                : { opacity: 0, y: 22, filter: 'blur(10px)' }
-                            }
-                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
-                          >
-                            <div className="mq-suite-speech-plate">
-                              <p className="mq-suite-speech-label">
-                                {isAr ? 'جيني' : 'Jeannie'}
-                              </p>
-                              <p
-                                className="mq-suite-speech-line"
-                                dir={isAr ? 'rtl' : 'ltr'}
-                              >
-                                {serviceLine}
-                              </p>
-                              <span className="mq-suite-speech-rule" aria-hidden />
-                            </div>
-                          </motion.div>
-                        ) : null}
-                      </AnimatePresence>
-                    </div>
-                  </div>
+                {/* Curtains */}
+                <motion.div
+                  className="mq-reveal-curtain mq-reveal-curtain-a"
+                  initial={false}
+                  animate={{ x: beat >= 2 ? (isAr ? '105%' : '-105%') : '0%' }}
+                  transition={{ duration: 1.15, ease: [0.65, 0, 0.35, 1] }}
+                  aria-hidden
+                />
+                <motion.div
+                  className="mq-reveal-curtain mq-reveal-curtain-b"
+                  initial={false}
+                  animate={{ x: beat >= 2 ? (isAr ? '-105%' : '105%') : '0%' }}
+                  transition={{ duration: 1.15, ease: [0.65, 0, 0.35, 1] }}
+                  aria-hidden
+                />
+
+                {/* Jeannie portrait */}
+                <motion.div
+                  className="mq-reveal-portrait"
+                  initial={false}
+                  animate={{
+                    opacity: beat >= 2 ? 1 : 0,
+                    scale: beat >= 2 ? 1 : 1.08,
+                  }}
+                  transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Image
+                    src={edition.jeannieSrc}
+                    alt={isAr ? 'جيني' : 'Jeannie'}
+                    fill
+                    priority
+                    quality={95}
+                    sizes="(max-width: 900px) 100vw, 1400px"
+                    className="object-cover object-[center_14%]"
+                  />
+                  <div className="mq-reveal-portrait-shade" aria-hidden />
+                  <div className="mq-reveal-portrait-glow" aria-hidden />
+                </motion.div>
+
+                {/* Light sweep across face */}
+                {beat >= 2 && !reduce ? (
+                  <motion.div
+                    className="mq-reveal-sweep"
+                    initial={{ x: isAr ? '40%' : '-40%', opacity: 0 }}
+                    animate={{ x: isAr ? '-120%' : '120%', opacity: [0, 0.7, 0] }}
+                    transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.15 }}
+                    aria-hidden
+                  />
+                ) : null}
+
+                {/* Giant name + service line ON the display */}
+                <div className="mq-reveal-copy">
+                  <motion.div
+                    className="mq-reveal-name-wrap"
+                    initial={false}
+                    animate={{
+                      opacity: beat >= 3 ? 1 : 0,
+                      y: beat >= 3 ? 0 : 28,
+                    }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <p className="mq-reveal-name-eyebrow">
+                      {isAr ? 'مساعدتكم التنفيذية' : 'Your executive aide'}
+                    </p>
+                    <h1
+                      className="mq-reveal-name"
+                      dir={isAr ? 'rtl' : 'ltr'}
+                      lang={isAr ? 'ar' : 'en'}
+                      aria-label={isAr ? 'جيني' : 'Jeannie'}
+                    >
+                      {nameLetters.map((ch, i) => (
+                        <motion.span
+                          key={`${ch}-${i}`}
+                          className="mq-reveal-name-char"
+                          initial={false}
+                          animate={
+                            beat >= 3
+                              ? { opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }
+                              : { opacity: 0, y: 36, rotateX: -40, filter: 'blur(8px)' }
+                          }
+                          transition={{
+                            duration: 0.55,
+                            delay: reduce ? 0 : 0.04 * i,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
+                        >
+                          {ch}
+                        </motion.span>
+                      ))}
+                    </h1>
+                  </motion.div>
+
+                  <motion.p
+                    className="mq-reveal-service"
+                    dir={isAr ? 'rtl' : 'ltr'}
+                    initial={false}
+                    animate={{
+                      opacity: beat >= 4 ? 1 : 0,
+                      y: beat >= 4 ? 0 : 18,
+                      letterSpacing: beat >= 4 ? (isAr ? '0em' : '0.04em') : '0.18em',
+                    }}
+                    transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {serviceLine}
+                  </motion.p>
                 </div>
-                <div className="mq-suite-hinge" aria-hidden />
-                <div className="mq-suite-base" aria-hidden>
-                  <div className="mq-suite-deck" />
-                  <div className="mq-suite-trackpad" />
-                </div>
-                <div className="mq-suite-shadow" aria-hidden />
+              </div>
+
+              <div className="mq-reveal-chrome-base" aria-hidden>
+                <div className="mq-reveal-stand-neck" />
+                <div className="mq-reveal-stand-foot" />
               </div>
             </motion.div>
 
             <motion.div
-              className="mq-suite-footer"
+              className="mq-reveal-cta-block"
               initial={false}
               animate={{
-                opacity: showChrome ? 1 : 0,
-                y: showChrome ? 0 : 16,
+                opacity: canEnter ? 1 : 0,
+                y: canEnter ? 0 : 24,
+                pointerEvents: canEnter ? 'auto' : 'none',
               }}
               transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <p className="mq-suite-org">{orgName}</p>
-              <p className="mq-suite-sub">
-                {isAr ? edition.welcomeAr : edition.welcomeEn}
-              </p>
-              <p className="mq-suite-tagline">
-                {isAr ? CONSOLE_PRODUCT.taglineAr : CONSOLE_PRODUCT.taglineEn}
-              </p>
+              <button
+                type="button"
+                className="mq-reveal-cta"
+                onClick={dismiss}
+                autoFocus={canEnter}
+              >
+                <MousePointerClick size={20} strokeWidth={1.6} />
+                <span>{isAr ? 'اضغط للدخول' : 'Click to enter'}</span>
+                <EnterIcon size={20} strokeWidth={1.75} />
+              </button>
 
-              <div className="mq-suite-actions">
-                <button
-                  type="button"
-                  className="mq-suite-enter"
-                  onClick={dismiss}
-                >
-                  <span>{isAr ? 'ادخل الجناح' : 'Enter the Suite'}</span>
-                  <EnterIcon size={16} strokeWidth={1.5} />
+              <div className="mq-reveal-cta-row">
+                <button type="button" className="mq-reveal-proceed" onClick={dismiss}>
+                  {isAr ? 'متابعة' : 'Proceed'}
                 </button>
-                <button
-                  type="button"
-                  className="mq-suite-skip"
-                  onClick={dismiss}
-                >
-                  {isAr ? 'متابعة مباشرة' : 'Continue'}
+                <span className="mq-reveal-cta-sep" aria-hidden />
+                <button type="button" className="mq-reveal-continue" onClick={dismiss}>
+                  {isAr ? 'استمرار' : 'Continue'}
                 </button>
               </div>
+
+              <p className="mq-reveal-hint">
+                {isAr
+                  ? 'أو اضغط في أي مكان · Enter'
+                  : 'Or click anywhere · press Enter'}
+              </p>
             </motion.div>
           </div>
         </motion.div>

@@ -98,22 +98,13 @@ async function main() {
     return !d || !/shortcut|اختصار/i.test(d.textContent || '');
   });
 
-  // Focus ring style
+  // Focus ring style — measure computed outline on a focused control
   const focusOk = await page.evaluate(() => {
-    const css = [...document.styleSheets]
-      .flatMap((s) => {
-        try {
-          return [...s.cssRules].map((r) => r.cssText);
-        } catch {
-          return [];
-        }
-      })
-      .join('\n');
-    return (
-      css.includes('outline: 2px solid #14b8a6') ||
-      css.includes('outline: 2px solid rgb(20, 184, 166)') ||
-      /focus-visible[^}]*#14b8a6/i.test(css)
-    );
+    const btn = document.querySelector('[data-console-a11y-menu], .mq-console-icon-btn');
+    if (!btn) return false;
+    btn.focus();
+    const cs = getComputedStyle(btn);
+    return /14b8a6|20,\s*184,\s*166/i.test(`${cs.outlineColor} ${cs.outline}`);
   });
 
   // J/K rows
@@ -182,16 +173,16 @@ async function main() {
 
   // Open a11y menu
   const menuOpened = await page.evaluate(() => {
-    const btn = document.querySelector('[aria-label="Accessibility options"]');
+    const btn = document.querySelector('[data-console-a11y-menu], [aria-label="Accessibility options"]');
     if (!btn) return false;
-    btn.click();
+    btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     return true;
   });
-  await new Promise((r) => setTimeout(r, 300));
+  await new Promise((r) => setTimeout(r, 400));
 
   results.menuOpen = menuOpened
     ? await page.evaluate(() => {
-        const menu = document.querySelector('[role="menu"]');
+        const menu = document.querySelector('[data-console-a11y-panel], [role="menu"]');
         return {
           open: Boolean(menu),
           text: (menu?.textContent || '').slice(0, 300),
@@ -200,10 +191,22 @@ async function main() {
     : { open: false, text: '' };
 
   // 5 Font size
+  if (!results.menuOpen.open) {
+    await page.click('[data-console-a11y-menu]');
+    await new Promise((r) => setTimeout(r, 400));
+    results.menuOpen = await page.evaluate(() => {
+      const menu = document.querySelector('[data-console-a11y-panel], [role="menu"]');
+      return { open: Boolean(menu), text: (menu?.textContent || '').slice(0, 300) };
+    });
+  }
   if (results.menuOpen.open) {
     await page.evaluate(() => {
       const btns = [...document.querySelectorAll('[role="menuitemradio"]')];
-      const large = btns.find((b) => /Large|كبير/i.test(b.textContent || '') && !/Extra|جدا/i.test(b.textContent || ''));
+      const large = btns.find(
+        (b) =>
+          /Large|كبير/i.test(b.textContent || '') &&
+          !/Extra|جدا|Extra large|كبير جدا/i.test(b.textContent || ''),
+      );
       large?.click();
     });
     await new Promise((r) => setTimeout(r, 200));
@@ -279,16 +282,18 @@ async function main() {
 
   // 9 Contrast/touch
   results.touch = await page.evaluate(() => {
-    const btn = document.querySelector('.mq-console-icon-btn');
+    const btn = document.querySelector('[data-console-a11y-menu]');
     const r = btn?.getBoundingClientRect();
     return r ? { w: Math.round(r.width), h: Math.round(r.height) } : null;
   });
   await page.setViewport({ width: 375, height: 812 });
-  await new Promise((r) => setTimeout(r, 300));
+  await new Promise((r) => setTimeout(r, 400));
   results.touchMobile = await page.evaluate(() => {
-    const btn = document.querySelector('.mq-console-icon-btn');
+    const btn = document.querySelector('[data-console-a11y-menu]');
     const r = btn?.getBoundingClientRect();
-    return r ? { w: Math.round(r.width), h: Math.round(r.height) } : null;
+    return r && r.width > 0
+      ? { w: Math.round(r.width), h: Math.round(r.height) }
+      : null;
   });
 
   // 10 RTL

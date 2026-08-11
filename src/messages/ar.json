@@ -2894,10 +2894,11 @@
     "addWebhook": "إضافة ويب هوك",
     "demoSwitcher": "مستأجرو التجربة",
     "productName": "جناح جيني",
-    "enterAtelier": "اضغط للدخول",
+    "enterAtelier": "دخول",
     "welcomeSkip": "استمرار",
     "welcomeProceed": "متابعة",
-    "serviceLine": "جيني في خدمتكم"
+    "serviceLine": "أنا جيني في خدمتكم",
+    "portalWelcome": "مرحباً بكم في بوابتكم"
   },
   "employers": {
     "heroHeadline": "وظّف بذكاء. وفر الوقت. قرّر بناءً على بيانات.",

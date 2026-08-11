@@ -4,6 +4,7 @@ import {
   IBM_Plex_Sans_Arabic,
   Readex_Pro,
   Cairo,
+  Amiri,
 } from 'next/font/google';
 
 /** Display — English atelier headlines */
@@ -53,10 +54,20 @@ export const fontJeannieAr = Cairo({
   preload: false,
 });
 
+/** Portal / cinematic Arabic — Amiri Naskh, proper connected script */
+export const fontPortalAr = Amiri({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-portal-ar',
+  preload: false,
+});
+
 export const fontVariables = [
   fontDisplayEn.variable,
   fontBodyEn.variable,
   fontBodyAr.variable,
   fontDisplayAr.variable,
   fontJeannieAr.variable,
+  fontPortalAr.variable,
 ].join(' ');

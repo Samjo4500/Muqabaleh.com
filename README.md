@@ -41,3 +41,16 @@ Analytics (GA4 / Meta Pixel) load only after the user accepts analytics cookies.
 ## Deploy
 
 Preview first via Vercel. Do not merge launch PRs until P0 checklist passes.
+
+### Vercel Preview checklist (founder)
+
+| Variable | Notes |
+|----------|--------|
+| `BREVO_API_KEY` | Must target **Preview** (and Production). Without it, welcome / PayPal confirm / passport / sales emails are dead on Preview. |
+| `NEXT_PUBLIC_GA_ID` | Must target **Preview** and be set **before** build (`G-…`). Redeploy after adding. |
+| PayPal vars | Already used for checkout on Preview when configured. |
+
+After changing `NEXT_PUBLIC_*` vars, trigger a new Preview deployment (redeploy or empty commit).
+
+**PR #130 branch:** `cursor/prelaunch-fix-all-da98`  
+**Manual founder checks after Preview is green:** welcome inbox, mic interview + PDF, real PayPal $9.99, delete account, sales@ inbox, single-IP rate limit, GA4 Network after cookie Accept.

@@ -7,6 +7,7 @@ import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 
 function isLocale(value: string): value is Locale {
   return (routing.locales as readonly string[]).includes(value);
@@ -121,6 +122,7 @@ export default async function LocaleLayout({
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

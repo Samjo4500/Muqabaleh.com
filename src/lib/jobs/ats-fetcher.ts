@@ -227,14 +227,33 @@ function parseLever(json: unknown, companySlug: string): NormalizedJob[] {
   }).filter((j) => j.externalId);
 }
 
+function workableLocation(job: Record<string, unknown>): string {
+  const city = String(job.city || '').trim();
+  const country = String(job.country || '').trim();
+  const state = String(job.state || '').trim();
+  if (city || country) {
+    return [city, state, country].filter(Boolean).join(', ');
+  }
+  const locations = Array.isArray(job.locations) ? job.locations : [];
+  const parts: string[] = [];
+  for (const raw of locations) {
+    if (!raw || typeof raw !== 'object') continue;
+    const loc = raw as Record<string, unknown>;
+    const label = [loc.city, loc.region, loc.country].map((x) => String(x || '').trim()).filter(Boolean);
+    if (label.length) parts.push(label.join(', '));
+  }
+  if (parts.length) return parts.join('; ');
+  if (typeof job.location === 'string' && job.location.trim()) return job.location.trim();
+  if (job.telecommuting) return 'Remote';
+  return 'Remote';
+}
+
 function parseWorkable(json: unknown, accountSlug: string): NormalizedJob[] {
   const root = json as { jobs?: Array<Record<string, unknown>> };
   const jobs = Array.isArray(root?.jobs) ? root.jobs : [];
   return jobs.map((job) => {
     const id = String(job.shortcode || job.id || '');
-    const city = String(job.city || '').trim();
-    const country = String(job.country || '').trim();
-    const loc = [city, country].filter(Boolean).join(', ') || String(job.location || 'Remote');
+    const loc = workableLocation(job);
     const desc = String(job.description || job.snippet || '');
     const title = String(job.title || 'Role');
     const department = String(job.department || '') || undefined;

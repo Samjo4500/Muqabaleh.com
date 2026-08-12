@@ -14,22 +14,26 @@ export type ListedCompanySeed = {
 
 /**
  * Live-verified Aug 2026 against public Greenhouse / Lever / Workable / Recruitee APIs.
- * Prefer regional HQs (UAE/KSA/Egypt…) — they unlock Remote/Hybrid rows under MENA filter.
+ * Prefer regional HQs — they unlock Remote/Hybrid rows under MENA filter.
+ * Country tag should reflect primary hiring market(s) for Remote classification.
  */
 export const LISTED_COMPANY_CATALOG: ListedCompanySeed[] = [
   // ── Regional MENA employers ──
   { name: 'Careem', slug: 'careem', ats: 'GREENHOUSE', country: 'UAE', industry: 'Mobility' },
-  { name: 'Tamara', slug: 'tamara', ats: 'GREENHOUSE', country: 'UAE/KSA', industry: 'Fintech' },
+  { name: 'Tamara', slug: 'tamara', ats: 'GREENHOUSE', country: 'UAE/KSA/Egypt', industry: 'Fintech' },
   { name: 'Jumia', slug: 'jumia', ats: 'GREENHOUSE', country: 'Egypt', industry: 'E-commerce' },
   { name: 'Aldar Properties', slug: 'aldar', ats: 'LEVER', country: 'UAE', industry: 'Real Estate' },
-  { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'UAE/KSA', industry: 'SaaS' },
-  { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA', industry: 'SaaS' },
+  { name: 'Fresha', slug: 'fresha', ats: 'LEVER', country: 'UAE/KSA/Qatar/Oman/Kuwait', industry: 'SaaS' },
+  { name: 'Foodics', slug: 'foodics', ats: 'WORKABLE', country: 'KSA/UAE/Egypt/Kuwait/Jordan', industry: 'SaaS' },
   { name: 'Trendyol', slug: 'trendyol', ats: 'LEVER', country: 'KSA/GCC', industry: 'E-commerce' },
   { name: 'Syarah', slug: 'syarah', ats: 'WORKABLE', country: 'KSA/Jordan', industry: 'Automotive' },
-  { name: 'Unifonic', slug: 'unifonic', ats: 'RECRUITEE', country: 'KSA/UAE', industry: 'Communications' },
+  { name: 'Unifonic', slug: 'unifonic', ats: 'RECRUITEE', country: 'KSA/UAE/Jordan/Egypt', industry: 'Communications' },
   { name: 'Lucid Motors', slug: 'lucidmotors', ats: 'GREENHOUSE', country: 'KSA/UAE', industry: 'Automotive' },
+  { name: 'Hala', slug: 'hala', ats: 'GREENHOUSE', country: 'KSA', industry: 'Fintech' },
+  { name: 'Salla', slug: 'salla', ats: 'WORKABLE', country: 'KSA/GCC', industry: 'E-commerce' },
+  { name: 'Agility', slug: 'agility', ats: 'WORKABLE', country: 'Kuwait/UAE/KSA', industry: 'Logistics' },
 
-  // ── Global boards with verified MENA openings ──
+  // ── Global boards with verified MENA openings (incl. Doha / GCC) ──
   { name: 'Scale AI', slug: 'scaleai', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'AI' },
   { name: 'Udacity', slug: 'udacity', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'EdTech' },
   { name: 'Datadog', slug: 'datadog', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
@@ -43,4 +47,7 @@ export const LISTED_COMPANY_CATALOG: ListedCompanySeed[] = [
   { name: 'Stripe', slug: 'stripe', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Fintech' },
   { name: 'Spotify', slug: 'spotify', ats: 'LEVER', country: 'Global→MENA', industry: 'Media' },
   { name: 'Box', slug: 'boxinc', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'SaaS' },
+  { name: 'OKX', slug: 'okx', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Crypto' },
+  { name: 'Binance', slug: 'binance', ats: 'LEVER', country: 'Global→MENA', industry: 'Crypto' },
+  { name: 'Bybit', slug: 'bybit', ats: 'GREENHOUSE', country: 'Global→MENA', industry: 'Crypto' },
 ];

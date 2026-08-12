@@ -12,6 +12,9 @@ import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
 
+/** Soft cap for client payload — banner uses a separate live MENA count. */
+const JOBS_PAGE_TAKE = 500;
+
 const JobsBrowserClient = dynamic(
   () =>
     import('./jobs-browser-client').then((m) => m.JobsBrowserClient),
@@ -64,7 +67,8 @@ export default async function JobsPage() {
   const locale = await getLocale();
   const isAr = locale === 'ar';
 
-  let jobs = await loadJobsSafe();
+  const [loaded, liveCount] = await Promise.all([loadJobsSafe(), countMenaJobsSafe()]);
+  let jobs = loaded;
   if (!jobs.length) {
     jobs = DEMO_JOBS.map((j) => ({
       id: j.id,
@@ -87,6 +91,8 @@ export default async function JobsPage() {
     isMenaListedRole(j.location, j.title, j.company?.country),
   );
 
+  const roleCount = Math.max(liveCount, jobs.length);
+
   return (
     <div className="mq-atelier min-h-screen bg-[#05080f]">
       <JobPortalChrome
@@ -95,7 +101,7 @@ export default async function JobsPage() {
         transparent
       />
 
-      <JobsHero roleCount={jobs.length} />
+      <JobsHero roleCount={roleCount} />
       <JobsBrowserClient initialJobs={jobs} />
 
       <div className="mq-wrap pb-12 text-center">
@@ -112,6 +118,36 @@ export default async function JobsPage() {
   );
 }
 
+async function countMenaJobsSafe(): Promise<number> {
+  try {
+    // Count with the same MENA filter as the board (not raw DB total).
+    const rows = await db.listedJob.findMany({
+      where: {
+        isActive: true,
+        OR: [{ companyId: null }, { company: { isActive: true } }],
+      },
+      select: {
+        location: true,
+        title: true,
+        department: true,
+        description: true,
+        company: { select: { country: true } },
+      },
+      take: 2000,
+      orderBy: { postedAt: 'desc' },
+    });
+    return rows.filter((j) =>
+      isMenaListedRole(j.location, j.title, j.company?.country, {
+        department: j.department,
+        description: j.description,
+      }),
+    ).length;
+  } catch (err) {
+    console.error('[jobs page count]', err);
+    return 0;
+  }
+}
+
 async function loadJobsSafe() {
   try {
     const rows = await db.listedJob.findMany({
@@ -125,8 +161,7 @@ async function loadJobsSafe() {
         },
       },
       orderBy: { postedAt: 'desc' },
-      // Cap payload for first paint — browser filters client-side from this set.
-      take: 160,
+      take: JOBS_PAGE_TAKE,
     });
     return rows.map((j) => ({
       id: j.id,

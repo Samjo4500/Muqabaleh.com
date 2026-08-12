@@ -11,16 +11,16 @@ export const dynamic = 'force-dynamic';
  * Vercel Cron — every 3 hours (rotation).
  * Also invoked by GitHub Action daily for a full catalog sweep (several ticks).
  *
- * Query: `?limit=12` (default 12, max 20 per tick to stay under 60s).
+ * Query: `?limit=16` (default 16, max 24 per tick to stay under 60s).
  */
 export async function GET(req: NextRequest) {
   const authError = assertCronAuthorized(req);
   if (authError) return authError;
   try {
-    const rawLimit = Number(req.nextUrl.searchParams.get('limit') || '12');
+    const rawLimit = Number(req.nextUrl.searchParams.get('limit') || '16');
     const limit = Number.isFinite(rawLimit)
-      ? Math.min(20, Math.max(1, Math.floor(rawLimit)))
-      : 12;
+      ? Math.min(24, Math.max(1, Math.floor(rawLimit)))
+      : 16;
     const source = req.nextUrl.searchParams.get('source') || 'vercel-cron';
 
     const summary = await runAtsFetchTick({ limit, syncCatalog: true });

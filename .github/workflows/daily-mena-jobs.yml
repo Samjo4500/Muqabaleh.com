@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
     inputs:
       ticks:
-        description: 'How many fetch ticks (each covers ~12 boards, oldest first)'
+        description: 'How many fetch ticks (each covers ~16 boards, oldest first)'
         required: false
-        default: '4'
+        default: '5'
 
 concurrency:
   group: mena-jobs-fetch
@@ -29,7 +29,7 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: ${{ vars.SITE_URL }}
-          TICKS: ${{ github.event.inputs.ticks || '4' }}
+          TICKS: ${{ github.event.inputs.ticks || '5' }}
         run: |
           set -euo pipefail
           if [ -z "${CRON_SECRET:-}" ]; then
@@ -51,7 +51,7 @@ jobs:
               -H "Authorization: Bearer ${CRON_SECRET}" \
               -H "Accept: application/json" \
               --max-time 90 \
-              "${BASE}/api/jobs/fetch-cron?limit=12&source=github-daily")
+              "${BASE}/api/jobs/fetch-cron?limit=16&source=github-daily")
             echo "$resp" | tee "/tmp/ats-tick-$i.json"
             upserted=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('upserted',0))")
             companies=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('companies',0))")

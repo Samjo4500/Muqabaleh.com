@@ -130,11 +130,12 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <DeferredMarketingChrome />
-            <CookieConsentBanner />
             <ConditionalAnalytics />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
         </Providers>
+        {/* Outside SessionProvider so auth/CSP client errors cannot hide consent UI */}
+        <CookieConsentBanner />
         <Analytics />
       </body>
     </html>

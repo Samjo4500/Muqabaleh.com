@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { createPortal } from 'react-dom';
+import { useParams } from 'next/navigation';
 import {
   readCookieConsent,
   writeCookieConsent,
@@ -9,40 +10,49 @@ import {
 } from '@/lib/cookie-consent';
 
 /**
- * Fixed bottom cookie banner. Does not cover primary CTAs on most layouts
- * (safe padding + compact height). Settings modal is minimal.
+ * Fixed bottom cookie banner — portaled to document.body so it cannot be
+ * clipped by layout overflow/transform, and mounted outside SessionProvider
+ * failure paths when possible.
  */
 export function CookieConsentBanner() {
-  const locale = useLocale();
-  const isAr = locale === 'ar';
-  const [consent, setConsent] = useState<CookieConsent | null | undefined>(undefined);
+  const params = useParams();
+  const locale = typeof params?.locale === 'string' ? params.locale : 'ar';
+  const isAr = locale !== 'en';
+
+  const [mounted, setMounted] = useState(false);
+  const [consent, setConsent] = useState<CookieConsent | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [analyticsOn, setAnalyticsOn] = useState(false);
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const existing = readCookieConsent();
     setConsent(existing);
     setAnalyticsOn(existing?.analytics ?? false);
+    setShow(!existing);
   }, []);
 
-  if (consent === undefined || consent) return null;
+  if (!mounted || !show || consent) return null;
 
   const accept = (analytics: boolean) => {
     const next = writeCookieConsent(analytics);
     setConsent(next);
+    setShow(false);
     setSettingsOpen(false);
   };
 
-  return (
+  const ui = (
     <>
       <div
-        className="fixed inset-x-0 bottom-0 z-[80] border-t border-white/10 bg-[#0B1220]/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md sm:px-6"
+        className="pointer-events-auto fixed inset-x-0 bottom-0 z-[9999] border-t border-white/15 bg-[#0B1220] px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.45)] sm:px-6"
         role="dialog"
         aria-label={isAr ? 'موافقة ملفات تعريف الارتباط' : 'Cookie consent'}
         dir={isAr ? 'rtl' : 'ltr'}
+        data-testid="cookie-consent-banner"
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm leading-relaxed text-white/80 sm:pe-4">
+          <p className="text-sm leading-relaxed text-white/85 sm:pe-4">
             {isAr
               ? 'نستخدم ملفات تعريف الارتباط لتحسين تجربتك. بالاستمرار، أنت توافق على ذلك.'
               : 'We use cookies to improve your experience. By continuing, you agree.'}
@@ -51,7 +61,7 @@ export function CookieConsentBanner() {
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
-              className="min-h-11 min-w-[7.5rem] rounded-xl border border-white/20 px-4 py-2.5 text-sm font-medium text-white/90 hover:bg-white/5"
+              className="min-h-11 min-w-[7.5rem] rounded-xl border border-white/25 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10"
             >
               {isAr ? 'إعدادات' : 'Settings'}
             </button>
@@ -68,7 +78,7 @@ export function CookieConsentBanner() {
 
       {settingsOpen ? (
         <div
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-black/55 p-4 sm:items-center"
+          className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/60 p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           onClick={() => setSettingsOpen(false)}
@@ -133,4 +143,6 @@ export function CookieConsentBanner() {
       ) : null}
     </>
   );
+
+  return createPortal(ui, document.body);
 }

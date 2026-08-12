@@ -4,7 +4,7 @@
  */
 
 const MENA_RE =
-  /\b(dubai|abu dhabi|abu-dhabi|sharjah|ajman|ras al khaimah|ras alkhaimah|fujairah|umm al quwain|al ain|al-ain|uae|u\.a\.e\.|united arab emirates|emirates|riyadh|jeddah|dammam|khobar|dhahran|jubail|yanbu|madinah|medina|makkah|mecca|taif|abha|tabuk|hail|neom|qiddiya|diriyah|red sea|saudi|ksa|kingdom of saudi|qatar|doha|lusail|kuwait|kuwait city|bahrain|manama|oman|muscat|salalah|sohar|cairo|giza|alexandria|new cairo|6th of october|nasr city|heliopolis|maadi|mansoura|tanta|assiut|ismailia|port said|suez|hurghada|sharm|egypt|amman|irbid|zarqa|aqaba|jordan|beirut|lebanon|casablanca|rabat|marrakech|marrakesh|tangier|fez|fes|agadir|morocco|tunis|sfax|sousse|tunisia|algiers|oran|constantine|algeria|baghdad|basra|erbil|mosul|najaf|sulaymaniyah|iraq|ramallah|palestine|gaza|west bank|tripoli|libya|sana'?a|yemen|khartoum|sudan|mena|middle east|gcc|gcc region|levant|maghreb)\b/i;
+  /\b(dubai|abu dhabi|abu-dhabi|sharjah|ajman|ras al khaimah|ras alkhaimah|fujairah|umm al quwain|al ain|al-ain|uae|u\.a\.e\.|united arab emirates|emirates|riyadh|jeddah|dammam|khobar|dhahran|jubail|yanbu|madinah|medina|makkah|mecca|taif|abha|tabuk|hail|neom|qiddiya|diriyah|red sea|saudi|ksa|kingdom of saudi|qatar|doha|lusail|kuwait|kuwait city|bahrain|manama|(?<![a-z])oman(?![a-z])|muscat|salalah|sohar|cairo|giza|alexandria|new cairo|6th of october|nasr city|heliopolis|maadi|mansoura|tanta|assiut|ismailia|port said|suez|hurghada|sharm|egypt|amman|irbid|zarqa|aqaba|jordan|beirut|lebanon|damascus|aleppo|homs|latakia|syria|syrian|casablanca|rabat|marrakech|marrakesh|tangier|fez|fes|agadir|morocco|tunis|sfax|sousse|tunisia|algiers|oran|constantine|algeria|baghdad|basra|erbil|mosul|najaf|sulaymaniyah|iraq|ramallah|palestine|gaza|west bank|tripoli|benghazi|libya|sana'?a|yemen|khartoum|sudan|mena|middle east|gcc|gcc region|levant|maghreb)\b/i;
 
 /** Extra signals often present in titles/descriptions for MENA-facing roles. */
 const MENA_ROLE_RE =
@@ -26,6 +26,7 @@ export type MenaCountryKey =
   | 'oman'
   | 'jordan'
   | 'lebanon'
+  | 'syria'
   | 'morocco'
   | 'tunisia'
   | 'algeria'
@@ -47,6 +48,7 @@ export const MENA_COUNTRY_ORDER: MenaCountryKey[] = [
   'oman',
   'jordan',
   'lebanon',
+  'syria',
   'morocco',
   'tunisia',
   'algeria',
@@ -65,9 +67,11 @@ export const MENA_COUNTRY_ORDER: MenaCountryKey[] = [
 const COUNTRY_PATTERNS: Array<{ key: MenaCountryKey; re: RegExp }> = [
   { key: 'kuwait', re: /\b(kuwait|kuwait city)\b/i },
   { key: 'bahrain', re: /\b(bahrain|manama)\b/i },
-  { key: 'oman', re: /\b(muscat|oman|salalah|sohar)\b/i },
+  // Avoid matching "oman" inside "Romania"
+  { key: 'oman', re: /\b(muscat|salalah|sohar|sultanate of oman|(?<![a-z])oman(?![a-z]))\b/i },
   { key: 'jordan', re: /\b(amman|jordan|irbid|aqaba|zarqa)\b/i },
   { key: 'lebanon', re: /\b(beirut|lebanon)\b/i },
+  { key: 'syria', re: /\b(damascus|aleppo|homs|latakia|syria|syrian)\b/i },
   { key: 'morocco', re: /\b(casablanca|rabat|marrakech|marrakesh|tangier|fez|fes|agadir|morocco)\b/i },
   { key: 'tunisia', re: /\b(tunis|tunisia|sfax|sousse)\b/i },
   { key: 'algeria', re: /\b(algiers|oran|constantine|algeria)\b/i },
@@ -118,14 +122,18 @@ export function classifyMenaCountry(
   const fromTitle = matchCountry(titleStr);
   if (fromTitle) return fromTitle;
 
-  // 3) Vague remote/hybrid: only then use company HQ region
-  if (VAGUE_LOCATION_RE.test(loc) || !loc) {
-    const fromCompany = matchCountry(companyCountry);
+  const singleHq =
+    companyCountry && !/[\/|&,]/.test(companyCountry) ? companyCountry : '';
+
+  // 3) Vague remote/hybrid: only then use a *single* company HQ country
+  // (skip multi-market tags like "UAE/KSA/Qatar" — those are not a city signal)
+  if ((VAGUE_LOCATION_RE.test(loc) || !loc) && singleHq) {
+    const fromCompany = matchCountry(singleHq);
     if (fromCompany) return fromCompany;
   }
 
   // 4) Combined fallback (still prefer specific markets via COUNTRY_PATTERNS order)
-  const combined = matchCountry(`${loc} ${titleStr} ${companyCountry}`);
+  const combined = matchCountry(`${loc} ${titleStr} ${singleHq}`);
   if (combined) return combined;
 
   if (MENA_RE.test(`${loc} ${titleStr} ${companyCountry}`)) return 'other';
@@ -142,6 +150,7 @@ export const MENA_COUNTRY_LABELS: Record<MenaCountryKey, { en: string; ar: strin
   oman: { en: 'Oman', ar: 'عُمان' },
   jordan: { en: 'Jordan', ar: 'الأردن' },
   lebanon: { en: 'Lebanon', ar: 'لبنان' },
+  syria: { en: 'Syria', ar: 'سوريا' },
   morocco: { en: 'Morocco', ar: 'المغرب' },
   tunisia: { en: 'Tunisia', ar: 'تونس' },
   algeria: { en: 'Algeria', ar: 'الجزائر' },
@@ -164,6 +173,7 @@ export const MENA_COUNTRY_FLAGS: Record<MenaCountryKey, string> = {
   oman: '🇴🇲',
   jordan: '🇯🇴',
   lebanon: '🇱🇧',
+  syria: '🇸🇾',
   morocco: '🇲🇦',
   tunisia: '🇹🇳',
   algeria: '🇩🇿',

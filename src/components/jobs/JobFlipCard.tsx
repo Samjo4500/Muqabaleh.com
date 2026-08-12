@@ -30,7 +30,7 @@ export function JobFlipCard({ locale, roleCount }: Props) {
     }),
     locale,
   );
-  const jobsLabel = roleCount > 0 ? roleCount : 166;
+  const jobsLabel = roleCount > 0 ? roleCount : null;
 
   useEffect(() => {
     if (reduceMotion || paused) return;
@@ -174,8 +174,12 @@ export function JobFlipCard({ locale, roleCount }: Props) {
         </Link>
         <p className="text-[11px] text-white/40">
           {locale === 'ar'
-            ? `أكثر من ${jobsLabel} وظيفة حقيقية · الراتب لدى الشركة`
-            : `${jobsLabel}+ real jobs · Salary at the company`}
+            ? jobsLabel
+              ? `أكثر من ${jobsLabel} وظيفة حقيقية · الراتب لدى الشركة`
+              : 'وظائف حقيقية في المنطقة · الراتب لدى الشركة'
+            : jobsLabel
+              ? `${jobsLabel}+ real jobs · Salary at the company`
+              : 'Live MENA roles · Salary at the company'}
         </p>
       </div>
     </div>

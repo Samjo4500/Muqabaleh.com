@@ -43,7 +43,8 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const [q, setQ] = useState('');
   const [salaryOnly, setSalaryOnly] = useState(false);
 
-  const [showEmptyCountries, setShowEmptyCountries] = useState(false);
+  // Show every MENA market by default (zeros included) so coverage gaps are visible.
+  const [showEmptyCountries, setShowEmptyCountries] = useState(true);
 
   const countryCounts = useMemo(() => {
     const map = new Map<MenaCountryKey, number>();

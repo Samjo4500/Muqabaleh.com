@@ -1,5 +1,7 @@
+import { NextRequest, NextResponse } from 'next/server';
 import NextAuth from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /**
  * On Vercel Preview, force NEXTAUTH_URL to the deployment host so
@@ -14,4 +16,20 @@ if (
 }
 
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+
+export async function GET(
+  req: NextRequest,
+  ctx: { params: Promise<{ nextauth: string[] }> },
+) {
+  return handler(req, ctx);
+}
+
+export async function POST(
+  req: NextRequest,
+  ctx: { params: Promise<{ nextauth: string[] }> },
+) {
+  // Login / CSRF / credentials posts share this handler — limit abuse.
+  const limited = await enforceIpRateLimit('/api/auth/*', 5);
+  if (limited) return limited;
+  return handler(req, ctx);
+}

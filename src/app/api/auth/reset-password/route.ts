@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import { hashSync } from 'bcryptjs';
 import { jwtVerify } from 'jose';
 import { db } from '@/lib/db';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 function secretKey() {
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
@@ -11,6 +12,9 @@ function secretKey() {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/auth/*', 5);
+  if (limited) return limited;
+
   try {
     const body = (await req.json()) as {
       token?: string;

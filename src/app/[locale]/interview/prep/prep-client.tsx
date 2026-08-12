@@ -7,9 +7,11 @@ import Link from 'next/link';
 import { Loader2, Mic } from 'lucide-react';
 import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
+import { FreeInterviewPaywall } from '@/components/paywall/FreeInterviewPaywall';
 import { localePath } from '@/i18n/navigation';
 import type { CoachGender, LabeledOption, PrepSelections } from '@/lib/coach/types';
 import { inferCoachRoleIdFromTitle } from '@/lib/jobs/jeannie-practice';
+import { trackGaEvent } from '@/lib/analytics-ga';
 
 type RolePublic = LabeledOption & {
   category: string;
@@ -35,19 +37,27 @@ type Props = {
   initialCompany?: string;
   initialRoleTitle?: string;
   initialJobId?: string;
+  /** Server-side hard gate when free quota is exhausted. */
+  forcePaywall?: boolean;
 };
 
 export function PrepClient({
   initialCompany,
   initialRoleTitle,
   initialJobId,
+  forcePaywall = false,
 }: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const router = useRouter();
   const [cfg, setCfg] = useState<PublicConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [accessBlocked, setAccessBlocked] = useState<string | null>(null);
+  const [accessBlocked, setAccessBlocked] = useState<string | null>(() => {
+    if (!forcePaywall) return null;
+    return locale === 'ar'
+      ? 'لقد استخدمت مقابلتك المجانية. اختر خطتك للمتابعة.'
+      : "You've used your free interview. Choose a plan to continue.";
+  });
   const [remaining, setRemaining] = useState<number | null>(null);
   const [canResume, setCanResume] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -90,8 +100,8 @@ export function PrepClient({
           setAccessBlocked(
             a.reason ||
               (isAr
-                ? 'لقد استهلكت مقابلتك المجانية. رقِّ حسابك للمتابعة.'
-                : 'You have used your free interview. Upgrade to continue.'),
+                ? 'لقد استخدمت مقابلتك المجانية. اختر خطتك للمتابعة.'
+                : "You've used your free interview. Choose a plan to continue."),
           );
         }
         setRemaining(typeof a.remaining === 'number' ? a.remaining : null);
@@ -207,6 +217,9 @@ export function PrepClient({
     } catch {
       /* ignore */
     }
+    if (mode === 'new') {
+      trackGaEvent('interview_started', { source: 'prep' });
+    }
     router.push(localePath('/interview/session', locale));
   };
 
@@ -318,17 +331,7 @@ export function PrepClient({
           </div>
         ) : null}
 
-        {accessBlocked ? (
-          <div className="mt-8 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-6">
-            <p className="text-amber-100">{accessBlocked}</p>
-            <Link
-              href={localePath('/#pricing', locale)}
-              className="mq-btn mq-btn-primary mt-4 inline-flex"
-            >
-              {isAr ? 'عرض الباقات' : 'View plans'}
-            </Link>
-          </div>
-        ) : null}
+        <FreeInterviewPaywall open={!!accessBlocked} reason={accessBlocked} />
 
         <form onSubmit={onSubmit} className="mt-8 max-w-2xl space-y-6">
           <Field label={isAr ? 'الفئة' : 'Category'} required>

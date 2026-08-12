@@ -102,7 +102,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
               });
               if (res.ok) {
                 window.location.href =
-                  locale === 'ar' ? '/payment/success' : '/en/payment/success';
+                  locale === 'ar' ? '/app?upgraded=true' : '/en/app?upgraded=true';
               } else {
                 setError(t('activateError'));
               }
@@ -139,7 +139,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
               });
               if (res.ok) {
                 window.location.href =
-                  locale === 'ar' ? '/payment/success' : '/en/payment/success';
+                  locale === 'ar' ? '/app?upgraded=true' : '/en/app?upgraded=true';
               } else {
                 setError(t('activateError'));
               }

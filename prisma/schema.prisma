@@ -771,6 +771,18 @@ model EmailQueue {
   @@index([sent, sendAt])
 }
 
+/// Sliding / fixed-window API abuse protection (serverless-safe).
+model ApiRateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+  @@map("api_rate_limits")
+}
+
 // ─── Candidate Pool (Opt-In talent database for employers) ───
 model CandidatePool {
   id               String   @id @default(uuid())

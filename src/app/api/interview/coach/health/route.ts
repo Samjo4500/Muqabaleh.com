@@ -9,6 +9,7 @@ import { assertCronAuthorized } from '@/lib/cron-auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /**
  * Ops health for Jeannie coach providers.
@@ -16,6 +17,9 @@ import { UserRole } from '@prisma/client';
  * Never returns secret values — only presence + a tiny live ping.
  */
 export async function GET(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   const cronDenied = assertCronAuthorized(req);
   if (cronDenied) {
     const session = await getServerSession(authOptions);

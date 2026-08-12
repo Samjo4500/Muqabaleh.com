@@ -591,13 +591,20 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
         <AlertDialog
           open={deleteStep >= 1}
           onOpenChange={(open) => {
-            if (!open) setDeleteStep(0);
+            if (!open) {
+              setDeleteStep(0);
+              return;
+            }
+            // Controlled dialog: Trigger alone cannot open when open={deleteStep>=1}
+            if (deleteStep === 0) setDeleteStep(1);
           }}
         >
           <AlertDialogTrigger asChild>
             <Button
+              type="button"
               variant="outline"
-              className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+              onClick={() => setDeleteStep(1)}
+              className="min-h-11 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
             >
               {t('deleteAccount')}
             </Button>
@@ -641,7 +648,10 @@ export function ProfileForm({ user, locale }: { user: ProfileFormData; locale: s
                   {tCommon('cancel')}
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleDelete}
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    await handleDelete();
+                  }}
                   disabled={deleting}
                   className="bg-red-500 text-white hover:bg-red-600 cursor-pointer"
                 >

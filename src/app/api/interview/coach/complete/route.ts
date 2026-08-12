@@ -4,8 +4,12 @@ import { completeCoachInterview } from '@/lib/coach/complete';
 import { getCoachAccess } from '@/lib/coach/access';
 import { trackCoachEvent } from '@/lib/coach/analytics';
 import type { ChatMessage, PrepSelections } from '@/lib/coach/types';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId, session } = await requireApiAuth();
     const body = (await req.json()) as {
@@ -63,6 +67,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error('[api/coach/complete]', err);
+    const { captureException } = await import('@/lib/sentry');
+    await captureException(err, { area: 'interview.complete' });
     return NextResponse.json(
       {
         ok: false,

@@ -14,7 +14,9 @@ export default function NotFound() {
   return (
     <AtelierShell>
       <main className="mq-wrap flex flex-col items-center justify-center px-4 py-24 text-center md:py-32">
-        <p className="text-xs font-bold tracking-[0.2em] text-teal-300/80">404</p>
+        <p className="mq-display text-7xl font-extrabold tracking-tight text-teal-300/90 md:text-8xl">
+          404
+        </p>
         <h1 className="mq-display mt-4 text-3xl font-extrabold text-white md:text-5xl">
           {t('404Title')}
         </h1>

@@ -126,12 +126,57 @@ export async function processEmailQueue(): Promise<{ sent: number; failed: numbe
   let failed = 0;
 
   for (const email of dueEmails) {
-    const result = await sendEmail({
-      to: email.to,
-      subject: email.subject,
-      html: email.html,
-      from: email.from || undefined,
-    });
+    // Skip free-only drip nudges if the user already upgraded / deleted.
+    if (email.subject.includes('[mq-drip:')) {
+      const { shouldSendDripEmail, sendDripViaBrevo } = await import('@/lib/email-drip');
+      const ok = await shouldSendDripEmail(email.to, email.subject);
+      if (!ok) {
+        await db.emailQueue.update({
+          where: { id: email.id },
+          data: { sent: true, sentAt: new Date(), error: 'skipped_upgraded_or_inactive' },
+        });
+        sent++;
+        continue;
+      }
+      const drip = await sendDripViaBrevo({
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+      });
+      if (drip.success) {
+        await db.emailQueue.update({
+          where: { id: email.id },
+          data: { sent: true, sentAt: new Date() },
+        });
+        sent++;
+        continue;
+      }
+      await db.emailQueue.update({
+        where: { id: email.id },
+        data: { error: drip.error || 'brevo_failed' },
+      });
+      failed++;
+      continue;
+    }
+
+    // Prefer Brevo for all queued mail when configured.
+    let result: { success: boolean; error?: string } = { success: false };
+    if (process.env.BREVO_API_KEY?.trim()) {
+      const { sendBrevoEmail } = await import('@/lib/brevo');
+      result = await sendBrevoEmail({
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+      });
+    }
+    if (!result.success) {
+      result = await sendEmail({
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+        from: email.from || undefined,
+      });
+    }
 
     if (result.success) {
       await db.emailQueue.update({

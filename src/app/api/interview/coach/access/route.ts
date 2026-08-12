@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import { getCoachAccess } from '@/lib/coach/access';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function GET() {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId } = await requireApiAuth();
     const snap = await getCoachAccess(userId);

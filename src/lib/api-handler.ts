@@ -53,7 +53,10 @@ export async function withAuth(
     const rl = checkRateLimit(ip, route, cfg.rateLimit);
     if (!rl.allowed) {
       return NextResponse.json(
-        { error: 'Too many requests', retryAfter: Math.ceil(rl.resetAt / 1000) },
+        {
+          error: 'Too many requests. Please try again in 60 seconds.',
+          retryAfter: Math.ceil(rl.resetAt / 1000),
+        },
         {
           status: 429,
           headers: {
@@ -120,7 +123,10 @@ export async function withRateLimit(
 
     if (!rl.allowed) {
       return NextResponse.json(
-        { error: 'Too many requests', retryAfter: Math.ceil(rl.resetAt / 1000) },
+        {
+          error: 'Too many requests. Please try again in 60 seconds.',
+          retryAfter: Math.ceil(rl.resetAt / 1000),
+        },
         {
           status: 429,
           headers: {

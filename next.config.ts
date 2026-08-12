@@ -20,13 +20,13 @@ const contentSecurityPolicy = [
   "form-action 'self' https://www.paypal.com https://www.sandbox.paypal.com",
   // Next.js hydration + PayPal SDK. 'unsafe-eval' kept for Next/PayPal compatibility;
   // remove once a nonce-based CSP middleware is in place.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://c.paypal.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://c.paypal.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "media-src 'self' blob: data:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co",
+  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://*.sentry.io https://*.ingest.sentry.io https://www.facebook.com https://connect.facebook.net",
   "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://*.daily.co",
   "upgrade-insecure-requests",
 ].join('; ');
@@ -62,6 +62,18 @@ const nextConfig: NextConfig = {
       { source: '/register', destination: '/auth/register', permanent: false },
       { source: '/en/login', destination: '/en/auth/signin', permanent: false },
       { source: '/en/register', destination: '/en/auth/register', permanent: false },
+      { source: '/help', destination: '/support', permanent: false },
+      { source: '/en/help', destination: '/en/support', permanent: false },
+      {
+        source: '/contact-sales',
+        destination: '/employers#enterprise-form',
+        permanent: false,
+      },
+      {
+        source: '/en/contact-sales',
+        destination: '/en/employers#enterprise-form',
+        permanent: false,
+      },
     ];
   },
   async headers() {

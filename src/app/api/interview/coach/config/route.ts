@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getPublicInterviewConfig } from '@/lib/coach/config';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function GET() {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     return NextResponse.json(getPublicInterviewConfig());
   } catch (err) {

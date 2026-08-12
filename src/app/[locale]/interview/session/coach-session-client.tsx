@@ -10,6 +10,7 @@ import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell'
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from '@/lib/coach/types';
+import { trackGaEvent } from '@/lib/analytics-ga';
 
 type Props = { candidateName: string };
 
@@ -192,6 +193,7 @@ export function CoachSessionClient({ candidateName }: Props) {
           return;
         }
         if (data.score) {
+          trackGaEvent('interview_completed', { source: 'coach' });
           setResult({
             interviewId: data.interviewId,
             verificationId: data.verificationId,
@@ -698,6 +700,7 @@ function ResultsView({
             <a
               href={`/api/interview/coach/passport?interviewId=${result.interviewId}`}
               className="mq-btn mq-btn-primary"
+              onClick={() => trackGaEvent('passport_downloaded', { source: 'coach' })}
             >
               {isAr ? 'تحميل PDF' : 'Download PDF'}
             </a>
@@ -710,14 +713,6 @@ function ResultsView({
                   rel="noreferrer"
                 >
                   LinkedIn
-                </a>
-                <a
-                  className="mq-btn mq-btn-ghost"
-                  href={`https://wa.me/?text=${encodeURIComponent(verifyUrl)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  WhatsApp
                 </a>
                 <a
                   className="mq-btn mq-btn-ghost"

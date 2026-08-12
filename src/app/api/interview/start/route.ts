@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimit, enforceIpRateLimit } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { startSession } from '@/lib/interview/session-service';
 
@@ -11,6 +11,9 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   const ip = await getClientIp();
   const rl = checkRateLimit(ip, '/api/interview/start', 20);
   if (!rl.allowed) {

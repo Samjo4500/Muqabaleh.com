@@ -5,8 +5,12 @@ import { resolveTtsVoice, synthesizeSpeech } from '@/lib/coach/tts';
 import { findActiveCoachSession } from '@/lib/coach/session';
 import { getCoachAccess } from '@/lib/coach/access';
 import type { CoachGender } from '@/lib/coach/types';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId } = await requireApiAuth();
     const body = (await req.json()) as {

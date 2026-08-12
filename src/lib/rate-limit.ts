@@ -1,82 +1,189 @@
-// ─── In-Memory Rate Limiter ───────────────────────────────────────
-// Sliding window per IP. No external dependency needed.
-// Resets entries older than windowMs to prevent unbounded memory growth.
+// ─── Rate Limiter (DB-backed, serverless-safe) ───────────────────
+// Prefer Postgres ApiRateLimit so limits survive Vercel cold starts.
+// Falls back to in-memory Map if the DB table is unavailable.
+
+import { NextResponse } from 'next/server';
+import { getClientIp } from '@/lib/security';
 
 interface RateEntry {
   count: number;
   resetAt: number;
 }
 
-const store = new Map<string, RateEntry>();
-
-/** Clean up expired entries every 5 minutes */
+const memoryStore = new Map<string, RateEntry>();
 const CLEANUP_MS = 5 * 60_000;
 let lastCleanup = Date.now();
 
-function cleanup(): void {
+function cleanupMemory(): void {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_MS) return;
   lastCleanup = now;
-  for (const [key, entry] of store) {
-    if (now > entry.resetAt) store.delete(key);
+  for (const [key, entry] of memoryStore) {
+    if (now > entry.resetAt) memoryStore.delete(key);
+  }
+}
+
+function memoryRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): boolean {
+  cleanupMemory();
+  const now = Date.now();
+  const entry = memoryStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    memoryStore.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
+function memoryRemaining(key: string, limit: number): number {
+  const entry = memoryStore.get(key);
+  if (!entry || Date.now() > entry.resetAt) return limit;
+  return Math.max(0, limit - entry.count);
+}
+
+function memoryResetAt(key: string): number {
+  const entry = memoryStore.get(key);
+  if (!entry) return 0;
+  return Math.max(0, entry.resetAt - Date.now());
+}
+
+async function dbConsume(
+  key: string,
+  limit: number,
+  windowMs: number,
+): Promise<{ allowed: boolean; remaining: number; resetAt: number } | null> {
+  try {
+    const { db } = await import('@/lib/db');
+    const now = new Date();
+    const existing = await db.apiRateLimit.findUnique({ where: { key } });
+
+    if (!existing || existing.resetAt.getTime() <= now.getTime()) {
+      const resetAt = new Date(now.getTime() + windowMs);
+      await db.apiRateLimit.upsert({
+        where: { key },
+        create: { key, count: 1, resetAt },
+        update: { count: 1, resetAt },
+      });
+      return {
+        allowed: true,
+        remaining: Math.max(0, limit - 1),
+        resetAt: windowMs,
+      };
+    }
+
+    if (existing.count >= limit) {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: Math.max(0, existing.resetAt.getTime() - now.getTime()),
+      };
+    }
+
+    const updated = await db.apiRateLimit.update({
+      where: { key },
+      data: { count: { increment: 1 } },
+    });
+    return {
+      allowed: true,
+      remaining: Math.max(0, limit - updated.count),
+      resetAt: Math.max(0, existing.resetAt.getTime() - now.getTime()),
+    };
+  } catch (err) {
+    console.warn('[rate-limit] DB unavailable, using memory', err);
+    return null;
   }
 }
 
 /**
- * Check if a request should be allowed.
- * @param key - Identifier (usually IP or IP+route)
- * @param limit - Max requests in the window
- * @param windowMs - Time window in ms (default 15 min)
- * @returns true if allowed, false if rate-limited
+ * Sync memory check (legacy callers). Prefer checkRateLimit / enforceIpRateLimit.
  */
 export function rateLimit(
   key: string,
   limit: number,
   windowMs: number = 15 * 60_000,
 ): boolean {
-  cleanup();
-  const now = Date.now();
-  const entry = store.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    return true;
-  }
-
-  if (entry.count >= limit) return false;
-  entry.count++;
-  return true;
+  return memoryRateLimit(key, limit, windowMs);
 }
 
-/** Get remaining requests in the current window */
 export function rateLimitRemaining(
   key: string,
   limit: number,
-  windowMs: number = 15 * 60_000,
+  _windowMs: number = 15 * 60_000,
 ): number {
-  const entry = store.get(key);
-  if (!entry || Date.now() > entry.resetAt) return limit;
-  return Math.max(0, limit - entry.count);
+  return memoryRemaining(key, limit);
 }
 
-/** Time until the rate limit resets (ms) */
-export function rateLimitResetAt(
-  key: string,
-): number {
-  const entry = store.get(key);
-  if (!entry) return 0;
-  return Math.max(0, entry.resetAt - Date.now());
+export function rateLimitResetAt(key: string): number {
+  return memoryResetAt(key);
+}
+
+export function checkRateLimit(
+  ip: string,
+  route: string,
+  limit = 100,
+  windowMs: number = 15 * 60_000,
+) {
+  const key = `${ip}:${route}`;
+  // Sync path kept for legacy; async DB path used by enforceIpRateLimit.
+  return {
+    allowed: rateLimit(key, limit, windowMs),
+    remaining: rateLimitRemaining(key, limit, windowMs),
+    resetAt: rateLimitResetAt(key),
+  };
+}
+
+export const RATE_LIMIT_MESSAGE =
+  'Too many requests. Please try again in 60 seconds.';
+
+export function tooManyRequestsResponse(retryAfterSec = 60): NextResponse {
+  return NextResponse.json(
+    { error: RATE_LIMIT_MESSAGE },
+    {
+      status: 429,
+      headers: {
+        'Retry-After': String(retryAfterSec),
+        'X-RateLimit-Remaining': '0',
+      },
+    },
+  );
+}
+
+/** Async DB-first rate limit result. */
+export async function consumeRateLimit(
+  ip: string,
+  route: string,
+  limit: number,
+  windowMs: number = 60_000,
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const key = `${ip}:${route}`;
+  const dbResult = await dbConsume(key, limit, windowMs);
+  if (dbResult) return dbResult;
+  const allowed = memoryRateLimit(key, limit, windowMs);
+  return {
+    allowed,
+    remaining: memoryRemaining(key, limit),
+    resetAt: memoryResetAt(key),
+  };
 }
 
 /**
- * Express/Next.js middleware helper.
- * Returns { allowed: boolean, remaining: number, resetAt: number }
+ * Enforce a per-IP per-minute limit for the given route bucket.
+ * Returns a 429 NextResponse when blocked, otherwise null.
  */
-export function checkRateLimit(ip: string, route: string, limit = 100) {
-  const key = `${ip}:${route}`;
-  return {
-    allowed: rateLimit(key, limit),
-    remaining: rateLimitRemaining(key, limit),
-    resetAt: rateLimitResetAt(key),
-  };
+export async function enforceIpRateLimit(
+  route: string,
+  limitPerMinute: number,
+): Promise<NextResponse | null> {
+  const ip = await getClientIp();
+  const rl = await consumeRateLimit(ip, route, limitPerMinute, 60_000);
+  if (!rl.allowed) {
+    const retryAfter = Math.max(1, Math.ceil(rl.resetAt / 1000));
+    return tooManyRequestsResponse(retryAfter);
+  }
+  return null;
 }

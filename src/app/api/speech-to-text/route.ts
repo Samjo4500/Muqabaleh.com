@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import {
-import { enforceIpRateLimit } from '@/lib/rate-limit';
   transcribeWithGoogleStt,
   type SttLanguageMode,
 } from '@/lib/coach/google-stt';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/speech-to-text

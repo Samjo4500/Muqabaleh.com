@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, Banknote, Briefcase, MapPin, Search, Sparkles } from 'lucide-react';
 import { localePath } from '@/i18n/navigation';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
+import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import {
   classifyMenaCountry,
   MENA_COUNTRY_FLAGS,
@@ -104,7 +105,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
           {isAr ? 'نجهّز قائمة الوظائف' : 'Warming up MENA roles'}
         </p>
         <Link
-          href={localePath('/interview/prequal', locale)}
+          href={localePath(jeanniePracticePath(), locale)}
           className="mq-btn mq-btn-primary mt-8 inline-flex min-h-[48px] items-center gap-2 px-6 text-sm font-bold"
         >
           <Sparkles size={16} />
@@ -241,7 +242,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                 {isAr ? 'عرض كل الوظائف' : 'Show all MENA'}
               </button>
               <Link
-                href={localePath('/interview/prequal', locale)}
+                href={localePath(jeanniePracticePath(), locale)}
                 className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center gap-2 px-5 text-sm font-bold"
               >
                 <Sparkles size={15} />
@@ -395,7 +396,11 @@ function SpotlightRole({
     ? localePath(`/companies/${job.company.slug}/${job.slug}`, locale)
     : localePath(`/jobs/${job.id}`, locale);
   const practiceHref = localePath(
-    `/interview/prequal?company=${encodeURIComponent(job.company?.name || '')}&role=${encodeURIComponent(job.title)}&job=${encodeURIComponent(job.id)}`,
+    jeanniePracticePath({
+      company: job.company?.name,
+      role: job.title,
+      job: job.id,
+    }),
     locale,
   );
   const countryKey = classifyMenaCountry(job.location, job.company?.country, job.title);
@@ -476,7 +481,7 @@ function SpotlightRole({
           className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
           <Sparkles size={15} />
-          {isAr ? 'تدرّب لهذه الوظيفة مع جيني' : 'Practice this role with Jeannie'}
+          {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
         </Link>
         <a
           href={job.applyUrl}

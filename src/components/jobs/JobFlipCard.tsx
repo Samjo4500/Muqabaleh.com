@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { FEATURED_JOBS } from '@/components/jobs/featured-jobs';
 import { localePath } from '@/i18n/navigation';
+import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 
 type Props = {
   locale: string;
@@ -21,7 +22,14 @@ export function JobFlipCard({ locale, roleCount }: Props) {
   const [showEn, setShowEn] = useState(false);
   const [paused, setPaused] = useState(false);
   const job = FEATURED_JOBS[jobIndex];
-  const practiceHref = localePath('/interview/prequal', locale);
+  const practiceHref = localePath(
+    jeanniePracticePath({
+      company: job.company,
+      role: locale === 'ar' ? job.titleAr : job.titleEn,
+      job: job.id,
+    }),
+    locale,
+  );
   const jobsLabel = roleCount > 0 ? roleCount : 166;
 
   useEffect(() => {
@@ -161,7 +169,7 @@ export function JobFlipCard({ locale, roleCount }: Props) {
           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 text-sm font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]"
           onClick={(e) => e.stopPropagation()}
         >
-          {locale === 'ar' ? 'تدرّب مع جيني مجاناً' : 'Train with Jeannie — Free'}
+          {locale === 'ar' ? 'تدرّب صوتياً مع جيني مجاناً' : 'Voice practice with Jeannie — Free'}
           <span aria-hidden>{locale === 'ar' ? '←' : '→'}</span>
         </Link>
         <p className="text-[11px] text-white/40">

@@ -14,6 +14,7 @@ import {
 } from '@/components/landing/crystal/mena-hero-frames';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
+import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 
 type Props = {
   roleCount: number;
@@ -184,10 +185,10 @@ export function JobsHero({ roleCount }: Props) {
                 {isAr ? 'استعرض الوظائف' : 'Browse roles'}
               </a>
               <Link
-                href={localePath('/interview/prequal', locale)}
+                href={localePath(jeanniePracticePath(), locale)}
                 className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
               >
-                {isAr ? 'تدرّب مع جيني' : 'Practice with Jeannie'}
+                {isAr ? 'تدرّب صوتياً مع جيني' : 'Voice practice with Jeannie'}
               </Link>
             </motion.div>
           </motion.div>

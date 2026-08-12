@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -5,6 +6,7 @@ import { routing, type Locale } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
+import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
@@ -117,6 +119,9 @@ export default async function LocaleLayout({
         <Providers>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <Suspense fallback={null}>
+              <AnalyticsTracker />
+            </Suspense>
             <DeferredMarketingChrome />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>

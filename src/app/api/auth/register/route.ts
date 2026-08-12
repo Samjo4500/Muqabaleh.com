@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hashSync } from 'bcryptjs';
 import { db } from '@/lib/db';
 import { z } from 'zod';
-import { checkRateLimit, enforceIpRateLimit, RATE_LIMIT_MESSAGE } from '@/lib/rate-limit';
+import { enforceIpRateLimit, consumeRateLimit, RATE_LIMIT_MESSAGE } from '@/lib/rate-limit';
 import { getClientIp, sanitizeObject, auditLog } from '@/lib/security';
 import { triggerWelcomeEmail } from '@/lib/email-triggers';
 import { scheduleSignupDripEmails } from '@/lib/email-drip';
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const ip = await getClientIp();
 
   // Rate limit: 5 registrations per IP per 15 min
-  const rl = checkRateLimit(ip, '/api/auth/register', 5, 60_000);
+  const rl = await consumeRateLimit(ip, '/api/auth/register', 5, 60_000);
   if (!rl.allowed) {
     return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
   }

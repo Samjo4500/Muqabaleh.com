@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createHash, randomBytes } from 'crypto';
 import { SignJWT } from 'jose';
 import { db } from '@/lib/db';
-import { checkRateLimit, enforceIpRateLimit } from '@/lib/rate-limit';
+import { enforceIpRateLimit, consumeRateLimit, RATE_LIMIT_MESSAGE } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/security';
 import { sendBrevoEmail, brandedEmailShell } from '@/lib/brevo';
 import { MUQABALEH_BRAND } from '@/lib/brand/comms';
@@ -25,10 +25,10 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const ip = await getClientIp();
-  const rl = checkRateLimit(ip, '/api/auth/forgot-password', 5, 60_000);
+  const rl = await consumeRateLimit(ip, '/api/auth/forgot-password', 5, 60_000);
   if (!rl.allowed) {
     return NextResponse.json(
-      { error: 'Too many requests. Please try again in 60 seconds.' },
+      { error: RATE_LIMIT_MESSAGE },
       { status: 429 },
     );
   }

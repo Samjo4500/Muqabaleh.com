@@ -122,8 +122,13 @@ export async function GET() {
     const completionRate =
       totalInterviews > 0 ? Math.round((completedInterviews / totalInterviews) * 100) : 0;
 
-    // Soft visitor estimate from interviews + signups when no analytics store exists
-    const visitors24h = Math.max(interviewsToday * 3 + newSignups * 2, interviewsToday + newSignups);
+    const { countVisitors24h } = await import('@/lib/analytics/admin-queries');
+    const realVisitors = await countVisitors24h();
+    // Prefer first-party analytics; fall back to soft estimate only if empty/unavailable
+    const visitors24h =
+      realVisitors > 0
+        ? realVisitors
+        : Math.max(interviewsToday * 3 + newSignups * 2, interviewsToday + newSignups);
 
     return NextResponse.json({
       widgets: {

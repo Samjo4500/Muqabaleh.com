@@ -1414,3 +1414,137 @@ model PipelineStage {
   @@unique([organizationId, key])
   @@index([organizationId, sortOrder])
 }
+
+// ─── Website visitor analytics (first-party) ───
+
+model AnalyticsVisitor {
+  id          String   @id
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  /// Linked when the visitor authenticates (no FK — soft link)
+  userId      String?
+  country     String?
+  region      String?
+  city        String?
+  deviceClass String?
+  browser     String?
+  os          String?
+  language    String?
+  timezone    String?
+  isBot       Boolean  @default(false)
+  pageviews   Int      @default(0)
+  sessions    Int      @default(0)
+
+  sessionRows AnalyticsSession[]
+  events      AnalyticsEvent[]
+
+  @@index([lastSeenAt])
+  @@index([userId])
+  @@index([country])
+  @@map("analytics_visitors")
+}
+
+model AnalyticsSession {
+  id           String    @id
+  visitorId    String
+  visitor      AnalyticsVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  landingPath  String?
+  exitPath     String?
+  entryUrl     String?
+  referrer     String?
+  referrerHost String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmTerm      String?
+  utmContent   String?
+  gclid        String?
+  fbclid       String?
+  locale       String?
+  userAgent    String?
+  browser      String?
+  os           String?
+  deviceClass  String?
+  country      String?
+  region       String?
+  city         String?
+  language     String?
+  timezone     String?
+  screenW      Int?
+  screenH      Int?
+  isBot        Boolean   @default(false)
+  pageCount    Int       @default(0)
+  durationMs   Int       @default(0)
+  maxScrollPct Int       @default(0)
+  userId       String?
+  ipHash       String?
+
+  events AnalyticsEvent[]
+
+  @@index([visitorId, startedAt])
+  @@index([startedAt])
+  @@index([utmSource, startedAt])
+  @@index([referrerHost, startedAt])
+  @@index([country, startedAt])
+  @@index([deviceClass, startedAt])
+  @@map("analytics_sessions")
+}
+
+/// Granular first-party events: pageview, scroll, outbound, exit, error, custom.
+model AnalyticsEvent {
+  id           String   @id @default(cuid())
+  type         String
+  visitorId    String
+  visitor      AnalyticsVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  sessionId    String
+  session      AnalyticsSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId       String?
+  occurredAt   DateTime @default(now())
+  path         String
+  pathNorm     String
+  query        String?
+  hash         String?
+  locale       String?
+  title        String?
+  referrer     String?
+  previousPath String?
+  durationMs   Int?
+  scrollPct    Int?
+  clickHref    String?
+  clickText    String?
+  screenW      Int?
+  screenH      Int?
+  viewportW    Int?
+  viewportH    Int?
+  country      String?
+  region       String?
+  city         String?
+  deviceClass  String?
+  browser      String?
+  os           String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmTerm      String?
+  utmContent   String?
+  gclid        String?
+  fbclid       String?
+  isBot        Boolean  @default(false)
+  ipHash       String?
+  timezone     String?
+  language     String?
+  connection   String?
+  meta         Json?
+
+  @@index([occurredAt])
+  @@index([type, occurredAt])
+  @@index([pathNorm, occurredAt])
+  @@index([sessionId, occurredAt])
+  @@index([visitorId, occurredAt])
+  @@index([country, occurredAt])
+  @@index([utmSource, occurredAt])
+  @@index([deviceClass, occurredAt])
+  @@map("analytics_events")
+}

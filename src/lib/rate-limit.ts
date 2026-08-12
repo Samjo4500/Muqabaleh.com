@@ -1,6 +1,10 @@
 // ─── In-Memory Rate Limiter ───────────────────────────────────────
-// Sliding window per IP. No external dependency needed.
+// Sliding window per IP. No external dependency / KV required.
 // Resets entries older than windowMs to prevent unbounded memory growth.
+// Note: resets on serverless cold start — better than nothing for launch.
+
+import { NextResponse } from 'next/server';
+import { getClientIp } from '@/lib/security';
 
 interface RateEntry {
   count: number;
@@ -60,9 +64,7 @@ export function rateLimitRemaining(
 }
 
 /** Time until the rate limit resets (ms) */
-export function rateLimitResetAt(
-  key: string,
-): number {
+export function rateLimitResetAt(key: string): number {
   const entry = store.get(key);
   if (!entry) return 0;
   return Math.max(0, entry.resetAt - Date.now());
@@ -72,11 +74,50 @@ export function rateLimitResetAt(
  * Express/Next.js middleware helper.
  * Returns { allowed: boolean, remaining: number, resetAt: number }
  */
-export function checkRateLimit(ip: string, route: string, limit = 100) {
+export function checkRateLimit(
+  ip: string,
+  route: string,
+  limit = 100,
+  windowMs: number = 15 * 60_000,
+) {
   const key = `${ip}:${route}`;
   return {
-    allowed: rateLimit(key, limit),
-    remaining: rateLimitRemaining(key, limit),
+    allowed: rateLimit(key, limit, windowMs),
+    remaining: rateLimitRemaining(key, limit, windowMs),
     resetAt: rateLimitResetAt(key),
   };
+}
+
+export const RATE_LIMIT_MESSAGE =
+  'Too many requests. Please try again in 60 seconds.';
+
+/** Standard 429 JSON for API abuse protection. */
+export function tooManyRequestsResponse(retryAfterSec = 60): NextResponse {
+  return NextResponse.json(
+    { error: RATE_LIMIT_MESSAGE },
+    {
+      status: 429,
+      headers: {
+        'Retry-After': String(retryAfterSec),
+        'X-RateLimit-Remaining': '0',
+      },
+    },
+  );
+}
+
+/**
+ * Enforce a per-IP per-minute limit for the given route bucket.
+ * Returns a 429 NextResponse when blocked, otherwise null.
+ */
+export async function enforceIpRateLimit(
+  route: string,
+  limitPerMinute: number,
+): Promise<NextResponse | null> {
+  const ip = await getClientIp();
+  const rl = checkRateLimit(ip, route, limitPerMinute, 60_000);
+  if (!rl.allowed) {
+    const retryAfter = Math.max(1, Math.ceil(rl.resetAt / 1000));
+    return tooManyRequestsResponse(retryAfter);
+  }
+  return null;
 }

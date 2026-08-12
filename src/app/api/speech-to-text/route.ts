@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, requireApiAuth } from '@/lib/session';
 import {
+import { enforceIpRateLimit } from '@/lib/rate-limit';
   transcribeWithGoogleStt,
   type SttLanguageMode,
 } from '@/lib/coach/google-stt';
@@ -11,6 +12,9 @@ import {
  * Never crashes the interview — empty text triggers client text fallback.
  */
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/speech-to-text', 5);
+  if (limited) return limited;
+
   try {
     await requireApiAuth();
 

@@ -5,6 +5,8 @@ import { routing, type Locale } from '@/i18n/routing';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
+import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
+import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
@@ -58,8 +60,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: meta.title,
-      description: meta.description,
+      title:
+        locale === 'ar'
+          ? 'Muqabaleh | تدرّب على مقابلات العمل بالذكاء الاصطناعي'
+          : 'Muqabaleh | Practice job interviews with AI',
+      description:
+        'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
       url,
       siteName: 'مقابلة | Muqabaleh',
       locale: ogLocale,
@@ -67,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       images: [
         {
-          url: '/og-image.jpg',
+          url: '/og-passport.jpg',
           width: 1200,
           height: 630,
           alt: 'مقابلة | Muqabaleh — AI Interview Practice',
@@ -76,9 +82,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: meta.title,
-      description: meta.description,
-      images: ['/og-image.jpg'],
+      title:
+        locale === 'ar'
+          ? 'Muqabaleh | تدرّب على مقابلات العمل بالذكاء الاصطناعي'
+          : 'Muqabaleh | Practice job interviews with AI',
+      description:
+        'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
+      images: ['/og-passport.jpg'],
       site: '@muqabaleh',
     },
     robots: { index: true, follow: true },
@@ -112,6 +122,7 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Muqabaleh" />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="min-h-screen bg-void text-[var(--text-primary)] antialiased">
@@ -119,6 +130,8 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <DeferredMarketingChrome />
+            <CookieConsentBanner />
+            <ConditionalAnalytics />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>
         </Providers>

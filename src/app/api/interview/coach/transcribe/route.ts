@@ -6,12 +6,16 @@ import {
 } from '@/lib/coach/google-stt';
 import { findActiveCoachSession } from '@/lib/coach/session';
 import { getCoachAccess } from '@/lib/coach/access';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /**
  * Legacy coach path — same Google STT backend as /api/speech-to-text.
  * Hard-gated to active session / remaining quota.
  */
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId } = await requireApiAuth();
     const active = await findActiveCoachSession(userId);

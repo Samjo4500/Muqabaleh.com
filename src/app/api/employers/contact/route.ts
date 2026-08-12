@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendBrevoEmail } from '@/lib/brevo';
+import { sendBrevoEmail, brandedEmailShell } from '@/lib/brevo';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /**
  * Enterprise contact form → sales@muqabaleh.com via Brevo.
  */
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/employers/contact', 5);
+  if (limited) return limited;
+
   const body = (await req.json().catch(() => ({}))) as {
     name?: string;
     company?: string;
@@ -22,6 +26,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const isAr = String(body.locale || '').startsWith('ar');
   const subject = `[Muqabaleh Enterprise] ${body.company} — ${body.name}`;
   const html = `
     <div style="font-family:Inter,Arial,sans-serif;line-height:1.5;color:#0f172a">
@@ -42,6 +47,21 @@ export async function POST(req: NextRequest) {
       subject,
       html,
       replyTo: { email: body.email.trim(), name: body.name.trim() },
+    });
+
+    await sendBrevoEmail({
+      to: body.email.trim(),
+      subject: isAr
+        ? 'استلمنا طلبك — مقابلة للأعمال'
+        : 'We received your inquiry — Muqabaleh for Business',
+      html: brandedEmailShell({
+        locale: isAr ? 'ar' : 'en',
+        eyebrow: isAr ? 'المبيعات' : 'Sales',
+        title: isAr ? 'تم الإرسال' : 'Sent',
+        bodyHtml: isAr
+          ? `<p style="margin:0;">تم الإرسال. سنتواصل معك خلال 24 ساعة.</p>`
+          : `<p style="margin:0;">Sent. We'll contact you within 24 hours.</p>`,
+      }),
     });
 
     if (!result.success) {

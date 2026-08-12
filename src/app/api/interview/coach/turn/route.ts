@@ -9,8 +9,12 @@ import {
 } from '@/lib/coach/session';
 import { trackCoachEvent } from '@/lib/coach/analytics';
 import type { ChatMessage, PrepSelections } from '@/lib/coach/types';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId, session } = await requireApiAuth();
     const body = (await req.json()) as {

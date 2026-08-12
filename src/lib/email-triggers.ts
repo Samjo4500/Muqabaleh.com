@@ -39,17 +39,17 @@ export async function triggerWelcomeEmail(userId: string, locale?: Locale) {
     const isAr = lang === 'ar';
     const name = user.name || (isAr ? 'مرحباً' : 'there');
     const subject = isAr
-      ? 'مرحباً بك في مقابلة — مقابلتك الأولى مجانية'
-      : 'Welcome to Muqabaleh — Your first interview is free';
+      ? 'مرحباً بك في مقابلة — ابدأ مقابلتك المجانية'
+      : 'Welcome to Muqabaleh. Start your free interview';
     const html = brandedEmailShell({
       locale: lang,
       eyebrow: isAr ? 'حسابك جاهز' : 'Your account is ready',
       title: isAr ? `مرحباً بك، ${name}` : `Welcome, ${name}`,
       bodyHtml: isAr
-        ? `<p style="margin:0 0 12px;">حسابك في <strong>مقابلة</strong> جاهز. مقابلتك الأولى مع جيني مجانية — تدرّب، احصل على درجة، وابنِ جواز مقابلة موثّقاً.</p>
-           <p style="margin:0;color:#64748b;font-size:14px;">يمكنك مراجعة الباقات لاحقاً لفتح إرسال الجواز بالبريد ومزيد من الجلسات.</p>`
-        : `<p style="margin:0 0 12px;">Your <strong>Muqabaleh</strong> account is ready. Your first interview with Jeannie is free — practice, get scored, and earn a verified Interview Passport.</p>
-           <p style="margin:0;color:#64748b;font-size:14px;">Review plans anytime to unlock passport email delivery and more sessions.</p>`,
+        ? `<p style="margin:0 0 12px;">مرحباً بك في <strong>مقابلة</strong>. ابدأ مقابلتك المجانية: الرابط أدناه.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">جلسة صوتية مع جيني — تقييم فوري وجواز مقابلة بعد الترقية.</p>`
+        : `<p style="margin:0 0 12px;">Welcome to <strong>Muqabaleh</strong>. Start your free interview with the link below.</p>
+           <p style="margin:0;color:#64748b;font-size:14px;">A voice session with Jeannie — instant scoring, and a passport after you upgrade.</p>`,
       ctaHref: localePath('/interview/prep', lang),
       ctaLabel: isAr ? 'ابدأ مقابلتك المجانية' : 'Start your free interview',
     });
@@ -84,31 +84,33 @@ export async function triggerSubscriptionConfirmationEmail(
     const lang = locale || localeFromUserLanguage(user.language);
     const isAr = lang === 'ar';
     const subject = isAr
-      ? `تم تفعيل ${planName} — مقابلة`
-      : `You're on ${planName} — Muqabaleh`;
+      ? 'تم تأكيد اشتراكك في مقابلة Pro'
+      : 'Your Muqabaleh Pro Subscription is Confirmed';
     const html = brandedEmailShell({
       locale: lang,
       eyebrow: isAr ? 'تأكيد الاشتراك' : 'Subscription confirmed',
-      title: isAr ? `تم تفعيل ${planName}` : `You're on ${planName}`,
+      title: isAr ? 'مرحباً بك في خطتك الجديدة' : 'Welcome to your new plan',
       bodyHtml: isAr
-        ? `<p style="margin:0 0 12px;">شكراً لترقيتك. جواز المقابلة يصل الآن بالبريد بعد كل جلسة مؤهّلة، مع جلسات إضافية مع جيني.</p>
+        ? `<p style="margin:0 0 12px;">تم تأكيد اشتراكك. إليك ما يشمله:</p>
            <ul style="margin:0;padding-right:18px;color:#334155;line-height:1.75;">
-             <li>جواز PDF بالبريد من passport@muqabaleh.com</li>
-             <li>مقابلات أكثر هذا الشهر</li>
+             <li>مقابلات إضافية مع جيني</li>
+             <li>جواز مقابلة PDF بالبريد من passport@muqabaleh.com</li>
              <li>دعم عبر support@muqabaleh.com</li>
-           </ul>`
-        : `<p style="margin:0 0 12px;">Thanks for upgrading. Passport PDFs now arrive by email after eligible sessions, with more Jeannie interviews each month.</p>
+           </ul>
+           <p style="margin:12px 0 0;color:#64748b;font-size:14px;">خطتك: <strong>${planName}</strong></p>`
+        : `<p style="margin:0 0 12px;">Your subscription is confirmed. Here's what's included:</p>
            <ul style="margin:0;padding-left:18px;color:#334155;line-height:1.75;">
+             <li>More Jeannie interviews</li>
              <li>Passport PDF by email from passport@muqabaleh.com</li>
-             <li>More interviews this month</li>
              <li>Support at support@muqabaleh.com</li>
-           </ul>`,
+           </ul>
+           <p style="margin:12px 0 0;color:#64748b;font-size:14px;">Your plan: <strong>${planName}</strong></p>`,
       highlight: {
         label: isAr ? 'خطتك' : 'Your plan',
         value: planName,
         sublabel: isAr ? 'مفعّل' : 'Active',
       },
-      ctaHref: localePath('/dashboard', lang),
+      ctaHref: localePath('/app', lang),
       ctaLabel: isAr ? 'افتح لوحة التحكم' : 'Open dashboard',
     });
     await sendBrevoEmail({

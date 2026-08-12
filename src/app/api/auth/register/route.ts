@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hashSync } from 'bcryptjs';
 import { db } from '@/lib/db';
 import { z } from 'zod';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimit, enforceIpRateLimit, RATE_LIMIT_MESSAGE } from '@/lib/rate-limit';
 import { getClientIp, sanitizeObject, auditLog } from '@/lib/security';
 import { triggerWelcomeEmail } from '@/lib/email-triggers';
+import { scheduleSignupDripEmails } from '@/lib/email-drip';
 
 const registerSchema = z.object({
   accountType: z.enum(['INDIVIDUAL', 'B2B']),
@@ -23,15 +24,15 @@ const registerSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/auth/*', 5);
+  if (limited) return limited;
+
   const ip = await getClientIp();
 
   // Rate limit: 5 registrations per IP per 15 min
-  const rl = checkRateLimit(ip, '/api/auth/register', 5);
+  const rl = checkRateLimit(ip, '/api/auth/register', 5, 60_000);
   if (!rl.allowed) {
-    return NextResponse.json(
-      { error: 'Too many registration attempts' },
-      { status: 429 },
-    );
+    return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
   }
 
   try {
@@ -103,8 +104,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send welcome email (fire and forget)
+    // Day 0 welcome + schedule Day 2/5/7/14 drip (Brevo / EmailQueue)
     triggerWelcomeEmail(user.id).catch(() => {});
+    scheduleSignupDripEmails(user.id).catch(() => {});
 
     return NextResponse.json({
       id: user.id,

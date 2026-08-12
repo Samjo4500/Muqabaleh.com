@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { getCoachAccess } from '@/lib/coach/access';
 import { PrepClient } from './prep-client';
 
 interface Props {
@@ -18,6 +19,8 @@ function first(v: string | string[] | undefined): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const isAr = locale === 'ar';
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
+  const path = isAr ? '/interview/prep' : '/en/interview/prep';
   return {
     title: {
       absolute: isAr
@@ -28,6 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? 'جهّز جلسة التدريب الصوتية مع جيني: الدور، القطاع، المستوى، واللغة.'
       : 'Set up your Jeannie voice practice session: role, industry, seniority, and language.',
     robots: { index: false, follow: false },
+    openGraph: {
+      url: `${site}${path}`,
+      images: [{ url: '/og-passport.jpg', width: 1200, height: 630 }],
+    },
   };
 }
 
@@ -54,11 +61,23 @@ export default async function InterviewPrepPage({ params, searchParams }: Props)
     redirect(dest);
   }
 
+  const userId = (session.user as { id?: string }).id;
+  let paywallForced = false;
+  if (userId) {
+    const access = await getCoachAccess(userId);
+    // Hard gate: free users who exhausted quota cannot open prep via URL
+    // unless they have an active session to resume.
+    if (!access.canStart && !access.canResume) {
+      paywallForced = true;
+    }
+  }
+
   return (
     <PrepClient
       initialCompany={company || undefined}
       initialRoleTitle={role || undefined}
       initialJobId={job || undefined}
+      forcePaywall={paywallForced}
     />
   );
 }

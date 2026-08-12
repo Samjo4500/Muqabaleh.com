@@ -15,7 +15,9 @@ import { requireAuth } from '@/lib/session';
 import { db } from '@/lib/db';
 import { getCoachAccess } from '@/lib/coach/access';
 import { GlowCard, CountUpStat, EmptyState } from '@/components/brand';
+import { Suspense } from 'react';
 import { NewInterviewForm } from './new-interview-form';
+import { UpgradeToast } from '@/components/dashboard/UpgradeToast';
 
 /* ------------------------------------------------------------------ */
 /*  Status badge (kept inline – no client interactivity needed)       */
@@ -162,6 +164,9 @@ export default async function DashboardPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      <Suspense fallback={null}>
+        <UpgradeToast />
+      </Suspense>
       {/* Welcome */}
       <div className="flex items-center gap-3">
         <Hand size={24} strokeWidth={1.75} className="text-gold" />

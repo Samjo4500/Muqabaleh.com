@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Check, X } from 'lucide-react';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { CrystalNavbar } from '@/components/landing/crystal/CrystalNavbar';
@@ -19,7 +20,7 @@ const TIERS = [
     price: 199,
     popular: false,
     cta: 'ctaTrial' as const,
-    href: '/console/najm-tech',
+    href: '/console/signup?type=employer',
     features: [
       'f50',
       'f2roles',
@@ -33,7 +34,7 @@ const TIERS = [
     price: 499,
     popular: true,
     cta: 'ctaPro' as const,
-    href: '/console/najm-tech',
+    href: '/console/signup?type=employer',
     features: [
       'f200',
       'f25roles',
@@ -86,6 +87,7 @@ export function EmployersPricing() {
     email: '',
     phone: '',
     teamSize: '11-50',
+    message: '',
   });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -103,7 +105,14 @@ export function EmployersPricing() {
       body: JSON.stringify({ ...form, locale }),
     });
     setSending(false);
-    if (res.ok) setSent(true);
+    if (res.ok) {
+      setSent(true);
+      toast.success(
+        isAr
+          ? 'تم الإرسال. سنتواصل معك خلال 24 ساعة.'
+          : "Sent. We'll contact you within 24 hours.",
+      );
+    }
   };
 
   return (
@@ -325,6 +334,12 @@ export function EmployersPricing() {
                 </option>
               ))}
             </select>
+            <textarea
+              className="min-h-[88px] rounded-lg border border-[#1E293B] bg-[#0B1120] px-3 py-2 text-sm text-[#F8FAFC] outline-none focus:border-[#14B8A6]"
+              placeholder={isAr ? 'رسالة (اختياري)' : 'Message (optional)'}
+              value={form.message}
+              onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
+            />
             <button
               type="button"
               disabled={sending}
@@ -342,7 +357,7 @@ export function EmployersPricing() {
         <div className="mx-auto max-w-3xl rounded-xl border border-[#1E293B] bg-gradient-to-br from-[#0F172A] to-[#0B1120] px-6 py-10 text-center">
           <h2 className="text-[1.5rem] font-medium tracking-tight text-[#F8FAFC] md:text-3xl">{t('bottomCta')}</h2>
           <Link
-            href={localePath('/console/najm-tech', locale)}
+            href={localePath('/console/signup?type=employer', locale)}
             className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-lg bg-[#14B8A6] px-6 text-sm font-medium text-[#042f2e]"
           >
             {t('ctaTrial')}

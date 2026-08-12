@@ -131,6 +131,14 @@ function RegisterForm() {
       }
 
       toast.success(t('registerSuccess'));
+      try {
+        const { trackGaEvent } = await import('@/lib/analytics-ga');
+        trackGaEvent('signup_completed', {
+          accountType: isCompany ? 'B2B' : 'INDIVIDUAL',
+        });
+      } catch {
+        /* analytics optional */
+      }
 
       const login = await signIn('credentials', {
         email: email.trim().toLowerCase(),

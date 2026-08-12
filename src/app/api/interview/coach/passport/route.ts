@@ -6,8 +6,12 @@ import { getInterviewConfig } from '@/lib/coach/config';
 import { buildPassportPdfBuffer } from '@/lib/coach/passport-pdf';
 import { trackCoachEvent } from '@/lib/coach/analytics';
 import type { CoachScoreResult, ScoringMode } from '@/lib/coach/types';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId, session } = await requireApiAuth();
     const access = await getCoachAccess(userId);
@@ -102,6 +106,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error('[api/coach/passport]', err);
+    const { captureException } = await import('@/lib/sentry');
+    await captureException(err, { area: 'passport.generate' });
     return NextResponse.json({ error: 'PDF generation failed' }, { status: 500 });
   }
 }

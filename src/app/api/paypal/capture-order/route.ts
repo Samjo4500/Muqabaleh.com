@@ -149,6 +149,8 @@ export async function POST(req: NextRequest) {
       }
     } catch (dbErr) {
       console.error('Post-capture DB error — initiating refund:', dbErr);
+      const { captureException } = await import('@/lib/sentry');
+      await captureException(dbErr, { area: 'paypal.capture_db' });
       if (captureId) {
         await refundPayPalCapture(
           accessToken,
@@ -162,9 +164,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    try {
+      const {
+        triggerPaymentReceiptEmail,
+        triggerSubscriptionConfirmationEmail,
+      } = await import('@/lib/email-triggers');
+      const amountCents = Math.round(Number.parseFloat(config.amount) * 100);
+      await triggerPaymentReceiptEmail(
+        userId,
+        planCode,
+        amountCents,
+        captureId || orderId,
+      );
+      await triggerSubscriptionConfirmationEmail(userId, planCode);
+    } catch (mailErr) {
+      console.error('[paypal/capture] confirmation email failed', mailErr);
+    }
+
     return NextResponse.json({ success: true, tier: config.tier });
   } catch (err) {
     console.error('PayPal capture error:', err);
+    const { captureException } = await import('@/lib/sentry');
+    await captureException(err, { area: 'paypal.capture' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

@@ -20,7 +20,7 @@ export function pageMetadata(opts: {
   const url = isAr ? arUrl : enUrl;
   const title = isAr ? opts.titleAr : opts.titleEn;
   const description = isAr ? opts.descAr : opts.descEn;
-  const image = opts.ogImage || '/og-image.jpg';
+  const image = opts.ogImage || '/og-passport.jpg';
 
   return {
     title: { absolute: title },

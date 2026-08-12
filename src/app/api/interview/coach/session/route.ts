@@ -6,9 +6,13 @@ import {
   recordCoachIntegritySignal,
 } from '@/lib/coach/session';
 import { trackCoachEvent } from '@/lib/coach/analytics';
+import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 /** Resume active coach session (or fetch by id). */
 export async function GET(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId } = await requireApiAuth();
     const sessionId = req.nextUrl.searchParams.get('sessionId');
@@ -44,6 +48,9 @@ export async function GET(req: NextRequest) {
 
 /** Integrity / anti-cheat soft signals (tab blur, visibility). */
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  if (limited) return limited;
+
   try {
     const { userId } = await requireApiAuth();
     const body = (await req.json()) as {

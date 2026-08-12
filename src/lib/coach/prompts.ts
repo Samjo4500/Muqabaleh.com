@@ -25,7 +25,8 @@ export function buildCoachSystemPrompt(
   const cfg = getInterviewConfig();
   const roleMeta = getRoleById(prep.role);
   const preferAr = prep.language === 'ar' || prep.language === 'mixed';
-  const role = labelFor(cfg.roles, prep.role, preferAr);
+  const roleLabel = labelFor(cfg.roles, prep.role, preferAr);
+  const role = prep.roleTitle?.trim() || roleLabel;
   const industry = labelFor(cfg.industries, prep.industry, preferAr);
   const seniority = labelFor(cfg.seniority, prep.seniority, preferAr);
   const language = labelFor(cfg.languages, prep.language, preferAr);
@@ -49,6 +50,10 @@ export function buildCoachSystemPrompt(
         ? "Ask questions in Arabic. Accept answers in Arabic or English and respond in the candidate's language."
         : 'Conduct the interview in clear professional English.';
 
+  const jobContext = prep.roleTitle?.trim()
+    ? `\nThis is a company-specific mock for the exact opening "${prep.roleTitle.trim()}" at ${company}. Frame questions as if you are interviewing for that live role.`
+    : '';
+
   return `You are ${coachName}, a professional interview coach for muqabaleh.com.
 Candidate: ${candidateName}
 Role: ${role}
@@ -56,6 +61,7 @@ Industry: ${industry}
 Seniority: ${seniority}
 Language: ${language}
 Company: ${company}
+${jobContext}
 
 Role question bank focus:
 ${focus}
@@ -82,7 +88,7 @@ export function buildScoringPrompt(
 ): { system: string; user: string } {
   const cfg = getInterviewConfig();
   const roleMeta = getRoleById(prep.role);
-  const role = labelFor(cfg.roles, prep.role);
+  const role = prep.roleTitle?.trim() || labelFor(cfg.roles, prep.role);
   const seniority = labelFor(cfg.seniority, prep.seniority);
   const rubric = roleMeta?.rubric?.en || '';
   const competencies = cfg.competencies.length

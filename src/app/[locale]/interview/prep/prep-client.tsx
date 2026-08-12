@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mic } from 'lucide-react';
 import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { CoachGender, LabeledOption, PrepSelections } from '@/lib/coach/types';
+import { inferCoachRoleIdFromTitle } from '@/lib/jobs/jeannie-practice';
 
 type RolePublic = LabeledOption & {
   category: string;
@@ -30,7 +31,17 @@ type PublicConfig = {
 
 const STORAGE_FALLBACK = 'mq_coach_prep';
 
-export function PrepClient() {
+type Props = {
+  initialCompany?: string;
+  initialRoleTitle?: string;
+  initialJobId?: string;
+};
+
+export function PrepClient({
+  initialCompany,
+  initialRoleTitle,
+  initialJobId,
+}: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const router = useRouter();
@@ -48,9 +59,12 @@ export function PrepClient() {
     seniority: '',
     language: isAr ? 'ar' : 'en',
     coachGender: 'female',
-    companyName: '',
+    companyName: initialCompany || '',
+    roleTitle: initialRoleTitle || undefined,
+    jobId: initialJobId || undefined,
   });
   const [error, setError] = useState<string | null>(null);
+  const fromJob = Boolean(initialCompany || initialRoleTitle);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,15 +95,37 @@ export function PrepClient() {
           );
         }
         setRemaining(typeof a.remaining === 'number' ? a.remaining : null);
-        const firstCat = c.roleCategories?.[0]?.id || c.roles[0]?.category || '';
+
+        const inferredId = initialRoleTitle
+          ? inferCoachRoleIdFromTitle(initialRoleTitle)
+          : '';
+        const matched =
+          (inferredId && (c.roles || []).find((r) => r.id === inferredId)) ||
+          (initialRoleTitle
+            ? (c.roles || []).find(
+                (r) =>
+                  r.en.toLowerCase().includes(initialRoleTitle.toLowerCase()) ||
+                  initialRoleTitle.toLowerCase().includes(r.en.toLowerCase()),
+              )
+            : null);
+
+        const firstCat =
+          matched?.category ||
+          c.roleCategories?.[0]?.id ||
+          c.roles[0]?.category ||
+          '';
         const rolesInCat = (c.roles || []).filter((r) => r.category === firstCat);
-        const firstRole = rolesInCat[0] || c.roles[0];
+        const firstRole = matched || rolesInCat[0] || c.roles[0];
         setCategory(firstCat);
+        if (initialRoleTitle) setRoleQuery(initialRoleTitle);
         setForm((prev) => ({
           ...prev,
           role: firstRole?.id || '',
           industry: firstRole?.industries?.[0] || c.industries[0]?.id || '',
           seniority: c.seniority.find((s) => s.id === 'mid')?.id || c.seniority[0]?.id || '',
+          companyName: initialCompany || prev.companyName,
+          roleTitle: initialRoleTitle || prev.roleTitle,
+          jobId: initialJobId || prev.jobId,
         }));
       } catch {
         if (!cancelled) setError(isAr ? 'تعذّر تحميل الإعدادات.' : 'Could not load setup.');
@@ -100,7 +136,7 @@ export function PrepClient() {
     return () => {
       cancelled = true;
     };
-  }, [isAr]);
+  }, [isAr, initialCompany, initialRoleTitle, initialJobId]);
 
   const label = useMemo(
     () => (opt: LabeledOption) => (isAr ? opt.ar : opt.en),
@@ -209,6 +245,8 @@ export function PrepClient() {
     const payload: PrepSelections = {
       ...form,
       companyName: form.companyName?.trim() || undefined,
+      roleTitle: form.roleTitle?.trim() || initialRoleTitle?.trim() || undefined,
+      jobId: form.jobId || initialJobId || undefined,
       coachGender: form.coachGender === 'none' ? 'none' : form.coachGender,
     };
     goToSession(payload, 'new');
@@ -243,13 +281,25 @@ export function PrepClient() {
         </div>
 
         <h1 className="mq-display text-3xl font-bold text-white md:text-4xl">
-          {isAr ? 'إعداد المقابلة مع جيني' : 'Prep your interview with Jeannie'}
+          {isAr ? 'إعداد المقابلة الصوتية مع جيني' : 'Prep your voice interview with Jeannie'}
         </h1>
         <p className="mt-2 max-w-2xl text-white/60">
           {isAr
-            ? 'اختر الفئة ثم الدور والسياق. تُحفظ جلستك في السحابة ويمكنك المتابعة إذا أُغلق التبويب.'
-            : 'Choose a category, then role and context. Your session is saved in the cloud so you can resume if the tab closes.'}
+            ? 'جلسة صوتية مباشرة بالميكروفون. اختر الفئة ثم الدور والسياق — تُحفظ جلستك ويمكنك المتابعة لاحقاً.'
+            : 'Live voice practice with your microphone. Choose a category, then role and context — your session is saved so you can resume.'}
         </p>
+
+        {fromJob ? (
+          <div className="mt-5 rounded-2xl border border-teal-300/30 bg-teal-400/10 px-4 py-3 text-sm text-teal-50">
+            <p className="inline-flex items-center gap-2 font-semibold">
+              <Mic size={16} />
+              {isAr ? 'تدريب صوتي لهذه الوظيفة' : 'Voice practice for this role'}
+            </p>
+            <p className="mt-1 text-teal-50/85">
+              {[initialRoleTitle, initialCompany].filter(Boolean).join(' · ')}
+            </p>
+          </div>
+        ) : null}
 
         {canResume ? (
           <div className="mt-6 rounded-2xl border border-teal-300/30 bg-teal-400/10 p-5">

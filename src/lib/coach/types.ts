@@ -20,6 +20,9 @@ export type PrepSelections = {
   language: 'ar' | 'en' | 'mixed';
   coachGender: CoachGender;
   companyName?: string;
+  /** Exact listed job title when launched from the jobs board */
+  roleTitle?: string;
+  jobId?: string;
 };
 
 export type ChatMessage = {

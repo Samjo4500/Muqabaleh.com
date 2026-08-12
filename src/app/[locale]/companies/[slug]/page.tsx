@@ -9,6 +9,7 @@ import { BreadcrumbJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
 import { getDemoCompany, getDemoCompanyJobs } from '@/lib/jobs/demo-listings';
 import { localePath } from '@/i18n/navigation';
+import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -75,11 +76,11 @@ export default async function CompanyPage({ params }: Props) {
             </div>
           </div>
           <Link
-            href={localePath(`/interview/prequal?company=${encodeURIComponent(company.name)}`, locale)}
+            href={localePath(jeanniePracticePath({ company: company.name }), locale)}
             className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
           >
             <Sparkles size={16} />
-            {isAr ? `تدرّب لـ ${company.name}` : `Practice for ${company.name}`}
+            {isAr ? `تدرّب صوتياً لـ ${company.name}` : `Voice practice for ${company.name}`}
           </Link>
         </div>
 

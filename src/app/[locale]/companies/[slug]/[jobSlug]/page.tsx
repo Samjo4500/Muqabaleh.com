@@ -15,6 +15,7 @@ import {
   MENA_COUNTRY_LABELS,
 } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
+import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; slug: string; jobSlug: string }> };
@@ -53,7 +54,11 @@ export default async function CompanyJobPage({ params }: Props) {
   if (!job) notFound();
 
   const practiceHref = localePath(
-    `/interview/prequal?company=${encodeURIComponent(job.companyName)}&role=${encodeURIComponent(job.title)}&job=${encodeURIComponent(job.id)}`,
+    jeanniePracticePath({
+      company: job.companyName,
+      role: job.title,
+      job: job.id,
+    }),
     locale,
   );
   const prefix = locale === 'en' ? '/en' : '';
@@ -167,7 +172,7 @@ export default async function CompanyJobPage({ params }: Props) {
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
             >
               <Sparkles size={16} />
-              {isAr ? 'تدرّب لهذه الوظيفة مع جيني' : 'Practice this role with Jeannie'}
+              {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
             </Link>
             <a
               href={job.applyUrl}

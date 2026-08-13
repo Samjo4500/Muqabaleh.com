@@ -32,6 +32,8 @@ export function pageMetadata(opts: {
     alternates: {
       canonical: url,
       languages: {
+        ar: arUrl,
+        en: enUrl,
         'ar-SA': arUrl,
         'en-US': enUrl,
         'x-default': arUrl,

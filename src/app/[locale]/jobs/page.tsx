@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/jobs',
-    titleAr: 'وظائف الشرق الأوسط — استعد ثم قدّم | مقابلة',
-    titleEn: 'MENA jobs — practice then apply | Muqabaleh',
+    titleAr: 'وظائف الشرق الأوسط — تدريب مقابلات | مقابلة',
+    titleEn: 'MENA Jobs — Practice Interviews | Muqabaleh',
     descAr:
       'وظائف حقيقية في الخليج وشمال أفريقيا والشام. يظهر الراتب إن أعلنه صاحب العمل. تدرّب مع جيني ثم قدّم بنفسك لدى الشركة.',
     descEn:

@@ -34,7 +34,7 @@ export function BrandLogo({
   return (
     <Image
       src={src}
-      alt="Muqabaleh | مقابلة"
+      alt="Muqabaleh logo"
       width={dims.w}
       height={dims.h}
       priority={priority}

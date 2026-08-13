@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -7,6 +8,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowUpLeft,
   ArrowUpRight,
+  Briefcase,
   Clock,
   Linkedin,
   MessageCircle,
@@ -195,23 +197,42 @@ export default function ArticleClient({
           </div>
         </section>
 
-        {/* Cover plane */}
+        {/* Cover / featured image */}
         <section className="relative pb-8">
           <div className="mq-wrap">
             <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[1.75rem] border border-white/12">
-              <div
-                className="aspect-[21/9] sm:aspect-[2.4/1]"
-                style={{
-                  background:
-                    'radial-gradient(ellipse 70% 80% at 25% 40%, rgba(45,212,191,0.3), transparent 55%), radial-gradient(ellipse 50% 60% at 85% 70%, rgba(232,201,122,0.2), transparent 50%), linear-gradient(160deg, #0b1220 0%, #05080f 100%)',
-                }}
-              />
-              <div className="absolute inset-0 opacity-[0.1] [background-image:linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:32px_32px]" />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#05080f] via-[#05080f]/40 to-transparent p-6 sm:p-8">
-                <div className="mq-display text-5xl font-bold text-white/20 sm:text-7xl">
-                  {post.title.trim().slice(0, 1)}
+              {post.image ? (
+                <div className="relative aspect-[21/9] sm:aspect-[2.4/1]">
+                  <Image
+                    src={post.image}
+                    alt={
+                      isAr
+                        ? `صورة مقال: ${post.title}`
+                        : `Article image: ${post.title}`
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 896px) 100vw, 896px"
+                    priority
+                  />
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div
+                    className="aspect-[21/9] sm:aspect-[2.4/1]"
+                    style={{
+                      background:
+                        'radial-gradient(ellipse 70% 80% at 25% 40%, rgba(45,212,191,0.3), transparent 55%), radial-gradient(ellipse 50% 60% at 85% 70%, rgba(232,201,122,0.2), transparent 50%), linear-gradient(160deg, #0b1220 0%, #05080f 100%)',
+                    }}
+                  />
+                  <div className="absolute inset-0 opacity-[0.1] [background-image:linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:32px_32px]" />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#05080f] via-[#05080f]/40 to-transparent p-6 sm:p-8">
+                    <div className="mq-display text-5xl font-bold text-white/20 sm:text-7xl">
+                      {post.title.trim().slice(0, 1)}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -239,6 +260,33 @@ export default function ArticleClient({
                 </Link>
               </div>
             </article>
+          </div>
+        </section>
+
+        <section className="mq-section !pt-0 !pb-8">
+          <div className="mq-wrap">
+            <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-2xl border border-teal-300/20 bg-teal-400/[0.06] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <Briefcase className="mt-0.5 shrink-0 text-teal-300" size={18} aria-hidden />
+                <div>
+                  <p className="text-sm font-bold text-white">
+                    {isAr ? 'وظائف الشرق الأوسط' : 'MENA job listings'}
+                  </p>
+                  <p className="mt-1 text-sm text-white/55">
+                    {isAr
+                      ? 'تصفّح الوظائف وتدرّب مع جيني قبل التقديم.'
+                      : 'Browse open roles and practice with Jeannie before you apply.'}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href={localePath('/jobs', locale)}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-300 hover:text-teal-200"
+              >
+                {isAr ? 'عرض الوظائف' : 'View jobs'}
+                <Arrow size={14} />
+              </Link>
+            </div>
           </div>
         </section>
 

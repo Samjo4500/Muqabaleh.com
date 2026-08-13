@@ -6,6 +6,7 @@ import { Banknote, Briefcase, ExternalLink, MapPin, Sparkles } from 'lucide-reac
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { BreadcrumbJsonLd, JobPostingJsonLd } from '@/components/json-ld';
+import { PageBreadcrumbs } from '@/components/seo/PageBreadcrumbs';
 import { db } from '@/lib/db';
 import { getDemoJob } from '@/lib/jobs/demo-listings';
 import { safeJobText } from '@/lib/jobs/job-details';
@@ -37,8 +38,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/companies/${slug}/${jobSlug}`,
-    titleAr: `${job.title} — ${job.companyName} | مقابلة`,
-    titleEn: `${job.title} — ${job.companyName} | Muqabaleh`,
+    titleAr: `${job.title} في ${job.companyName} — تقدم الآن | مقابلة`,
+    titleEn: `${job.title} at ${job.companyName} — Apply Now | Muqabaleh`,
     descAr: `${job.title} لدى ${job.companyName} · ${job.location}. تدرّب مع جيني ثم قدّم لدى الشركة.`,
     descEn: `${job.title} at ${job.companyName} · ${job.location}. Practice with Jeannie, then apply on their site.`,
     keywords: [job.title, job.companyName, job.location, 'MENA jobs', 'Muqabaleh'],
@@ -83,9 +84,13 @@ export default async function CompanyJobPage({ params }: Props) {
         title={job.title}
         description={job.description}
         datePosted={job.datePosted}
+        validThrough={job.validThrough}
         hiringOrganization={job.companyName}
+        hiringOrganizationUrl={`${SITE_URL}${prefix}/companies/${slug}`}
         jobLocation={job.location}
+        addressCountry={job.countryKey}
         employmentType={job.employmentType}
+        pageUrl={`${SITE_URL}${prefix}/companies/${slug}/${jobSlug}`}
         applyUrl={job.applyUrl}
         salaryLabel={job.salaryLabel}
         locale={locale}
@@ -97,6 +102,15 @@ export default async function CompanyJobPage({ params }: Props) {
 
       <main className="mq-wrap py-10 md:py-14">
         <div className="mx-auto max-w-3xl">
+          <PageBreadcrumbs
+            locale={locale}
+            items={[
+              { label: isAr ? 'الرئيسية' : 'Home', href: '/' },
+              { label: isAr ? 'الوظائف' : 'Jobs', href: '/jobs' },
+              { label: job.companyName, href: `/companies/${slug}` },
+              { label: job.title },
+            ]}
+          />
           <p className="mq-kicker mb-3">{job.companyName}</p>
           <h1 className="mq-display text-3xl font-bold tracking-tight text-white md:text-5xl">
             {job.title}
@@ -208,6 +222,9 @@ async function loadJob(companySlug: string, jobSlug: string) {
       include: { company: true },
     });
     if (row?.company) {
+      const posted = row.postedAt || row.updatedAt;
+      const valid = new Date(posted);
+      valid.setDate(valid.getDate() + 60);
       return {
         id: row.id,
         title: row.title,
@@ -219,7 +236,8 @@ async function loadJob(companySlug: string, jobSlug: string) {
         applyUrl: row.applyUrl,
         salaryLabel: row.salaryLabel,
         companyName: row.company.name,
-        datePosted: (row.postedAt || row.updatedAt)?.toISOString?.() ?? null,
+        datePosted: posted?.toISOString?.() ?? null,
+        validThrough: valid.toISOString(),
         countryKey: classifyMenaCountry(row.location, row.company.country, row.title),
       };
     }
@@ -229,6 +247,8 @@ async function loadJob(companySlug: string, jobSlug: string) {
 
   const demo = getDemoJob(companySlug, jobSlug);
   if (!demo) return null;
+  const demoValid = new Date();
+  demoValid.setDate(demoValid.getDate() + 60);
   return {
     id: demo.id,
     title: demo.title,
@@ -241,6 +261,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
     salaryLabel: null as string | null,
     companyName: demo.company.name,
     datePosted: null as string | null,
+    validThrough: demoValid.toISOString(),
     countryKey: classifyMenaCountry(demo.location, demo.company.country, demo.title),
   };
 }

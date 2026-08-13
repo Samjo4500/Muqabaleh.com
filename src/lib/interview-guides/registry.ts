@@ -113,7 +113,8 @@ export function listedToGuideCompany(row: {
       en: 'Smart professional attire for most tech interviews; more formal for banks and enterprise.',
       ar: 'لباس مهني أنيق لمعظم مقابلات التقنية؛ أكثر رسمية للبنوك والمؤسسات.',
     },
-    relatedCompanySlugs: [],
+    // Cheap catalog defaults — avoid empty related lists that trigger registry scans.
+    relatedCompanySlugs: ['careem', 'noon', 'stc'].filter((s) => s !== row.slug),
     relatedRoleSlugs: ['software-engineer', 'product-manager', 'project-manager'],
     publishedAt: GUIDE_TEMPLATE_UPDATED_AT,
     logoUrl: row.logoUrl || null,
@@ -414,24 +415,33 @@ export async function resolveCompanyGuide(
         industry: true,
         logoUrl: true,
         website: true,
-        jobs: {
-          select: { postedAt: true, isActive: true },
-          orderBy: { postedAt: 'desc' },
+        _count: {
+          select: {
+            jobs: { where: { isActive: true } },
+          },
         },
       },
     });
     if (!row?.industry) return null;
-    const activeJobs = row.jobs.filter((j) => j.isActive);
-    const everJobs = row.jobs.length;
-    // Match registry threshold + soft-keep (previously eligible)
-    if (activeJobs.length < MIN_COMPANY_JOBS && everJobs < MIN_COMPANY_JOBS) {
-      return null;
+
+    const activeCount = row._count.jobs;
+    // Soft-keep: if below active threshold, confirm they ever met it
+    let everCount = activeCount;
+    if (activeCount < MIN_COMPANY_JOBS) {
+      everCount = await db.listedJob.count({ where: { company: { slug } } });
+      if (everCount < MIN_COMPANY_JOBS) return null;
     }
+
+    const latest = await db.listedJob.findFirst({
+      where: { company: { slug }, isActive: true },
+      orderBy: { postedAt: 'desc' },
+      select: { postedAt: true },
+    });
+
     const company = listedToGuideCompany(row);
-    const latest = activeJobs[0] || row.jobs[0];
     return {
       company,
-      jobCount: activeJobs.length,
+      jobCount: activeCount,
       lastJobAt: latest?.postedAt?.toISOString() || null,
     };
   } catch (err) {

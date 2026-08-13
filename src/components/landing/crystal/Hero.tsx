@@ -10,7 +10,6 @@ import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { HeroPassportPreview } from './HeroPassportPreview';
-import { JeannieNameLockup } from './JeannieNameLockup';
 import {
   MENA_JEANNIE_FRAMES,
   prefetchNextImage,
@@ -51,7 +50,6 @@ export function CrystalHero() {
   }, [carouselReady, reduceMotion, frame]);
 
   const current = MENA_JEANNIE_FRAMES[frame];
-  const cityLabel = isAr ? current.cityAr : current.cityEn;
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
@@ -145,9 +143,10 @@ export function CrystalHero() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="max-w-3xl text-white"
+          className="w-full max-w-[520px] text-center text-white md:max-w-[min(55%,36rem)] md:text-start lg:max-w-[min(55%,40rem)]"
+          dir={isAr ? 'rtl' : 'ltr'}
         >
-          <motion.div variants={fadeUp} className="mb-5">
+          <motion.div variants={fadeUp} className="mb-5 flex justify-center md:justify-start">
             <motion.div
               className="mq-logo-glow relative inline-flex"
               animate={{ y: [0, -10, 0] }}
@@ -166,31 +165,16 @@ export function CrystalHero() {
 
           <motion.p
             variants={fadeUp}
-            className="mq-kicker mb-3 text-teal-200/90"
+            className="mb-3 text-sm font-medium leading-snug text-teal-300"
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={current.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.35 }}
-                className="inline-block"
-              >
-                {isAr ? `جيني · ${cityLabel}` : `Jeannie · ${cityLabel}`}
-              </motion.span>
-            </AnimatePresence>
+            <BiInline bi={C.hero.eyebrow} />
           </motion.p>
-
-          <motion.div variants={fadeUp} className="mb-3">
-            <JeannieNameLockup size="lg" />
-          </motion.div>
 
           <motion.div variants={fadeUp}>
             <T
               as="h1"
               bi={C.hero.headline}
-              className="mq-display mb-5 text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
+              className="mq-display mb-5 whitespace-pre-line text-[2.75rem] font-bold leading-[1.2] tracking-tight text-white sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]"
             />
           </motion.div>
 
@@ -198,7 +182,7 @@ export function CrystalHero() {
             <T
               as="p"
               bi={C.hero.sub}
-              className="mb-6 max-w-xl text-base leading-relaxed text-white/80 md:mb-8 md:text-lg"
+              className="mb-6 max-w-[520px] text-lg font-normal leading-relaxed text-white/75 md:mb-8 md:text-xl"
             />
           </motion.div>
 
@@ -214,21 +198,35 @@ export function CrystalHero() {
             />
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start"
+            style={{ gap: 12 }}
+          >
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href={localePath('/interview/prep', locale)}
-                className="mq-btn mq-btn-on-dark mq-btn-shimmer"
+                className="mq-btn mq-btn-on-dark mq-btn-shimmer text-base font-medium"
               >
                 <BiInline bi={C.hero.ctaInterview} />
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href={localePath('/jobs', locale)} className="mq-btn mq-btn-on-dark-ghost">
-                <BiInline bi={C.hero.ctaJeannie} />
+              <Link
+                href={localePath('/#pricing', locale)}
+                className="mq-btn mq-btn-on-dark-ghost text-base font-medium"
+              >
+                <BiInline bi={C.hero.ctaPricing} />
               </Link>
             </motion.div>
           </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="mt-4 text-[13px] font-normal leading-relaxed text-white/50"
+          >
+            <BiInline bi={C.hero.trust} />
+          </motion.p>
         </motion.div>
       </div>
 

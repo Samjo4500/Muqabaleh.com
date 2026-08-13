@@ -17,14 +17,17 @@ export const C = {
     getStarted: { en: 'Get started', ar: 'ابدأ الآن' },
   },
   hero: {
-    eyebrow: { en: 'Jeannie · Muqabaleh', ar: 'جيني · مقابلة' },
+    eyebrow: {
+      en: 'The first AI interview practice platform for the Middle East',
+      ar: 'أول منصة ذكاء اصطناعي لمقابلات العمل في الشرق الأوسط',
+    },
     headline: {
-      en: 'Train with Jeannie. Walk into the interview ready.',
-      ar: 'تدرّب مع جيني. ادخل المقابلة وأنت جاهز.',
+      en: 'Walk in prepared.\nWalk out hired.',
+      ar: 'ادخل واثق.\nاخرج ناجح.',
     },
     sub: {
-      en: 'Train in Arabic or English, get a verified score, and apply to any job with confidence.',
-      ar: 'تدرّب بالعربية أو الإنجليزية، احصل على درجة موثّقة، وقدّم بثقة لأي وظيفة.',
+      en: 'Practice real job interviews with Jeannie — your AI coach in Arabic and English. Get ready for tough questions and sharpen your answers before you apply.',
+      ar: 'تدرّب على مقابلات العمل الحقيقية مع جيني — مساعدك الذكي بالعربية والإنجليزية. استعد للأسئلة الصعبة، وحسّن إجاباتك قبل ما تقدم على الوظيفة.',
     },
     dialectNote: {
       en: 'Jeannie understands and fairly scores Arabic regional dialects (Gulf, Levantine, Egyptian), professional English with local accents, and natural bilingual code-switching — accent is not a penalty.',
@@ -34,9 +37,14 @@ export const C = {
       en: 'Your interview scores stay private until you choose to publish or share your passport. Practice and retake anytime to improve before locking a public score.',
       ar: 'درجات مقابلتك تبقى خاصة حتى تختار نشر جوازك أو مشاركته. تدرّب وأعد المقابلة في أي وقت لتحسين نتيجتك قبل تثبيت درجة عامة.',
     },
-    ctaInterview: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
+    ctaInterview: { en: 'Start Free Practice', ar: 'ابدأ التدريب المجاني' },
+    ctaPricing: { en: 'See Pricing Plans', ar: 'تعرّف على خطط الأسعار' },
     ctaJeannie: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
+    trust: {
+      en: 'Trusted by thousands of job seekers in the UAE, Saudi Arabia, and Egypt',
+      ar: 'موثوق من آلاف الباحثين عن عمل في الإمارات والسعودية ومصر',
+    },
   },
   path: {
     eyebrow: { en: 'Simple path', ar: 'مسار بسيط' },

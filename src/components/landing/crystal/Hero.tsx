@@ -139,14 +139,19 @@ export function CrystalHero() {
       </div>
 
       <div className="mq-wrap relative flex min-h-[100svh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
+        {/*
+          Mobile: centered stack.
+          Desktop: edge-aligned text column (~55%) — start side = right in RTL, left in LTR.
+          Do not center the slogan on desktop.
+        */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="w-full max-w-[520px] text-center text-white md:max-w-[min(55%,36rem)] md:text-start lg:max-w-[min(55%,40rem)]"
+          className="mx-auto flex w-full max-w-[520px] flex-col items-center text-center text-white md:mx-0 md:max-w-[min(55%,40rem)] md:items-start md:text-start"
           dir={isAr ? 'rtl' : 'ltr'}
         >
-          <motion.div variants={fadeUp} className="mb-5 flex justify-center md:justify-start">
+          <motion.div variants={fadeUp} className="mb-5 flex w-full justify-center md:justify-start">
             <motion.div
               className="mq-logo-glow relative inline-flex"
               animate={{ y: [0, -10, 0] }}
@@ -165,20 +170,33 @@ export function CrystalHero() {
 
           <motion.p
             variants={fadeUp}
-            className="mb-3 text-sm font-medium leading-snug text-teal-300"
+            className="mb-3 w-full text-sm font-medium leading-snug text-teal-300"
           >
             <BiInline bi={C.hero.eyebrow} />
           </motion.p>
 
-          <motion.div variants={fadeUp}>
-            <T
-              as="h1"
-              bi={C.hero.headline}
-              className="mq-display mb-5 whitespace-pre-line text-[2.75rem] font-bold leading-[1.2] tracking-tight text-white sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]"
-            />
-          </motion.div>
+          <motion.h1
+            variants={fadeUp}
+            className="mq-display mb-5 w-full text-[2.75rem] font-bold leading-[1.2] tracking-tight text-white sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]"
+            dir={isAr ? 'rtl' : 'ltr'}
+            lang={isAr ? 'ar' : 'en'}
+          >
+            {isAr ? (
+              <>
+                ادخل واثق.
+                <br />
+                اخرج ناجح.
+              </>
+            ) : (
+              <>
+                Walk in prepared.
+                <br />
+                Walk out hired.
+              </>
+            )}
+          </motion.h1>
 
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} className="w-full">
             <T
               as="p"
               bi={C.hero.sub}
@@ -187,7 +205,7 @@ export function CrystalHero() {
           </motion.div>
 
           {/* Mobile passport — in content flow so it never covers Jeannie's face */}
-          <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 md:hidden">
+          <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 w-full md:hidden">
             <HeroPassportPreview
               locale={locale}
               cityEn={current.cityEn}
@@ -200,7 +218,7 @@ export function CrystalHero() {
 
           <motion.div
             variants={fadeUp}
-            className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start"
+            className="flex w-full flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start"
             style={{ gap: 12 }}
           >
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
@@ -223,7 +241,7 @@ export function CrystalHero() {
 
           <motion.p
             variants={fadeUp}
-            className="mt-4 text-[13px] font-normal leading-relaxed text-white/50"
+            className="mt-4 w-full text-[13px] font-normal leading-relaxed text-white/50"
           >
             <BiInline bi={C.hero.trust} />
           </motion.p>

@@ -150,6 +150,13 @@ export function CompanyProfileView({ locale }: { locale: string }) {
             >
               {isAr ? 'للشركات' : 'For companies'}
             </Link>
+            <a
+              href="/muqabaleh-company-profile.pdf"
+              className="mq-btn mq-btn-ghost min-h-12 px-6 text-sm font-bold"
+              download
+            >
+              {isAr ? 'تحميل PDF' : 'Download PDF'}
+            </a>
           </div>
         </div>
       </section>

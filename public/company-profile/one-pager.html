@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Muqabaleh — Company Profile</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: #0b1220;
+      background: #fff;
+      line-height: 1.45;
+    }
+    .page {
+      max-width: 190mm;
+      margin: 0 auto;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #0d9488;
+    }
+    .logo { width: 220px; height: auto; display: block; }
+    h1 {
+      font-size: 26px;
+      margin: 10px 0 6px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .sub { color: #334155; font-size: 13px; margin: 0; }
+    .jeannie {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      object-position: center 18%;
+      border-radius: 8px;
+    }
+    .kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #0f766e;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    h2 {
+      font-size: 16px;
+      margin: 16px 0 8px;
+      color: #0b1220;
+    }
+    .services { margin: 0; padding: 0; list-style: none; }
+    .services li {
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 8px;
+    }
+    .num {
+      font-weight: 800;
+      color: #0d9488;
+      font-size: 12px;
+      padding-top: 2px;
+    }
+    .services h3 { margin: 0 0 2px; font-size: 13px; }
+    .services p { margin: 0; font-size: 11.5px; color: #475569; }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .panel {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .panel h3 { margin: 0 0 4px; font-size: 12.5px; }
+    .panel p { margin: 0; font-size: 11.5px; color: #475569; }
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #64748b;
+    }
+    .footer a { color: #0f766e; text-decoration: none; font-weight: 600; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div>
+        <img class="logo" src="/images/logos/muqabaleh-wordmark.png" alt="Muqabaleh | مقابلة" />
+        <p class="kicker">Company profile · Services</p>
+        <h1>Interview readiness for MENA — with Jeannie</h1>
+        <p class="sub">
+          Arabic-first AI interview practice, verified passports, MENA jobs, and hiring support for companies.
+        </p>
+      </div>
+      <img class="jeannie" src="/images/hero-interview.webp" alt="Jeannie — Muqabaleh interview coach" />
+    </header>
+
+    <h2>Our services</h2>
+    <ol class="services">
+      <li>
+        <span class="num">01</span>
+        <div>
+          <h3>Jeannie — AI interview coach</h3>
+          <p>Live practice in Arabic or English. Dialects welcome. Real-time dialogue and a private scorecard until you share.</p>
+        </div>
+      </li>
+      <li>
+        <span class="num">02</span>
+        <div>
+          <h3>Verified interview passport</h3>
+          <p>0–100 hire-ready score with public verify link + QR when candidates choose to publish.</p>
+        </div>
+      </li>
+      <li>
+        <span class="num">03</span>
+        <div>
+          <h3>MENA jobs board</h3>
+          <p>Real employer and ATS roles. Practice with Jeannie, then apply yourself on the company site — no auto-apply.</p>
+        </div>
+      </li>
+      <li>
+        <span class="num">04</span>
+        <div>
+          <h3>Hiring desk for companies</h3>
+          <p>Screen with verified passports and Jeannie first-rounds. Built for MENA hiring teams.</p>
+        </div>
+      </li>
+      <li>
+        <span class="num">05</span>
+        <div>
+          <h3>Expert human interviews</h3>
+          <p>Optional live sessions with professional interviewers on top of Jeannie’s AI screen.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="split">
+      <div class="panel">
+        <h3>For candidates</h3>
+        <p>Walk in prepared. Practice with Jeannie, earn a passport, apply with confidence.</p>
+      </div>
+      <div class="panel">
+        <h3>For employers</h3>
+        <p>Hire with signal, not noise. Verified readiness before the panel.</p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span>muqabaleh.com · Jeannie · مقابلة</span>
+      <span>
+        <a href="https://muqabaleh.com/en/company-profile">Profile</a>
+        ·
+        <a href="mailto:hello@muqabaleh.com">hello@muqabaleh.com</a>
+        ·
+        <a href="https://muqabaleh.com/request-demo">Request demo</a>
+      </span>
+    </footer>
+  </div>
+</body>
+</html>

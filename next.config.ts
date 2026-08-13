@@ -55,7 +55,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
+    // Interview guides hit Prisma during SSG — keep concurrency low for Supabase pooler.
+    staticGenerationMaxConcurrency: 2,
+    staticGenerationRetryCount: 3,
   },
+  // Allow slow DB-backed guide pages to finish during `next build` on Vercel.
+  staticPageGenerationTimeout: 180,
   async redirects() {
     return [
       { source: '/login', destination: '/auth/signin', permanent: false },

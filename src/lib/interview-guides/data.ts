@@ -9,12 +9,7 @@ import {
   GUIDE_COMPANIES,
   GUIDE_ROLES,
 } from './catalog';
-import {
-  listRegistryCompanies,
-  listRegistryRoles,
-  resolveCompanyGuide,
-  resolveRoleGuide,
-} from './registry';
+import { resolveCompanyGuide, resolveRoleGuide } from './registry';
 import type { GuideCompany, GuideRole, RelatedJobCard } from './types';
 
 export type CompanyGuidePayload = {
@@ -180,24 +175,21 @@ async function queryRoleJobs(role: GuideRole): Promise<{
   };
 }
 
-async function relatedCompanyEntities(slugs: string[], exclude?: string): Promise<GuideCompany[]> {
+/**
+ * Related links must stay cheap — never call listRegistry* here.
+ * Full registry scans during parallel static generation exhaust the
+ * Supabase pooler and bake soft-404 pages into the Vercel deploy.
+ */
+function relatedCompanyEntities(slugs: string[], exclude?: string): GuideCompany[] {
   const picked = pickRelatedCompanies(slugs, exclude);
   if (picked.length >= 2) return picked;
-  const registry = await listRegistryCompanies();
-  return registry
-    .filter((c) => c.slug !== exclude)
-    .slice(0, 3)
-    .map(({ jobCount: _j, lastJobAt: _l, ...c }) => c);
+  return GUIDE_COMPANIES.filter((c) => c.slug !== exclude).slice(0, 3);
 }
 
-async function relatedRoleEntities(slugs: string[], exclude?: string): Promise<GuideRole[]> {
+function relatedRoleEntities(slugs: string[], exclude?: string): GuideRole[] {
   const picked = pickRelatedRoles(slugs, exclude);
   if (picked.length >= 2) return picked;
-  const registry = await listRegistryRoles();
-  return registry
-    .filter((r) => r.slug !== exclude)
-    .slice(0, 3)
-    .map(({ jobCount: _j, lastJobAt: _l, ...r }) => r);
+  return GUIDE_ROLES.filter((r) => r.slug !== exclude).slice(0, 3);
 }
 
 export async function loadCompanyGuide(
@@ -213,11 +205,11 @@ export async function loadCompanyGuide(
     openJobs,
     relatedJobs: jobs.relatedJobs,
     listedCompanySlug: jobs.listedCompanySlug || resolved.company.slug,
-    relatedCompanies: await relatedCompanyEntities(
+    relatedCompanies: relatedCompanyEntities(
       resolved.company.relatedCompanySlugs,
       resolved.company.slug,
     ),
-    relatedRoles: await relatedRoleEntities(resolved.company.relatedRoleSlugs),
+    relatedRoles: relatedRoleEntities(resolved.company.relatedRoleSlugs),
     lastModified:
       jobs.lastModified ||
       resolved.lastJobAt ||
@@ -236,8 +228,8 @@ export async function loadRoleGuide(slug: string): Promise<RoleGuidePayload | nu
     role: resolved.role,
     openJobs,
     relatedJobs: jobs.relatedJobs,
-    relatedCompanies: await relatedCompanyEntities(resolved.role.relatedCompanySlugs),
-    relatedRoles: await relatedRoleEntities(resolved.role.relatedRoleSlugs, resolved.role.slug),
+    relatedCompanies: relatedCompanyEntities(resolved.role.relatedCompanySlugs),
+    relatedRoles: relatedRoleEntities(resolved.role.relatedRoleSlugs, resolved.role.slug),
     lastModified: jobs.lastModified || resolved.lastJobAt || resolved.role.publishedAt,
     noActiveJobs: openJobs === 0,
   };

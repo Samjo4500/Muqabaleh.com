@@ -10,21 +10,29 @@ import { pageMetadata } from '@/lib/seo';
 type Props = { params: Promise<{ locale: string; roleSlug: string }> };
 
 export const revalidate = 3600;
-/** Deploy-time generation only — unknown role slugs 404. */
-export const dynamicParams = false;
+/** Prefetch at build; allow on-demand recovery for published roles. */
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
+  // Parent layout already emits locales — only this segment.
   const slugs = await allGuideRoleSlugsAsync();
-  return slugs.flatMap((roleSlug) => [
-    { locale: 'ar', roleSlug },
-    { locale: 'en', roleSlug },
-  ]);
+  return slugs.map((roleSlug) => ({ roleSlug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, roleSlug } = await params;
   const data = await loadRoleGuide(roleSlug);
-  if (!data) notFound();
+  if (!data) {
+    return pageMetadata({
+      locale,
+      path: `/interview-guide/role/${roleSlug}`,
+      titleAr: 'دليل مقابلة | مقابلة',
+      titleEn: 'Interview Guide | Muqabaleh',
+      descAr: 'دليل مقابلة على مقابلة.',
+      descEn: 'Interview guide on Muqabaleh.',
+      noIndex: true,
+    });
+  }
 
   const nameAr = data.role.name.ar;
   const nameEn = data.role.name.en;

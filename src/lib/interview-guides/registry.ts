@@ -415,19 +415,24 @@ export async function resolveCompanyGuide(
         logoUrl: true,
         website: true,
         jobs: {
-          where: { isActive: true },
-          select: { postedAt: true },
+          select: { postedAt: true, isActive: true },
           orderBy: { postedAt: 'desc' },
         },
       },
     });
-    // Soft-keep: show page if company exists with industry even if jobs < threshold
     if (!row?.industry) return null;
+    const activeJobs = row.jobs.filter((j) => j.isActive);
+    const everJobs = row.jobs.length;
+    // Match registry threshold + soft-keep (previously eligible)
+    if (activeJobs.length < MIN_COMPANY_JOBS && everJobs < MIN_COMPANY_JOBS) {
+      return null;
+    }
     const company = listedToGuideCompany(row);
+    const latest = activeJobs[0] || row.jobs[0];
     return {
       company,
-      jobCount: row.jobs.length,
-      lastJobAt: row.jobs[0]?.postedAt?.toISOString() || null,
+      jobCount: activeJobs.length,
+      lastJobAt: latest?.postedAt?.toISOString() || null,
     };
   } catch (err) {
     console.error('[interview-guides] resolveCompanyGuide', err);

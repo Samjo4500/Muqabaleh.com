@@ -11,24 +11,33 @@ type Props = { params: Promise<{ locale: string; companySlug: string }> };
 
 export const revalidate = 3600;
 /**
- * Deploy-time generation only (Phase 2 guardrail).
- * Soft empty-jobs messaging still applies for statically built slugs.
- * Unknown slugs 404 — do not SSR thin pages on demand.
+ * Prefetch at build via generateStaticParams; allow on-demand for published
+ * guides missing from a partial build (fixes soft-404 shells with HTTP 200).
+ * Unknown / thin slugs still notFound() in the page.
  */
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
+  // Parent `[locale]/layout` already emits locales — return only this segment.
+  // Including `locale` here caused incomplete AR/EN prerenders on Vercel.
   const slugs = await allGuideCompanySlugsAsync();
-  return slugs.flatMap((companySlug) => [
-    { locale: 'ar', companySlug },
-    { locale: 'en', companySlug },
-  ]);
+  return slugs.map((companySlug) => ({ companySlug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, companySlug } = await params;
   const data = await loadCompanyGuide(companySlug);
-  if (!data) notFound();
+  if (!data) {
+    return pageMetadata({
+      locale,
+      path: `/interview-guide/${companySlug}`,
+      titleAr: 'دليل مقابلة | مقابلة',
+      titleEn: 'Interview Guide | Muqabaleh',
+      descAr: 'دليل مقابلة على مقابلة.',
+      descEn: 'Interview guide on Muqabaleh.',
+      noIndex: true,
+    });
+  }
 
   const nameAr = data.company.name.ar;
   const nameEn = data.company.name.en;

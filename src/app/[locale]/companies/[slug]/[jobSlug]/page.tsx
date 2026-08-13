@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
-import { Banknote, Briefcase, ExternalLink, MapPin, Sparkles } from 'lucide-react';
+import { Banknote, BookOpen, Briefcase, ExternalLink, MapPin, Sparkles } from 'lucide-react';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { BreadcrumbJsonLd, JobPostingJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
+import { getGuideCompany, getGuideRole, GUIDE_ROLES } from '@/lib/interview-guides/catalog';
 import { getDemoJob } from '@/lib/jobs/demo-listings';
 import { safeJobText } from '@/lib/jobs/job-details';
 import {
@@ -15,7 +16,7 @@ import {
   MENA_COUNTRY_LABELS,
 } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
-import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
+import { inferCoachRoleIdFromTitle, jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; slug: string; jobSlug: string }> };
@@ -62,6 +63,12 @@ export default async function CompanyJobPage({ params }: Props) {
     locale,
   );
   const prefix = locale === 'en' ? '/en' : '';
+  const companyGuide = getGuideCompany(slug);
+  const coachRoleId = inferCoachRoleIdFromTitle(job.title);
+  const roleGuide =
+    GUIDE_ROLES.find((r) => r.coachRoleId === coachRoleId) ||
+    getGuideRole(coachRoleId) ||
+    null;
 
   return (
     <div className="mq-atelier min-h-screen">
@@ -101,6 +108,35 @@ export default async function CompanyJobPage({ params }: Props) {
           <h1 className="mq-display text-3xl font-bold tracking-tight text-white md:text-5xl">
             {job.title}
           </h1>
+          {companyGuide || roleGuide ? (
+            <p className="mt-4 rounded-xl border border-teal-300/20 bg-teal-400/[0.06] px-4 py-3 text-sm text-white/70">
+              <BookOpen size={14} className="me-1.5 inline-block text-teal-300" aria-hidden />
+              {isAr
+                ? `تستعد لمقابلة ${job.companyName}؟ `
+                : `Preparing for a ${job.companyName} interview? `}
+              {companyGuide ? (
+                <Link
+                  href={localePath(`/interview-guide/${companyGuide.slug}`, locale)}
+                  className="font-semibold text-teal-300 hover:text-teal-200"
+                >
+                  {isAr ? 'اقرأ دليل الشركة' : 'Read the company guide'}
+                </Link>
+              ) : null}
+              {companyGuide && roleGuide ? (
+                <span className="text-white/35"> · </span>
+              ) : null}
+              {roleGuide ? (
+                <Link
+                  href={localePath(`/interview-guide/role/${roleGuide.slug}`, locale)}
+                  className="font-semibold text-teal-300 hover:text-teal-200"
+                >
+                  {isAr
+                    ? `دليل ${roleGuide.name.ar}`
+                    : `${roleGuide.name.en} guide`}
+                </Link>
+              ) : null}
+            </p>
+          ) : null}
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-white/55">
             <span className="inline-flex items-center gap-1.5">
               <MapPin size={16} />

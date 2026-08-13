@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic';
 import { getLocale } from 'next-intl/server';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
+import { PopularGuides } from './PopularGuides';
 import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 
 const CrystalSimplePath = dynamic(
@@ -58,6 +59,7 @@ export async function CrystalLanding() {
       <main>
         <CrystalHero />
         <CrystalSimplePath />
+        <PopularGuides locale={locale} />
         <CrystalPassportShowcase />
         <CrystalJeannie />
         <CrystalPricing />

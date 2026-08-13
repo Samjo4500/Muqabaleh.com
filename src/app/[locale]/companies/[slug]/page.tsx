@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
-import { Building2, Sparkles } from 'lucide-react';
+import { BookOpen, Building2, Sparkles } from 'lucide-react';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { BreadcrumbJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
+import { getGuideCompany } from '@/lib/interview-guides/catalog';
 import { getDemoCompany, getDemoCompanyJobs } from '@/lib/jobs/demo-listings';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
@@ -50,6 +51,11 @@ export default async function CompanyPage({ params }: Props) {
 
   const { company, jobs } = data;
   const prefix = locale === 'en' ? '/en' : '';
+  const guide =
+    getGuideCompany(company.slug) ||
+    getGuideCompany(
+      company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    );
 
   return (
     <div className="mq-atelier min-h-screen">
@@ -75,14 +81,41 @@ export default async function CompanyPage({ params }: Props) {
               ) : null}
             </div>
           </div>
-          <Link
-            href={localePath(jeanniePracticePath({ company: company.name }), locale)}
-            className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
-          >
-            <Sparkles size={16} />
-            {isAr ? `تدرّب صوتياً لـ ${company.name}` : `Voice practice for ${company.name}`}
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {guide ? (
+              <Link
+                href={localePath(`/interview-guide/${guide.slug}`, locale)}
+                className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
+              >
+                <BookOpen size={16} />
+                {isAr
+                  ? `دليل مقابلة ${guide.name.ar}`
+                  : `${guide.name.en} interview guide`}
+              </Link>
+            ) : null}
+            <Link
+              href={localePath(jeanniePracticePath({ company: company.name }), locale)}
+              className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
+            >
+              <Sparkles size={16} />
+              {isAr ? `تدرّب صوتياً لـ ${company.name}` : `Voice practice for ${company.name}`}
+            </Link>
+          </div>
         </div>
+
+        {guide ? (
+          <p className="mb-8 rounded-xl border border-teal-300/20 bg-teal-400/[0.06] px-4 py-3 text-sm text-white/70">
+            {isAr
+              ? `تستعد لمقابلة ${company.name}؟ `
+              : `Preparing for a ${company.name} interview? `}
+            <Link
+              href={localePath(`/interview-guide/${guide.slug}`, locale)}
+              className="font-semibold text-teal-300 hover:text-teal-200"
+            >
+              {isAr ? 'اقرأ دليل المقابلة' : 'Read our interview guide'}
+            </Link>
+          </p>
+        ) : null}
 
         <h2 className="mq-display mb-4 text-xl font-bold text-white md:text-2xl">
           {isAr ? 'الوظائف المفتوحة' : 'Open roles'}

@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { getAllPosts, getAllSlugs } from '@/content/blog';
 import { db } from '@/lib/db';
+import {
+  allGuideCompanySlugs,
+  allGuideRoleSlugs,
+} from '@/lib/interview-guides/catalog';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
@@ -23,6 +27,7 @@ const PUBLIC_ROUTES = [
   '/partners',
   '/verify',
   '/legal/opt-out',
+  '/interview-guide',
 ] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -75,6 +80,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     });
+  }
+
+  for (const companySlug of allGuideCompanySlugs()) {
+    for (const prefix of ['', '/en'] as const) {
+      entries.push({
+        url: `${SITE_URL}${prefix}/interview-guide/${companySlug}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.85,
+      });
+    }
+  }
+
+  for (const roleSlug of allGuideRoleSlugs()) {
+    for (const prefix of ['', '/en'] as const) {
+      entries.push({
+        url: `${SITE_URL}${prefix}/interview-guide/role/${roleSlug}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.85,
+      });
+    }
   }
 
   try {

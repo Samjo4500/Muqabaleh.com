@@ -4,6 +4,7 @@ export function bi(locale: string, value: Bi): string {
   return locale === 'en' ? value.en : value.ar;
 }
 
+/** @deprecated prefer interviewProcessVariant from variants.ts */
 export function interviewProcessSteps(subject: string, locale: string): string[] {
   if (locale === 'en') {
     return [
@@ -21,38 +22,66 @@ export function interviewProcessSteps(subject: string, locale: string): string[]
   ];
 }
 
-export function companyGuideFaqs(company: GuideCompany): Array<{ q: Bi; a: Bi }> {
+export function companyGuideFaqs(
+  company: GuideCompany,
+  opts?: { roleHint?: GuideRole | null },
+): Array<{ q: Bi; a: Bi }> {
   const nameEn = company.name.en;
   const nameAr = company.name.ar;
+  const roleEn = opts?.roleHint?.name.en || 'your target role';
+  const roleAr = opts?.roleHint?.name.ar || 'الدور المستهدف';
+  const salaryEn = opts?.roleHint?.salaryHint.en || company.salaryHint.en;
+  const salaryAr = opts?.roleHint?.salaryHint.ar || company.salaryHint.ar;
+
   return [
     {
       q: {
-        en: `How hard is a ${nameEn} interview?`,
-        ar: `ما مدى صعوبة مقابلة ${nameAr}؟`,
+        en: `What are the most important questions in a ${roleEn} interview?`,
+        ar: `ما هي أهم الأسئلة في مقابلة ${roleAr}؟`,
       },
       a: {
-        en: `Most candidates rate ${nameEn} around ${company.difficulty}/5. Expect structured rounds and concrete examples—not only polished buzzwords.`,
-        ar: `معظم المرشحين يقيّمون ${nameAr} حوالي ${company.difficulty}/5. توقّع جولات منظمة وأمثلة ملموسة—لا شعارات فقط.`,
+        en: `Expect ownership stories, role fundamentals, and ${nameEn}-specific scenarios. Practice the question list on this page aloud with Jeannie.`,
+        ar: `توقّع قصص ملكية وأساسيات الدور وسيناريوهات خاصة بـ ${nameAr}. تدرّب على قائمة الأسئلة في هذه الصفحة بصوت عالٍ مع جيني.`,
       },
     },
     {
       q: {
-        en: `How should I practice for ${nameEn}?`,
-        ar: `كيف أتدرّب لمقابلة ${nameAr}؟`,
+        en: `How do I prepare for a ${nameEn} interview?`,
+        ar: `كيف أتأهب لمقابلة ${nameAr}؟`,
       },
       a: {
-        en: `Practice aloud with Jeannie using ${nameEn} as the company context, then review STAR stories for ownership and impact.`,
-        ar: `تدرّب بصوت عالٍ مع جيني باستخدام ${nameAr} كسياق الشركة، ثم راجع قصص STAR للملكية والأثر.`,
+        en: `Research ${nameEn}'s market, prepare STAR stories, and run a mock with Jeannie using ${nameEn} as the company context.`,
+        ar: `ابحث عن سوق ${nameAr}، حضّر قصص STAR، ونفّذ تدريباً مع جيني باستخدام ${nameAr} كسياق الشركة.`,
       },
     },
     {
       q: {
-        en: `Does Muqabaleh apply to ${nameEn} for me?`,
-        ar: `هل تقدّم مقابلة إلى ${nameAr} نيابةً عني؟`,
+        en: `What salary should I expect for a ${roleEn} role at ${nameEn}?`,
+        ar: `ما الراتب المتوقع لوظيفة ${roleAr} في ${nameAr}؟`,
       },
       a: {
-        en: 'No. Muqabaleh helps you prepare and practice. You always apply yourself on the employer site.',
-        ar: 'لا. مقابلة تساعدك على التحضير والتدريب. أنت تقدّم بنفسك دائماً على موقع صاحب العمل.',
+        en: salaryEn,
+        ar: salaryAr,
+      },
+    },
+    {
+      q: {
+        en: `Are ${nameEn} interviews in Arabic or English?`,
+        ar: `هل المقابلة بالعربية أم الإنجليزية في ${nameAr}؟`,
+      },
+      a: {
+        en: `Many MENA panels mix both. Practice bilingual answers. Jeannie supports Arabic and English mocks with fair dialect scoring.`,
+        ar: `كثير من اللجان في المنطقة تمزج اللغتين. تدرّب على إجابات ثنائية اللغة. جيني تدعم تدريباً بالعربية والإنجليزية مع تقييم عادل للهجات.`,
+      },
+    },
+    {
+      q: {
+        en: `How many stages are in a ${nameEn} interview?`,
+        ar: `كم مرحلة في مقابلة ${nameAr}؟`,
+      },
+      a: {
+        en: `Typically 3–4 stages: recruiter screen, skills/case, behavioral, and hiring-manager final. Difficulty is often rated around ${company.difficulty}/5.`,
+        ar: `عادة ٣–٤ مراحل: فحص موارد بشرية، مهارات/حالة، سلوكية، ثم نهائي مع المدير. تُقيَّم الصعوبة غالباً حوالي ${company.difficulty}/5.`,
       },
     },
   ];
@@ -64,32 +93,52 @@ export function roleGuideFaqs(role: GuideRole): Array<{ q: Bi; a: Bi }> {
   return [
     {
       q: {
-        en: `What are the most common ${nameEn} interview questions?`,
-        ar: `ما أكثر أسئلة مقابلة ${nameAr} شيوعاً؟`,
+        en: `What are the most important questions in a ${nameEn} interview?`,
+        ar: `ما هي أهم الأسئلة في مقابلة ${nameAr}؟`,
       },
       a: {
-        en: `Expect a mix of role fundamentals, behavioral ownership stories, and MENA-context scenarios. See the question list on this page.`,
-        ar: `توقّع مزيجاً من أساسيات الدور وقصص الملكية السلوكية وسيناريوهات سياق المنطقة. راجع قائمة الأسئلة في هذه الصفحة.`,
+        en: `See the common questions on this page — fundamentals, ownership, and MENA scenarios.`,
+        ar: `راجع الأسئلة الشائعة في هذه الصفحة — أساسيات وملكية وسيناريوهات المنطقة.`,
       },
     },
     {
       q: {
-        en: `How do I prepare for a ${nameEn} interview in Arabic or English?`,
-        ar: `كيف أتحضّر لمقابلة ${nameAr} بالعربية أو الإنجليزية؟`,
+        en: `How do I prepare for a ${nameEn} interview?`,
+        ar: `كيف أتأهب لمقابلة ${nameAr}؟`,
       },
       a: {
-        en: 'Practice the same stories in both languages. Jeannie supports Arabic and English mock interviews with instant scoring.',
-        ar: 'تدرّب على نفس القصص باللغتين. جيني تدعم مقابلات تجريبية بالعربية والإنجليزية مع تقييم فوري.',
+        en: 'Practice aloud with Jeannie, quantify outcomes, and prepare bilingual versions of your top stories.',
+        ar: 'تدرّب بصوت عالٍ مع جيني، ورقّم النتائج، وحضّر نسخاً ثنائية اللغة لأهم قصصك.',
       },
     },
     {
       q: {
         en: `What salary should a ${nameEn} expect in MENA?`,
-        ar: `ما الراتب المتوقع لـ ${nameAr} في الشرق الأوسط؟`,
+        ar: `ما الراتب المتوقع لوظيفة ${nameAr} في المنطقة؟`,
       },
       a: {
         en: role.salaryHint.en,
         ar: role.salaryHint.ar,
+      },
+    },
+    {
+      q: {
+        en: `Are ${nameEn} interviews usually in Arabic or English?`,
+        ar: `هل مقابلات ${nameAr} عادة بالعربية أم الإنجليزية؟`,
+      },
+      a: {
+        en: 'Depends on employer and panel. Many Gulf tech interviews are English-first with Arabic rapport. Practice both.',
+        ar: 'يعتمد على صاحب العمل واللجنة. كثير من مقابلات تقنية الخليج بالإنجليزية أولاً مع تواصل عربي. تدرّب على الاثنين.',
+      },
+    },
+    {
+      q: {
+        en: `How many stages are typical for a ${nameEn} interview?`,
+        ar: `كم مرحلة نموذجية في مقابلة ${nameAr}؟`,
+      },
+      a: {
+        en: `Usually 3–4 rounds. Difficulty for this path is often around ${role.difficulty}/5.`,
+        ar: `عادة ٣–٤ جولات. صعوبة هذا المسار غالباً حوالي ${role.difficulty}/5.`,
       },
     },
   ];
@@ -103,4 +152,9 @@ export const HOW_TO_ANSWER_GENERIC: Bi = {
 export const SALARY_DISCLAIMER: Bi = {
   en: 'Ranges are indicative market guidance—not a guarantee. Always verify published pay on the employer posting.',
   ar: 'النطاقات إرشادية للسوق—وليست ضماناً. تحقّق دائماً من الراتب المعلن في إعلان صاحب العمل.',
+};
+
+export const NO_ACTIVE_JOBS: Bi = {
+  en: 'No active jobs for this company right now. Browse similar guides or open roles on the jobs board.',
+  ar: 'لا توجد وظائف نشطة لهذه الشركة الآن. تصفّح أدلة مشابهة أو الوظائف المفتوحة على لوحة الوظائف.',
 };

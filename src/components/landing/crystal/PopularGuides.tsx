@@ -1,22 +1,23 @@
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react';
-import { GUIDE_COMPANIES, GUIDE_ROLES } from '@/lib/interview-guides/catalog';
 import { bi } from '@/lib/interview-guides/content';
+import {
+  listRegistryCompanies,
+  listRegistryRoles,
+} from '@/lib/interview-guides/registry';
 import { localePath } from '@/i18n/navigation';
 
-const FEATURED_COMPANY_SLUGS = ['careem', 'noon', 'neom', 'stc', 'emirates', 'aramco'];
-const FEATURED_ROLE_SLUGS = ['software-engineer', 'product-manager', 'data-scientist'];
-
-export function PopularGuides({ locale }: { locale: string }) {
+export async function PopularGuides({ locale }: { locale: string }) {
   const isAr = locale !== 'en';
   const Arrow = isAr ? ArrowLeft : ArrowRight;
 
-  const companies = FEATURED_COMPANY_SLUGS.map((s) =>
-    GUIDE_COMPANIES.find((c) => c.slug === s),
-  ).filter(Boolean);
-  const roles = FEATURED_ROLE_SLUGS.map((s) => GUIDE_ROLES.find((r) => r.slug === s)).filter(
-    Boolean,
-  );
+  const [companies, roles] = await Promise.all([
+    listRegistryCompanies(),
+    listRegistryRoles(),
+  ]);
+
+  const featuredCompanies = companies.slice(0, 5);
+  const featuredRoles = roles.slice(0, 3);
 
   return (
     <section
@@ -49,46 +50,42 @@ export function PopularGuides({ locale }: { locale: string }) {
         </div>
 
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {companies.map((c) =>
-            c ? (
-              <li key={c.slug}>
-                <Link
-                  href={localePath(`/interview-guide/${c.slug}`, locale)}
-                  className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-teal-300/30"
-                >
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-teal-300/80">
-                    <BookOpen size={12} aria-hidden />
-                    {isAr ? 'شركة' : 'Company'}
-                  </span>
-                  <span className="mq-display mt-2 text-base font-bold text-white group-hover:text-teal-100">
-                    {isAr
-                      ? `دليل مقابلة ${bi(locale, c.name)}`
-                      : `${bi(locale, c.name)} interview guide`}
-                  </span>
-                </Link>
-              </li>
-            ) : null,
-          )}
-          {roles.map((r) =>
-            r ? (
-              <li key={r.slug}>
-                <Link
-                  href={localePath(`/interview-guide/role/${r.slug}`, locale)}
-                  className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-teal-300/30"
-                >
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-200/80">
-                    <BookOpen size={12} aria-hidden />
-                    {isAr ? 'دور' : 'Role'}
-                  </span>
-                  <span className="mq-display mt-2 text-base font-bold text-white group-hover:text-teal-100">
-                    {isAr
-                      ? `دليل مقابلة ${bi(locale, r.name)}`
-                      : `${bi(locale, r.name)} interview guide`}
-                  </span>
-                </Link>
-              </li>
-            ) : null,
-          )}
+          {featuredCompanies.map((c) => (
+            <li key={c.slug}>
+              <Link
+                href={localePath(`/interview-guide/${c.slug}`, locale)}
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-teal-300/30"
+              >
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-teal-300/80">
+                  <BookOpen size={12} aria-hidden />
+                  {isAr ? 'شركة' : 'Company'}
+                </span>
+                <span className="mq-display mt-2 text-base font-bold text-white group-hover:text-teal-100">
+                  {isAr
+                    ? `دليل مقابلة ${bi(locale, c.name)}`
+                    : `${bi(locale, c.name)} interview guide`}
+                </span>
+              </Link>
+            </li>
+          ))}
+          {featuredRoles.map((r) => (
+            <li key={r.slug}>
+              <Link
+                href={localePath(`/interview-guide/role/${r.slug}`, locale)}
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-teal-300/30"
+              >
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-200/80">
+                  <BookOpen size={12} aria-hidden />
+                  {isAr ? 'دور' : 'Role'}
+                </span>
+                <span className="mq-display mt-2 text-base font-bold text-white group-hover:text-teal-100">
+                  {isAr
+                    ? `دليل مقابلة ${bi(locale, r.name)}`
+                    : `${bi(locale, r.name)} interview guide`}
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </section>

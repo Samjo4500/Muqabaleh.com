@@ -5,14 +5,18 @@ import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { ArticleJsonLd, BreadcrumbJsonLd, FaqJsonLd } from '@/components/json-ld';
 import { localePath } from '@/i18n/navigation';
 import {
-  HOW_TO_ANSWER_GENERIC,
+  NO_ACTIVE_JOBS,
   SALARY_DISCLAIMER,
   bi,
   companyGuideFaqs,
-  interviewProcessSteps,
   roleGuideFaqs,
 } from '@/lib/interview-guides/content';
 import type { CompanyGuidePayload, RoleGuidePayload } from '@/lib/interview-guides/data';
+import {
+  cultureTipsVariant,
+  howToAnswerVariant,
+  interviewProcessVariant,
+} from '@/lib/interview-guides/variants';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { SITE_URL } from '@/lib/seo';
 
@@ -88,14 +92,20 @@ export function InterviewGuideView(props: Props) {
     kind === 'company'
       ? bi(locale, props.data.company.about)
       : bi(locale, props.data.role.about);
-  const culture =
-    kind === 'company'
-      ? bi(locale, props.data.company.cultureTips)
-      : bi(locale, props.data.role.cultureTips);
+  const slug = kind === 'company' ? props.data.company.slug : props.data.role.slug;
+  const culture = bi(
+    locale,
+    cultureTipsVariant(
+      slug,
+      kind === 'company' ? props.data.company.cultureTips : props.data.role.cultureTips,
+    ),
+  );
   const openJobs = props.data.openJobs;
   const relatedJobs = props.data.relatedJobs;
   const publishedAt =
     kind === 'company' ? props.data.company.publishedAt : props.data.role.publishedAt;
+  const lastModified = props.data.lastModified || publishedAt;
+  const noActiveJobs = props.data.noActiveJobs;
 
   const practiceHref = localePath(
     jeanniePracticePath(
@@ -135,14 +145,19 @@ export function InterviewGuideView(props: Props) {
         ].slice(0, 7)
       : props.data.role.questions;
 
-  const answerTips =
-    kind === 'role'
-      ? `${bi(locale, HOW_TO_ANSWER_GENERIC)} ${bi(locale, props.data.role.answerTips)}`
-      : bi(locale, HOW_TO_ANSWER_GENERIC);
+  const answerTips = bi(
+    locale,
+    howToAnswerVariant(
+      slug,
+      kind === 'role' ? props.data.role.answerTips : undefined,
+    ),
+  );
 
   const faqs =
     kind === 'company'
-      ? companyGuideFaqs(props.data.company)
+      ? companyGuideFaqs(props.data.company, {
+          roleHint: props.data.relatedRoles[0] || null,
+        })
       : roleGuideFaqs(props.data.role);
 
   const jobsHref =
@@ -158,7 +173,7 @@ export function InterviewGuideView(props: Props) {
         url={pageUrl}
         image="/og-passport.jpg"
         datePublished={publishedAt}
-        dateModified={publishedAt}
+        dateModified={lastModified}
         locale={locale}
       />
       <BreadcrumbJsonLd
@@ -245,6 +260,18 @@ export function InterviewGuideView(props: Props) {
             </Link>
           </div>
 
+          {noActiveJobs ? (
+            <p className="mt-6 rounded-xl border border-amber-300/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-50">
+              {bi(locale, NO_ACTIVE_JOBS)}{' '}
+              <Link
+                href={localePath('/interview-guide', locale)}
+                className="font-semibold text-teal-300 hover:text-teal-200"
+              >
+                {isAr ? 'أدلة مشابهة' : 'Similar guides'}
+              </Link>
+            </p>
+          ) : null}
+
           <div className="mt-8 grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:grid-cols-3">
             <div>
               <p className="text-xs uppercase tracking-wide text-white/40">
@@ -295,7 +322,7 @@ export function InterviewGuideView(props: Props) {
               title={isAr ? 'عملية المقابلة' : 'Interview process'}
             >
               <ol className="list-decimal space-y-2 ps-5">
-                {interviewProcessSteps(subjectName, locale).map((step) => (
+                {interviewProcessVariant(subjectName, slug, locale).map((step) => (
                   <li key={step}>{step}</li>
                 ))}
               </ol>

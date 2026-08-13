@@ -7,7 +7,12 @@ import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { BreadcrumbJsonLd, JobPostingJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
-import { getGuideCompany, getGuideRole, GUIDE_ROLES } from '@/lib/interview-guides/catalog';
+import {
+  isPublishedCompanyGuide,
+  isPublishedRoleGuide,
+  resolveCompanyGuide,
+  resolveRoleGuide,
+} from '@/lib/interview-guides/registry';
 import { getDemoJob } from '@/lib/jobs/demo-listings';
 import { safeJobText } from '@/lib/jobs/job-details';
 import {
@@ -63,12 +68,15 @@ export default async function CompanyJobPage({ params }: Props) {
     locale,
   );
   const prefix = locale === 'en' ? '/en' : '';
-  const companyGuide = getGuideCompany(slug);
   const coachRoleId = inferCoachRoleIdFromTitle(job.title);
-  const roleGuide =
-    GUIDE_ROLES.find((r) => r.coachRoleId === coachRoleId) ||
-    getGuideRole(coachRoleId) ||
-    null;
+  const [companyPublished, rolePublished] = await Promise.all([
+    isPublishedCompanyGuide(slug),
+    isPublishedRoleGuide(coachRoleId),
+  ]);
+  const resolvedCompany = companyPublished ? await resolveCompanyGuide(slug) : null;
+  const companyGuide = resolvedCompany?.company || null;
+  const resolvedRole = rolePublished ? await resolveRoleGuide(coachRoleId) : null;
+  const roleGuide = resolvedRole?.role || null;
 
   return (
     <div className="mq-atelier min-h-screen">

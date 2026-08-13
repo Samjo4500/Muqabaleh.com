@@ -43,7 +43,10 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'Googlebot', allow: '/', disallow: DISALLOW },
       { userAgent: 'Bingbot', allow: '/', disallow: DISALLOW },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: [
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/sitemap-interview-guides.xml`,
+    ],
     host: SITE_URL,
   };
 }

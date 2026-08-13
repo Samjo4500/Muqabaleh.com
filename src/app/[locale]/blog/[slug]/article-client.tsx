@@ -242,6 +242,43 @@ export default function ArticleClient({
           </div>
         </section>
 
+        <section className="mq-section !pt-0 !pb-6">
+          <div className="mq-wrap">
+            <div className="mx-auto flex max-w-3xl flex-col gap-2 rounded-2xl border border-teal-300/20 bg-teal-400/[0.06] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold text-white">
+                  {isAr ? 'أدلة مقابلات ذات صلة' : 'Related interview guides'}
+                </p>
+                <p className="mt-1 text-sm text-white/55">
+                  {isAr
+                    ? 'أسئلة ونصائح قبل التقديم — للشركات والأدوار.'
+                    : 'Questions and tips before you apply — by company and role.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 text-sm font-semibold">
+                <Link
+                  href={localePath('/interview-guide', locale)}
+                  className="text-teal-300 hover:text-teal-200"
+                >
+                  {isAr ? 'أدلة الشركات' : 'Company guides'}
+                </Link>
+                <Link
+                  href={localePath('/interview-guide/role', locale)}
+                  className="text-teal-300 hover:text-teal-200"
+                >
+                  {isAr ? 'أدلة الأدوار' : 'Role guides'}
+                </Link>
+                <Link
+                  href={localePath('/interview-guide/role/software-engineer', locale)}
+                  className="text-teal-300 hover:text-teal-200"
+                >
+                  {isAr ? 'مهندس برمجيات' : 'Software Engineer'}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Related */}
         {related.length > 0 ? (
           <section className="mq-section !pt-0">

@@ -2,19 +2,20 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { InterviewGuideView } from '@/components/interview-guides/InterviewGuideView';
-import { allGuideRoleSlugs } from '@/lib/interview-guides/catalog';
 import { bi } from '@/lib/interview-guides/content';
 import { loadRoleGuide } from '@/lib/interview-guides/data';
+import { allGuideRoleSlugsAsync } from '@/lib/interview-guides/registry';
 import { pageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; roleSlug: string }> };
 
 export const revalidate = 3600;
-/** Phase 1 allowlist only — unknown role slugs must 404. */
+/** Deploy-time generation only — unknown role slugs 404. */
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return allGuideRoleSlugs().flatMap((roleSlug) => [
+export async function generateStaticParams() {
+  const slugs = await allGuideRoleSlugsAsync();
+  return slugs.flatMap((roleSlug) => [
     { locale: 'ar', roleSlug },
     { locale: 'en', roleSlug },
   ]);
@@ -23,17 +24,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, roleSlug } = await params;
   const data = await loadRoleGuide(roleSlug);
-  if (!data) {
-    return pageMetadata({
-      locale,
-      path: `/interview-guide/role/${roleSlug}`,
-      titleAr: 'دليل مقابلة | مقابلة',
-      titleEn: 'Interview Guide | Muqabaleh',
-      descAr: 'دليل مقابلة على مقابلة.',
-      descEn: 'Interview guide on Muqabaleh.',
-      noIndex: true,
-    });
-  }
+  if (!data) notFound();
 
   const nameAr = data.role.name.ar;
   const nameEn = data.role.name.en;

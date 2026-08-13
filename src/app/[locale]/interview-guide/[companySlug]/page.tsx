@@ -2,19 +2,24 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { InterviewGuideView } from '@/components/interview-guides/InterviewGuideView';
-import { allGuideCompanySlugs } from '@/lib/interview-guides/catalog';
 import { bi } from '@/lib/interview-guides/content';
 import { loadCompanyGuide } from '@/lib/interview-guides/data';
+import { allGuideCompanySlugsAsync } from '@/lib/interview-guides/registry';
 import { pageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; companySlug: string }> };
 
 export const revalidate = 3600;
-/** Phase 1 allowlist only — unknown company slugs must 404. */
+/**
+ * Deploy-time generation only (Phase 2 guardrail).
+ * Soft empty-jobs messaging still applies for statically built slugs.
+ * Unknown slugs 404 — do not SSR thin pages on demand.
+ */
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return allGuideCompanySlugs().flatMap((companySlug) => [
+export async function generateStaticParams() {
+  const slugs = await allGuideCompanySlugsAsync();
+  return slugs.flatMap((companySlug) => [
     { locale: 'ar', companySlug },
     { locale: 'en', companySlug },
   ]);
@@ -23,17 +28,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, companySlug } = await params;
   const data = await loadCompanyGuide(companySlug);
-  if (!data) {
-    return pageMetadata({
-      locale,
-      path: `/interview-guide/${companySlug}`,
-      titleAr: 'دليل مقابلة | مقابلة',
-      titleEn: 'Interview Guide | Muqabaleh',
-      descAr: 'دليل مقابلة على مقابلة.',
-      descEn: 'Interview guide on Muqabaleh.',
-      noIndex: true,
-    });
-  }
+  if (!data) notFound();
 
   const nameAr = data.company.name.ar;
   const nameEn = data.company.name.en;

@@ -7,7 +7,10 @@ import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { BreadcrumbJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
-import { getGuideCompany } from '@/lib/interview-guides/catalog';
+import {
+  isPublishedCompanyGuide,
+  resolveCompanyGuide,
+} from '@/lib/interview-guides/registry';
 import { getDemoCompany, getDemoCompanyJobs } from '@/lib/jobs/demo-listings';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
@@ -51,11 +54,9 @@ export default async function CompanyPage({ params }: Props) {
 
   const { company, jobs } = data;
   const prefix = locale === 'en' ? '/en' : '';
-  const guide =
-    getGuideCompany(company.slug) ||
-    getGuideCompany(
-      company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-    );
+  const published = await isPublishedCompanyGuide(company.slug);
+  const resolvedGuide = published ? await resolveCompanyGuide(company.slug) : null;
+  const guide = resolvedGuide?.company || null;
 
   return (
     <div className="mq-atelier min-h-screen">

@@ -17,6 +17,9 @@ export type GuideCompany = {
   relatedCompanySlugs: string[];
   relatedRoleSlugs: string[];
   publishedAt: string;
+  logoUrl?: string | null;
+  website?: string | null;
+  source?: 'phase1' | 'listed';
 };
 
 export type GuideRole = {
@@ -35,6 +38,7 @@ export type GuideRole = {
   relatedRoleSlugs: string[];
   relatedCompanySlugs: string[];
   publishedAt: string;
+  source?: 'phase1' | 'listed';
 };
 
 export type RelatedJobCard = {

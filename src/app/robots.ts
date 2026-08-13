@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
+import { SITE_URL } from '@/lib/seo';
 
 const DISALLOW = [
   '/admin',
@@ -43,7 +42,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'Googlebot', allow: '/', disallow: DISALLOW },
       { userAgent: 'Bingbot', allow: '/', disallow: DISALLOW },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap-index.xml`,
     host: SITE_URL,
   };
 }

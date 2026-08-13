@@ -5,7 +5,8 @@ import { getLocale } from 'next-intl/server';
 import { Building2, Sparkles } from 'lucide-react';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
-import { BreadcrumbJsonLd } from '@/components/json-ld';
+import { BreadcrumbJsonLd, CompanyOrganizationJsonLd } from '@/components/json-ld';
+import { PageBreadcrumbs } from '@/components/seo/PageBreadcrumbs';
 import { db } from '@/lib/db';
 import { getDemoCompany, getDemoCompanyJobs } from '@/lib/jobs/demo-listings';
 import { localePath } from '@/i18n/navigation';
@@ -32,8 +33,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/companies/${company.slug}`,
-    titleAr: `${company.name} — وظائف | مقابلة`,
-    titleEn: `${company.name} — jobs | Muqabaleh`,
+    titleAr: `${company.name} — وظائف وتدريب مقابلات | مقابلة`,
+    titleEn: `${company.name} Jobs & Interview Practice | Muqabaleh`,
     descAr: `${jobs.length} وظيفة لدى ${company.name}${company.industry ? ` · ${company.industry}` : ''}. تدرّب مع جيني ثم قدّم لدى الشركة.`,
     descEn: `${jobs.length} open roles at ${company.name}${company.industry ? ` · ${company.industry}` : ''}. Practice with Jeannie, then apply on their site.`,
     keywords: [company.name, company.country, 'jobs', 'MENA', 'Muqabaleh'],
@@ -60,12 +61,43 @@ export default async function CompanyPage({ params }: Props) {
           { name: company.name, url: `${SITE_URL}${prefix}/companies/${company.slug}` },
         ]}
       />
+      <CompanyOrganizationJsonLd
+        name={company.name}
+        slug={company.slug}
+        description={
+          company.industry
+            ? `${company.name} · ${company.industry} · ${company.country}`
+            : `${company.name} · ${company.country}`
+        }
+        logoUrl={company.logoUrl}
+        website={company.website}
+        locale={locale}
+      />
       <JobPortalChrome backHref="/jobs" backLabel={{ en: 'Jobs', ar: 'الوظائف' }} />
       <main className="mq-wrap py-10 md:py-14">
+        <PageBreadcrumbs
+          locale={locale}
+          items={[
+            { label: isAr ? 'الرئيسية' : 'Home', href: '/' },
+            { label: isAr ? 'الوظائف' : 'Jobs', href: '/jobs' },
+            { label: company.name },
+          ]}
+        />
         <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-teal-300/30 bg-teal-400/10 text-teal-200">
-              <Building2 size={28} />
+              {company.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.logoUrl}
+                  alt={isAr ? `شعار ${company.name}` : `${company.name} logo`}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-lg object-contain"
+                />
+              ) : (
+                <Building2 size={28} aria-hidden />
+              )}
             </div>
             <div>
               <p className="mq-kicker mb-2">{company.country}</p>
@@ -135,6 +167,8 @@ async function loadCompany(slug: string) {
           slug: company.slug,
           country: company.country,
           industry: company.industry,
+          logoUrl: company.logoUrl,
+          website: company.website,
         },
         jobs: company.jobs.map((j) => ({
           id: j.id,
@@ -159,6 +193,8 @@ async function loadCompany(slug: string) {
       slug: demo.slug,
       country: demo.country,
       industry: demo.industry,
+      logoUrl: demo.logoUrl,
+      website: null as string | null,
     },
     jobs: jobs.map((j) => ({
       id: j.id,

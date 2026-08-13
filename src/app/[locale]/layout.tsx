@@ -67,16 +67,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
       url,
-      siteName: 'مقابلة | Muqabaleh',
+      siteName: 'Muqabaleh',
       locale: ogLocale,
       alternateLocale: locale === 'ar' ? ['en_US'] : ['ar_SA'],
       type: 'website',
       images: [
         {
-          url: '/og-passport.jpg',
+          url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: 'مقابلة | Muqabaleh — AI Interview Practice',
+          alt: 'Muqabaleh — AI Interview Practice for MENA',
         },
       ],
     },
@@ -84,11 +84,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title:
         locale === 'ar'
-          ? 'Muqabaleh | تدرّب على مقابلات العمل بالذكاء الاصطناعي'
-          : 'Muqabaleh | Practice job interviews with AI',
+          ? 'مقابلة | تدريب مقابلات العمل بالذكاء الاصطناعي'
+          : 'Muqabaleh | AI Mock Interviews for MENA Jobs',
       description:
         'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
-      images: ['/og-passport.jpg'],
+      images: ['/og-image.png'],
       site: '@muqabaleh',
     },
     robots: { index: true, follow: true },

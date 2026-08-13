@@ -4,8 +4,7 @@ import { getPost, getRelatedPosts, getAllSlugs } from '@/content/blog';
 import ArticleClient from './article-client';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/json-ld';
 import type { Metadata } from 'next';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
+import { pageMetadata, SITE_URL } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -20,38 +19,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPost(locale, slug);
   if (!post) return {};
 
-  const url = `${SITE_URL}${locale === 'en' ? '/en' : ''}/blog/${slug}`;
-  const arUrl = `${SITE_URL}/blog/${slug}`;
-  const enUrl = `${SITE_URL}/en/blog/${slug}`;
+  const isAr = locale !== 'en';
+  const titleAr = `${post.title} | مدونة مقابلة`;
+  const titleEn = `${post.title} | Muqabaleh Blog`;
+
+  const meta = pageMetadata({
+    locale,
+    path: `/blog/${slug}`,
+    titleAr: isAr ? post.metaTitle || titleAr : titleAr,
+    titleEn: !isAr ? post.metaTitle || titleEn : titleEn,
+    descAr: post.metaDescription,
+    descEn: post.metaDescription,
+    keywords: post.keywords,
+    ogImage: post.image,
+    ogType: 'article',
+  });
 
   return {
-    title: { absolute: post.metaTitle },
-    description: post.metaDescription,
-    keywords: post.keywords,
+    ...meta,
     authors: [{ name: 'Muqabaleh' }],
-    alternates: {
-      canonical: url,
-      languages: {
-        'ar-SA': arUrl,
-        'en-US': enUrl,
-        'x-default': arUrl,
-      },
-    },
     openGraph: {
-      title: post.metaTitle,
-      description: post.metaDescription,
-      url,
+      ...meta.openGraph,
       type: 'article',
       publishedTime: post.date,
       modifiedTime: post.date,
       authors: ['Muqabaleh'],
-      images: [{ url: post.image, width: 1200, height: 630, alt: post.title }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.metaTitle,
-      description: post.metaDescription,
-      images: [post.image],
     },
   };
 }

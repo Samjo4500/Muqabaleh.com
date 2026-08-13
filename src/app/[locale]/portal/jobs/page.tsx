@@ -14,6 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titleEn: 'Vacancies coming soon — Muqabaleh',
     descAr: 'بوابة الوظائف متوقفة مؤقتاً. ابدأ مقابلة مجانية واحصل على جوازك مع جيني.',
     descEn: 'Job Portal is paused for now. Start a free interview and get your passport with Jeannie.',
+    noIndex: true,
   });
 }
 

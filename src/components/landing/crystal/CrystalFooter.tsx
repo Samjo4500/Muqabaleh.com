@@ -32,6 +32,10 @@ export function CrystalFooter() {
     ],
     company: [
       { bi: C.footer.about, href: '/about' },
+      {
+        bi: { en: 'Company profile', ar: 'ملف الشركة' },
+        href: '/company-profile',
+      },
       { bi: C.nav.forCompanies, href: '/business' },
       { bi: C.nav.partners, href: '/partners' },
       { bi: C.nav.blog, href: '/blog' },

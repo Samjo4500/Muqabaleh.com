@@ -12,6 +12,7 @@ const PUBLIC_ROUTES = [
   '/request-demo',
   '/demo',
   '/about',
+  '/company-profile',
   '/support',
   '/privacy',
   '/terms',

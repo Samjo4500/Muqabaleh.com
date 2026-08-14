@@ -1,9 +1,9 @@
 import { db } from '@/lib/db';
 import {
   getGoogleAccessToken,
-  hasGeminiApiKey,
   hasGoogleApiKey,
   hasGoogleServiceAccount,
+  resolveGeminiApiKey,
 } from '@/lib/coach/google-auth';
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'skip';
@@ -60,7 +60,16 @@ async function checkDatabase(): Promise<HealthCheckResult> {
     // "Timed out fetching a new connection from the connection pool".
     await db.$queryRaw`SELECT 1`;
     const users = await db.user.count();
-    const jobs = await db.b2BJob.count().catch(() => 0);
+    // Public job board + sitemap-jobs.xml use ListedJob, not B2BJob.
+    const jobs = await db.listedJob
+      .count({
+        where: {
+          isActive: true,
+          slug: { not: '' },
+          company: { isActive: true, slug: { not: '' } },
+        },
+      })
+      .catch(() => 0);
     return {
       id: 'database',
       label: { ar: 'قاعدة البيانات', en: 'Database' },
@@ -83,11 +92,51 @@ async function checkDatabase(): Promise<HealthCheckResult> {
   }
 }
 
+const GEMINI_PING_MODELS = [
+  'gemini-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-pro-latest',
+];
+
+function geminiGenerateAttempts(
+  model: string,
+  key: string | null,
+  accessToken: string | null,
+): { label: string; url: string; headers: Record<string, string> }[] {
+  const attempts: { label: string; url: string; headers: Record<string, string> }[] = [];
+  // Prefer AI Studio API key — GCP service accounts often 401 without Generative Language API.
+  if (key) {
+    attempts.push({
+      label: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    attempts.push({
+      label: 'api_key_header',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+    });
+  }
+  if (accessToken) {
+    attempts.push({
+      label: 'service_account',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+  return attempts;
+}
+
 async function checkGemini(): Promise<HealthCheckResult> {
   const started = Date.now();
-  const geminiKey = hasGeminiApiKey();
+  const key = resolveGeminiApiKey();
   const sa = hasGoogleServiceAccount();
-  if (!geminiKey && !sa) {
+  if (!key && !sa) {
     return {
       id: 'gemini',
       label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
@@ -100,32 +149,16 @@ async function checkGemini(): Promise<HealthCheckResult> {
   }
 
   try {
-    const models = ['gemini-flash-latest', 'gemini-pro-latest', 'gemini-2.5-flash'];
     const accessToken = sa
       ? await getGoogleAccessToken([
           'https://www.googleapis.com/auth/generative-language',
         ])
       : null;
-    const key = process.env.GEMINI_API_KEY?.trim() || null;
     let lastErr = 'no response';
+    let skipSa = false;
 
-    for (const model of models) {
-      const attempts: { url: string; headers: Record<string, string> }[] = [];
-      if (accessToken) {
-        attempts.push({
-          url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-      if (key) {
-        attempts.push({
-          url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
+    for (const model of GEMINI_PING_MODELS) {
+      const attempts = geminiGenerateAttempts(model, key, skipSa ? null : accessToken);
       for (const attempt of attempts) {
         const res = await fetch(attempt.url, {
           method: 'POST',
@@ -133,10 +166,13 @@ async function checkGemini(): Promise<HealthCheckResult> {
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: OK' }] }],
           }),
-          signal: AbortSignal.timeout(12000),
+          signal: AbortSignal.timeout(8000),
         });
         if (!res.ok) {
           lastErr = `${model} ${res.status}`;
+          if (attempt.label === 'service_account' && (res.status === 401 || res.status === 403)) {
+            skipSa = true;
+          }
           continue;
         }
         const data = (await res.json()) as {
@@ -326,16 +362,56 @@ async function checkBrevo(): Promise<HealthCheckResult> {
   }
 }
 
-function checkResend(): HealthCheckResult {
-  const key = Boolean(process.env.RESEND_API_KEY?.trim());
-  return {
-    id: 'resend',
-    label: { ar: 'بريد Resend', en: 'Resend email' },
-    category: 'comms',
-    status: key ? 'pass' : 'warn',
-    critical: false,
-    detail: key ? 'RESEND_API_KEY configured' : 'RESEND_API_KEY missing',
-  };
+async function checkResend(): Promise<HealthCheckResult> {
+  const started = Date.now();
+  const key = process.env.RESEND_API_KEY?.trim() || '';
+  if (!key) {
+    return {
+      id: 'resend',
+      label: { ar: 'بريد Resend', en: 'Resend email' },
+      category: 'comms',
+      status: 'fail',
+      critical: true,
+      latencyMs: Date.now() - started,
+      detail: 'RESEND_API_KEY missing',
+    };
+  }
+  try {
+    const res = await fetch('https://api.resend.com/domains', {
+      headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) {
+      return {
+        id: 'resend',
+        label: { ar: 'بريد Resend', en: 'Resend email' },
+        category: 'comms',
+        status: 'pass',
+        critical: true,
+        latencyMs: Date.now() - started,
+        detail: 'RESEND_API_KEY valid',
+      };
+    }
+    return {
+      id: 'resend',
+      label: { ar: 'بريد Resend', en: 'Resend email' },
+      category: 'comms',
+      status: 'fail',
+      critical: true,
+      latencyMs: Date.now() - started,
+      detail: `Resend HTTP ${res.status}`,
+    };
+  } catch (err) {
+    return {
+      id: 'resend',
+      label: { ar: 'بريد Resend', en: 'Resend email' },
+      category: 'comms',
+      status: 'fail',
+      critical: true,
+      latencyMs: Date.now() - started,
+      detail: err instanceof Error ? err.message.slice(0, 160) : 'exception',
+    };
+  }
 }
 
 function checkPayPal(): HealthCheckResult {
@@ -423,7 +499,7 @@ export async function runSystemHealthChecks(): Promise<SystemHealthReport> {
     checkGemini(),
     checkSpeech(),
     checkBrevo(),
-    Promise.resolve(checkResend()),
+    checkResend(),
     Promise.resolve(checkPayPal()),
     Promise.resolve(checkCron()),
   ]);

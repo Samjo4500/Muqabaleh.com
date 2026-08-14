@@ -103,10 +103,18 @@ export function hasGoogleApiKey(): boolean {
   );
 }
 
+/** AI Studio / Generative Language API key (never log the value). */
+export function resolveGeminiApiKey(): string | null {
+  const key =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    null;
+  return key || null;
+}
+
 export function hasGeminiApiKey(): boolean {
-  return Boolean(
-    process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim(),
-  );
+  return Boolean(resolveGeminiApiKey());
 }
 
 export function hasGoogleServiceAccount(): boolean {

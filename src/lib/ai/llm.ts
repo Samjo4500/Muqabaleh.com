@@ -3,14 +3,16 @@
  * Gemini → heuristic. No OpenAI in the muqabaleh.com stack path.
  */
 
+import { resolveGeminiApiKey } from '@/lib/coach/google-auth';
+
 export async function callGeminiText(system: string, user: string): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key = resolveGeminiApiKey();
   if (!key) return null;
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const client = new GoogleGenerativeAI(key);
     const model = client.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: system,
     });
     const result = await model.generateContent(user);

@@ -26,7 +26,7 @@ const contentSecurityPolicy = [
   "font-src 'self' data:",
   "media-src 'self' blob: data:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://*.sentry.io https://*.ingest.sentry.io https://www.facebook.com https://connect.facebook.net",
+  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.sentry.io https://*.ingest.sentry.io https://www.facebook.com https://connect.facebook.net",
   "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://*.daily.co",
   "upgrade-insecure-requests",
 ].join('; ');

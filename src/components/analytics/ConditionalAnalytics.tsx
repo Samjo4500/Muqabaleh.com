@@ -7,15 +7,14 @@ import {
   readCookieConsent,
   type CookieConsent,
 } from '@/lib/cookie-consent';
-import { getGaId } from '@/lib/analytics-ga';
 
 /**
- * Loads GA4 (and optional Meta Pixel) only after analytics consent.
- * Vercel Analytics stays separate (first-party, no cookies required).
+ * Updates GA4 Consent Mode after the user accepts analytics cookies.
+ * The measurement snippet itself lives in <head> via GaHead (all routes).
+ * Meta Pixel still loads only after consent.
  */
 export function ConditionalAnalytics() {
   const [consent, setConsent] = useState<CookieConsent | null>(null);
-  const gaId = getGaId();
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || '';
 
   useEffect(() => {
@@ -30,25 +29,22 @@ export function ConditionalAnalytics() {
   }, []);
 
   const analyticsAllowed = consent?.analytics === true || hasAnalyticsConsent();
-  if (!analyticsAllowed || !gaId) return null;
+
+  useEffect(() => {
+    if (typeof window.gtag !== 'function') return;
+    if (consent === null && !hasAnalyticsConsent()) return;
+    window.gtag('consent', 'update', {
+      analytics_storage: analyticsAllowed ? 'granted' : 'denied',
+      ad_storage: analyticsAllowed ? 'granted' : 'denied',
+    });
+  }, [analyticsAllowed, consent]);
+
+  if (!analyticsAllowed || !metaPixelId) return null;
 
   return (
     <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-        strategy="afterInteractive"
-      />
-      <Script id="mq-ga4" strategy="afterInteractive">
+      <Script id="mq-meta-pixel" strategy="afterInteractive">
         {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${gaId}', { anonymize_ip: true });
-        `}
-      </Script>
-      {metaPixelId ? (
-        <Script id="mq-meta-pixel" strategy="afterInteractive">
-          {`
             !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
             n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
@@ -57,8 +53,7 @@ export function ConditionalAnalytics() {
             fbq('init', '${metaPixelId}');
             fbq('track', 'PageView');
           `}
-        </Script>
-      ) : null}
+      </Script>
     </>
   );
 }

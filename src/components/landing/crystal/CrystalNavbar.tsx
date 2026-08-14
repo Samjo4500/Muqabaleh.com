@@ -11,6 +11,7 @@ import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
+import { trackSignupInitiated } from '@/lib/analytics-ga';
 
 /** Product story first; Pricing always last before auth CTAs. */
 const NAV_LINKS = [
@@ -88,7 +89,11 @@ export function CrystalNavbar() {
           >
             <BiInline bi={C.nav.login} />
           </Link>
-          <Link href={localePath('/interview/prep', locale)} className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm">
+          <Link
+            href={localePath('/interview/prep', locale)}
+            className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm"
+            onClick={() => trackSignupInitiated({ location: 'homepage', locale })}
+          >
             <BiInline bi={C.nav.getStarted} />
           </Link>
         </div>
@@ -133,7 +138,10 @@ export function CrystalNavbar() {
                 </Link>
                 <Link
                   href={localePath('/interview/prep', locale)}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    trackSignupInitiated({ location: 'homepage', locale });
+                  }}
                   className="mq-btn mq-btn-primary mt-2 text-center text-sm"
                 >
                   <BiInline bi={C.nav.getStarted} />

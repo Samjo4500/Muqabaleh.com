@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Check, X, Crown, Loader2 } from 'lucide-react';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { localePath } from '@/i18n/navigation';
+import { trackSignupInitiated } from '@/lib/analytics-ga';
 
 type TierKey = 'free' | 'pro' | 'unlimited';
 
@@ -217,8 +218,10 @@ function PayPalPlanButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const t = useTranslations('paypal');
+  const locale = useLocale();
 
   const handleClick = async () => {
+    trackSignupInitiated({ location: 'pricing', locale });
     setLoading(true);
     setError('');
     try {

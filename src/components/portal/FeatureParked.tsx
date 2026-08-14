@@ -8,6 +8,7 @@ import { BiInline, T } from '@/components/landing/crystal/BiText';
 import { C, type Bi } from '@/components/landing/crystal/copy';
 import { fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
+import { trackSignupInitiated } from '@/lib/analytics-ga';
 
 type ParkedCopy = {
   kicker: Bi;
@@ -40,6 +41,7 @@ export function FeatureParked({ copy }: { copy: ParkedCopy }) {
         <Link
           href={localePath('/interview/prequal', locale)}
           className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm"
+          onClick={() => trackSignupInitiated({ location: 'homepage', locale })}
         >
           <BiInline bi={C.nav.getStarted} />
         </Link>

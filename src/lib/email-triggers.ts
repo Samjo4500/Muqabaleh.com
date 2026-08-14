@@ -2,13 +2,11 @@ import { db } from './db';
 import { sendEmail, queueEmail, APP_URL } from './email';
 import { brandedEmailShell, sendBrevoEmail } from './brevo';
 import { MUQABALEH_BRAND, localePath } from '@/lib/brand/comms';
-import { welcomeEmail } from '@/emails/welcome';
 import { paymentReceiptEmail } from '@/emails/payment-receipt';
 import { bookingConfirmationEmail } from '@/emails/booking-confirmation';
 import { sessionReminderEmail } from '@/emails/session-reminder';
 import { sessionStartingSoonEmail } from '@/emails/session-starting-soon';
 import { reviewRequestEmail } from '@/emails/review-request';
-import { passwordResetEmail } from '@/emails/password-reset';
 import { interviewerApplicationReceivedEmail } from '@/emails/interviewer-application-received';
 import { interviewerApprovedEmail } from '@/emails/interviewer-approved';
 import { interviewerNewBookingEmail } from '@/emails/interviewer-new-booking';
@@ -61,9 +59,7 @@ export async function triggerWelcomeEmail(userId: string, locale?: Locale) {
       sender: SYSTEM_SENDER,
     });
     if (!brevo.success) {
-      // Fallback to legacy Resend path if configured
-      const legacy = await welcomeEmail({ userName: user.name || 'User', locale: lang });
-      await sendEmail({ to: user.email, subject: legacy.subject, html: legacy.html });
+      console.error('[EmailTrigger] Welcome email Brevo failed:', brevo.error);
     }
   } catch (err) {
     console.error('[EmailTrigger] Welcome email failed:', err);
@@ -385,8 +381,7 @@ export async function triggerPasswordResetEmail(
       sender: SYSTEM_SENDER,
     });
     if (!brevo.success) {
-      const legacy = await passwordResetEmail({ userName, resetLink, locale });
-      await sendEmail({ to: userEmail, subject: legacy.subject, html: legacy.html });
+      console.error('[EmailTrigger] Password reset Brevo failed:', brevo.error);
     }
   } catch (err) {
     console.error('[EmailTrigger] Password reset email failed:', err);

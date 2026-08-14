@@ -363,48 +363,49 @@ async function checkBrevo(): Promise<HealthCheckResult> {
 }
 
 async function checkResend(): Promise<HealthCheckResult> {
+  // Resend is not used. Transactional mail (welcome, reset, receipts) goes through Brevo.
   const started = Date.now();
-  const key = process.env.RESEND_API_KEY?.trim() || '';
+  const key = process.env.BREVO_API_KEY?.trim();
   if (!key) {
     return {
       id: 'resend',
-      label: { ar: 'بريد Resend', en: 'Resend email' },
+      label: { ar: 'البريد المعاملاتي', en: 'Transactional email' },
       category: 'comms',
       status: 'fail',
       critical: true,
       latencyMs: Date.now() - started,
-      detail: 'RESEND_API_KEY missing',
+      detail: 'BREVO_API_KEY missing — welcome/reset mail disabled',
     };
   }
   try {
-    const res = await fetch('https://api.resend.com/domains', {
-      headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' },
+    const res = await fetch('https://api.brevo.com/v3/account', {
+      headers: { 'api-key': key, Accept: 'application/json' },
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
       return {
         id: 'resend',
-        label: { ar: 'بريد Resend', en: 'Resend email' },
+        label: { ar: 'البريد المعاملاتي', en: 'Transactional email' },
         category: 'comms',
         status: 'pass',
         critical: true,
         latencyMs: Date.now() - started,
-        detail: 'RESEND_API_KEY valid',
+        detail: 'Brevo (welcome, password reset, receipts) — Resend not used',
       };
     }
     return {
       id: 'resend',
-      label: { ar: 'بريد Resend', en: 'Resend email' },
+      label: { ar: 'البريد المعاملاتي', en: 'Transactional email' },
       category: 'comms',
       status: 'fail',
       critical: true,
       latencyMs: Date.now() - started,
-      detail: `Resend HTTP ${res.status}`,
+      detail: `Brevo HTTP ${res.status}`,
     };
   } catch (err) {
     return {
       id: 'resend',
-      label: { ar: 'بريد Resend', en: 'Resend email' },
+      label: { ar: 'البريد المعاملاتي', en: 'Transactional email' },
       category: 'comms',
       status: 'fail',
       critical: true,

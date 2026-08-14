@@ -4,7 +4,7 @@ import { localePath } from '@/i18n/navigation';
 import { db } from '@/lib/db';
 
 /**
- * Legacy /jobs/:id — 301 to canonical /companies/{company}/{job-slug}.
+ * Legacy /jobs/:id — 301/308 to canonical /companies/{company}/{job-slug}.
  * Never serve a separate job detail surface here.
  */
 export default async function JobIdRedirect({
@@ -18,6 +18,9 @@ export default async function JobIdRedirect({
     permanentRedirect(localePath('/jobs', locale));
   }
 
+  let companySlug: string | null = null;
+  let jobSlug: string | null = null;
+
   try {
     const row = await db.listedJob.findFirst({
       where: {
@@ -30,13 +33,14 @@ export default async function JobIdRedirect({
         company: { select: { slug: true } },
       },
     });
-    if (row?.company?.slug && row.slug) {
-      permanentRedirect(
-        localePath(`/companies/${row.company.slug}/${row.slug}`, locale),
-      );
-    }
+    companySlug = row?.company?.slug ?? null;
+    jobSlug = row?.slug ?? null;
   } catch (err) {
     console.error('[jobs/[id] redirect]', err);
+  }
+
+  if (companySlug && jobSlug) {
+    permanentRedirect(localePath(`/companies/${companySlug}/${jobSlug}`, locale));
   }
 
   const demo = DEMO_JOBS.find((j) => j.id === key || j.slug === key);

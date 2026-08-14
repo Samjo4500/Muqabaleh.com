@@ -13,7 +13,7 @@ export function Footer() {
   const locale = useLocale();
 
   const productLinks = [
-    { key: 'footerLinkPricing', href: '/employers' },
+    { key: 'footerLinkPricing', href: '/#pricing' },
     { key: 'footerLinkBusiness', href: '/business' },
     { key: 'footerLinkInterviewers', href: '/interviewers' },
     { key: 'footerLinkJoin', href: '/join-as-interviewer' },
@@ -22,6 +22,8 @@ export function Footer() {
 
   const companyLinks = [
     { key: 'footerLinkAbout', href: '/about' },
+    { key: 'footerLinkPress', href: '/press' },
+    { key: 'footerLinkCompanies', href: '/companies' },
     { key: 'footerLinkDemo', href: '/demo' },
   ];
 

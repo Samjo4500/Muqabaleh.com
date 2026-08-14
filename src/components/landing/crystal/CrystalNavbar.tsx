@@ -19,6 +19,7 @@ const NAV_LINKS = [
   { bi: { en: 'How it works', ar: 'كيف يعمل' }, href: '#how' },
   { bi: { en: 'Passport', ar: 'الجواز' }, href: '#passport' },
   { bi: { en: 'Jobs', ar: 'الوظائف' }, href: '/jobs' },
+  { bi: { en: 'Companies', ar: 'الشركات' }, href: '/companies' },
   { bi: C.nav.pricing, href: '#pricing' },
 ] as const;
 

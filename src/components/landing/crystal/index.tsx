@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
 import { PopularGuides } from './PopularGuides';
+import { CrystalSocialProof } from './SocialProof';
 import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
 
 const CrystalSimplePath = dynamic(
@@ -65,6 +66,7 @@ export async function CrystalLanding() {
         <CrystalPricing />
         <CrystalFAQ />
         <CrystalFinalCta />
+        <CrystalSocialProof locale={locale} />
       </main>
       <CrystalFooter />
     </div>

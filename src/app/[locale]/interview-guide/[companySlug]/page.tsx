@@ -27,17 +27,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, companySlug } = await params;
   const data = await loadCompanyGuide(companySlug);
-  if (!data) {
-    return pageMetadata({
-      locale,
-      path: `/interview-guide/${companySlug}`,
-      titleAr: 'دليل مقابلة | مقابلة',
-      titleEn: 'Interview Guide | Muqabaleh',
-      descAr: 'دليل مقابلة على مقابلة.',
-      descEn: 'Interview guide on Muqabaleh.',
-      noIndex: true,
-    });
-  }
+  if (!data) notFound();
 
   const nameAr = data.company.name.ar;
   const nameEn = data.company.name.en;

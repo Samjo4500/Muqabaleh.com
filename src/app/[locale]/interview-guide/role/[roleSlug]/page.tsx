@@ -22,17 +22,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, roleSlug } = await params;
   const data = await loadRoleGuide(roleSlug);
-  if (!data) {
-    return pageMetadata({
-      locale,
-      path: `/interview-guide/role/${roleSlug}`,
-      titleAr: 'دليل مقابلة | مقابلة',
-      titleEn: 'Interview Guide | Muqabaleh',
-      descAr: 'دليل مقابلة على مقابلة.',
-      descEn: 'Interview guide on Muqabaleh.',
-      noIndex: true,
-    });
-  }
+  if (!data) notFound();
 
   const nameAr = data.role.name.ar;
   const nameEn = data.role.name.en;

@@ -317,31 +317,48 @@ export function resolveJobAddressCountry(opts: {
   return null;
 }
 
-/** City / region label from a free-text location; omit when remote/vague. */
-export function parseAddressRegion(location?: string | null): string | undefined {
+/** City / region labels from free-text location; omit when remote/vague. */
+export function parseJobAddressParts(location?: string | null): {
+  locality?: string;
+  region?: string;
+} {
   const loc = nonEmpty(location);
-  if (!loc) return undefined;
+  if (!loc) return {};
   if (
     /^(remote|hybrid|anywhere|emea|global|worldwide|multiple locations?|various|n\/?a|mena|gcc)\b/i.test(
       loc,
     )
   ) {
-    return undefined;
+    return {};
   }
   const parts = loc
     .split(/[,·|]/)
     .map((p) => p.trim().replace(/\.+$/, ''))
     .filter(Boolean);
-  if (!parts.length) return undefined;
-  const first = parts[0];
-  // First token is already a country name → no region
-  if (COUNTRY_NAME_TO_ISO.some(({ re }) => re.test(first)) && parts.length === 1) {
-    return undefined;
-  }
-  if (/^(remote|hybrid|anywhere|emea|global|worldwide|mena|gcc)$/i.test(first)) {
-    return undefined;
-  }
-  return first;
+  if (!parts.length) return {};
+
+  const isCountry = (p: string) =>
+    COUNTRY_NAME_TO_ISO.some(({ re }) => re.test(p)) ||
+    /^(remote|hybrid|anywhere|emea|global|worldwide|mena|gcc)$/i.test(p);
+
+  const nonCountry = parts.filter((p) => !isCountry(p));
+  if (!nonCountry.length) return {};
+
+  // Google: addressLocality = city; addressRegion = state/province when present.
+  const locality = nonCountry[0];
+  const region =
+    nonCountry.length > 1 && /province|state|governorate|emirate|region/i.test(nonCountry[1])
+      ? nonCountry[1]
+      : nonCountry.length > 1 && nonCountry[1] !== locality
+        ? nonCountry[1]
+        : undefined;
+
+  return { locality, region };
+}
+
+/** @deprecated use parseJobAddressParts — kept for callers expecting city-as-region. */
+export function parseAddressRegion(location?: string | null): string | undefined {
+  return parseJobAddressParts(location).locality;
 }
 
 export type JobPostingLdInput = {
@@ -363,6 +380,7 @@ export type JobPostingLdInput = {
   countryKey?: string | null;
   addressCountry?: string | null;
   addressRegion?: string | null;
+  addressLocality?: string | null;
   streetAddress?: string | null;
   postalCode?: string | null;
 };
@@ -393,8 +411,10 @@ export function buildJobPostingLd(
     addressCountry,
     postalCode: nonEmpty(input.postalCode) || '00000',
   };
-  const region =
-    nonEmpty(input.addressRegion) || parseAddressRegion(input.jobLocation);
+  const parsed = parseJobAddressParts(input.jobLocation);
+  const locality = nonEmpty(input.addressLocality) || parsed.locality;
+  if (locality) address.addressLocality = locality;
+  const region = nonEmpty(input.addressRegion) || parsed.region;
   if (region) address.addressRegion = region;
   const street = nonEmpty(input.streetAddress);
   if (street) address.streetAddress = street;

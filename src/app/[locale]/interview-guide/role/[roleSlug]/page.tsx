@@ -10,8 +10,8 @@ import { pageMetadata } from '@/lib/seo';
 type Props = { params: Promise<{ locale: string; roleSlug: string }> };
 
 export const revalidate = 3600;
-/** Prefetch at build; allow on-demand recovery for published roles. */
-export const dynamicParams = true;
+/** Unknown role slugs must 404; published roles are prerendered at build. */
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   // Parent layout already emits locales — only this segment.

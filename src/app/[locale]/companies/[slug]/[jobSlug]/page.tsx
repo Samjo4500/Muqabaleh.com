@@ -104,6 +104,9 @@ export default async function CompanyJobPage({ params }: Props) {
         applyUrl={job.applyUrl}
         salaryLabel={job.salaryLabel}
         locale={locale}
+        companySlug={slug}
+        companyCountry={job.companyCountry}
+        countryKey={job.countryKey}
       />
       <JobPortalChrome
         backHref={`/companies/${slug}`}
@@ -263,6 +266,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
         applyUrl: row.applyUrl,
         salaryLabel: row.salaryLabel,
         companyName: row.company.name,
+        companyCountry: row.company.country,
         datePosted: (row.postedAt || row.updatedAt)?.toISOString?.() ?? null,
         countryKey: classifyMenaCountry(row.location, row.company.country, row.title),
       };
@@ -284,6 +288,7 @@ async function loadJob(companySlug: string, jobSlug: string) {
     applyUrl: demo.applyUrl,
     salaryLabel: null as string | null,
     companyName: demo.company.name,
+    companyCountry: demo.company.country,
     datePosted: null as string | null,
     countryKey: classifyMenaCountry(demo.location, demo.company.country, demo.title),
   };

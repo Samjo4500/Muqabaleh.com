@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { UserRole } from '@prisma/client';
 import { enforceIpRateLimit } from '@/lib/rate-limit';
+import { getBrevoApiKey } from '@/lib/env/runtime';
 
 /**
  * Ops health for Jeannie coach providers.
@@ -176,14 +177,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const brevoKey = Boolean(process.env.BREVO_API_KEY?.trim());
+  const brevoApiKey = getBrevoApiKey();
+  const brevoKey = Boolean(brevoApiKey);
   let brevoPing: 'ok' | 'fail' | 'skipped' = 'skipped';
   let brevoError: string | null = null;
-  if (brevoKey) {
+  if (brevoApiKey) {
     try {
       const res = await fetch('https://api.brevo.com/v3/account', {
         headers: {
-          'api-key': process.env.BREVO_API_KEY!.trim(),
+          'api-key': brevoApiKey,
           Accept: 'application/json',
         },
       });

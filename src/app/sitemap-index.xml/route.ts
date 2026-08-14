@@ -7,6 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 export function GET() {
   const children = [
     `${SITE_URL}/sitemap.xml`,
+    `${SITE_URL}/sitemap-jobs.xml`,
     `${SITE_URL}/sitemap-interview-guides.xml`,
   ];
 

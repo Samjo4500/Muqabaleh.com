@@ -262,9 +262,11 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
             className="mt-6 divide-y divide-white/10 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.02]"
           >
             {rest.map((job, i) => {
-              const href = job.company
-                ? localePath(`/companies/${job.company.slug}/${job.slug}`, locale)
-                : localePath(`/jobs/${job.id}`, locale);
+              if (!job.company?.slug || !job.slug) return null;
+              const href = localePath(
+                `/companies/${job.company.slug}/${job.slug}`,
+                locale,
+              );
               const countryKey = classifyMenaCountry(
                 job.location,
                 job.company?.country,
@@ -393,9 +395,11 @@ function SpotlightRole({
   isAr: boolean;
   locale: string;
 }) {
-  const href = job.company
-    ? localePath(`/companies/${job.company.slug}/${job.slug}`, locale)
-    : localePath(`/jobs/${job.id}`, locale);
+  if (!job.company?.slug || !job.slug) return null;
+  const href = localePath(
+    `/companies/${job.company.slug}/${job.slug}`,
+    locale,
+  );
   const practiceHref = localePath(
     jeanniePracticePath({
       company: job.company?.name,

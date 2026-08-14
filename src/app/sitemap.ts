@@ -80,22 +80,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Per-guide URLs live in /sitemap-interview-guides.xml (see robots.txt).
-
+  // Per-job URLs live in /sitemap-jobs.xml (companies/{slug}/{job-slug} only).
   try {
     const companies = await db.listedCompany.findMany({
       where: { isActive: true },
-      select: {
-        slug: true,
-        updatedAt: true,
-        jobs: {
-          where: { isActive: true },
-          select: { slug: true, updatedAt: true, postedAt: true },
-          take: 80,
-          orderBy: { postedAt: 'desc' },
-        },
-      },
-      take: 60,
+      select: { slug: true, updatedAt: true },
+      take: 200,
+      orderBy: { updatedAt: 'desc' },
     });
 
     for (const company of companies) {
@@ -106,18 +97,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: 'daily',
           priority: 0.8,
         });
-        for (const job of company.jobs) {
-          entries.push({
-            url: `${SITE_URL}${prefix}/companies/${company.slug}/${job.slug}`,
-            lastModified: (job.updatedAt || job.postedAt).toISOString(),
-            changeFrequency: 'daily',
-            priority: 0.75,
-          });
-        }
       }
     }
   } catch (err) {
-    console.error('[sitemap] listed jobs', err);
+    console.error('[sitemap] listed companies', err);
   }
 
   return entries;

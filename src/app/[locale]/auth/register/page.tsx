@@ -132,9 +132,11 @@ function RegisterForm() {
 
       toast.success(t('registerSuccess'));
       try {
-        const { trackGaEvent } = await import('@/lib/analytics-ga');
-        trackGaEvent('signup_completed', {
-          accountType: isCompany ? 'B2B' : 'INDIVIDUAL',
+        const { trackSignupCompleted } = await import('@/lib/analytics-ga');
+        trackSignupCompleted({
+          locale,
+          plan: isCompany ? 'enterprise' : 'free',
+          onceKey: 'register',
         });
       } catch {
         /* analytics optional */

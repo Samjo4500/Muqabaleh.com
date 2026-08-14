@@ -11,11 +11,10 @@ type Props = { params: Promise<{ locale: string; companySlug: string }> };
 
 export const revalidate = 3600;
 /**
- * Prefetch at build via generateStaticParams; allow on-demand for published
- * guides missing from a partial build (fixes soft-404 shells with HTTP 200).
- * Unknown / thin slugs still notFound() in the page.
+ * Only slugs from generateStaticParams are valid. Unknown slugs must be a
+ * real HTTP 404 (not a 200 ISR shell), which Google treats as a soft-404.
  */
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   // Parent `[locale]/layout` already emits locales — return only this segment.
@@ -27,17 +26,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, companySlug } = await params;
   const data = await loadCompanyGuide(companySlug);
-  if (!data) {
-    return pageMetadata({
-      locale,
-      path: `/interview-guide/${companySlug}`,
-      titleAr: 'دليل مقابلة | مقابلة',
-      titleEn: 'Interview Guide | Muqabaleh',
-      descAr: 'دليل مقابلة على مقابلة.',
-      descEn: 'Interview guide on Muqabaleh.',
-      noIndex: true,
-    });
-  }
+  if (!data) notFound();
 
   const nameAr = data.company.name.ar;
   const nameEn = data.company.name.en;

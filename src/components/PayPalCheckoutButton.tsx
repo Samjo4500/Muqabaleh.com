@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, CheckCircle2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { trackSignupInitiated } from '@/lib/analytics-ga';
 
 export type PlanType = 'pro' | 'unlimited' | 'jeannie' | 'jeannie_pro' | 'mastery_pack';
 
@@ -158,6 +159,9 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
             layout: 'vertical',
             label: isSubscription ? 'subscribe' : 'pay',
             height: 44,
+          },
+          onClick: () => {
+            trackSignupInitiated({ location: 'pricing', locale });
           },
           onCancel: () => {
             window.location.href = `/${locale}/payment/cancel`;

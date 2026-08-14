@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { localePath } from '@/i18n/navigation';
 import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell';
 import type { InterviewPlan } from '@/lib/interview/plan-generator';
+import { trackInterviewStarted } from '@/lib/analytics-ga';
 
 type Stored = {
   sessionId: string;
@@ -58,6 +59,16 @@ export function SummaryClient({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to start');
+      const form = (
+        stored as {
+          form?: { targetRole?: string; languagePreference?: string };
+        }
+      ).form;
+      trackInterviewStarted({
+        language: form?.languagePreference,
+        role: form?.targetRole,
+        locale,
+      });
       router.push(localePath(`/interview/session/${stored.sessionId}`, locale));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to start');

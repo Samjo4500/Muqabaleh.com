@@ -7,6 +7,7 @@ import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
+import { GaHead } from '@/components/analytics/GaHead';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
@@ -54,6 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: url,
       languages: {
+        ar: SITE_URL,
+        en: `${SITE_URL}/en`,
         'ar-SA': SITE_URL,
         'en-US': `${SITE_URL}/en`,
         'x-default': SITE_URL,
@@ -117,6 +120,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning className={fontVariables}>
       <head>
+        <GaHead />
         <meta name="theme-color" content="#0a1220" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

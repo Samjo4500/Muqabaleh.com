@@ -288,10 +288,10 @@ export function CompanyProfileView({ locale }: { locale: string }) {
               {isAr ? 'اطلب عرضاً' : 'Request a demo'}
             </Link>
             <a
-              href="mailto:hello@muqabaleh.com"
+              href="mailto:info@muqabaleh.com"
               className="mq-btn mq-btn-ghost min-h-12 px-6 text-sm font-bold"
             >
-              hello@muqabaleh.com
+              info@muqabaleh.com
             </a>
           </div>
           <p className="mt-10 text-sm text-white/35">

@@ -134,11 +134,11 @@ export function Footer() {
             ))}
           </div>
           <a
-            href="mailto:hello@muqabaleh.com"
+            href="mailto:info@muqabaleh.com"
             className="flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
           >
             <Mail size={14} strokeWidth={1.75} />
-            hello@muqabaleh.com
+            info@muqabaleh.com
           </a>
         </div>
 

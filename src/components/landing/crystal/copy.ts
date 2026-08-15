@@ -650,7 +650,7 @@ export const C = {
     privacy: { en: 'Privacy', ar: 'الخصوصية' },
     terms: { en: 'Terms', ar: 'الشروط' },
     refund: { en: 'Refund', ar: 'الاسترداد' },
-    email: { en: 'hello@muqabaleh.com', ar: 'hello@muqabaleh.com' },
+    email: { en: 'info@muqabaleh.com', ar: 'info@muqabaleh.com' },
     copyright: {
       en: '© 2026 Muqabaleh. All rights reserved.',
       ar: '© ٢٠٢٦ مقابلة. جميع الحقوق محفوظة.',

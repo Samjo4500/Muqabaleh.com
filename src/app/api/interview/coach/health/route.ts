@@ -4,6 +4,7 @@ import {
   hasGeminiApiKey,
   hasGoogleApiKey,
   hasGoogleServiceAccount,
+  resolveGeminiApiKey,
 } from '@/lib/coach/google-auth';
 import { assertCronAuthorized } from '@/lib/cron-auth';
 import { getServerSession } from 'next-auth';
@@ -40,16 +41,18 @@ export async function GET(req: NextRequest) {
   if (geminiKey || googleServiceAccount) {
     const models = [
       'gemini-flash-latest',
-      'gemini-pro-latest',
-      'gemini-3.5-flash',
       'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-pro-latest',
     ];
     const accessToken = googleServiceAccount
       ? await getGoogleAccessToken([
           'https://www.googleapis.com/auth/generative-language',
         ])
       : null;
-    const key = process.env.GEMINI_API_KEY?.trim() || null;
+    const key = resolveGeminiApiKey();
+    let skipSa = false;
 
     for (const model of models) {
       geminiModelTried = model;
@@ -59,7 +62,14 @@ export async function GET(req: NextRequest) {
           headers: Record<string, string>;
           label: string;
         }[] = [];
-        if (accessToken) {
+        if (key) {
+          attempts.push({
+            label: 'api_key',
+            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        if (accessToken && !skipSa) {
           attempts.push({
             label: 'service_account',
             url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -67,13 +77,6 @@ export async function GET(req: NextRequest) {
               Authorization: `Bearer ${accessToken}`,
               'Content-Type': 'application/json',
             },
-          });
-        }
-        if (key) {
-          attempts.push({
-            label: 'api_key',
-            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-            headers: { 'Content-Type': 'application/json' },
           });
         }
 
@@ -87,10 +90,17 @@ export async function GET(req: NextRequest) {
                 { role: 'user', parts: [{ text: 'Reply with exactly: OK' }] },
               ],
             }),
+            signal: AbortSignal.timeout(8000),
           });
           if (!res.ok) {
             const errText = await res.text().catch(() => '');
             geminiError = `${attempt.label} ${res.status}: ${errText.slice(0, 160)}`;
+            if (
+              attempt.label === 'service_account' &&
+              (res.status === 401 || res.status === 403)
+            ) {
+              skipSa = true;
+            }
             continue;
           }
           const data = (await res.json()) as {

@@ -63,11 +63,11 @@ export default async function CompanyPage({ params }: Props) {
       <BreadcrumbJsonLd
         items={[
           { name: isAr ? 'الرئيسية' : 'Home', url: locale === 'en' ? `${SITE_URL}/en` : SITE_URL },
-          { name: isAr ? 'الوظائف' : 'Jobs', url: `${SITE_URL}${prefix}/jobs` },
+          { name: isAr ? 'الشركات' : 'Companies', url: `${SITE_URL}${prefix}/companies` },
           { name: company.name, url: `${SITE_URL}${prefix}/companies/${company.slug}` },
         ]}
       />
-      <JobPortalChrome backHref="/jobs" backLabel={{ en: 'Jobs', ar: 'الوظائف' }} />
+      <JobPortalChrome backHref="/companies" backLabel={{ en: 'Companies', ar: 'الشركات' }} />
       <main className="mq-wrap py-10 md:py-14">
         <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex items-start gap-4">

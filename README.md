@@ -17,7 +17,7 @@ npm run dev
 | `DATABASE_URL` | Postgres (Neon/Supabase) |
 | `BREVO_API_KEY` | Transactional email |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | Error tracking (PII scrubbed) |
-| `NEXT_PUBLIC_GA_ID` | GA4 measurement ID (loads only after analytics cookie consent) |
+| `NEXT_PUBLIC_GA_ID` | GA4 measurement ID (snippet in `<head>` on all locale routes; Consent Mode until analytics cookies are accepted) |
 | `NEXT_PUBLIC_META_PIXEL_ID` | Optional Meta Pixel (blocked until analytics consent) |
 | PayPal vars | Existing PayPal subscription / checkout flow |
 
@@ -36,7 +36,7 @@ Day 0 welcome sends immediately on signup. Days 2/5/7/14 are queued in `EmailQue
 
 ## Cookie consent
 
-Analytics (GA4 / Meta Pixel) load only after the user accepts analytics cookies. Consent is stored in `localStorage` under `mq_cookie_consent_v1`.
+Analytics (GA4) ships a measurement snippet in `<head>` on every locale route (`/`, `/en`, `/jobs`, guides, etc.). Google Consent Mode defaults to `denied` until the user accepts analytics cookies. Conversion funnel events (`interview_started`, `interview_completed`, `guide_viewed`, `signup_initiated`, `signup_completed`) dual-write to GA4 and `POST /api/analytics`. Founder dashboard: `/admin/analytics` (yesterday + today, Asia/Riyadh).
 
 ## Deploy
 

@@ -10,6 +10,7 @@ import type {
   GenerativeModel,
   GoogleGenerativeAI,
 } from '@google/generative-ai';
+import { resolveGeminiApiKey } from '@/lib/coach/google-auth';
 
 // ─── Gemini Setup ───
 let _geminiModel: GenerativeModel | null = null;
@@ -17,12 +18,12 @@ let _geminiClient: GoogleGenerativeAI | null = null;
 
 async function getGeminiModel() {
   if (_geminiModel) return _geminiModel;
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = resolveGeminiApiKey();
   if (!apiKey) return null;
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     _geminiClient = new GoogleGenerativeAI(apiKey);
-    _geminiModel = _geminiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    _geminiModel = _geminiClient.getGenerativeModel({ model: 'gemini-flash-latest' });
     return _geminiModel;
   } catch {
     return null;

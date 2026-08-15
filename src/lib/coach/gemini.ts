@@ -2,23 +2,25 @@ import { getInterviewConfig } from './config';
 import { extractJsonObject } from '@/lib/ai/llm';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from './types';
 import { buildCoachSystemPrompt, buildScoringPrompt } from './prompts';
-import { getGoogleAccessToken, hasGoogleServiceAccount } from './google-auth';
+import {
+  getGoogleAccessToken,
+  hasGoogleServiceAccount,
+  resolveGeminiApiKey,
+} from './google-auth';
 
 const GEMINI_MODEL_FALLBACKS = [
   'gemini-flash-latest',
-  'gemini-pro-latest',
-  'gemini-3.5-flash',
   'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-pro-latest',
 ];
 
 async function callGeminiPro(
   system: string,
   contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
 ): Promise<string | null> {
-  const key =
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    null;
+  const key = resolveGeminiApiKey();
   const accessToken = hasGoogleServiceAccount()
     ? await getGoogleAccessToken([
         'https://www.googleapis.com/auth/generative-language',
@@ -106,6 +108,22 @@ async function callGeminiRest(opts: {
 
   const attempts: { auth: string; url: string; headers: Record<string, string> }[] =
     [];
+  // API key first — service-account OAuth often 401s without Generative Language API.
+  if (opts.key) {
+    attempts.push({
+      auth: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    attempts.push({
+      auth: 'api_key_header',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent`,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': opts.key,
+      },
+    });
+  }
   if (opts.accessToken) {
     attempts.push({
       auth: 'service_account',
@@ -116,34 +134,38 @@ async function callGeminiRest(opts: {
       },
     });
   }
-  if (opts.key) {
-    attempts.push({
-      auth: 'api_key',
-      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
 
   for (const attempt of attempts) {
-    const res = await fetch(attempt.url, {
-      method: 'POST',
-      headers: attempt.headers,
-      body,
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.error(
-        `[coach/gemini] REST ${opts.model} ${attempt.auth}`,
-        res.status,
-        errText.slice(0, 220),
-      );
-      continue;
+    try {
+      const res = await fetch(attempt.url, {
+        method: 'POST',
+        headers: attempt.headers,
+        body,
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        console.error(
+          `[coach/gemini] REST ${opts.model} ${attempt.auth}`,
+          res.status,
+          errText.slice(0, 220),
+        );
+        if (
+          attempt.auth === 'service_account' &&
+          (res.status === 401 || res.status === 403)
+        ) {
+          opts.accessToken = null;
+        }
+        continue;
+      }
+      const data = (await res.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+      };
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+      if (text) return text;
+    } catch (err) {
+      console.error(`[coach/gemini] REST ${opts.model} ${attempt.auth} exception`, err);
     }
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-    if (text) return text;
   }
   return null;
 }
@@ -154,11 +176,6 @@ function toGeminiHistory(messages: ChatMessage[]) {
     parts: [{ text: m.content }],
   }));
 }
-
-const OPENING_FALLBACK = {
-  ar: 'مرحباً، أنا مدرب المقابلات في مقابلة. لنبدأ — حدّثني عن نفسك وخبرتك ذات الصلة بهذا الدور.',
-  en: "Hello — I'm your interview coach on Muqabaleh. Let's begin: tell me about yourself and your relevant experience for this role.",
-};
 
 export async function generateCoachTurn(opts: {
   prep: PrepSelections;
@@ -183,16 +200,11 @@ export async function generateCoachTurn(opts: {
 
   const text = await callGeminiPro(system, toGeminiHistory(history));
   if (!text) {
-    // Prefer contextual fallback — never crash the session.
-    if (opts.userMessage?.trim()) {
-      const fallbackFollow =
-        opts.prep.language === 'en'
-          ? 'Thank you. Could you share a specific example with numbers or outcomes?'
-          : 'شكراً لك. هل يمكنك مشاركة مثال محدد بأرقام أو نتائج؟';
-      return { reply: fallbackFollow, complete: false };
-    }
+    console.error('[coach/gemini] all models failed; returning graceful fallback');
     const fallback =
-      opts.prep.language === 'en' ? OPENING_FALLBACK.en : OPENING_FALLBACK.ar;
+      opts.prep.language === 'en'
+        ? 'Jeannie is temporarily unavailable. Your session is saved — please try that answer again in a moment.'
+        : 'جيني غير متاحة مؤقتاً. جلستك محفوظة — أعد إرسال إجابتك بعد لحظات.';
     return { reply: fallback, complete: false };
   }
 
@@ -241,10 +253,7 @@ export async function scoreTranscript(
   transcript: string,
 ): Promise<CoachScoreResult> {
   const { system, user } = buildScoringPrompt(prep, transcript);
-  const key =
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    null;
+  const key = resolveGeminiApiKey();
   const hasSa = hasGoogleServiceAccount();
   if (!key && !hasSa) return heuristicScore(transcript);
 

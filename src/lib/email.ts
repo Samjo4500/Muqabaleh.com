@@ -1,22 +1,23 @@
-import { Resend } from 'resend';
 import { db } from './db';
 import { MUQABALEH_BRAND } from '@/lib/brand/comms';
+import { sendBrevoEmail } from '@/lib/brevo';
 
 const DEFAULT_FROM = `Muqabaleh <${MUQABALEH_BRAND.senders.system.email}>`;
 const REPLY_TO = MUQABALEH_BRAND.supportEmail;
 const C = MUQABALEH_BRAND.colors;
 
-function getResendClient(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn('[Email] RESEND_API_KEY not configured');
-    return null;
+function parseFromHeader(from?: string): { name: string; email: string } {
+  const raw = (from || DEFAULT_FROM).trim();
+  const match = raw.match(/^(.*)<([^>]+)>$/);
+  if (match) {
+    return { name: match[1].trim().replace(/^"|"$/g, '') || MUQABALEH_BRAND.name, email: match[2].trim() };
   }
-  return new Resend(apiKey);
+  if (raw.includes('@')) return { name: MUQABALEH_BRAND.name, email: raw };
+  return MUQABALEH_BRAND.senders.system;
 }
 
 /**
- * Send an email immediately via Resend.
+ * Send an email immediately via Brevo.
  * Returns { success: true, id } or { success: false, error }.
  */
 export type EmailAttachment = {
@@ -42,48 +43,36 @@ export async function sendEmail(opts: {
   /** Optional white-label display / reply-to overrides. */
   partnerBrand?: PartnerEmailBrand;
 }) {
-  const resend = getResendClient();
-  if (!resend) {
-    console.error('[Email] Cannot send: RESEND_API_KEY missing');
-    return { success: false, error: 'Email service not configured' };
-  }
-
-  const partnerFrom =
-    opts.partnerBrand?.fromName?.trim()
-      ? `${opts.partnerBrand.fromName.trim()} <${MUQABALEH_BRAND.senders.system.email}>`
-      : null;
+  const partnerFrom = opts.partnerBrand?.fromName?.trim()
+    ? `${opts.partnerBrand.fromName.trim()} <${MUQABALEH_BRAND.senders.system.email}>`
+    : null;
   const partnerReply = opts.partnerBrand?.replyTo?.trim() || null;
+  const sender = parseFromHeader(opts.from || partnerFrom || DEFAULT_FROM);
+  const replyEmail = opts.replyTo || partnerReply || REPLY_TO;
+  const ccList = opts.cc
+    ? (Array.isArray(opts.cc) ? opts.cc : [opts.cc]).map((email) => ({ email }))
+    : undefined;
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: opts.from || partnerFrom || DEFAULT_FROM,
-      to: Array.isArray(opts.to) ? opts.to : [opts.to],
-      subject: opts.subject,
-      html: opts.html,
-      replyTo: opts.replyTo || partnerReply || REPLY_TO,
-      cc: opts.cc
-        ? Array.isArray(opts.cc)
-          ? opts.cc
-          : [opts.cc]
-        : undefined,
-      attachments: opts.attachments?.map((a) => ({
-        filename: a.filename,
-        content: Buffer.isBuffer(a.content) ? a.content : Buffer.from(a.content),
-        contentType: a.contentType,
-      })),
-    });
+  const result = await sendBrevoEmail({
+    to: opts.to,
+    subject: opts.subject,
+    html: opts.html,
+    sender,
+    replyTo: { email: replyEmail },
+    cc: ccList,
+    attachment: opts.attachments?.map((a) => ({
+      name: a.filename,
+      content: Buffer.isBuffer(a.content)
+        ? a.content.toString('base64')
+        : Buffer.from(a.content).toString('base64'),
+    })),
+  });
 
-    if (error) {
-      console.error('[Email] Resend error:', error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, id: data?.id };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[Email] Exception:', msg);
-    return { success: false, error: msg };
+  if (!result.success) {
+    console.error('[Email] Brevo send failed:', result.error);
+    return { success: false, error: result.error || 'Email service not configured' };
   }
+  return { success: true, id: result.messageId };
 }
 
 /**
@@ -159,24 +148,11 @@ export async function processEmailQueue(): Promise<{ sent: number; failed: numbe
       continue;
     }
 
-    // Prefer Brevo for all queued mail when configured.
-    let result: { success: boolean; error?: string } = { success: false };
-    if (process.env.BREVO_API_KEY?.trim()) {
-      const { sendBrevoEmail } = await import('@/lib/brevo');
-      result = await sendBrevoEmail({
-        to: email.to,
-        subject: email.subject,
-        html: email.html,
-      });
-    }
-    if (!result.success) {
-      result = await sendEmail({
-        to: email.to,
-        subject: email.subject,
-        html: email.html,
-        from: email.from || undefined,
-      });
-    }
+    const result = await sendBrevoEmail({
+      to: email.to,
+      subject: email.subject,
+      html: email.html,
+    });
 
     if (result.success) {
       await db.emailQueue.update({

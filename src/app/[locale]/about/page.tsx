@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { pageMetadata } from '@/lib/seo';
+import { pageMetadata, SITE_URL } from '@/lib/seo';
+import { BreadcrumbJsonLd, OrganizationJsonLd } from '@/components/json-ld';
 import PageContent from './about-content';
 
 type Props = {
@@ -12,15 +13,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '/about',
-    titleAr: 'من نحن — مقابلة | Muqabaleh',
-    titleEn: 'About — Muqabaleh',
-    descAr: 'تعرّف على مقابلة، المنصة العربية للتدرّب على مقابلات العمل بالذكاء الاصطناعي.',
-    descEn: 'About Muqabaleh — the Arabic-first AI job interview practice platform.',
+    titleAr: 'عن مقابلة | Muqabaleh',
+    titleEn: 'About Muqabaleh',
+    descAr:
+      'عن مقابلة: منصة التدرّب على المقابلات بالذكاء الاصطناعي لسوق الشرق الأوسط وشمال أفريقيا. ادخل واثق. اخرج ناجح.',
+    descEn:
+      'About Muqabaleh — the AI interview practice platform built for MENA. Walk in prepared. Walk out hired.',
   });
 }
 
 export default async function Page({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PageContent />;
+  const isAr = locale !== 'en';
+  const prefix = locale === 'en' ? '/en' : '';
+
+  return (
+    <>
+      <OrganizationJsonLd />
+      <BreadcrumbJsonLd
+        items={[
+          { name: isAr ? 'الرئيسية' : 'Home', url: locale === 'en' ? `${SITE_URL}/en` : SITE_URL },
+          { name: isAr ? 'عن مقابلة' : 'About Muqabaleh', url: `${SITE_URL}${prefix}/about` },
+        ]}
+      />
+      <PageContent />
+    </>
+  );
 }
+

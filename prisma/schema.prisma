@@ -1426,3 +1426,78 @@ model PipelineStage {
   @@unique([organizationId, key])
   @@index([organizationId, sortOrder])
 }
+
+/// First-party conversion funnel (GA4 dual-write; adblocker-proof dashboard).
+model FunnelEvent {
+  id               String   @id @default(cuid())
+  name             String
+  language         String?
+  role             String?
+  durationSeconds  Int?
+  guideType        String?
+  guideSlug        String?
+  location         String?
+  plan             String?
+  path             String?
+  createdAt        DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([createdAt])
+  @@index([name, guideSlug])
+  @@map("funnel_events")
+}
+
+/// First-party pageview — source of truth for visitor stats (not GA4).
+model VisitorPageview {
+  id            String   @id @default(cuid())
+  visitorId     String
+  sessionId     String
+  path          String
+  title         String?
+  referrer      String?
+  referrerHost  String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  locale        String?
+  country       String?
+  city          String?
+  region        String?
+  device        String?
+  browser       String?
+  os            String?
+  ipHash        String?
+  userId        String?
+  isBot         Boolean  @default(false)
+  isStaff       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([path, createdAt])
+  @@index([country, createdAt])
+  @@index([isBot, isStaff, createdAt])
+  @@map("visitor_pageviews")
+}
+
+/// Live presence — heartbeat upsert. Rows older than 2 minutes are offline.
+model VisitorPresence {
+  sessionId  String   @id
+  visitorId  String
+  path       String
+  title      String?
+  locale     String?
+  country    String?
+  city       String?
+  region     String?
+  device     String?
+  browser    String?
+  userId     String?
+  isStaff    Boolean  @default(false)
+  lastSeenAt DateTime
+  startedAt  DateTime @default(now())
+
+  @@index([lastSeenAt])
+  @@map("visitor_presence")
+}

@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { localePath } from '@/i18n/navigation';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { trackGaEvent, trackSignupCompleted } from '@/lib/analytics-ga';
 
 export default function PaymentSuccessPage() {
   const t = useTranslations('paypal');
@@ -13,7 +13,8 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     trackGaEvent('payment_completed', { source: 'paypal_success_page' });
-  }, []);
+    trackSignupCompleted({ locale, plan: 'pro', onceKey: 'payment' });
+  }, [locale]);
 
   return (
     <div className="mq-atelier relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-x-hidden px-4">

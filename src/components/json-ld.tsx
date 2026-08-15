@@ -425,7 +425,7 @@ export function buildJobPostingLd(
   };
   const slug = nonEmpty(input.companySlug);
   if (slug) {
-    // Canonical company page on Muqabaleh ( /employers/[slug] does not exist ).
+    // Canonical company page on Muqabaleh.
     org.sameAs = `${SITE_URL}/companies/${slug}`;
   }
 

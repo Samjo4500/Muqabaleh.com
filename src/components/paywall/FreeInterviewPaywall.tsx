@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { localePath } from '@/i18n/navigation';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { trackGaEvent, trackSignupInitiated } from '@/lib/analytics-ga';
 
 const PLANS = [
   {
@@ -95,7 +95,10 @@ export function FreeInterviewPaywall({ open, reason }: Props) {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
             href={localePath('/#pricing', locale)}
-            onClick={() => trackGaEvent('upgrade_clicked', { source: 'free_paywall' })}
+            onClick={() => {
+              trackGaEvent('upgrade_clicked', { source: 'free_paywall' });
+              trackSignupInitiated({ location: 'pricing', locale });
+            }}
             className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-teal-500 px-5 text-sm font-semibold text-[#041016] hover:bg-teal-400"
           >
             {isAr ? 'الترقية إلى Pro' : 'Upgrade to Pro'}

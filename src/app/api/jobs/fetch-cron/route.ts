@@ -12,19 +12,24 @@ export const dynamic = 'force-dynamic';
  * Also invoked by GitHub Action daily for a full catalog sweep (several ticks)
  * when repo secret CRON_SECRET matches Vercel.
  *
- * Query: `?limit=16` (default 16, max 24 per tick to stay under 60s).
+ * Query: `?limit=8` (default 8, max 16). `?sync=1` upserts the company catalog.
  */
 export async function GET(req: NextRequest) {
   const authError = assertCronAuthorized(req);
   if (authError) return authError;
   try {
-    const rawLimit = Number(req.nextUrl.searchParams.get('limit') || '16');
+    const rawLimit = Number(req.nextUrl.searchParams.get('limit') || '8');
     const limit = Number.isFinite(rawLimit)
-      ? Math.min(24, Math.max(1, Math.floor(rawLimit)))
-      : 16;
+      ? Math.min(16, Math.max(1, Math.floor(rawLimit)))
+      : 8;
     const source = req.nextUrl.searchParams.get('source') || 'vercel-cron';
+    const syncCatalog = req.nextUrl.searchParams.get('sync') === '1';
 
-    const summary = await runAtsFetchTick({ limit, syncCatalog: true });
+    const summary = await runAtsFetchTick({
+      limit,
+      syncCatalog,
+      budgetMs: 45_000,
+    });
     if (summary.errors.length > 0 || summary.upserted > 0) {
       await writeAdminNotification({
         channel: 'IN_APP',

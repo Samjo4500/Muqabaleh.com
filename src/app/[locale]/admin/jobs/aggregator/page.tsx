@@ -55,7 +55,7 @@ export default function AtsAggregatorPage() {
     void load();
   }, [load]);
 
-  const runTick = async (limit = 50) => {
+  const runTick = async (limit = 8) => {
     setRunning(true);
     setMsg('');
     try {
@@ -92,7 +92,7 @@ export default function AtsAggregatorPage() {
               <RefreshCw className="me-2 h-4 w-4" />
               <BiInline ar="تحديث" en="Refresh" />
             </Button>
-            <Button type="button" size="sm" onClick={() => void runTick(50)} disabled={running}>
+            <Button type="button" size="sm" onClick={() => void runTick(8)} disabled={running}>
               <BiInline
                 ar={running ? 'جارٍ الجلب عبر MENA…' : 'جلب كل لوحات MENA'}
                 en={running ? 'Fetching MENA…' : 'Fetch all MENA boards'}

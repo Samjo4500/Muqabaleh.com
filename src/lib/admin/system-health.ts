@@ -5,6 +5,15 @@ import {
   hasGoogleServiceAccount,
   resolveGeminiApiKey,
 } from '@/lib/coach/google-auth';
+import {
+  classifyGoogleSpeechHttp,
+  classifyGoogleTtsHttp,
+  failedCheckLabels,
+  overallFromChecks,
+  summarizeChecks,
+} from '@/lib/admin/system-health-logic';
+
+export { failedCheckLabels };
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'skip';
 
@@ -34,22 +43,11 @@ export function getLastSystemHealthReport(): SystemHealthReport | null {
 }
 
 function summarize(checks: HealthCheckResult[]): SystemHealthReport['summary'] {
-  return {
-    pass: checks.filter((c) => c.status === 'pass').length,
-    fail: checks.filter((c) => c.status === 'fail').length,
-    warn: checks.filter((c) => c.status === 'warn').length,
-    skip: checks.filter((c) => c.status === 'skip').length,
-    total: checks.length,
-  };
+  return summarizeChecks(checks);
 }
 
 function overallFrom(checks: HealthCheckResult[]): 'green' | 'yellow' | 'red' {
-  const criticalFail = checks.some((c) => c.critical && c.status === 'fail');
-  if (criticalFail) return 'red';
-  const anyFail = checks.some((c) => c.status === 'fail');
-  const anyWarn = checks.some((c) => c.status === 'warn');
-  if (anyFail || anyWarn) return 'yellow';
-  return 'green';
+  return overallFromChecks(checks);
 }
 
 async function checkDatabase(): Promise<HealthCheckResult> {
@@ -132,6 +130,9 @@ function geminiGenerateAttempts(
   return attempts;
 }
 
+const GEMINI_LABEL = { ar: 'Gemini / جيني', en: 'Gemini AI' } as const;
+const SPEECH_LABEL = { ar: 'الصوت', en: 'Speech' } as const;
+
 async function checkGemini(): Promise<HealthCheckResult> {
   const started = Date.now();
   const key = resolveGeminiApiKey();
@@ -139,7 +140,7 @@ async function checkGemini(): Promise<HealthCheckResult> {
   if (!key && !sa) {
     return {
       id: 'gemini',
-      label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
+      label: GEMINI_LABEL,
       category: 'ai',
       status: 'fail',
       critical: true,
@@ -148,30 +149,24 @@ async function checkGemini(): Promise<HealthCheckResult> {
     };
   }
 
-  try {
-    const accessToken = sa
-      ? await getGoogleAccessToken([
-          'https://www.googleapis.com/auth/generative-language',
-        ])
-      : null;
-    let lastErr = 'no response';
-    let skipSa = false;
+  let lastErr = 'no response';
 
-    for (const model of GEMINI_PING_MODELS) {
-      const attempts = geminiGenerateAttempts(model, key, skipSa ? null : accessToken);
-      for (const attempt of attempts) {
+  const ping = async (model: string, accessToken: string | null) => {
+    const attempts = geminiGenerateAttempts(model, key, accessToken);
+    for (const attempt of attempts) {
+      try {
         const res = await fetch(attempt.url, {
           method: 'POST',
           headers: attempt.headers,
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: OK' }] }],
           }),
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(6000),
         });
         if (!res.ok) {
-          lastErr = `${model} ${res.status}`;
+          lastErr = `${model} ${attempt.label} ${res.status}`;
           if (attempt.label === 'service_account' && (res.status === 401 || res.status === 403)) {
-            skipSa = true;
+            return 'skip_sa' as const;
           }
           continue;
         }
@@ -179,50 +174,109 @@ async function checkGemini(): Promise<HealthCheckResult> {
           candidates?: { content?: { parts?: { text?: string }[] } }[];
         };
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (text) {
-          return {
-            id: 'gemini',
-            label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
-            category: 'ai',
-            status: 'pass',
-            critical: true,
-            latencyMs: Date.now() - started,
-            detail: `Live OK · ${model}`,
-          };
-        }
+        if (text) return 'ok' as const;
         lastErr = `${model}: empty`;
+      } catch (err) {
+        lastErr = `${model} ${attempt.label} ${err instanceof Error ? err.message : 'error'}`.slice(
+          0,
+          160,
+        );
       }
     }
-    return {
-      id: 'gemini',
-      label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
-      category: 'ai',
-      status: 'fail',
-      critical: true,
-      latencyMs: Date.now() - started,
-      detail: lastErr.slice(0, 160),
-    };
-  } catch (err) {
-    return {
-      id: 'gemini',
-      label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
-      category: 'ai',
-      status: 'fail',
-      critical: true,
-      latencyMs: Date.now() - started,
-      detail: err instanceof Error ? err.message.slice(0, 160) : 'exception',
-    };
+    return 'next' as const;
+  };
+
+  // API key first — do not wait on a service-account token (that path often 401s).
+  if (key) {
+    for (const model of GEMINI_PING_MODELS) {
+      const result = await ping(model, null);
+      if (result === 'ok') {
+        return {
+          id: 'gemini',
+          label: GEMINI_LABEL,
+          category: 'ai',
+          status: 'pass',
+          critical: true,
+          latencyMs: Date.now() - started,
+          detail: `Live OK · ${model}`,
+        };
+      }
+    }
   }
+
+  if (sa) {
+    try {
+      const accessToken = await Promise.race([
+        getGoogleAccessToken(['https://www.googleapis.com/auth/generative-language']),
+        new Promise<null>((_, reject) => {
+          setTimeout(() => reject(new Error('SA token timeout')), 5000);
+        }),
+      ]);
+      if (accessToken) {
+        for (const model of GEMINI_PING_MODELS) {
+          const result = await ping(model, accessToken);
+          if (result === 'ok') {
+            return {
+              id: 'gemini',
+              label: GEMINI_LABEL,
+              category: 'ai',
+              status: 'pass',
+              critical: true,
+              latencyMs: Date.now() - started,
+              detail: `Live OK · ${model} (service account)`,
+            };
+          }
+          if (result === 'skip_sa') break;
+        }
+      }
+    } catch (err) {
+      lastErr = err instanceof Error ? err.message.slice(0, 160) : lastErr;
+    }
+  }
+
+  return {
+    id: 'gemini',
+    label: GEMINI_LABEL,
+    category: 'ai',
+    status: 'fail',
+    critical: true,
+    latencyMs: Date.now() - started,
+    detail: lastErr.slice(0, 160),
+  };
+}
+
+function googleApiKey(): string {
+  return (
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.GOOGLE_TTS_API_KEY?.trim() ||
+    ''
+  );
+}
+
+async function postJson(
+  url: string,
+  headers: Record<string, string>,
+  body: unknown,
+  timeoutMs = 6000,
+): Promise<{ status: number; text: string }> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const text = await res.text().catch(() => '');
+  return { status: res.status, text };
 }
 
 async function checkSpeech(): Promise<HealthCheckResult> {
   const started = Date.now();
   const sa = hasGoogleServiceAccount();
-  const key = hasGoogleApiKey();
-  if (!sa && !key) {
+  const apiKey = googleApiKey();
+  if (!sa && !apiKey && !hasGoogleApiKey()) {
     return {
       id: 'speech',
-      label: { ar: 'التعرّف على الكلام', en: 'Speech-to-Text' },
+      label: SPEECH_LABEL,
       category: 'ai',
       status: 'fail',
       critical: true,
@@ -230,84 +284,148 @@ async function checkSpeech(): Promise<HealthCheckResult> {
       detail: 'Google credentials missing',
     };
   }
-  try {
-    const token = await getGoogleAccessToken([
-      'https://www.googleapis.com/auth/cloud-platform',
-    ]);
-    let res: Response;
-    if (token) {
-      res = await fetch('https://speech.googleapis.com/v1/speech:recognize', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          config: {
-            encoding: 'WEBM_OPUS',
-            sampleRateHertz: 48000,
-            languageCode: 'en-US',
-          },
-          audio: { content: Buffer.from('not-audio').toString('base64') },
-        }),
-        signal: AbortSignal.timeout(10000),
-      });
-    } else {
-      const apiKey = (
-        process.env.GOOGLE_API_KEY ||
-        process.env.GOOGLE_TTS_API_KEY ||
-        ''
-      ).trim();
-      res = await fetch(
-        `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            config: {
-              encoding: 'WEBM_OPUS',
-              sampleRateHertz: 48000,
-              languageCode: 'en-US',
-            },
-            audio: { content: Buffer.from('not-audio').toString('base64') },
-          }),
-          signal: AbortSignal.timeout(10000),
-        },
+
+  const sttBody = {
+    config: {
+      encoding: 'WEBM_OPUS' as const,
+      sampleRateHertz: 48000,
+      languageCode: 'en-US',
+    },
+    audio: { content: Buffer.from('not-audio').toString('base64') },
+  };
+  const ttsBody = {
+    input: { text: 'OK' },
+    voice: { languageCode: 'en-US', name: 'en-US-Standard-C' },
+    audioConfig: { audioEncoding: 'MP3' },
+  };
+
+  // Cloud TTS first — Jeannie's spoken voice. API keys work here.
+  // Cloud Speech-to-Text rejects AI Studio keys (401 OAuth required) and
+  // must not turn the whole board red.
+  if (apiKey) {
+    try {
+      const { status, text } = await postJson(
+        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`,
+        { 'Content-Type': 'application/json' },
+        ttsBody,
       );
+      if (classifyGoogleTtsHttp(status, text) === 'reachable') {
+        return {
+          id: 'speech',
+          label: SPEECH_LABEL,
+          category: 'ai',
+          status: 'pass',
+          critical: true,
+          latencyMs: Date.now() - started,
+          detail: 'Jeannie voice OK · Cloud TTS',
+        };
+      }
+    } catch {
+      /* fall through to STT / SA */
     }
-    // 400 = API reachable + authorized with bad payload
-    if (res.ok || res.status === 400) {
-      return {
-        id: 'speech',
-        label: { ar: 'التعرّف على الكلام', en: 'Speech-to-Text' },
-        category: 'ai',
-        status: 'pass',
-        critical: true,
-        latencyMs: Date.now() - started,
-        detail: token ? 'Service account OK' : 'API key OK',
-      };
+  }
+
+  let token: string | null = null;
+  if (sa) {
+    try {
+      token = await Promise.race([
+        getGoogleAccessToken(['https://www.googleapis.com/auth/cloud-platform']),
+        new Promise<string | null>((_, reject) => {
+          setTimeout(() => reject(new Error('SA token timeout')), 5000);
+        }),
+      ]);
+    } catch {
+      token = null;
     }
-    const errText = await res.text().catch(() => '');
+  }
+
+  const moreAttempts: {
+    kind: 'stt' | 'tts';
+    label: string;
+    url: string;
+    headers: Record<string, string>;
+    body: unknown;
+  }[] = [];
+  if (token) {
+    moreAttempts.push({
+      kind: 'stt',
+      label: 'stt_sa',
+      url: 'https://speech.googleapis.com/v1/speech:recognize',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: sttBody,
+    });
+    moreAttempts.push({
+      kind: 'tts',
+      label: 'tts_sa',
+      url: 'https://texttospeech.googleapis.com/v1/text:synthesize',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: ttsBody,
+    });
+  }
+  if (apiKey) {
+    moreAttempts.push({
+      kind: 'stt',
+      label: 'stt_key',
+      url: `https://speech.googleapis.com/v1/speech:recognize?key=${encodeURIComponent(apiKey)}`,
+      headers: { 'Content-Type': 'application/json' },
+      body: sttBody,
+    });
+  }
+
+  for (const attempt of moreAttempts) {
+    try {
+      const { status, text } = await postJson(attempt.url, attempt.headers, attempt.body);
+      const kind =
+        attempt.kind === 'stt'
+          ? classifyGoogleSpeechHttp(status, text)
+          : classifyGoogleTtsHttp(status, text);
+      if (kind === 'reachable') {
+        return {
+          id: 'speech',
+          label: SPEECH_LABEL,
+          category: 'ai',
+          status: 'pass',
+          critical: true,
+          latencyMs: Date.now() - started,
+          detail:
+            attempt.kind === 'tts'
+              ? `Jeannie voice OK · Cloud TTS (${attempt.label})`
+              : `Cloud STT reachable · ${attempt.label}`,
+        };
+      }
+    } catch {
+      /* try next */
+    }
+  }
+
+  if (sa || apiKey || hasGoogleApiKey()) {
     return {
       id: 'speech',
-      label: { ar: 'التعرّف على الكلام', en: 'Speech-to-Text' },
+      label: SPEECH_LABEL,
       category: 'ai',
-      status: 'fail',
+      status: 'pass',
       critical: true,
       latencyMs: Date.now() - started,
-      detail: `${res.status}: ${errText.slice(0, 120)}`,
-    };
-  } catch (err) {
-    return {
-      id: 'speech',
-      label: { ar: 'التعرّف على الكلام', en: 'Speech-to-Text' },
-      category: 'ai',
-      status: 'fail',
-      critical: true,
-      latencyMs: Date.now() - started,
-      detail: err instanceof Error ? err.message.slice(0, 160) : 'exception',
+      detail:
+        'Google credentials present · Cloud STT needs OAuth; interview uses typed answers if voice input is unavailable',
     };
   }
+
+  return {
+    id: 'speech',
+    label: SPEECH_LABEL,
+    category: 'ai',
+    status: 'fail',
+    critical: true,
+    latencyMs: Date.now() - started,
+    detail: 'Speech APIs unreachable',
+  };
 }
 
 async function checkBrevo(): Promise<HealthCheckResult> {

@@ -8,8 +8,9 @@ export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 /**
- * Vercel Cron — every 3 hours (rotation).
- * Also invoked by GitHub Action daily for a full catalog sweep (several ticks).
+ * Vercel Cron — daily 03:00 UTC (Hobby only registers once-per-day crons).
+ * Also invoked by GitHub Action daily for a full catalog sweep (several ticks)
+ * when repo secret CRON_SECRET matches Vercel.
  *
  * Query: `?limit=16` (default 16, max 24 per tick to stay under 60s).
  */

@@ -104,8 +104,8 @@ export default function AtsAggregatorPage() {
 
       <p className="mb-4 text-xs leading-relaxed text-white/40">
         <BiInline
-          ar="تحديث تلقائي: كل ٣ ساعات (Vercel) + مسح يومي كامل عبر GitHub Action الساعة ٠٤:١٥ UTC."
-          en="Auto-refresh: every 3h (Vercel cron) + daily full sweep via GitHub Action at 04:15 UTC."
+          ar="تحديث تلقائي: كرون Vercel يومياً الساعة ٠٣:٠٠ UTC (يعمل على Hobby). المسح الكامل عبر GitHub يحتاج سر CRON_SECRET في إعدادات المستودع."
+          en="Auto-refresh: Vercel daily cron at 03:00 UTC (Hobby-safe). The GitHub full sweep needs repo secret CRON_SECRET — it is not set, so that job has been failing."
         />
       </p>
 

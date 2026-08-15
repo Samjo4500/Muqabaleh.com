@@ -8,6 +8,8 @@ import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingCh
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
 import { GaHead } from '@/components/analytics/GaHead';
+import { VisitorTracker } from '@/components/analytics/VisitorTracker';
+import { Suspense } from 'react';
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
@@ -134,6 +136,9 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <DeferredMarketingChrome />
+            <Suspense fallback={null}>
+              <VisitorTracker />
+            </Suspense>
             <ConditionalAnalytics />
             <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
           </NextIntlClientProvider>

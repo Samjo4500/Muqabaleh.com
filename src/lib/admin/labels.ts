@@ -78,6 +78,7 @@ export const L = {
   emails: { ar: 'قوالب البريد الإلكتروني', en: 'Emails' },
   // Analytics — التحليلات
   analytics: { ar: 'التحليلات', en: 'Analytics' },
+  visitors: { ar: 'الزوار', en: 'Visitors' },
   funnel: { ar: 'لوحة التحويل', en: 'Funnel' },
   website: { ar: 'أداء الموقع', en: 'Website' },
   behavior: { ar: 'تحليلات سلوك المستخدمين', en: 'Behavior' },

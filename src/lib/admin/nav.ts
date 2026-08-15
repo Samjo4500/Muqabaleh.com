@@ -121,8 +121,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: 'analytics',
     label: 'analytics',
     items: [
+      { href: '/admin/visitors', label: 'visitors' },
       { href: '/admin/analytics', label: 'funnel' },
-      { href: '/admin/analytics/website', label: 'website' },
       { href: '/admin/analytics/behavior', label: 'behavior' },
       { href: '/admin/analytics/interviews', label: 'interviews' },
     ],
@@ -168,7 +168,7 @@ export function parentAdminPath(pathname: string): string {
   const parts = path.split('/').filter(Boolean);
   if (parts.length <= 2) return '/admin/dashboard';
   if (parts.length === 3) {
-    if (parts[1] === 'analytics') return '/admin/analytics';
+    if (parts[1] === 'analytics' || parts[1] === 'visitors') return '/admin/analytics';
     return '/admin/dashboard';
   }
   return `/${parts.slice(0, -1).join('/')}`;

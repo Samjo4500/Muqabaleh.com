@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin } from '../../_lib';
+import { verifyAdmin } from '../_lib';
 import { getVisitorDashboard } from '@/lib/visitors/stats';
 import type { RangeKey } from '@/lib/visitors/parse';
 

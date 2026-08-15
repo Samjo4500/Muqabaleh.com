@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyAdmin } from '../../../_lib';
+import { verifyAdmin } from '../../_lib';
 import { getLiveVisitors } from '@/lib/visitors/stats';
 
 export const dynamic = 'force-dynamic';

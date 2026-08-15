@@ -45,18 +45,19 @@ export async function recordVisitorEvent(input: CollectInput): Promise<{ ok: tru
   const utm = parseUtm(input.search || '');
   const now = new Date();
 
-  const context = {
+  const device = parseDevice(ua);
+  const browser = parseBrowser(ua);
+  const os = parseOs(ua);
+  const presence = {
     visitorId: input.visitorId,
-    sessionId: input.sessionId,
     path,
     title: input.title?.slice(0, 160) || null,
     locale: input.locale?.slice(0, 8) || null,
     country: input.country?.slice(0, 8) || null,
     city: input.city?.slice(0, 80) || null,
     region: input.region?.slice(0, 80) || null,
-    device: parseDevice(ua),
-    browser: parseBrowser(ua),
-    os: parseOs(ua),
+    device,
+    browser,
     userId: input.userId || null,
     isStaff,
   };
@@ -64,12 +65,13 @@ export async function recordVisitorEvent(input: CollectInput): Promise<{ ok: tru
   await db.visitorPresence.upsert({
     where: { sessionId: input.sessionId },
     create: {
-      ...context,
+      sessionId: input.sessionId,
+      ...presence,
       lastSeenAt: now,
       startedAt: now,
     },
     update: {
-      ...context,
+      ...presence,
       lastSeenAt: now,
     },
   });
@@ -96,7 +98,19 @@ export async function recordVisitorEvent(input: CollectInput): Promise<{ ok: tru
 
   await db.visitorPageview.create({
     data: {
-      ...context,
+      visitorId: input.visitorId,
+      sessionId: input.sessionId,
+      path,
+      title: presence.title,
+      locale: presence.locale,
+      country: presence.country,
+      city: presence.city,
+      region: presence.region,
+      device,
+      browser,
+      os,
+      userId: presence.userId,
+      isStaff,
       referrer: input.referrer?.slice(0, 300) || null,
       referrerHost: referrerHostOf(input.referrer, input.siteHost || undefined),
       utmSource: utm.utmSource,

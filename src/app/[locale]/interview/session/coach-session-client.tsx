@@ -10,7 +10,9 @@ import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell'
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from '@/lib/coach/types';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { getCachedCoachOpener } from '@/lib/coach/opener';
+import { applyCoachTurnSseChunk, type CoachTurnDone } from '@/lib/coach/turn-stream';
+import { trackGaEvent, trackInterviewCompleted, trackSignupInitiated } from '@/lib/analytics-ga';
 
 type Props = { candidateName: string };
 
@@ -38,6 +40,7 @@ export function CoachSessionClient({ candidateName }: Props) {
   const historyRef = useRef<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const [recording, setRecording] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -193,7 +196,11 @@ export function CoachSessionClient({ candidateName }: Props) {
           return;
         }
         if (data.score) {
-          trackGaEvent('interview_completed', { source: 'coach' });
+          trackInterviewCompleted({
+            language: currentPrep.language,
+            role: currentPrep.roleTitle || currentPrep.role,
+            locale,
+          });
           setResult({
             interviewId: data.interviewId,
             verificationId: data.verificationId,
@@ -222,9 +229,24 @@ export function CoachSessionClient({ candidateName }: Props) {
 
   const runTurn = useCallback(
     async (currentPrep: PrepSelections, userMessage?: string) => {
+      // Indicator must paint before the network call — set state first.
+      setThinking(true);
       setBusy(true);
       setError(null);
+
       const prior = historyRef.current;
+      const base: ChatMessage[] = userMessage?.trim()
+        ? prior.some(
+            (m, i) =>
+              i === prior.length - 1 &&
+              m.role === 'user' &&
+              m.content === userMessage.trim(),
+          )
+          ? prior
+          : [...prior, { role: 'user', content: userMessage.trim() }]
+        : prior;
+      if (base !== prior) setHistoryBoth(base);
+
       try {
         const res = await fetch('/api/interview/coach/turn', {
           method: 'POST',
@@ -236,15 +258,10 @@ export function CoachSessionClient({ candidateName }: Props) {
             sessionId: sessionIdRef.current,
           }),
         });
-        const data = (await res.json()) as {
-          reply?: string;
-          complete?: boolean;
-          error?: string;
-          sessionId?: string;
-          history?: ChatMessage[];
-          upgradeRequired?: boolean;
-        };
+
         if (res.status === 402) {
+          const data = (await res.json()) as CoachTurnDone;
+          setThinking(false);
           setError(
             data.error ||
               (isAr
@@ -253,33 +270,98 @@ export function CoachSessionClient({ candidateName }: Props) {
           );
           return;
         }
-        if (data.sessionId) setSessionBoth(data.sessionId);
-        if (!data.reply) {
+
+        if (!res.ok && !res.headers.get('content-type')?.includes('text/event-stream')) {
+          const data = (await res.json().catch(() => ({}))) as CoachTurnDone;
+          setThinking(false);
           setError(data.error || (isAr ? 'تعذّر الرد.' : 'Could not get a reply.'));
           return;
         }
 
+        let assembled = '';
+        let done: CoachTurnDone = {};
+        const contentType = res.headers.get('content-type') || '';
+
+        if (contentType.includes('text/event-stream') && res.body) {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const { value, done: streamDone } = await reader.read();
+            if (streamDone) break;
+            buffer = applyCoachTurnSseChunk(
+              buffer,
+              decoder.decode(value, { stream: true }),
+              {
+                onMeta: (meta) => {
+                  if (meta.sessionId) setSessionBoth(meta.sessionId);
+                },
+                onToken: (text) => {
+                  assembled += text;
+                  setThinking(false);
+                  setHistoryBoth([...base, { role: 'assistant', content: assembled }]);
+                },
+                onDone: (payload) => {
+                  done = payload;
+                },
+                onError: (payload) => {
+                  done = payload;
+                },
+              },
+            );
+          }
+          if (buffer.trim()) {
+            applyCoachTurnSseChunk(buffer, '\n\n', {
+              onToken: (text) => {
+                assembled += text;
+                setThinking(false);
+                setHistoryBoth([...base, { role: 'assistant', content: assembled }]);
+              },
+              onDone: (payload) => {
+                done = payload;
+              },
+            });
+          }
+        } else {
+          done = (await res.json()) as CoachTurnDone;
+          if (done.reply) {
+            assembled = done.reply;
+            setThinking(false);
+            setHistoryBoth([...base, { role: 'assistant', content: assembled }]);
+          }
+        }
+
+        if (done.sessionId) setSessionBoth(done.sessionId);
+        if (done.error && !assembled) {
+          setThinking(false);
+          setError(done.error || (isAr ? 'تعذّر الرد.' : 'Could not get a reply.'));
+          return;
+        }
+
+        const reply = done.reply || assembled;
+        if (!reply) {
+          setThinking(false);
+          setError(isAr ? 'تعذّر الرد.' : 'Could not get a reply.');
+          return;
+        }
+
         const next: ChatMessage[] =
-          Array.isArray(data.history) && data.history.length
-            ? data.history
-            : (() => {
-                const built: ChatMessage[] = [...prior];
-                if (userMessage?.trim()) {
-                  built.push({ role: 'user', content: userMessage.trim() });
-                }
-                built.push({ role: 'assistant', content: data.reply! });
-                return built;
-              })();
+          Array.isArray(done.history) && done.history.length
+            ? done.history
+            : [...base, { role: 'assistant', content: reply }];
         setHistoryBoth(next);
+        setThinking(false);
 
-        await speak(data.reply, currentPrep.coachGender, currentPrep.language);
+        await speak(reply, currentPrep.coachGender, currentPrep.language);
 
-        if (data.complete) {
+        if (done.complete) {
           await finalize(currentPrep, next);
         }
       } catch {
+        setThinking(false);
         setError(isAr ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Try again.');
       } finally {
+        setThinking(false);
         setBusy(false);
       }
     },
@@ -290,15 +372,27 @@ export function CoachSessionClient({ candidateName }: Props) {
     if (!prep || startedRef.current) return;
     startedRef.current = true;
 
+    let resumeIfActive = true;
+    let existingSession: string | null = null;
+    try {
+      resumeIfActive = sessionStorage.getItem('mq_coach_resume') !== '0';
+      existingSession = sessionStorage.getItem(SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+
+    // Paint the thinking bubble in this tick, before any await.
+    setThinking(true);
+    setBusy(true);
+
+    // New interview: show the cached opener immediately (<3s) while start persists it.
+    if (!existingSession || resumeIfActive === false) {
+      setHistoryBoth([{ role: 'assistant', content: getCachedCoachOpener(prep) }]);
+      setThinking(false);
+    }
+
     (async () => {
-      setBusy(true);
       try {
-        let resumeIfActive = true;
-        try {
-          resumeIfActive = sessionStorage.getItem('mq_coach_resume') !== '0';
-        } catch {
-          /* ignore */
-        }
         const res = await fetch('/api/interview/coach/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -313,6 +407,7 @@ export function CoachSessionClient({ candidateName }: Props) {
           error?: string;
         };
         if (res.status === 402 || !data.sessionId) {
+          setThinking(false);
           setError(
             data.error ||
               (isAr
@@ -324,24 +419,35 @@ export function CoachSessionClient({ candidateName }: Props) {
         setSessionBoth(data.sessionId);
         const activePrep = data.prep || prep;
         if (data.prep) setPrep(data.prep);
-        if (Array.isArray(data.history) && data.history.length > 0) {
-          setHistoryBoth(data.history);
-          // Resumed mid-session — do not re-open with a fresh kickoff.
-          return;
+        const visible: ChatMessage[] =
+          Array.isArray(data.history) && data.history.length > 0
+            ? data.history
+            : historyRef.current.length > 0
+              ? historyRef.current
+              : [{ role: 'assistant', content: getCachedCoachOpener(activePrep) }];
+        setHistoryBoth(visible);
+        setThinking(false);
+        const opener = visible.find((m) => m.role === 'assistant')?.content;
+        if (opener && !visible.some((m) => m.role === 'user')) {
+          void speak(opener, activePrep.coachGender, activePrep.language);
         }
-        await runTurn(activePrep);
       } catch {
+        setThinking(false);
         setError(isAr ? 'تعذّر بدء الجلسة.' : 'Could not start session.');
       } finally {
+        setThinking(false);
         setBusy(false);
       }
     })();
-  }, [prep, runTurn, isAr]);
+  }, [prep, isAr, speak]);
 
   const submitText = async () => {
     if (!prep || !input.trim() || busy) return;
     const msg = input.trim();
     setInput('');
+    setThinking(true);
+    setBusy(true);
+    setHistoryBoth([...historyRef.current, { role: 'user', content: msg }]);
     await runTurn(prep, msg);
   };
 
@@ -377,6 +483,7 @@ export function CoachSessionClient({ candidateName }: Props) {
         const fd = new FormData();
         fd.append('audio', blob, 'answer.webm');
         fd.append('language', prep?.language || 'mixed');
+        setThinking(true);
         setBusy(true);
         try {
           const res = await fetch('/api/speech-to-text', { method: 'POST', body: fd });
@@ -388,8 +495,13 @@ export function CoachSessionClient({ candidateName }: Props) {
           if (data.text?.trim() && prep) {
             setError(null);
             setVoiceFallback(false);
+            setHistoryBoth([
+              ...historyRef.current,
+              { role: 'user', content: data.text.trim() },
+            ]);
             await runTurn(prep, data.text.trim());
           } else {
+            setThinking(false);
             setVoiceFallback(true);
             setError(
               isAr
@@ -399,6 +511,7 @@ export function CoachSessionClient({ candidateName }: Props) {
             window.setTimeout(() => answerInputRef.current?.focus(), 50);
           }
         } catch {
+          setThinking(false);
           setVoiceFallback(true);
           setError(
             isAr
@@ -516,10 +629,24 @@ export function CoachSessionClient({ candidateName }: Props) {
                   {m.content}
                 </div>
               ))}
-              {busy ? (
-                <div className="inline-flex items-center gap-2 text-sm text-white/50">
-                  <Loader2 className="animate-spin" size={16} />
-                  {isAr ? 'جاري التفكير…' : 'Thinking…'}
+              {thinking ? (
+                <div
+                  className="max-w-[90%] rounded-2xl bg-teal-400/10 px-4 py-3 text-sm text-teal-50"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <p className="text-xs text-teal-200/80">
+                    {isAr ? `${coachName} تفكر…` : `${coachName} is thinking…`}
+                  </p>
+                  <div className="mt-2 flex items-center gap-1.5" aria-hidden>
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="h-2 w-2 animate-bounce rounded-full bg-teal-300"
+                        style={{ animationDelay: `${i * 0.15}s` }}
+                      />
+                    ))}
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -688,7 +815,13 @@ function ResultsView({
                   ? 'الباقة المجانية تعرض معاينة فقط. رقِّ لفتح جواز PDF الكامل.'
                   : 'Free tier shows a blurred preview. Upgrade to unlock the full passport PDF.'}
               </p>
-              <Link href={localePath('/#pricing', locale)} className="mq-btn mq-btn-primary mt-4">
+              <Link
+                href={localePath('/#pricing', locale)}
+                className="mq-btn mq-btn-primary mt-4"
+                onClick={() =>
+                  trackSignupInitiated({ location: 'pricing', locale })
+                }
+              >
                 {isAr ? 'ترقية الآن' : 'Upgrade now'}
               </Link>
             </div>

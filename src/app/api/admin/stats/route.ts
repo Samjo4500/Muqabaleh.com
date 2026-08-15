@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { PaymentStatus } from '@/lib/enums';
 import { verifyAdmin } from '../_lib';
+import { resolveGeminiApiKey } from '@/lib/coach/google-auth';
+import { countUniqueVisitorsSince } from '@/lib/visitors/stats';
 
 function dayStart(d = new Date()) {
   const x = new Date(d);
@@ -23,7 +25,7 @@ async function probeHealth(): Promise<'green' | 'yellow' | 'red'> {
   } catch {
     checks.push(false);
   }
-  checks.push(Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY));
+  checks.push(Boolean(resolveGeminiApiKey()));
   checks.push(
     Boolean(
       process.env.PAYPAL_CLIENT_ID ||
@@ -122,8 +124,12 @@ export async function GET() {
     const completionRate =
       totalInterviews > 0 ? Math.round((completedInterviews / totalInterviews) * 100) : 0;
 
-    // Soft visitor estimate from interviews + signups when no analytics store exists
-    const visitors24h = Math.max(interviewsToday * 3 + newSignups * 2, interviewsToday + newSignups);
+    let visitors24h = 0;
+    try {
+      visitors24h = await countUniqueVisitorsSince(new Date(Date.now() - 24 * 60 * 60 * 1000));
+    } catch {
+      visitors24h = 0;
+    }
 
     return NextResponse.json({
       widgets: {

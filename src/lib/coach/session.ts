@@ -4,8 +4,18 @@ import { debitPractice } from '@/lib/plans/entitlements';
 import { getInterviewConfig } from './config';
 import { getCoachAccess } from './access';
 import { resolveCoachName } from './prompts';
+import { getCachedCoachOpener, needsCachedOpener } from './opener';
 import type { ChatMessage, PrepSelections } from './types';
 import { trackCoachEvent } from './analytics';
+
+/** Open the Prisma/PgBouncer socket on interview start, not the first chat turn. */
+export async function warmCoachDb(): Promise<void> {
+  try {
+    await db.$queryRaw`SELECT 1`;
+  } catch (err) {
+    console.error('[coach/session] db warm failed', err);
+  }
+}
 
 export const COACH_ENGINE = 'jeannie-coach';
 
@@ -183,10 +193,24 @@ export async function startCoachSession(opts: {
   | { ok: true; session: CoachSessionSnapshot; resumed: boolean }
   | { ok: false; error: string; status: number; upgradeRequired?: boolean }
 > {
+  await warmCoachDb();
+
   const resumeIfActive = opts.resumeIfActive !== false;
   if (resumeIfActive) {
     const existing = await findActiveCoachSession(opts.userId);
     if (existing) {
+      if (needsCachedOpener(existing.history)) {
+        const history: ChatMessage[] = [
+          { role: 'assistant', content: getCachedCoachOpener(existing.prep) },
+        ];
+        await persistCoachHistory({
+          userId: opts.userId,
+          sessionId: existing.sessionId,
+          history,
+          prep: existing.prep,
+        });
+        existing.history = history;
+      }
       await trackCoachEvent(opts.userId, 'coach.session_resume', {
         sessionId: existing.sessionId,
       });
@@ -209,6 +233,9 @@ export async function startCoachSession(opts: {
   const cfg = getInterviewConfig();
   const coachName = resolveCoachName(opts.prep.coachGender);
   const clientSessionId = randomUUID();
+  const openerHistory: ChatMessage[] = [
+    { role: 'assistant', content: getCachedCoachOpener(opts.prep) },
+  ];
 
   try {
     const prequal = await db.interviewPrequal.create({
@@ -230,7 +257,7 @@ export async function startCoachSession(opts: {
           engine: COACH_ENGINE,
           prep: opts.prep,
           coachName,
-          history: [],
+          history: openerHistory,
         },
       },
     });
@@ -249,7 +276,7 @@ export async function startCoachSession(opts: {
           engine: COACH_ENGINE,
           prep: opts.prep,
           coachName,
-          history: [],
+          history: openerHistory,
           integrity: {
             tabBlurCount: 0,
             recordingArchive: null,
@@ -285,7 +312,7 @@ export async function startCoachSession(opts: {
         sessionId: session.id,
         prequalId: prequal.id,
         prep: opts.prep,
-        history: [],
+        history: openerHistory,
         status: 'active',
         startedAt: session.startedAt?.toISOString() ?? new Date().toISOString(),
       },

@@ -14,7 +14,11 @@ import {
 import { BiInline } from '@/components/admin/BiLabel';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { HealthCheckResult, SystemHealthReport } from '@/lib/admin/system-health';
+import {
+  failedCheckLabels,
+  type HealthCheckResult,
+  type SystemHealthReport,
+} from '@/lib/admin/system-health';
 
 type Props = {
   /** Compact mode for dashboard embed */
@@ -243,6 +247,19 @@ export function SystemHealthPanel({ compact }: Props) {
                 {new Date(report.checkedAt).toLocaleString()} · {report.durationMs}ms ·{' '}
                 {report.summary.pass}/{report.summary.total}{' '}
                 <BiInline ar="سليم" en="pass" />
+                {report.summary.fail > 0 ? (
+                  <>
+                    {' '}
+                    · {failedCheckLabels(report.checks)}{' '}
+                    <BiInline ar="عطل" en="fail" />
+                  </>
+                ) : null}
+                {report.summary.warn > 0 ? (
+                  <>
+                    {' '}
+                    · {report.summary.warn} <BiInline ar="تحذير" en="warn" />
+                  </>
+                ) : null}
               </p>
             ) : null}
           </div>

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { trackGaEvent, trackSignupCompleted } from '@/lib/analytics-ga';
 
 /** Shows success toast when redirected after PayPal upgrade (?upgraded=true). */
 export function UpgradeToast() {
@@ -19,11 +19,12 @@ export function UpgradeToast() {
     if (upgraded !== 'true' && upgraded !== '1') return;
     toast.success(isAr ? 'تم الترقية بنجاح!' : 'Upgraded successfully!');
     trackGaEvent('payment_completed', { source: 'paypal' });
+    trackSignupCompleted({ locale, plan: 'pro', onceKey: 'payment' });
     const params = new URLSearchParams(searchParams.toString());
     params.delete('upgraded');
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [searchParams, router, pathname, isAr]);
+  }, [searchParams, router, pathname, isAr, locale]);
 
   return null;
 }

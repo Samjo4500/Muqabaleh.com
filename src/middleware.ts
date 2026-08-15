@@ -2,6 +2,14 @@ import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { routing } from './i18n/routing';
+import {
+  SESSION_COOKIE,
+  SESSION_IDLE_MS,
+  VISITOR_COOKIE,
+  isVisitorId,
+  newVisitorId,
+  shouldTrackPath,
+} from '@/lib/visitors/parse';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -220,6 +228,55 @@ export default async function middleware(request: NextRequest) {
   if (requestHeaders.get('x-partner-host')) {
     res.headers.set('x-partner-host', requestHeaders.get('x-partner-host')!);
   }
+
+  const dest = request.headers.get('sec-fetch-dest');
+  const isDocument = !dest || dest === 'document';
+  let visitorId = request.cookies.get(VISITOR_COOKIE)?.value;
+  let sessionId = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!isVisitorId(visitorId)) visitorId = newVisitorId();
+  if (!isVisitorId(sessionId)) sessionId = newVisitorId();
+  const secure = process.env.NODE_ENV === 'production';
+  res.cookies.set(VISITOR_COOKIE, visitorId, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  res.cookies.set(SESSION_COOKIE, sessionId, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    path: '/',
+    maxAge: Math.floor(SESSION_IDLE_MS / 1000),
+  });
+
+  if (isDocument && shouldTrackPath(pathname)) {
+    const collectUrl = new URL('/api/visitors/collect', request.url);
+    void fetch(collectUrl, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'user-agent': request.headers.get('user-agent') || '',
+        'x-forwarded-for': request.headers.get('x-forwarded-for') || '',
+        'x-vercel-ip-country': request.headers.get('x-vercel-ip-country') || '',
+        'x-vercel-ip-city': request.headers.get('x-vercel-ip-city') || '',
+        'x-vercel-ip-country-region':
+          request.headers.get('x-vercel-ip-country-region') || '',
+        cookie: request.headers.get('cookie') || '',
+      },
+      body: JSON.stringify({
+        type: 'pageview',
+        path: pathname,
+        referrer: request.headers.get('referer') || '',
+        search: request.nextUrl.search,
+        locale: pathname.startsWith('/en') ? 'en' : 'ar',
+        visitorId,
+        sessionId,
+      }),
+    }).catch(() => undefined);
+  }
+
   return res;
 }
 

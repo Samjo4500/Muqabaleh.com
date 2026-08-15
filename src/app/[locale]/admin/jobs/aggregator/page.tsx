@@ -55,7 +55,7 @@ export default function AtsAggregatorPage() {
     void load();
   }, [load]);
 
-  const runTick = async (limit = 50) => {
+  const runTick = async (limit = 8) => {
     setRunning(true);
     setMsg('');
     try {
@@ -92,7 +92,7 @@ export default function AtsAggregatorPage() {
               <RefreshCw className="me-2 h-4 w-4" />
               <BiInline ar="تحديث" en="Refresh" />
             </Button>
-            <Button type="button" size="sm" onClick={() => void runTick(50)} disabled={running}>
+            <Button type="button" size="sm" onClick={() => void runTick(8)} disabled={running}>
               <BiInline
                 ar={running ? 'جارٍ الجلب عبر MENA…' : 'جلب كل لوحات MENA'}
                 en={running ? 'Fetching MENA…' : 'Fetch all MENA boards'}
@@ -104,8 +104,8 @@ export default function AtsAggregatorPage() {
 
       <p className="mb-4 text-xs leading-relaxed text-white/40">
         <BiInline
-          ar="تحديث تلقائي: كل ٣ ساعات (Vercel) + مسح يومي كامل عبر GitHub Action الساعة ٠٤:١٥ UTC."
-          en="Auto-refresh: every 3h (Vercel cron) + daily full sweep via GitHub Action at 04:15 UTC."
+          ar="تحديث تلقائي: كرون Vercel يومياً الساعة ٠٣:٠٠ UTC (يعمل على Hobby). المسح الكامل عبر GitHub يحتاج سر CRON_SECRET في إعدادات المستودع."
+          en="Auto-refresh: Vercel daily cron at 03:00 UTC (Hobby-safe). The GitHub full sweep needs repo secret CRON_SECRET — it is not set, so that job has been failing."
         />
       </p>
 

@@ -25,6 +25,7 @@ export async function sendBrevoEmail(opts: {
   html: string;
   sender?: { name: string; email: string };
   replyTo?: { name?: string; email: string };
+  cc?: { email: string }[];
   attachment?: BrevoAttachment[];
 }): Promise<{ success: boolean; error?: string; messageId?: string }> {
   const apiKey = process.env.BREVO_API_KEY?.trim();
@@ -54,6 +55,7 @@ export async function sendBrevoEmail(opts: {
       body: JSON.stringify({
         sender: opts.sender || DEFAULT_SENDER,
         to: recipients,
+        cc: opts.cc?.length ? opts.cc : undefined,
         replyTo: opts.replyTo || DEFAULT_REPLY_TO,
         subject: opts.subject,
         htmlContent: opts.html,

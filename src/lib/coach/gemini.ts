@@ -2,36 +2,41 @@ import { getInterviewConfig } from './config';
 import { extractJsonObject } from '@/lib/ai/llm';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from './types';
 import { buildCoachSystemPrompt, buildScoringPrompt } from './prompts';
-import { getGoogleAccessToken, hasGoogleServiceAccount } from './google-auth';
+import {
+  getGoogleAccessToken,
+  hasGoogleServiceAccount,
+  resolveGeminiApiKey,
+} from './google-auth';
+import { getCachedCoachOpener, needsCachedOpener } from './opener';
+import {
+  consumeGeminiSseBuffer,
+  mergeGeminiStreamText,
+} from './gemini-sse';
 
 const GEMINI_MODEL_FALLBACKS = [
   'gemini-flash-latest',
-  'gemini-pro-latest',
-  'gemini-3.5-flash',
   'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-pro-latest',
 ];
 
-async function callGeminiPro(
-  system: string,
-  contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
+async function resolveGeminiAccessToken(
+  key: string | null,
 ): Promise<string | null> {
-  const key =
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    null;
-  const accessToken = hasGoogleServiceAccount()
-    ? await getGoogleAccessToken([
-        'https://www.googleapis.com/auth/generative-language',
-      ])
-    : null;
-  if (!accessToken && !key) return null;
+  // API key is enough — do not block the first byte on a service-account token.
+  if (key || !hasGoogleServiceAccount()) return null;
+  return getGoogleAccessToken([
+    'https://www.googleapis.com/auth/generative-language',
+  ]);
+}
 
-  const preferred =
-    getInterviewConfig().engine.geminiModel || 'gemini-flash-latest';
-  // Prefer stable aliases — pinned ids are frequently retired for new projects.
-  const models = Array.from(new Set([preferred, ...GEMINI_MODEL_FALLBACKS]));
-
-  // Gemini chat history must start with a user turn.
+function normalizeGeminiHistory(
+  contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
+): {
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[];
+  lastText: string;
+} {
   let history = contents.slice(0, -1);
   if (history[0]?.role === 'model') {
     history = [
@@ -40,9 +45,24 @@ async function callGeminiPro(
     ];
   }
   const last = contents[contents.length - 1];
-  const lastText = last?.parts?.[0]?.text || 'Continue.';
+  return { history, lastText: last?.parts?.[0]?.text || 'Continue.' };
+}
 
-  // Prefer service-account OAuth, then API key REST, then SDK.
+async function callGeminiPro(
+  system: string,
+  contents: { role: 'user' | 'model'; parts: { text: string }[] }[],
+): Promise<string | null> {
+  const key = resolveGeminiApiKey();
+  let accessToken = await resolveGeminiAccessToken(key);
+  if (!accessToken && !key) return null;
+
+  const preferred =
+    getInterviewConfig().engine.geminiModel || 'gemini-flash-latest';
+  // Prefer stable aliases — pinned ids are frequently retired for new projects.
+  const models = Array.from(new Set([preferred, ...GEMINI_MODEL_FALLBACKS]));
+  const { history, lastText } = normalizeGeminiHistory(contents);
+
+  // Prefer API key REST, then service-account OAuth, then SDK.
   for (const model of models) {
     try {
       const rest = await callGeminiRest({
@@ -56,6 +76,29 @@ async function callGeminiPro(
       if (rest) return rest;
     } catch (err) {
       console.error(`[coach/gemini] REST failed model=${model}`, err);
+    }
+  }
+
+  if (!accessToken && hasGoogleServiceAccount()) {
+    accessToken = await getGoogleAccessToken([
+      'https://www.googleapis.com/auth/generative-language',
+    ]);
+    if (accessToken) {
+      for (const model of models) {
+        try {
+          const rest = await callGeminiRest({
+            accessToken,
+            key: null,
+            model,
+            system,
+            history,
+            lastText,
+          });
+          if (rest) return rest;
+        } catch (err) {
+          console.error(`[coach/gemini] SA REST failed model=${model}`, err);
+        }
+      }
     }
   }
 
@@ -102,10 +145,30 @@ async function callGeminiRest(opts: {
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: opts.system }] },
     contents,
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 512,
+    },
   });
 
   const attempts: { auth: string; url: string; headers: Record<string, string> }[] =
     [];
+  // API key first — service-account OAuth often 401s without Generative Language API.
+  if (opts.key) {
+    attempts.push({
+      auth: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    attempts.push({
+      auth: 'api_key_header',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent`,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': opts.key,
+      },
+    });
+  }
   if (opts.accessToken) {
     attempts.push({
       auth: 'service_account',
@@ -116,34 +179,160 @@ async function callGeminiRest(opts: {
       },
     });
   }
-  if (opts.key) {
-    attempts.push({
-      auth: 'api_key',
-      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
 
   for (const attempt of attempts) {
-    const res = await fetch(attempt.url, {
-      method: 'POST',
-      headers: attempt.headers,
-      body,
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.error(
-        `[coach/gemini] REST ${opts.model} ${attempt.auth}`,
-        res.status,
-        errText.slice(0, 220),
-      );
-      continue;
+    try {
+      const res = await fetch(attempt.url, {
+        method: 'POST',
+        headers: attempt.headers,
+        body,
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        console.error(
+          `[coach/gemini] REST ${opts.model} ${attempt.auth}`,
+          res.status,
+          errText.slice(0, 220),
+        );
+        if (
+          attempt.auth === 'service_account' &&
+          (res.status === 401 || res.status === 403)
+        ) {
+          opts.accessToken = null;
+        }
+        continue;
+      }
+      const data = (await res.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+      };
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+      if (text) return text;
+    } catch (err) {
+      console.error(`[coach/gemini] REST ${opts.model} ${attempt.auth} exception`, err);
     }
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-    if (text) return text;
+  }
+  return null;
+}
+
+function geminiAuthAttempts(
+  model: string,
+  method: 'generateContent' | 'streamGenerateContent',
+  key: string | null,
+  accessToken: string | null,
+): { auth: string; url: string; headers: Record<string, string> }[] {
+  const attempts: { auth: string; url: string; headers: Record<string, string> }[] =
+    [];
+  const sse = method === 'streamGenerateContent' ? '&alt=sse' : '';
+  if (key) {
+    attempts.push({
+      auth: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:${method}?key=${encodeURIComponent(key)}${sse}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    attempts.push({
+      auth: 'api_key_header',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:${method}${method === 'streamGenerateContent' ? '?alt=sse' : ''}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key,
+      },
+    });
+  }
+  if (accessToken) {
+    attempts.push({
+      auth: 'service_account',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:${method}${method === 'streamGenerateContent' ? '?alt=sse' : ''}`,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+  return attempts;
+}
+
+async function callGeminiRestStream(opts: {
+  accessToken: string | null;
+  key: string | null;
+  model: string;
+  system: string;
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[];
+  lastText: string;
+  onToken: (delta: string) => void;
+}): Promise<string | null> {
+  const contents = [
+    ...opts.history.map((h) => ({
+      role: h.role,
+      parts: h.parts,
+    })),
+    { role: 'user' as const, parts: [{ text: opts.lastText }] },
+  ];
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: opts.system }] },
+    contents,
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 512,
+    },
+  });
+
+  const attempts = geminiAuthAttempts(
+    opts.model,
+    'streamGenerateContent',
+    opts.key,
+    opts.accessToken,
+  );
+
+  for (const attempt of attempts) {
+    try {
+      const res = await fetch(attempt.url, {
+        method: 'POST',
+        headers: attempt.headers,
+        body,
+        signal: AbortSignal.timeout(25000),
+      });
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => '');
+        console.error(
+          `[coach/gemini] stream ${opts.model} ${attempt.auth}`,
+          res.status,
+          errText.slice(0, 220),
+        );
+        continue;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let assembled = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer = consumeGeminiSseBuffer(
+          buffer,
+          decoder.decode(value, { stream: true }),
+          (incoming) => {
+            const merged = mergeGeminiStreamText(assembled, incoming);
+            assembled = merged.next;
+            if (merged.delta) opts.onToken(merged.delta);
+          },
+        );
+      }
+      if (buffer.trim()) {
+        consumeGeminiSseBuffer(buffer, '\n\n', (incoming) => {
+          const merged = mergeGeminiStreamText(assembled, incoming);
+          assembled = merged.next;
+          if (merged.delta) opts.onToken(merged.delta);
+        });
+      }
+      if (assembled.trim()) return assembled.trim();
+    } catch (err) {
+      console.error(
+        `[coach/gemini] stream ${opts.model} ${attempt.auth} exception`,
+        err,
+      );
+    }
   }
   return null;
 }
@@ -155,24 +344,32 @@ function toGeminiHistory(messages: ChatMessage[]) {
   }));
 }
 
-const OPENING_FALLBACK = {
-  ar: 'مرحباً، أنا مدرب المقابلات في مقابلة. لنبدأ — حدّثني عن نفسك وخبرتك ذات الصلة بهذا الدور.',
-  en: "Hello — I'm your interview coach on Muqabaleh. Let's begin: tell me about yourself and your relevant experience for this role.",
-};
+function coachFallback(language: PrepSelections['language']): string {
+  return language === 'ar' || language === 'mixed'
+    ? 'جيني غير متاحة مؤقتاً. جلستك محفوظة — أعد إرسال إجابتك بعد لحظات.'
+    : 'Jeannie is temporarily unavailable. Your session is saved — please try that answer again in a moment.';
+}
 
-export async function generateCoachTurn(opts: {
+function finalizeCoachReply(text: string): { reply: string; complete: boolean } {
+  const complete = text.includes('[[INTERVIEW_COMPLETE]]');
+  const reply = text.replace(/\[\[INTERVIEW_COMPLETE\]\]/g, '').trim();
+  return { reply, complete };
+}
+
+function buildTurnContents(opts: {
   prep: PrepSelections;
   candidateName: string;
   history: ChatMessage[];
   userMessage?: string;
-}): Promise<{ reply: string; complete: boolean }> {
+}): {
+  system: string;
+  contents: { role: 'user' | 'model'; parts: { text: string }[] }[];
+} {
   const system = buildCoachSystemPrompt(opts.prep, opts.candidateName);
   const history = [...opts.history];
   if (opts.userMessage?.trim()) {
     history.push({ role: 'user', content: opts.userMessage.trim() });
   }
-
-  // Opening turn
   if (history.length === 0) {
     const kickoff =
       opts.prep.language === 'en'
@@ -180,25 +377,106 @@ export async function generateCoachTurn(opts: {
         : 'ابدأ المقابلة بترحيب قصير ثم اطرح السؤال الأول.';
     history.push({ role: 'user', content: kickoff });
   }
+  return { system, contents: toGeminiHistory(history) };
+}
 
-  const text = await callGeminiPro(system, toGeminiHistory(history));
-  if (!text) {
-    // Prefer contextual fallback — never crash the session.
-    if (opts.userMessage?.trim()) {
-      const fallbackFollow =
-        opts.prep.language === 'en'
-          ? 'Thank you. Could you share a specific example with numbers or outcomes?'
-          : 'شكراً لك. هل يمكنك مشاركة مثال محدد بأرقام أو نتائج؟';
-      return { reply: fallbackFollow, complete: false };
-    }
-    const fallback =
-      opts.prep.language === 'en' ? OPENING_FALLBACK.en : OPENING_FALLBACK.ar;
-    return { reply: fallback, complete: false };
+export async function generateCoachTurn(opts: {
+  prep: PrepSelections;
+  candidateName: string;
+  history: ChatMessage[];
+  userMessage?: string;
+}): Promise<{ reply: string; complete: boolean }> {
+  if (needsCachedOpener(opts.history, opts.userMessage)) {
+    return { reply: getCachedCoachOpener(opts.prep), complete: false };
   }
 
-  const complete = text.includes('[[INTERVIEW_COMPLETE]]');
-  const reply = text.replace(/\[\[INTERVIEW_COMPLETE\]\]/g, '').trim();
-  return { reply, complete };
+  const { system, contents } = buildTurnContents(opts);
+  const text = await callGeminiPro(system, contents);
+  if (!text) {
+    console.error('[coach/gemini] all models failed; returning graceful fallback');
+    return { reply: coachFallback(opts.prep.language), complete: false };
+  }
+  return finalizeCoachReply(text);
+}
+
+export async function streamCoachTurn(
+  opts: {
+    prep: PrepSelections;
+    candidateName: string;
+    history: ChatMessage[];
+    userMessage?: string;
+  },
+  onToken: (delta: string) => void,
+): Promise<{ reply: string; complete: boolean }> {
+  if (needsCachedOpener(opts.history, opts.userMessage)) {
+    const reply = getCachedCoachOpener(opts.prep);
+    onToken(reply);
+    return { reply, complete: false };
+  }
+
+  const key = resolveGeminiApiKey();
+  let accessToken = await resolveGeminiAccessToken(key);
+  if (!key && !accessToken) {
+    return generateCoachTurn(opts);
+  }
+
+  const preferred =
+    getInterviewConfig().engine.geminiModel || 'gemini-flash-latest';
+  const models = Array.from(new Set([preferred, ...GEMINI_MODEL_FALLBACKS]));
+  const { system, contents } = buildTurnContents(opts);
+  const { history, lastText } = normalizeGeminiHistory(contents);
+  let emitted = false;
+  const emit = (delta: string) => {
+    if (!delta) return;
+    emitted = true;
+    onToken(delta);
+  };
+
+  for (const model of models) {
+    try {
+      const streamed = await callGeminiRestStream({
+        accessToken,
+        key,
+        model,
+        system,
+        history,
+        lastText,
+        onToken: emit,
+      });
+      if (streamed) return finalizeCoachReply(streamed);
+    } catch (err) {
+      console.error(`[coach/gemini] stream failed model=${model}`, err);
+    }
+  }
+
+  if (!accessToken && hasGoogleServiceAccount()) {
+    accessToken = await getGoogleAccessToken([
+      'https://www.googleapis.com/auth/generative-language',
+    ]);
+    if (accessToken) {
+      for (const model of models) {
+        try {
+          const streamed = await callGeminiRestStream({
+            accessToken,
+            key: null,
+            model,
+            system,
+            history,
+            lastText,
+            onToken: emit,
+          });
+          if (streamed) return finalizeCoachReply(streamed);
+        } catch (err) {
+          console.error(`[coach/gemini] SA stream failed model=${model}`, err);
+        }
+      }
+    }
+  }
+
+  // Non-stream fallback so a flaky SSE path still returns a full reply.
+  const fallback = await generateCoachTurn(opts);
+  if (!emitted && fallback.reply) onToken(fallback.reply);
+  return fallback;
 }
 
 function heuristicScore(transcript: string): CoachScoreResult {
@@ -241,10 +519,7 @@ export async function scoreTranscript(
   transcript: string,
 ): Promise<CoachScoreResult> {
   const { system, user } = buildScoringPrompt(prep, transcript);
-  const key =
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    null;
+  const key = resolveGeminiApiKey();
   const hasSa = hasGoogleServiceAccount();
   if (!key && !hasSa) return heuristicScore(transcript);
 

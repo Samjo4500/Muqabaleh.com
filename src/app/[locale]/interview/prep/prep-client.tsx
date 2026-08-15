@@ -11,7 +11,7 @@ import { FreeInterviewPaywall } from '@/components/paywall/FreeInterviewPaywall'
 import { localePath } from '@/i18n/navigation';
 import type { CoachGender, LabeledOption, PrepSelections } from '@/lib/coach/types';
 import { inferCoachRoleIdFromTitle } from '@/lib/jobs/jeannie-practice';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { trackInterviewStarted } from '@/lib/analytics-ga';
 
 type RolePublic = LabeledOption & {
   category: string;
@@ -218,7 +218,11 @@ export function PrepClient({
       /* ignore */
     }
     if (mode === 'new') {
-      trackGaEvent('interview_started', { source: 'prep' });
+      trackInterviewStarted({
+        language: payload.language,
+        role: payload.roleTitle || payload.role,
+        locale,
+      });
     }
     router.push(localePath('/interview/session', locale));
   };

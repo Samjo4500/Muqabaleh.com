@@ -9,6 +9,7 @@ import { localePath } from '@/i18n/navigation';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { easeCrystal, fadeUp, stagger } from './motion';
+import { trackSignupInitiated } from '@/lib/analytics-ga';
 
 const PLAN_FACETS = [
   'mq-facet mq-facet-cyan mq-facet-shape-soft',
@@ -394,6 +395,12 @@ export function CrystalPricing() {
 
               <Link
                 href={localePath(plan.href, locale)}
+                onClick={() =>
+                  trackSignupInitiated({
+                    location: 'pricing',
+                    locale,
+                  })
+                }
                 className={`mq-btn relative w-full text-sm ${
                   plan.popular
                     ? 'mq-btn-primary mq-btn-shimmer'

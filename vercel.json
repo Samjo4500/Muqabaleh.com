@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/jobs/fetch-cron",
-      "schedule": "0 */3 * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/backup/cron",

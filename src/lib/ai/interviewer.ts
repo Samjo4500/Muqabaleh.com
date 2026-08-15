@@ -3,6 +3,8 @@
  * Prefers Gemini (GEMINI_API_KEY), then heuristic scoring. No OpenAI.
  */
 
+import { resolveGeminiApiKey } from '@/lib/coach/google-auth';
+
 export type FeedbackResult = {
   contentScore: number;
   structureScore: number;
@@ -134,13 +136,13 @@ function heuristicFeedback(ctx: InterviewerContext): FeedbackResult {
 }
 
 async function callGemini(system: string, user: string): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key = resolveGeminiApiKey();
   if (!key) return null;
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const client = new GoogleGenerativeAI(key);
     const model = client.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-flash-latest',
       systemInstruction: system,
     });
     const result = await model.generateContent(user);

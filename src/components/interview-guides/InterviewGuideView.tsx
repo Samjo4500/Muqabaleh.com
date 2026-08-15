@@ -19,6 +19,7 @@ import {
 } from '@/lib/interview-guides/variants';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { SITE_URL } from '@/lib/seo';
+import { GuideViewedTracker } from '@/components/analytics/GuideViewedTracker';
 
 function Stars({ n }: { n: number }) {
   return (
@@ -167,6 +168,7 @@ export function InterviewGuideView(props: Props) {
 
   return (
     <div className="mq-atelier min-h-screen">
+      <GuideViewedTracker guideType={kind} guideSlug={slug} locale={locale} />
       <ArticleJsonLd
         title={title}
         description={description}

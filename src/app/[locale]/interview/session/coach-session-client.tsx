@@ -10,7 +10,7 @@ import { AtelierFlowShell } from '@/components/landing/crystal/AtelierFlowShell'
 import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from '@/lib/coach/types';
-import { trackGaEvent } from '@/lib/analytics-ga';
+import { trackGaEvent, trackInterviewCompleted, trackSignupInitiated } from '@/lib/analytics-ga';
 
 type Props = { candidateName: string };
 
@@ -193,7 +193,11 @@ export function CoachSessionClient({ candidateName }: Props) {
           return;
         }
         if (data.score) {
-          trackGaEvent('interview_completed', { source: 'coach' });
+          trackInterviewCompleted({
+            language: currentPrep.language,
+            role: currentPrep.roleTitle || currentPrep.role,
+            locale,
+          });
           setResult({
             interviewId: data.interviewId,
             verificationId: data.verificationId,
@@ -688,7 +692,13 @@ function ResultsView({
                   ? 'الباقة المجانية تعرض معاينة فقط. رقِّ لفتح جواز PDF الكامل.'
                   : 'Free tier shows a blurred preview. Upgrade to unlock the full passport PDF.'}
               </p>
-              <Link href={localePath('/#pricing', locale)} className="mq-btn mq-btn-primary mt-4">
+              <Link
+                href={localePath('/#pricing', locale)}
+                className="mq-btn mq-btn-primary mt-4"
+                onClick={() =>
+                  trackSignupInitiated({ location: 'pricing', locale })
+                }
+              >
                 {isAr ? 'ترقية الآن' : 'Upgrade now'}
               </Link>
             </div>

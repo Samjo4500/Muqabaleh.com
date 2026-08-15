@@ -7,11 +7,13 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 const PUBLIC_ROUTES = [
   '',
   '/jobs',
+  '/companies',
   '/employers',
   '/business',
   '/request-demo',
   '/demo',
   '/about',
+  '/press',
   '/company-profile',
   '/support',
   '/privacy',
@@ -36,16 +38,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const priority =
       route === ''
         ? 1
-        : route === '/jobs' || route === '/blog' || route === '/employers'
+        : route === '/jobs' || route === '/companies' || route === '/blog'
           ? 0.95
-          : route === '/demo' || route === '/business'
+          : route === '/demo' || route === '/business' || route === '/employers'
             ? 0.85
             : route === '/legal/opt-out'
               ? 0.3
               : 0.7;
 
     const freq: MetadataRoute.Sitemap[0]['changeFrequency'] =
-      route === '' || route === '/jobs' || route === '/blog' || route === '/employers'
+      route === '' || route === '/jobs' || route === '/companies' || route === '/blog'
         ? 'daily'
         : 'monthly';
 

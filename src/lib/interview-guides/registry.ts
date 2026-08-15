@@ -7,6 +7,11 @@ import {
   getGuideRole,
 } from './catalog';
 import {
+  BUILD_TIME_COMPANY_GUIDE_LIMIT,
+  BUILD_TIME_ROLE_GUIDE_LIMIT,
+  pickTopSlugs,
+} from './top-slugs';
+import {
   companyAboutVariant,
   companyHookVariant,
   cultureTipsVariant,
@@ -530,6 +535,40 @@ export async function allGuideCompanySlugsAsync(): Promise<string[]> {
 export async function allGuideRoleSlugsAsync(): Promise<string[]> {
   const list = await listRegistryRoles();
   return list.map((r) => r.slug);
+}
+
+/** Top company guides to prerender. Remaining slugs render on first request. */
+export async function topGuideCompanySlugs(
+  limit = BUILD_TIME_COMPANY_GUIDE_LIMIT,
+): Promise<string[]> {
+  try {
+    const list = await listRegistryCompanies();
+    return pickTopSlugs(
+      list.map((c) => c.slug),
+      GUIDE_COMPANIES.map((c) => c.slug),
+      limit,
+    );
+  } catch (err) {
+    console.error('[interview-guides] top company slugs', err);
+    return pickTopSlugs([], GUIDE_COMPANIES.map((c) => c.slug), limit);
+  }
+}
+
+/** Top role guides to prerender. Remaining slugs render on first request. */
+export async function topGuideRoleSlugs(
+  limit = BUILD_TIME_ROLE_GUIDE_LIMIT,
+): Promise<string[]> {
+  try {
+    const list = await listRegistryRoles();
+    return pickTopSlugs(
+      list.map((r) => r.slug),
+      GUIDE_ROLES.map((r) => r.slug),
+      limit,
+    );
+  } catch (err) {
+    console.error('[interview-guides] top role slugs', err);
+    return pickTopSlugs([], GUIDE_ROLES.map((r) => r.slug), limit);
+  }
 }
 
 /** True when a company guide is in the published registry (safe to link). */

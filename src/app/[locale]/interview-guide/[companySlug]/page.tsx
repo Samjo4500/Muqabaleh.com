@@ -4,23 +4,22 @@ import { setRequestLocale } from 'next-intl/server';
 import { InterviewGuideView } from '@/components/interview-guides/InterviewGuideView';
 import { bi } from '@/lib/interview-guides/content';
 import { loadCompanyGuide } from '@/lib/interview-guides/data';
-import { allGuideCompanySlugsAsync } from '@/lib/interview-guides/registry';
+import { topGuideCompanySlugs } from '@/lib/interview-guides/registry';
 import { pageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; companySlug: string }> };
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 /**
- * Prefetch at build via generateStaticParams; allow on-demand for published
- * guides missing from a partial build (fixes soft-404 shells with HTTP 200).
- * Unknown / thin slugs still notFound() in the page.
+ * Prerender the top 20. Other published slugs generate on first request
+ * (App Router equivalent of fallback: 'blocking') then ISR-cache.
+ * Unknown slugs still `notFound()` — real HTTP 404, not a soft-404 shell.
  */
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   // Parent `[locale]/layout` already emits locales — return only this segment.
-  // Including `locale` here caused incomplete AR/EN prerenders on Vercel.
-  const slugs = await allGuideCompanySlugsAsync();
+  const slugs = await topGuideCompanySlugs(20);
   return slugs.map((companySlug) => ({ companySlug }));
 }
 

@@ -1,30 +1,15 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
+import { sitemapIndexXml } from '@/lib/sitemaps/xml';
+import { sitemapIndexLocs } from '@/lib/sitemaps/static-urls';
 
-/**
- * Sitemap index for GSC. Only includes child sitemaps that exist in production.
- * Keep in sync with public/sitemap-index.xml (static fallback).
- */
+/** Cheap static index — no DB. public/sitemap-index.xml is the committed copy. */
+export const revalidate = 86400;
+
 export function GET() {
-  const children = [
-    `${SITE_URL}/sitemap.xml`,
-    `${SITE_URL}/sitemap-jobs.xml`,
-    `${SITE_URL}/sitemap-interview-guides.xml`,
-  ];
-
-  const body = children
-    .map(
-      (loc) =>
-        `  <sitemap>\n    <loc>${loc}</loc>\n  </sitemap>`,
-    )
-    .join('\n');
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</sitemapindex>\n`;
-
-  return new Response(xml, {
+  return new Response(sitemapIndexXml(sitemapIndexLocs()), {
     status: 200,
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
     },
   });
 }

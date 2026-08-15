@@ -16,6 +16,8 @@ import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
 
+export const revalidate = 3600;
+
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

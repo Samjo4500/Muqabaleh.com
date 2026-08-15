@@ -1,67 +1,19 @@
 import type { MetadataRoute } from 'next';
 import { getAllPosts, getAllSlugs } from '@/content/blog';
-import { db } from '@/lib/db';
+import { buildStaticSitemapEntries } from '@/lib/sitemaps/static-urls';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
-
-const PUBLIC_ROUTES = [
-  '',
-  '/jobs',
-  '/employers',
-  '/business',
-  '/request-demo',
-  '/demo',
-  '/about',
-  '/company-profile',
-  '/support',
-  '/privacy',
-  '/terms',
-  '/refund',
-  '/join-as-interviewer',
-  '/interviewers',
-  '/human-interviews',
-  '/blog',
-  '/partners',
-  '/verify',
-  '/legal/opt-out',
-  '/interview-guide',
-  '/interview-guide/role',
-] as const;
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = [];
+/**
+ * Static + blog URLs only. Jobs and interview guides live in their own
+ * sitemaps and are generated at request/cron time — not during `next build`.
+ */
+export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
-
-  for (const route of PUBLIC_ROUTES) {
-    const priority =
-      route === ''
-        ? 1
-        : route === '/jobs' || route === '/blog' || route === '/employers'
-          ? 0.95
-          : route === '/demo' || route === '/business'
-            ? 0.85
-            : route === '/legal/opt-out'
-              ? 0.3
-              : 0.7;
-
-    const freq: MetadataRoute.Sitemap[0]['changeFrequency'] =
-      route === '' || route === '/jobs' || route === '/blog' || route === '/employers'
-        ? 'daily'
-        : 'monthly';
-
-    entries.push({
-      url: `${SITE_URL}${route || '/'}`,
-      lastModified: now,
-      changeFrequency: freq,
-      priority,
-    });
-    entries.push({
-      url: `${SITE_URL}/en${route}`,
-      lastModified: now,
-      changeFrequency: freq,
-      priority: Math.max(0.5, priority - 0.1),
-    });
-  }
+  const entries: MetadataRoute.Sitemap = buildStaticSitemapEntries(now).map((e) => ({
+    url: e.url,
+    lastModified: e.lastModified,
+    changeFrequency: e.changeFrequency,
+    priority: e.priority,
+  }));
 
   const postsBySlug = new Map<string, string>();
   for (const post of [...getAllPosts('en'), ...getAllPosts('ar')]) {
@@ -73,34 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const { locale, slug } of getAllSlugs()) {
     const prefix = locale === 'en' ? '/en' : '';
     entries.push({
-      url: `${SITE_URL}${prefix}/blog/${slug}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com'}${prefix}/blog/${slug}`,
       lastModified: postsBySlug.get(slug) || now,
       changeFrequency: 'monthly',
       priority: 0.7,
     });
-  }
-
-  // Per-job URLs live in /sitemap-jobs.xml (companies/{slug}/{job-slug} only).
-  try {
-    const companies = await db.listedCompany.findMany({
-      where: { isActive: true },
-      select: { slug: true, updatedAt: true },
-      take: 200,
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    for (const company of companies) {
-      for (const prefix of ['', '/en'] as const) {
-        entries.push({
-          url: `${SITE_URL}${prefix}/companies/${company.slug}`,
-          lastModified: company.updatedAt.toISOString(),
-          changeFrequency: 'daily',
-          priority: 0.8,
-        });
-      }
-    }
-  } catch (err) {
-    console.error('[sitemap] listed companies', err);
   }
 
   return entries;

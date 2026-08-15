@@ -9,6 +9,8 @@ import {
 import { C } from '@/components/landing/crystal/copy';
 import { pageMetadata } from '@/lib/seo';
 
+export const revalidate = 3600;
+
 interface Props {
   params: Promise<{ locale: string }>;
 }

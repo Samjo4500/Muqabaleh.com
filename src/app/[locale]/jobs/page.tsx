@@ -29,6 +29,8 @@ const JobsBrowserClient = dynamic(
   },
 );
 
+export const revalidate = 3600;
+
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -53,14 +53,15 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  // Do not wipe .next/cache — Vercel persists it between builds.
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
-    // Interview guides hit Prisma during SSG — keep concurrency low for Supabase pooler.
-    staticGenerationMaxConcurrency: 2,
-    staticGenerationRetryCount: 3,
+    // Only ~30 guide pages prerender now — higher concurrency is safe.
+    staticGenerationMaxConcurrency: 8,
+    staticGenerationRetryCount: 2,
   },
-  // Allow slow DB-backed guide pages to finish during `next build` on Vercel.
-  staticPageGenerationTimeout: 180,
+  // Guides no longer enumerate the full catalog at build.
+  staticPageGenerationTimeout: 60,
   async redirects() {
     return [
       { source: '/login', destination: '/auth/signin', permanent: false },

@@ -5,8 +5,9 @@ import {
   MAX_PHOTO_BYTES,
   PHOTO_MIME,
 } from './constants';
+import { INLINE_VIDEO_MAX_BYTES, assertVideoFile } from '@/lib/uploads/video';
 
-export type MediaKind = 'PHOTO' | 'CV' | 'OTHER';
+export type MediaKind = 'PHOTO' | 'CV' | 'VIDEO' | 'OTHER';
 
 function assertFile(kind: MediaKind, mimeType: string, size: number) {
   if (kind === 'PHOTO') {
@@ -25,6 +26,15 @@ function assertFile(kind: MediaKind, mimeType: string, size: number) {
     if (size > MAX_CV_BYTES) {
       throw new Error('CV must be under 3 MB');
     }
+    return;
+  }
+  if (kind === 'VIDEO') {
+    assertVideoFile({
+      mimeType,
+      filename: 'upload',
+      size,
+      maxBytes: INLINE_VIDEO_MAX_BYTES,
+    });
   }
 }
 

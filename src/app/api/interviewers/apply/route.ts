@@ -4,23 +4,44 @@ import { randomBytes } from 'crypto';
 import { UserRole } from '@prisma/client';
 import { triggerAdminNewApplicationEmail } from '@/lib/email-triggers';
 
+function isSafeVideoUrl(url: string): boolean {
+  if (url.startsWith('/api/media/')) return true;
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === 'https:' &&
+      (parsed.hostname.endsWith('.blob.vercel-storage.com') ||
+        parsed.hostname === 'blob.vercel-storage.com')
+    );
+  } catch {
+    return false;
+  }
+}
+
 // POST /api/interviewers/apply — submit interviewer application (multipart form)
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
-    const fullName = formData.get('fullName') as string | null;
+    const fullName =
+      (formData.get('fullName') as string | null) ||
+      (formData.get('fullNameEn') as string | null);
     const fullNameAr = formData.get('fullNameAr') as string | null;
     const email = formData.get('email') as string | null;
     const phone = formData.get('phone') as string | null;
-    const linkedInUrl = formData.get('linkedInUrl') as string | null;
+    const linkedInUrl =
+      (formData.get('linkedInUrl') as string | null) ||
+      (formData.get('linkedIn') as string | null);
     const yearsExperience = formData.get('yearsExperience') as string | null;
-    const specialtiesRaw = formData.get('specialties') as string | null;
+    const specialtiesRaw =
+      (formData.get('specialties') as string | null) ||
+      (formData.get('roles') as string | null);
     const industriesRaw = formData.get('industries') as string | null;
     const languagesRaw = formData.get('languages') as string | null;
-    const priceTier = formData.get('priceTier') as string | null;
-    const videoIntro = formData.get('videoIntro') as File | null;
-    const idDocument = formData.get('idDocument') as File | null;
+    const priceTierRaw = formData.get('priceTier') as string | null;
+    const videoIntroUrlField = (formData.get('videoIntroUrl') as string | null)?.trim() || null;
+    const videoIntro = formData.get('videoIntro');
+    const idDocument = formData.get('idDocument') || formData.get('idVerification');
 
     // ── Validation ──
     const errors: string[] = [];
@@ -29,7 +50,7 @@ export async function POST(req: NextRequest) {
     if (!phone?.trim()) errors.push('phone is required');
     if (!yearsExperience) errors.push('yearsExperience is required');
     if (!specialtiesRaw) errors.push('specialties is required');
-    if (!priceTier) errors.push('priceTier is required');
+    if (!priceTierRaw) errors.push('priceTier is required');
 
     if (errors.length > 0) {
       return NextResponse.json(
@@ -57,8 +78,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate years experience is a positive number
-    const years = parseInt(yearsExperience!, 10);
+    // Validate years experience is a positive number ("1-3" → 1)
+    const years = parseInt(String(yearsExperience!).split(/[-+]/)[0] || '', 10);
     if (isNaN(years) || years < 0) {
       return NextResponse.json(
         {
@@ -71,9 +92,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate price tier
-    const validTiers = ['STANDARD', 'PREMIUM', 'ELITE'];
-    if (!validTiers.includes(priceTier!)) {
+    // Validate price tier (form sends standard/pro/executive)
+    const TIER_MAP: Record<string, string> = {
+      STANDARD: 'STANDARD',
+      PREMIUM: 'PREMIUM',
+      ELITE: 'ELITE',
+      standard: 'STANDARD',
+      pro: 'PREMIUM',
+      executive: 'ELITE',
+    };
+    const priceTier = TIER_MAP[priceTierRaw || ''] || null;
+    if (!priceTier) {
       return NextResponse.json(
         {
           error: {
@@ -139,9 +168,51 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Silence unused file refs (upload handled separately / future)
-    void videoIntro;
-    void idDocument;
+    let videoIntroUrl = videoIntroUrlField;
+    let idDocumentUrl: string | null = null;
+
+    try {
+      const { fileFromForm, saveMediaAsset } = await import('@/lib/ats/media');
+      if (!videoIntroUrl && videoIntro && typeof videoIntro !== 'string') {
+        const file = await fileFromForm(formData, 'videoIntro');
+        if (file) {
+          const asset = await saveMediaAsset({
+            kind: 'VIDEO',
+            filename: file.filename,
+            mimeType: file.mimeType,
+            data: file.data,
+          });
+          videoIntroUrl = `/api/media/${asset.id}`;
+        }
+      }
+      if (idDocument && typeof idDocument !== 'string') {
+        const key = formData.get('idDocument') ? 'idDocument' : 'idVerification';
+        const file = await fileFromForm(formData, key);
+        if (file) {
+          const asset = await saveMediaAsset({
+            kind: 'OTHER',
+            filename: file.filename,
+            mimeType: file.mimeType,
+            data: file.data,
+          });
+          idDocumentUrl = `/api/media/${asset.id}`;
+        }
+      }
+    } catch (err) {
+      console.error('[Interviewer Apply] media save failed', err);
+      const message = err instanceof Error ? err.message : 'Could not save upload';
+      return NextResponse.json(
+        { error: { ar: message, en: message } },
+        { status: 400 },
+      );
+    }
+
+    if (videoIntroUrl && !isSafeVideoUrl(videoIntroUrl)) {
+      return NextResponse.json(
+        { error: { ar: 'رابط الفيديو غير صالح', en: 'Invalid video URL' } },
+        { status: 400 },
+      );
+    }
 
     // ── Try DB, fall back to mock ──
     try {
@@ -195,8 +266,10 @@ export async function POST(req: NextRequest) {
           specialties: JSON.stringify(specialties),
           industries: JSON.stringify(industries),
           languages: JSON.stringify(languages),
-          priceTier: priceTier!,
+          priceTier,
           status: 'PENDING',
+          videoIntroUrl,
+          idDocumentUrl,
         },
       });
 

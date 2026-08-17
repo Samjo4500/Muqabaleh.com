@@ -2157,7 +2157,7 @@
     "tierExecutive": "تنفيذي ($99)",
     "videoIntro": "فيديو تعريفي (أقصى ٦٠ ثانية)",
     "videoIntroHelp": "عرفنا عن نفسك وخبرتك في ٦٠ ثانية",
-    "videoIntroFormats": "MP4, MOV, WebM — أقصى ٥٠MB",
+    "videoIntroFormats": "MP4 أو MOV أو WebM — مقطع قصير (أقل من 3.5MB ما لم يُفعَّل تخزين الكائنات)",
     "idVerification": "وثيقة إثبات الهوية",
     "idVerificationHelp": "للتحقق فقط — نحذفها بعد المراجعة",
     "idVerificationFormats": "JPG, PNG, PDF — أقصى ١٠MB",

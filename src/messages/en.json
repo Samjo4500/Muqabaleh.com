@@ -2157,7 +2157,7 @@
     "tierExecutive": "Executive ($99)",
     "videoIntro": "Intro video (max 60 seconds)",
     "videoIntroHelp": "Introduce yourself and your experience in 60 seconds",
-    "videoIntroFormats": "MP4, MOV, WebM — max 50MB",
+    "videoIntroFormats": "MP4, MOV, WebM — short clip (under 3.5MB unless object storage is enabled)",
     "idVerification": "ID Verification Document",
     "idVerificationHelp": "For verification only — deleted after review",
     "idVerificationFormats": "JPG, PNG, PDF — max 10MB",

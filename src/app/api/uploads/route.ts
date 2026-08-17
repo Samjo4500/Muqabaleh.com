@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
     const kindRaw = String(form.get('kind') || 'OTHER').toUpperCase();
-    const kind = (['PHOTO', 'CV', 'OTHER'].includes(kindRaw)
+    const kind = (['PHOTO', 'CV', 'VIDEO', 'OTHER'].includes(kindRaw)
       ? kindRaw
       : 'OTHER') as MediaKind;
     const file = await fileFromForm(form, 'file');

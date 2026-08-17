@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/email/cron",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 5 * * *"
     },
     {
       "path": "/api/email/daily-summary",
@@ -15,7 +15,7 @@
     },
     {
       "path": "/api/generate-sitemaps",
-      "schedule": "0 3 * * *"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/backup/cron",

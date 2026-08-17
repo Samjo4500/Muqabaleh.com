@@ -9,7 +9,8 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Vercel Cron — daily 03:00 UTC.
- * Hobby only registers once-per-day crons; `0 */3 * * *` never ran in production.
+ * Hobby rejects any cron more frequent than once per day at deploy time
+ * (including leftover `*/5` email crons in vercel.json).
  * GitHub Action can still sweep extra ticks when repo secret CRON_SECRET is set.
  *
  * Query: `?limit=8` (default 8, max 16). `?sync=1` upserts the company catalog.

@@ -3,6 +3,12 @@ import { processEmailQueue } from '@/lib/email';
 import { processNurtureQueue } from '@/lib/nurture/process';
 import { assertCronAuthorized } from '@/lib/cron-auth';
 
+/**
+ * Vercel Cron — daily 05:00 UTC (Hobby forbids */5).
+ * GitHub Action `.github/workflows/email-cron.yml` ticks every 5 minutes
+ * when repo secret CRON_SECRET is set.
+ */
+
 async function runEmailCron() {
   const result = await processEmailQueue();
   const nurture = await processNurtureQueue();

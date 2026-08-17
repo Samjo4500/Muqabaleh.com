@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -7,6 +8,7 @@ import { AlertCircle, Clock, Loader2, Search, ShieldCheck } from 'lucide-react';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { easeCrystal, fadeUp } from '@/components/landing/crystal/motion';
 import { VerifiedBadge } from '@/components/brand';
+import { localePath } from '@/i18n/navigation';
 
 type VerifyResult = 'idle' | 'loading' | 'valid' | 'expired' | 'notFound' | 'error';
 
@@ -90,6 +92,12 @@ export function VerifyClient({ initialId = '' }: { initialId?: string }) {
             </div>
             <h1 className="mq-display text-3xl font-bold text-white md:text-5xl">{t('title')}</h1>
             <p className="mx-auto mt-4 max-w-md text-base text-white/55 md:text-lg">{t('sub')}</p>
+            <Link
+              href={localePath('/how-scores-work', locale)}
+              className="mt-3 inline-flex text-sm font-semibold text-teal-300 hover:text-teal-200"
+            >
+              {isAr ? 'كيف تعمل درجات مقابلة' : 'How Muqabaleh scores work'}
+            </Link>
           </motion.div>
 
           <motion.div

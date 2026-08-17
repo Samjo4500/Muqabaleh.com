@@ -45,13 +45,21 @@ export function CrystalPassportShowcase() {
                 </li>
               ))}
             </ul>
-            <Link
-              href={localePath('/interview/prequal', locale)}
-              className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center gap-2 px-6 text-sm font-bold"
-            >
-              <Sparkles size={16} />
-              <BiInline bi={C.passport.cta} />
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link
+                href={localePath('/interview/prequal', locale)}
+                className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center gap-2 px-6 text-sm font-bold"
+              >
+                <Sparkles size={16} />
+                <BiInline bi={C.passport.cta} />
+              </Link>
+              <Link
+                href={localePath('/how-scores-work', locale)}
+                className="inline-flex min-h-[44px] items-center text-sm font-semibold text-teal-300 hover:text-teal-200"
+              >
+                <BiInline bi={C.passport.scoresLink} />
+              </Link>
+            </div>
           </motion.div>
 
           {/* Visible passport — sample credential employers can understand */}
@@ -140,7 +148,11 @@ export function CrystalPassportShowcase() {
                   <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-white/15 bg-white p-1">
                     <Image
                       src="/images/passport-qr-demo.png"
-                      alt=""
+                      alt={
+                        isAr
+                          ? 'نموذج رمز QR للتحقق العام من جواز مقابلة'
+                          : 'Sample QR code for public Muqabaleh Passport verification'
+                      }
                       width={48}
                       height={48}
                       className="h-full w-full object-contain"

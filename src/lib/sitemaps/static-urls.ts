@@ -21,6 +21,7 @@ export const STATIC_SITEMAP_ROUTES = [
   '/human-interviews',
   '/blog',
   '/partners',
+  '/how-scores-work',
   '/verify',
   '/legal/opt-out',
   '/interview-guide',

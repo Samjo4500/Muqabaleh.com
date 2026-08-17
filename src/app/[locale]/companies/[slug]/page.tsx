@@ -104,7 +104,7 @@ export default async function CompanyPage({ params }: Props) {
               className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
             >
               <Sparkles size={16} />
-              {isAr ? `تدرّب صوتياً لـ ${company.name}` : `Voice practice for ${company.name}`}
+              {isAr ? `تدرّب مع جيني لـ ${company.name}` : `Practice with Jeannie for ${company.name}`}
             </PracticeGateLink>
           </div>
         </div>
@@ -128,26 +128,51 @@ export default async function CompanyPage({ params }: Props) {
         </h2>
         <div className="grid gap-3">
           {jobs.map((job) => (
-            <Link
+            <article
               key={job.id}
-              href={localePath(`/companies/${company.slug}/${job.slug}`, locale)}
-              className="group rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-5 transition hover:border-teal-300/30 hover:bg-white/[0.05]"
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-5"
             >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="mq-display text-lg font-bold text-white group-hover:text-teal-100">
-                    {job.title}
-                  </h3>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <h3 className="mq-display text-lg font-bold text-white">{job.title}</h3>
                   <p className="mt-1 text-sm text-white/45">
                     {job.location}
                     {job.department ? ` · ${job.department}` : ''}
                   </p>
+                  <p className="mt-2 text-sm text-white/55">
+                    {isAr
+                      ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+                      : 'Try your first interview question for this role.'}
+                  </p>
                 </div>
-                <span className="text-sm font-bold text-teal-300">
-                  {isAr ? 'عرض الدور' : 'View role'} →
-                </span>
+                <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                  <PracticeGateLink
+                    href={localePath(
+                      jeanniePracticePath({
+                        company: company.name,
+                        role: job.title,
+                        job: job.id,
+                      }),
+                      locale,
+                    )}
+                    role={job.title}
+                    company={company.name}
+                    jobId={job.id}
+                    companyId={company.slug}
+                    className="mq-btn mq-btn-primary inline-flex min-h-[44px] items-center justify-center gap-2 px-4 text-sm font-bold"
+                  >
+                    <Sparkles size={14} />
+                    {isAr ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
+                  </PracticeGateLink>
+                  <Link
+                    href={localePath(`/companies/${company.slug}/${job.slug}`, locale)}
+                    className="text-sm font-semibold text-white/50 hover:text-teal-200"
+                  >
+                    {isAr ? 'تفاصيل الدور' : 'Role details'}
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       </main>

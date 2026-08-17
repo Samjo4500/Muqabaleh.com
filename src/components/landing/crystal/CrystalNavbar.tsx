@@ -21,6 +21,11 @@ const NAV_LINKS = [
   { bi: C.nav.pricing, href: '#pricing' },
 ] as const;
 
+const TEAM_LINKS = [
+  { bi: C.hero.forEmployers, href: '/business' },
+  { bi: C.hero.forPartners, href: '/partners' },
+] as const;
+
 export function CrystalNavbar() {
   const locale = useLocale();
   const pathname = usePathname();
@@ -79,6 +84,16 @@ export function CrystalNavbar() {
               <BiInline bi={link.bi} />
             </Link>
           ))}
+          <span className="h-4 w-px bg-white/15" aria-hidden />
+          {TEAM_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={localePath(link.href, locale)}
+              className="text-xs font-medium text-white/40 transition-colors hover:text-white/70"
+            >
+              <BiInline bi={link.bi} />
+            </Link>
+          ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -96,7 +111,7 @@ export function CrystalNavbar() {
         <div className="lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button type="button" className="rounded-lg p-2 text-white/80" aria-label="Menu">
+              <button type="button" className="rounded-lg p-2 text-white/80" aria-label={locale === 'ar' ? 'القائمة' : 'Menu'}>
                 <Menu size={22} strokeWidth={1.75} />
               </button>
             </SheetTrigger>
@@ -123,6 +138,19 @@ export function CrystalNavbar() {
                     href={resolveHref(link.href)}
                     onClick={() => setOpen(false)}
                     className="min-h-[48px] rounded-xl px-3 py-3 text-white hover:bg-white/5"
+                  >
+                    <T bi={link.bi} className="text-sm font-semibold" />
+                  </Link>
+                ))}
+                <p className="mt-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-white/35">
+                  {locale === 'ar' ? 'للفرق' : 'For teams'}
+                </p>
+                {TEAM_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={localePath(link.href, locale)}
+                    onClick={() => setOpen(false)}
+                    className="min-h-[48px] rounded-xl px-3 py-3 text-white/70 hover:bg-white/5"
                   >
                     <T bi={link.bi} className="text-sm font-semibold" />
                   </Link>

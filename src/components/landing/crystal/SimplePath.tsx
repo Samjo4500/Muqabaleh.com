@@ -40,7 +40,7 @@ export function CrystalSimplePath() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid gap-4 md:grid-cols-3"
+          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
         >
           {C.path.steps.map((step, i) => (
             <motion.li

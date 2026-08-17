@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
@@ -11,8 +11,6 @@ import { CrystalNavbar } from '@/components/landing/crystal/CrystalNavbar';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
 import { localePath } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-
-const TRUST_LOGOS = ['Aramco', 'SABIC', 'STC', 'Emirates', 'NEOM'] as const;
 
 const TIERS = [
   {
@@ -92,11 +90,6 @@ export function EmployersPricing() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const trustLine = useMemo(
-    () => (isAr ? 'استعد للتوظيف في' : 'Prepare to hire like teams at'),
-    [isAr],
-  );
-
   const submitEnterprise = async () => {
     setSending(true);
     const res = await fetch('/api/employers/contact', {
@@ -166,18 +159,20 @@ export function EmployersPricing() {
         </div>
       </section>
 
-      <section className="border-y border-[#1E293B] bg-[#0F172A]/px-4 py-8 md:px-8">
+      <section className="border-y border-[#1E293B] bg-[#0F172A] px-4 py-8 md:px-8">
         <p className="text-center text-sm text-[#94A3B8]">{t('trust')}</p>
-        <p className="mt-2 text-center text-xs text-[#64748B]">{trustLine}</p>
-        <div className="mx-auto mt-5 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {TRUST_LOGOS.map((name) => (
-            <span
-              key={name}
-              className="text-sm font-medium tracking-wide text-[#F8FAFC]/40"
-            >
-              {name}
-            </span>
-          ))}
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-[#94A3B8]">
+          {isAr
+            ? 'الجواز إشارة جاهزية تحت سيطرة المرشّح. استخدمه مع حكم بشري مسؤول — وليس كقرار توظيف تلقائي.'
+            : 'The Passport is a candidate-controlled readiness signal. Use it with responsible human judgement — not as an automatic hiring decision.'}
+        </p>
+        <div className="mt-4 text-center">
+          <Link
+            href={localePath('/how-scores-work', locale)}
+            className="text-sm font-semibold text-[#14B8A6] hover:brightness-110"
+          >
+            {isAr ? 'كيف تعمل درجات مقابلة' : 'How Muqabaleh scores work'}
+          </Link>
         </div>
       </section>
 

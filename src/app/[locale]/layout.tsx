@@ -10,6 +10,7 @@ import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytic
 import { fontVariables } from '@/lib/fonts';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/json-ld';
 
 function isLocale(value: string): value is Locale {
   return (routing.locales as readonly string[]).includes(value);
@@ -124,6 +125,8 @@ export default async function LocaleLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <OrganizationJsonLd />
+        <WebSiteJsonLd locale={locale} />
       </head>
       <body className="min-h-screen bg-void text-[var(--text-primary)] antialiased">
         <Providers>

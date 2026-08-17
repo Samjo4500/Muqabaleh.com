@@ -45,8 +45,9 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const [q, setQ] = useState('');
   const [salaryOnly, setSalaryOnly] = useState(false);
 
-  // Show every MENA market by default (zeros included) so coverage gaps are visible.
-  const [showEmptyCountries, setShowEmptyCountries] = useState(true);
+  // Hide empty markets by default so zero-count tiles are not the first impression.
+  const [showEmptyCountries, setShowEmptyCountries] = useState(false);
+  const [visibleRest, setVisibleRest] = useState(24);
 
   const countryCounts = useMemo(() => {
     const map = new Map<MenaCountryKey, number>();
@@ -100,6 +101,12 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const spotlight =
     filtered.find((j) => j.salaryLabel) ?? filtered[0] ?? null;
   const rest = filtered.filter((j) => j.id !== spotlight?.id);
+  const filterKey = `${country}|${q}|${salaryOnly ? '1' : '0'}`;
+  const [listKey, setListKey] = useState(filterKey);
+  if (listKey !== filterKey) {
+    setListKey(filterKey);
+    setVisibleRest(24);
+  }
 
   if (!initialJobs.length) {
     return (
@@ -134,10 +141,10 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
               {isAr ? 'اختر وظيفة. تدرّب عليها.' : 'Pick a role. Practice it.'}
             </h2>
           </div>
-          <p className="text-sm text-white/45 md:max-w-xs md:text-end">
+          <p className="text-sm text-white/45 md:max-w-sm md:text-end">
             {isAr
-              ? `${filtered.length} وظيفة · ${withSalaryCount} براتب معلن`
-              : `${filtered.length} roles · ${withSalaryCount} with published pay`}
+              ? `${filtered.length} وظيفة. يظهر الراتب عندما ينشره صاحب العمل. لا نقدّر الرواتب ولا نخترعها.`
+              : `${filtered.length} roles. Salary shown when employers publish it. We do not estimate or invent pay.`}
           </p>
         </div>
 
@@ -257,87 +264,129 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
         )}
 
         {rest.length > 0 ? (
-          <motion.ul
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-40px' }}
-            className="mt-6 divide-y divide-white/10 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.02]"
-          >
-            {rest.map((job, i) => {
-              if (!job.company?.slug || !job.slug) return null;
-              const href = localePath(
-                `/companies/${job.company.slug}/${job.slug}`,
-                locale,
-              );
-              const countryKey = classifyMenaCountry(
-                job.location,
-                job.company?.country,
-                job.title,
-              );
-              const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
-              return (
-                <motion.li key={job.id} variants={fadeUp} custom={i} className="group">
-                  <Link
-                    href={href}
-                    className="flex flex-col gap-3 px-5 py-5 transition hover:bg-white/[0.04] md:flex-row md:items-center md:justify-between md:gap-6 md:px-7"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-200/80">
-                        {job.company?.name ?? '—'}
-                      </p>
-                      <h3 className="mq-display mt-1 text-xl font-bold text-white transition group-hover:text-teal-100 md:text-2xl">
-                        {job.title}
-                      </h3>
-                      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/45">
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin size={13} />
-                          {job.location}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <span aria-hidden>{MENA_COUNTRY_FLAGS[countryKey]}</span>
-                          {isAr
-                            ? MENA_COUNTRY_LABELS[countryKey].ar
-                            : MENA_COUNTRY_LABELS[countryKey].en}
-                        </span>
-                        {meta ? (
+          <>
+            <motion.ul
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-40px' }}
+              className="mt-6 divide-y divide-white/10 overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.02]"
+            >
+              {rest.slice(0, visibleRest).map((job, i) => {
+                if (!job.company?.slug || !job.slug) return null;
+                const href = localePath(
+                  `/companies/${job.company.slug}/${job.slug}`,
+                  locale,
+                );
+                const practiceHref = localePath(
+                  jeanniePracticePath({
+                    company: job.company?.name,
+                    role: job.title,
+                    job: job.id,
+                  }),
+                  locale,
+                );
+                const countryKey = classifyMenaCountry(
+                  job.location,
+                  job.company?.country,
+                  job.title,
+                );
+                const meta = [job.department, job.employmentType].filter(Boolean).join(' · ');
+                return (
+                  <motion.li key={job.id} variants={fadeUp} custom={i} className="group px-5 py-5 md:px-7">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-6">
+                      <div className="min-w-0 flex-1">
+                        <Link href={href} className="block">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-200/80">
+                            {job.company?.name ?? '—'}
+                          </p>
+                          <h3 className="mq-display mt-1 text-xl font-bold text-white transition group-hover:text-teal-100 md:text-2xl">
+                            {job.title}
+                          </h3>
+                        </Link>
+                        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/45">
                           <span className="inline-flex items-center gap-1">
-                            <Briefcase size={13} />
-                            {meta}
+                            <MapPin size={13} />
+                            {job.location}
                           </span>
-                        ) : null}
-                        {job.salaryLabel ? (
-                          <span className="inline-flex items-center gap-1 font-semibold text-amber-200/90">
-                            <Banknote size={13} />
-                            {job.salaryLabel}
+                          <span className="inline-flex items-center gap-1">
+                            <span aria-hidden>{MENA_COUNTRY_FLAGS[countryKey]}</span>
+                            {isAr
+                              ? MENA_COUNTRY_LABELS[countryKey].ar
+                              : MENA_COUNTRY_LABELS[countryKey].en}
                           </span>
-                        ) : (
-                          <span className="text-white/35">
-                            {isAr ? 'الراتب لدى الشركة' : 'Pay on company site'}
-                          </span>
-                        )}
-                      </p>
-                      {job.description && !/^https?:\/\//i.test(job.description.trim()) ? (
-                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/40">
-                          {job.description}
+                          {meta ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Briefcase size={13} />
+                              {meta}
+                            </span>
+                          ) : null}
+                          {job.salaryLabel ? (
+                            <span className="inline-flex items-center gap-1 font-semibold text-amber-200/90">
+                              <Banknote size={13} />
+                              {job.salaryLabel}
+                            </span>
+                          ) : (
+                            <span className="text-white/35">
+                              {isAr
+                                ? 'يظهر الراتب عندما ينشره صاحب العمل'
+                                : 'Salary shown when published'}
+                            </span>
+                          )}
                         </p>
-                      ) : null}
+                        <p className="mt-2 text-sm text-white/55">
+                          {isAr
+                            ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+                            : 'Try your first interview question for this role.'}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+                        <PracticeGateLink
+                          href={practiceHref}
+                          role={job.title}
+                          company={job.company?.name}
+                          jobId={job.id}
+                          roleId={job.id}
+                          companyId={job.company?.slug}
+                          className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-4 text-sm font-bold"
+                        >
+                          <Sparkles size={15} />
+                          {isAr ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
+                        </PracticeGateLink>
+                        <ApplyTrackLink
+                          href={job.applyUrl}
+                          role={job.title}
+                          company={job.company?.name}
+                          jobId={job.id}
+                          className="mq-btn mq-btn-ghost inline-flex min-h-[44px] items-center justify-center gap-2 px-4 text-sm font-semibold"
+                        >
+                          {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
+                          <ArrowUpRight size={14} />
+                        </ApplyTrackLink>
+                      </div>
                     </div>
-                    <span className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-teal-200">
-                      {isAr ? 'تدرّب لهذه الوظيفة' : 'Practice this role'}
-                      <ArrowUpRight size={16} />
-                    </span>
-                  </Link>
-                </motion.li>
-              );
-            })}
-          </motion.ul>
+                  </motion.li>
+                );
+              })}
+            </motion.ul>
+            {rest.length > visibleRest ? (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleRest((n) => n + 24)}
+                  className="mq-btn mq-btn-ghost inline-flex min-h-[44px] px-5 text-sm font-bold"
+                >
+                  {isAr ? 'عرض المزيد من الوظائف' : 'Show more roles'}
+                </button>
+              </div>
+            ) : null}
+          </>
         ) : null}
 
         <p className="mt-10 text-center text-xs leading-relaxed text-white/35">
           {isAr
-            ? 'نعرض الراتب فقط إذا أعلنه صاحب العمل. الدول بلا وظائف بعد ضمن نطاقنا — ونضيف لوحات توظيف قانونية باستمرار.'
-            : 'Salaries appear only when the employer published pay via ATS. Countries at 0 are still in scope — we add legal boards continuously.'}
+            ? 'يظهر الراتب عندما ينشره صاحب العمل. لا نقدّر الرواتب ولا نخترعها.'
+            : 'Salary shown when employers publish it. We do not estimate or invent pay.'}
         </p>
       </div>
     </section>
@@ -459,8 +508,8 @@ function SpotlightRole({
       {!job.salaryLabel ? (
         <p className="relative mt-2 text-sm text-white/40">
           {isAr
-            ? 'الراتب غير معلن هنا — راجعه عند التقديم لدى الشركة.'
-            : 'Pay not published here — check the company site when you apply.'}
+            ? 'يظهر الراتب عندما ينشره صاحب العمل. لا نقدّر الرواتب ولا نخترعها.'
+            : 'Salary shown when employers publish it. We do not estimate or invent pay.'}
         </p>
       ) : null}
       {job.description && !/^https?:\/\//i.test(job.description.trim()) ? (
@@ -483,35 +532,42 @@ function SpotlightRole({
           {job.requirements.length > 220 ? '…' : ''}
         </p>
       ) : null}
-      <div className="relative mt-7 flex flex-col gap-3 sm:flex-row">
+      <p className="relative mt-5 text-sm font-medium text-teal-100/90">
+        {isAr
+          ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+          : 'Try your first interview question for this role.'}
+      </p>
+      <div className="relative mt-5 flex flex-col gap-3">
         <PracticeGateLink
           href={practiceHref}
           role={job.title}
           company={job.company?.name}
-              jobId={job.id}
-              roleId={job.id}
-              companyId={job.company?.slug}
-              className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
-        >
-          <Sparkles size={15} />
-          {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
-        </PracticeGateLink>
-        <ApplyTrackLink
-          href={job.applyUrl}
-          role={job.title}
-          company={job.company?.name}
           jobId={job.id}
-          className="mq-btn mq-btn-ghost inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
+          roleId={job.id}
+          companyId={job.company?.slug}
+          className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] w-full items-center justify-center gap-2 text-sm font-bold sm:w-auto sm:min-w-[280px]"
         >
-          {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
-          <ArrowUpRight size={15} />
-        </ApplyTrackLink>
-        <Link
-          href={href}
-          className="mq-btn mq-btn-ghost inline-flex min-h-[50px] items-center justify-center px-5 text-sm font-bold sm:flex-none"
-        >
-          {isAr ? 'التفاصيل' : 'Details'}
-        </Link>
+          <Sparkles size={16} />
+          {isAr ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
+        </PracticeGateLink>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <ApplyTrackLink
+            href={job.applyUrl}
+            role={job.title}
+            company={job.company?.name}
+            jobId={job.id}
+            className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center justify-center gap-2 text-sm font-bold"
+          >
+            {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
+            <ArrowUpRight size={15} />
+          </ApplyTrackLink>
+          <Link
+            href={href}
+            className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center justify-center px-5 text-sm font-bold"
+          >
+            {isAr ? 'التفاصيل' : 'Details'}
+          </Link>
+        </div>
       </div>
     </motion.article>
   );

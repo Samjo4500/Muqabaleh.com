@@ -198,9 +198,27 @@ export function CrystalHero() {
             <T
               as="p"
               bi={C.hero.sub}
-              className="mb-6 max-w-xl text-base leading-relaxed text-white/80 md:mb-8 md:text-lg"
+              className="mb-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg"
             />
           </motion.div>
+
+          <motion.ol
+            variants={fadeUp}
+            className="mb-6 grid max-w-xl grid-cols-1 gap-2 sm:grid-cols-2 lg:max-w-2xl"
+            aria-label={isAr ? 'مسار المرشّح' : 'Candidate journey'}
+          >
+            {C.hero.journey.map((step, i) => (
+              <li
+                key={step.en}
+                className="flex items-start gap-2.5 text-sm leading-snug text-white/75"
+              >
+                <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-teal-300/35 bg-teal-400/10 text-[10px] font-bold text-teal-200">
+                  {i + 1}
+                </span>
+                <BiInline bi={step} />
+              </li>
+            ))}
+          </motion.ol>
 
           {/* Mobile passport — in content flow so it never covers Jeannie's face */}
           <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 md:hidden">
@@ -229,6 +247,40 @@ export function CrystalHero() {
               </Link>
             </motion.div>
           </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="mt-3 max-w-xl text-sm leading-relaxed text-white/70"
+          >
+            <BiInline bi={C.hero.reassure} />
+          </motion.p>
+          <motion.p
+            variants={fadeUp}
+            className="mt-1.5 text-xs font-semibold tracking-wide text-teal-200/80"
+          >
+            <BiInline bi={C.hero.noCard} />
+            <span aria-hidden className="mx-2 text-white/30">
+              ·
+            </span>
+            <BiInline bi={C.hero.startMinutes} />
+          </motion.p>
+          <motion.p variants={fadeUp} className="mt-4 text-xs text-white/45">
+            <Link
+              href={localePath('/business', locale)}
+              className="underline-offset-2 hover:text-white/70 hover:underline"
+            >
+              <BiInline bi={C.hero.forEmployers} />
+            </Link>
+            <span aria-hidden className="mx-2">
+              ·
+            </span>
+            <Link
+              href={localePath('/partners', locale)}
+              className="underline-offset-2 hover:text-white/70 hover:underline"
+            >
+              <BiInline bi={C.hero.forPartners} />
+            </Link>
+          </motion.p>
         </motion.div>
       </div>
 

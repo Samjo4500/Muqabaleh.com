@@ -21,6 +21,7 @@ import { localeFromPreferred, timezoneForCity } from './constants';
 import { readFileSync } from 'node:fs';
 import { GATE1, GATE2, PREFS_COPY } from './copy';
 import { renderNurtureEmail, type NurtureMerge } from './templates';
+import { passportEmailHtml } from '../coach/brevo-passport';
 
 describe('nurture validation', () => {
   it('normalizes emails and rejects junk', () => {
@@ -197,5 +198,26 @@ describe('nurture templates', () => {
     assert.ok(rendered);
     assert.match(rendered!.html, /dir="rtl"/);
     assert.match(rendered!.subject, /جواز/);
+  });
+});
+
+describe('gate 1 acknowledgement', () => {
+  it('thanks the candidate and points dashboard at /app', () => {
+    assert.match(GATE1.en.successHeadline, /Thank you/i);
+    assert.match(GATE1.en.successBody, /inbox/i);
+    assert.equal(GATE1.en.viewDashboard, 'Check your dashboard');
+    assert.match(GATE1.ar.successHeadline, /شكراً/);
+    assert.equal(GATE1.en.seeScorecard.includes('RESULTS'), true);
+  });
+
+  it('passport email dashboard CTA hits /app not /dashboard', () => {
+    const html = passportEmailHtml({
+      language: 'en',
+      name: 'Sam',
+      overallScore: 82,
+      grade: 'B+',
+    });
+    assert.match(html, /\/en\/app/);
+    assert.doesNotMatch(html, /\/dashboard/);
   });
 });

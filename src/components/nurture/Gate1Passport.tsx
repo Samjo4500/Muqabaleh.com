@@ -92,9 +92,9 @@ export function Gate1Passport({
           competencies,
         }),
       });
-      const data = (await res.json()) as { ok?: boolean; token?: string };
+      const data = (await res.json()) as { ok?: boolean; token?: string; error?: string };
       if (!res.ok || !data.ok) {
-        setErrors({ email: copy.invalidEmail });
+        setErrors({ form: copy.sendFailed });
         return;
       }
       writeNurture({
@@ -108,14 +108,21 @@ export function Gate1Passport({
       });
       trackGaEvent('nurture_gate1_unlocked', { city: currentCity });
       setSuccess(true);
-      onUnlocked();
+      // Stay on the thank-you state. Parent unmounts this modal if we call
+      // onUnlocked() here, so the scorecard opens only from "See my results".
+    } catch {
+      setErrors({ form: copy.sendFailed });
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <GateShell isAr={isAr} label={success ? copy.successHeadline : copy.headline} onClose={onClose}>
+    <GateShell
+      isAr={isAr}
+      label={success ? copy.successHeadline : copy.headline}
+      onClose={success ? undefined : onClose}
+    >
       <div className="mb-5 flex justify-center">
         {success ? (
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00D4AA]/15 text-[#00D4AA] shadow-[0_0_24px_rgba(0,212,170,0.35)]">
@@ -134,57 +141,53 @@ export function Gate1Passport({
         <p className="mt-2 text-center text-sm text-white/40">{copy.subhead}</p>
       ) : null}
 
-      {success && score ? (
+      {success ? (
         <div className="mt-6">
-          <p className="text-center text-5xl font-black text-[#C9A84C]">
-            {score.overallScore}
-            <span className="text-lg font-bold text-white/70"> / 100</span>
-          </p>
-          <ul className="mt-5 space-y-3">
-            {(score.competencyBreakdown || []).map((c) => (
-              <li key={c.name}>
-                <div className="mb-1 flex justify-between text-xs text-white/60">
-                  <span>{c.name}</span>
-                  <span>{c.score}</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div
-                    className={`h-2 rounded-full ${scoreBarColor(c.score)}`}
-                    style={{ width: `${Math.max(0, Math.min(100, c.score))}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#00D4AA]">
-                {isAr ? 'نقاط القوة' : 'Strengths'}
+          <p className="text-center text-sm text-white/70">{copy.successBody}</p>
+          {email.trim() ? (
+            <p className="mt-2 text-center text-sm text-[#00D4AA]">
+              {copy.emailedNote} <span className="font-semibold text-white">{email.trim()}</span>
+            </p>
+          ) : null}
+
+          {score ? (
+            <div className="mt-6">
+              <p className="text-center text-5xl font-black text-[#C9A84C]">
+                {score.overallScore}
+                <span className="text-lg font-bold text-white/70"> / 100</span>
               </p>
-              <ul className="mt-2 space-y-1 text-sm text-white/75">
-                {(score.strengths || []).slice(0, 2).map((s) => (
-                  <li key={s}>• {s}</li>
+              <ul className="mt-5 space-y-3">
+                {(score.competencyBreakdown || []).map((c) => (
+                  <li key={c.name}>
+                    <div className="mb-1 flex justify-between text-xs text-white/60">
+                      <span>{c.name}</span>
+                      <span>{c.score}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-white/10">
+                      <div
+                        className={`h-2 rounded-full ${scoreBarColor(c.score)}`}
+                        style={{ width: `${Math.max(0, Math.min(100, c.score))}%` }}
+                      />
+                    </div>
+                  </li>
                 ))}
               </ul>
             </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#C9A84C]">
-                {isAr ? 'للتحسين' : 'To improve'}
-              </p>
-              <ul className="mt-2 space-y-1 text-sm text-white/75">
-                {(score.improvements || []).slice(0, 2).map((s) => (
-                  <li key={s}>• {s}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          ) : null}
+
           <div className="mt-6 space-y-3">
+            <button type="button" onClick={onUnlocked} className={gateCtaClass}>
+              {copy.seeScorecard}
+            </button>
+            <Link href={localePath('/app', locale)} className={gateSecondaryClass}>
+              {copy.viewDashboard}
+            </Link>
             <Link
               href={localePath(
                 '/interview/prep?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=practice_again',
                 locale,
               )}
-              className={gateCtaClass}
+              className={gateSecondaryClass}
             >
               {copy.practiceAgain}
             </Link>
@@ -193,7 +196,7 @@ export function Gate1Passport({
                 '/jobs?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=browse_roles',
                 locale,
               )}
-              className={gateSecondaryClass}
+              className="block text-center text-sm text-white/45 underline-offset-2 hover:text-white/70 hover:underline"
             >
               {copy.browseRoles}
             </Link>
@@ -260,6 +263,7 @@ export function Gate1Passport({
           <button type="submit" disabled={busy} className={gateCtaClass}>
             {busy ? copy.sending : copy.cta}
           </button>
+          {errors.form ? <p className="text-center text-sm text-rose-300">{errors.form}</p> : null}
           <Link
             href={localePath(
               '/jobs?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=skip',

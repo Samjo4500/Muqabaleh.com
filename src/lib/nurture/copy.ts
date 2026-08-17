@@ -47,7 +47,11 @@ export const GATE1 = {
     cta: 'UNLOCK MY RESULTS →',
     skip: 'Skip for now — I just want to browse jobs',
     trust: 'No spam. We only send interview tips and relevant MENA roles.',
-    successHeadline: 'Your Passport is Ready',
+    successHeadline: 'Thank you — we received your details',
+    successBody:
+      'Your score is on its way to your inbox. Check email (and spam) in the next few minutes.',
+    seeScorecard: 'SEE MY RESULTS →',
+    viewDashboard: 'Check your dashboard',
     practiceAgain: 'PRACTICE AGAIN',
     browseRoles: 'BROWSE ROLES',
     seeResults: 'See My Results',
@@ -56,6 +60,8 @@ export const GATE1 = {
     required: 'This field is required.',
     invalidEmail: 'Enter a valid email.',
     sending: 'Unlocking…',
+    sendFailed: 'Could not save your details. Please try again.',
+    emailedNote: 'We emailed your score to',
   },
   ar: {
     headline: 'افتح جواز مقابلة',
@@ -73,7 +79,11 @@ export const GATE1 = {
     cta: 'افتح نتائجي ←',
     skip: 'تخطَّ الآن — أريد تصفّح الوظائف فقط',
     trust: 'بلا رسائل مزعجة. نرسل فقط نصائح المقابلات ووظائف مناسبة في المنطقة.',
-    successHeadline: 'جوازك جاهز',
+    successHeadline: 'شكراً — استلمنا بياناتك',
+    successBody:
+      'درجتك في طريقها إلى بريدك. راجع صندوق الوارد (والبريد المزعج) خلال دقائق.',
+    seeScorecard: 'عرض نتائجي ←',
+    viewDashboard: 'تحقق من لوحة التحكم',
     practiceAgain: 'تدرّب مرة أخرى',
     browseRoles: 'تصفّح الوظائف',
     seeResults: 'عرض نتائجي',
@@ -82,6 +92,8 @@ export const GATE1 = {
     required: 'هذا الحقل مطلوب.',
     invalidEmail: 'أدخل بريداً إلكترونياً صحيحاً.',
     sending: 'جارٍ الفتح…',
+    sendFailed: 'تعذّر حفظ بياناتك. حاول مرة أخرى.',
+    emailedNote: 'أرسلنا درجتك إلى',
   },
 } as const;
 

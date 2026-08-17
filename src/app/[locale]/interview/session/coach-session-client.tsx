@@ -468,6 +468,7 @@ export function CoachSessionClient({ candidateName }: Props) {
             role={prep?.roleTitle || prep?.role}
             company={prep?.companyName}
             onUnlocked={() => setPassportUnlocked(true)}
+            onClose={() => setGate1Open(false)}
           />
         </AtelierFlowShell>
       );
@@ -749,13 +750,19 @@ function ResultsView({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href={localePath('/interview/prep', locale)}
+            href={localePath(
+              '/interview/prep?utm_source=gate&utm_medium=results&utm_campaign=gate1&utm_content=practice_again',
+              locale,
+            )}
             className="inline-flex h-12 items-center justify-center rounded-3xl bg-[#C9A84C] px-6 text-sm font-extrabold text-black hover:bg-[#D4B86A]"
           >
             {isAr ? 'تدرّب مرة أخرى' : 'PRACTICE AGAIN'}
           </Link>
           <Link
-            href={localePath('/jobs', locale)}
+            href={localePath(
+              '/jobs?utm_source=gate&utm_medium=results&utm_campaign=gate1&utm_content=browse_roles',
+              locale,
+            )}
             className="inline-flex h-12 items-center justify-center rounded-3xl border border-[#00D4AA] px-6 text-sm font-extrabold text-[#00D4AA]"
           >
             {isAr ? 'تصفّح الوظائف' : 'BROWSE ROLES'}

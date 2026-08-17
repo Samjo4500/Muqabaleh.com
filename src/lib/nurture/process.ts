@@ -98,6 +98,19 @@ export async function processNurtureQueue(): Promise<{
   let failed = 0;
 
   for (const enrollment of due) {
+    const claimed = await db.nurtureEnrollment.updateMany({
+      where: {
+        id: enrollment.id,
+        status: 'ACTIVE',
+        nextSendAt: { lte: new Date() },
+      },
+      data: { nextSendAt: new Date(Date.now() + 15 * 60 * 1000) },
+    });
+    if (claimed.count !== 1) {
+      skipped++;
+      continue;
+    }
+
     const lead = enrollment.lead;
     const pref = lead.preference;
     const gate = canSendNurture(pref);

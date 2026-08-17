@@ -20,6 +20,8 @@ type Props = {
   role?: string;
   company?: string;
   jobId?: string;
+  roleId?: string;
+  companyId?: string;
   onClose: () => void;
 };
 
@@ -31,6 +33,8 @@ export function Gate2Practice({
   role,
   company,
   jobId,
+  roleId,
+  companyId,
   onClose,
 }: Props) {
   const router = useRouter();
@@ -79,6 +83,8 @@ export function Gate2Practice({
           role,
           company,
           jobId,
+          roleId: roleId || jobId,
+          companyId: companyId || company,
           href,
         }),
       });
@@ -124,6 +130,8 @@ export function Gate2Practice({
           role,
           company,
           jobId,
+          roleId: roleId || jobId,
+          companyId: companyId || company,
           href,
         }),
       });
@@ -141,7 +149,7 @@ export function Gate2Practice({
   };
 
   return (
-    <GateShell isAr={isAr}>
+    <GateShell isAr={isAr} label={copy.headline(role || (isAr ? 'هذه الوظيفة' : 'this role'), company || '')} onClose={onClose}>
       <button
         type="button"
         onClick={onClose}
@@ -164,6 +172,8 @@ export function Gate2Practice({
           void start();
         }}
       >
+        <input type="hidden" name="role_id" value={roleId || jobId || role || ''} />
+        <input type="hidden" name="company_id" value={companyId || company || ''} />
         <GateField label={copy.email} error={errors.email}>
           <input
             className={gateInputClass}

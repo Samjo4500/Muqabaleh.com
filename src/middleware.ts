@@ -91,8 +91,14 @@ function isInterviewerPublicPath(bare: string): boolean {
   );
 }
 
+/** Always-public legal/ops pages — never require a session. */
+const PUBLIC_ALWAYS = ['/preferences', '/unsubscribe'];
+
 function getProtectedRoute(pathname: string): { route: string; roles: string[] } | null {
   const bare = stripLocale(pathname);
+  if (PUBLIC_ALWAYS.some((p) => bare === p || bare.startsWith(`${p}/`))) {
+    return null;
+  }
   // Public partner marketing pages
   if (PARTNER_PUBLIC_PREFIXES.some((p) => bare === p || bare.startsWith(`${p}/`))) {
     return null;

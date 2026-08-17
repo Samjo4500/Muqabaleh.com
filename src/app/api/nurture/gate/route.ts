@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       userId,
       role: normalizeOptional(body.role, 160),
       jobCompany: normalizeOptional(body.company, 120),
-      jobId: normalizeOptional(body.jobId, 80),
+      jobId: normalizeOptional(body.jobId, 80) || normalizeOptional(body.roleId, 80),
       tags: ['Job Intent'],
     });
     await afterGate2(lead.id, lead.timezone);
@@ -101,7 +101,12 @@ export async function POST(req: NextRequest) {
       leadId: lead.id,
       email,
       kind: 'practice_start',
-      metadata: { role: body.role, company: body.company },
+      metadata: {
+        role: body.role,
+        company: body.company,
+        role_id: body.roleId || body.jobId,
+        company_id: body.companyId || body.company,
+      },
     });
     return NextResponse.json({
       ok: true,

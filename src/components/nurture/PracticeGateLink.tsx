@@ -13,9 +13,20 @@ type Props = {
   role?: string;
   company?: string;
   jobId?: string;
+  roleId?: string;
+  companyId?: string;
 };
 
-export function PracticeGateLink({ href, className, children, role, company, jobId }: Props) {
+export function PracticeGateLink({
+  href,
+  className,
+  children,
+  role,
+  company,
+  jobId,
+  roleId,
+  companyId,
+}: Props) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const router = useRouter();
@@ -47,6 +58,8 @@ export function PracticeGateLink({ href, className, children, role, company, job
         role={role}
         company={company}
         jobId={jobId}
+        roleId={roleId || jobId}
+        companyId={companyId}
         onClose={() => setOpen(false)}
       />
     </>

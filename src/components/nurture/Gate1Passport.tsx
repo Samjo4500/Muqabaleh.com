@@ -32,6 +32,7 @@ type Props = {
   role?: string;
   company?: string;
   onUnlocked: () => void;
+  onClose?: () => void;
 };
 
 export function Gate1Passport({
@@ -42,6 +43,7 @@ export function Gate1Passport({
   role,
   company,
   onUnlocked,
+  onClose,
 }: Props) {
   const copy = isAr ? GATE1.ar : GATE1.en;
   const stored = useMemo(() => readNurture(), [open]);
@@ -113,7 +115,7 @@ export function Gate1Passport({
   };
 
   return (
-    <GateShell isAr={isAr}>
+    <GateShell isAr={isAr} label={success ? copy.successHeadline : copy.headline} onClose={onClose}>
       <div className="mb-5 flex justify-center">
         {success ? (
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00D4AA]/15 text-[#00D4AA] shadow-[0_0_24px_rgba(0,212,170,0.35)]">
@@ -177,10 +179,22 @@ export function Gate1Passport({
             </div>
           </div>
           <div className="mt-6 space-y-3">
-            <Link href={localePath('/interview/prep', locale)} className={gateCtaClass}>
+            <Link
+              href={localePath(
+                '/interview/prep?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=practice_again',
+                locale,
+              )}
+              className={gateCtaClass}
+            >
               {copy.practiceAgain}
             </Link>
-            <Link href={localePath('/jobs', locale)} className={gateSecondaryClass}>
+            <Link
+              href={localePath(
+                '/jobs?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=browse_roles',
+                locale,
+              )}
+              className={gateSecondaryClass}
+            >
               {copy.browseRoles}
             </Link>
           </div>
@@ -246,7 +260,13 @@ export function Gate1Passport({
           <button type="submit" disabled={busy} className={gateCtaClass}>
             {busy ? copy.sending : copy.cta}
           </button>
-          <Link href={localePath('/jobs', locale)} className="block text-center text-sm text-white/45 underline-offset-2 hover:text-white/70 hover:underline">
+          <Link
+            href={localePath(
+              '/jobs?utm_source=gate&utm_medium=modal&utm_campaign=gate1&utm_content=skip',
+              locale,
+            )}
+            className="block text-center text-sm text-white/45 underline-offset-2 hover:text-white/70 hover:underline"
+          >
             {copy.skip}
           </Link>
           <p className="text-center text-xs text-white/40">{copy.trust}</p>

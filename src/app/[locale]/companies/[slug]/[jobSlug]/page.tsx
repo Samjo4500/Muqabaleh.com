@@ -222,6 +222,8 @@ export default async function CompanyJobPage({ params }: Props) {
               role={job.title}
               company={job.companyName}
               jobId={job.id}
+              roleId={job.id}
+              companyId={slug}
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
             >
               <Sparkles size={16} />

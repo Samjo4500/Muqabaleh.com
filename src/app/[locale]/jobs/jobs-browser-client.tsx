@@ -488,8 +488,10 @@ function SpotlightRole({
           href={practiceHref}
           role={job.title}
           company={job.company?.name}
-          jobId={job.id}
-          className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
+              jobId={job.id}
+              roleId={job.id}
+              companyId={job.company?.slug}
+              className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
           <Sparkles size={15} />
           {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}

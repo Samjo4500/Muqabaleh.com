@@ -58,18 +58,18 @@ CREATE UNIQUE INDEX "nurture_preferences_token_key" ON "nurture_preferences"("to
 CREATE TABLE "nurture_enrollments" (
     "id" TEXT NOT NULL,
     "leadId" TEXT NOT NULL,
-    "sequence" TEXT NOT NULL,
+    "sequence_type" TEXT NOT NULL,
     "step" INTEGER NOT NULL DEFAULT 1,
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "enrolledAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "lastSentAt" TIMESTAMP(3),
+    "email_sent_at" TIMESTAMP(3),
     "nextSendAt" TIMESTAMP(3),
     "metadata" TEXT NOT NULL DEFAULT '{}',
 
     CONSTRAINT "nurture_enrollments_pkey" PRIMARY KEY ("id")
 );
 
-CREATE UNIQUE INDEX "nurture_enrollments_leadId_sequence_key" ON "nurture_enrollments"("leadId", "sequence");
+CREATE UNIQUE INDEX "nurture_enrollments_leadId_sequence_key" ON "nurture_enrollments"("leadId", "sequence_type");
 CREATE INDEX "nurture_enrollments_status_nextSendAt_idx" ON "nurture_enrollments"("status", "nextSendAt");
 CREATE INDEX "nurture_enrollments_leadId_idx" ON "nurture_enrollments"("leadId");
 

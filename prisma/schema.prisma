@@ -7,8 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled (6543) — app runtime
+  directUrl = env("DIRECT_URL") // direct (5432) — prisma migrate only
 }
 
 // ─── Enums ───
@@ -1490,11 +1491,13 @@ model NurtureEnrollment {
   id         String    @id @default(cuid())
   leadId     String
   lead       NurtureLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  sequence   String
+  /// Sequence key (NEW_SIGNUP | ACTIVE_PRACTICERS | JOB_SEEKERS | JOB_CLICK | APPLY_FOLLOWUP)
+  sequence   String    @map("sequence_type")
   step       Int       @default(1)
   status     String    @default("ACTIVE")
   enrolledAt DateTime  @default(now())
-  lastSentAt DateTime?
+  /// Last successful send — claim-before-send uses this to survive overlapping crons
+  lastSentAt DateTime? @map("email_sent_at")
   nextSendAt DateTime?
   metadata   String    @default("{}")
 

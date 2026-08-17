@@ -98,6 +98,7 @@ export default async function CompanyPage({ params }: Props) {
             <PracticeGateLink
               href={localePath(jeanniePracticePath({ company: company.name }), locale)}
               company={company.name}
+              companyId={company.slug}
               className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
             >
               <Sparkles size={16} />

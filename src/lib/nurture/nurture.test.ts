@@ -18,6 +18,7 @@ import {
 } from './validate';
 import { nurtureHref, nurtureUtm } from './utm';
 import { localeFromPreferred, timezoneForCity } from './constants';
+import { readFileSync } from 'node:fs';
 import { GATE1, GATE2, PREFS_COPY } from './copy';
 import { renderNurtureEmail, type NurtureMerge } from './templates';
 
@@ -120,6 +121,16 @@ describe('nurture copy', () => {
     assert.match(GATE2.ar.badge, /تدريب/);
     assert.match(GATE2.ar.headline('مهندس', 'كريم'), /كريم/);
     assert.match(PREFS_COPY.ar.unsub, /إلغاء/);
+  });
+});
+
+describe('nurture schema', () => {
+  const schema = readFileSync(new URL('../../../prisma/schema.prisma', import.meta.url), 'utf8');
+  it('uniques email and maps sequence_type + email_sent_at', () => {
+    assert.match(schema, /model NurtureLead[\s\S]*email\s+String\s+@unique/);
+    assert.match(schema, /sequence\s+String\s+@map\("sequence_type"\)/);
+    assert.match(schema, /lastSentAt\s+DateTime\?\s+@map\("email_sent_at"\)/);
+    assert.match(schema, /directUrl\s+=\s+env\("DIRECT_URL"\)/);
   });
 });
 

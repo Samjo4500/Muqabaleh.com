@@ -241,6 +241,8 @@ export function InterviewGuideView(props: Props) {
               href={practiceHref}
               role={kind === 'role' ? subjectName : undefined}
               company={kind === 'company' ? subjectName : undefined}
+              roleId={kind === 'role' ? slug : undefined}
+              companyId={kind === 'company' ? slug : undefined}
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
             >
               <Sparkles size={16} />

@@ -169,6 +169,8 @@ export function JobFlipCard({ locale, roleCount }: Props) {
           role={locale === 'ar' ? job.titleAr : job.titleEn}
           company={job.company}
           jobId={job.id}
+          roleId={job.id}
+          companyId={job.company}
           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 text-sm font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]"
         >
           {locale === 'ar' ? 'تدرّب صوتياً مع جيني مجاناً' : 'Voice practice with Jeannie — Free'}

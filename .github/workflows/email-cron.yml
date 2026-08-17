@@ -1,0 +1,39 @@
+# Email + nurture queue tick (backup to Vercel’s daily 05:00 UTC cron).
+# Hobby only allows once-per-day Vercel crons, so this Action is the 5-minute
+# scheduler. Requires GitHub Actions secret CRON_SECRET (same as Vercel).
+
+name: Email queue cron
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: email-queue-cron
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    name: Process email + nurture queue
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: POST /api/email/cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::Missing repo secret CRON_SECRET (must match Vercel CRON_SECRET)"
+            exit 1
+          fi
+          BASE="${SITE_URL:-https://muqabaleh.com}"
+          BASE="${BASE%/}"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            --max-time 90 \
+            "${BASE}/api/email/cron"
+          echo

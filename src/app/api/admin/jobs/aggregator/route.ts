@@ -78,8 +78,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, ...synced });
     }
 
-    const limit = Math.min(Math.max(Number(body.limit) || 40, 1), 80);
-    const summary = await runAtsFetchTick({ limit, syncCatalog: true });
+    const limit = Math.min(Math.max(Number(body.limit) || 16, 1), 80);
+    const summary = await runAtsFetchTick({
+      limit,
+      syncCatalog: true,
+      budgetMs: 45_000,
+    });
     return NextResponse.json({ ok: true, ...summary });
   } catch (err) {
     console.error('POST /api/admin/jobs/aggregator', err);

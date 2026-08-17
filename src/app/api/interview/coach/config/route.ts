@@ -3,22 +3,24 @@ import { getPublicInterviewConfig } from '@/lib/coach/config';
 import { enforceIpRateLimit } from '@/lib/rate-limit';
 
 export async function GET() {
-  const limited = await enforceIpRateLimit('/api/interview/*', 10);
+  // Public catalog — do not share the tight /api/interview/* action bucket.
+  const limited = await enforceIpRateLimit('/api/interview/coach/config', 60);
   if (limited) return limited;
 
   try {
-    return NextResponse.json(getPublicInterviewConfig());
+    const payload = getPublicInterviewConfig();
+    if (!payload.roles?.length) {
+      return NextResponse.json(
+        { error: 'Role catalog unavailable' },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json(payload);
   } catch (err) {
     console.error('[api/coach/config]', err);
     return NextResponse.json(
-      {
-        roles: [],
-        industries: [],
-        seniority: [],
-        languages: [],
-        storageKey: 'mq_coach_prep',
-      },
-      { status: 200 },
+      { error: 'Role catalog unavailable' },
+      { status: 503 },
     );
   }
 }

@@ -10,6 +10,11 @@ import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { FreeInterviewPaywall } from '@/components/paywall/FreeInterviewPaywall';
 import { localePath } from '@/i18n/navigation';
 import type { CoachGender, LabeledOption, PrepSelections } from '@/lib/coach/types';
+import {
+  categoriesWithRoles,
+  pickInitialRole,
+  rolesForPicker,
+} from '@/lib/coach/role-select';
 import { inferCoachRoleIdFromTitle } from '@/lib/jobs/jeannie-practice';
 import { trackGaEvent } from '@/lib/analytics-ga';
 
@@ -93,6 +98,9 @@ export function PrepClient({
           activeSessionId?: string | null;
         };
         if (cancelled) return;
+        if (!cRes.ok || !Array.isArray(c.roles) || c.roles.length === 0) {
+          throw new Error('empty-role-catalog');
+        }
         setCfg(c);
         setCanResume(!!a.canResume && !!a.activeSessionId);
         setActiveSessionId(a.activeSessionId || null);
@@ -114,20 +122,17 @@ export function PrepClient({
           (initialRoleTitle
             ? (c.roles || []).find(
                 (r) =>
-                  r.en.toLowerCase().includes(initialRoleTitle.toLowerCase()) ||
-                  initialRoleTitle.toLowerCase().includes(r.en.toLowerCase()),
+                  r.en.toLowerCase() === initialRoleTitle.toLowerCase() ||
+                  r.id === initialRoleTitle.toLowerCase(),
               )
-            : null);
+            : undefined);
 
-        const firstCat =
-          matched?.category ||
-          c.roleCategories?.[0]?.id ||
-          c.roles[0]?.category ||
-          '';
-        const rolesInCat = (c.roles || []).filter((r) => r.category === firstCat);
-        const firstRole = matched || rolesInCat[0] || c.roles[0];
-        setCategory(firstCat);
-        if (initialRoleTitle) setRoleQuery(initialRoleTitle);
+        const picked = pickInitialRole(c.roles || [], c.roleCategories || [], {
+          matchedRoleId: matched?.id,
+        });
+        const firstRole = picked.role;
+        setCategory(picked.categoryId);
+        setRoleQuery('');
         setForm((prev) => ({
           ...prev,
           role: firstRole?.id || '',
@@ -153,25 +158,23 @@ export function PrepClient({
     [isAr],
   );
 
-  const categories = cfg?.roleCategories?.length
-    ? cfg.roleCategories
-    : Array.from(new Set((cfg?.roles || []).map((r) => r.category))).map((id) => ({
-        id,
-        en: id,
-        ar: id,
-      }));
+  const categories = useMemo(() => {
+    const raw = cfg?.roleCategories?.length
+      ? cfg.roleCategories
+      : Array.from(new Set((cfg?.roles || []).map((r) => r.category))).map((id) => ({
+          id,
+          en: id,
+          ar: id,
+        }));
+    const populated = categoriesWithRoles(raw, cfg?.roles || []);
+    return populated.length ? populated : raw;
+  }, [cfg?.roleCategories, cfg?.roles]);
 
-  const rolesInCategory = useMemo(() => {
-    const list = (cfg?.roles || []).filter((r) => !category || r.category === category);
-    const q = roleQuery.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter(
-      (r) =>
-        r.en.toLowerCase().includes(q) ||
-        r.ar.includes(roleQuery.trim()) ||
-        r.id.includes(q),
-    );
-  }, [cfg?.roles, category, roleQuery]);
+  const picker = useMemo(
+    () => rolesForPicker(cfg?.roles || [], categories, category, roleQuery),
+    [cfg?.roles, categories, category, roleQuery],
+  );
+  const rolesInCategory = picker.roles;
 
   const industriesForRole = useMemo(() => {
     const role = (cfg?.roles || []).find((r) => r.id === form.role);
@@ -181,15 +184,26 @@ export function PrepClient({
     return filtered.length ? filtered : cfg?.industries || [];
   }, [cfg?.roles, cfg?.industries, form.role]);
 
+  useEffect(() => {
+    if (!rolesInCategory.length) return;
+    if (rolesInCategory.some((r) => r.id === form.role)) return;
+    const first = rolesInCategory[0];
+    setForm((f) => ({
+      ...f,
+      role: first.id,
+      industry: first.industries?.[0] || f.industry,
+    }));
+  }, [rolesInCategory, form.role]);
+
   const onCategoryChange = (next: string) => {
     setCategory(next);
     setRoleQuery('');
-    const first = (cfg?.roles || []).find((r) => r.category === next);
+    const first = rolesForPicker(cfg?.roles || [], categories, next, '').roles[0];
     if (first) {
       setForm((f) => ({
         ...f,
         role: first.id,
-        industry: first.industries[0] || f.industry,
+        industry: first.industries?.[0] || f.industry,
       }));
     }
   };
@@ -275,6 +289,16 @@ export function PrepClient({
     );
   }
 
+  if (!cfg) {
+    return (
+      <AtelierFlowShell>
+        <div className="mq-wrap py-16 text-center text-white/80">
+          <p>{error || (isAr ? 'تعذّر تحميل الأدوار.' : 'Could not load roles.')}</p>
+        </div>
+      </AtelierFlowShell>
+    );
+  }
+
   return (
     <AtelierFlowShell>
       <div className="mq-wrap py-10 md:py-14" dir={isAr ? 'rtl' : 'ltr'} lang={isAr ? 'ar' : 'en'}>
@@ -355,6 +379,8 @@ export function PrepClient({
               value={roleQuery}
               onChange={(e) => setRoleQuery(e.target.value)}
               placeholder={isAr ? 'ابحث عن دور…' : 'Search roles…'}
+              autoComplete="off"
+              name="role-search"
             />
             <select
               className="min-h-12 w-full rounded-xl border border-white/12 bg-white/[0.04] px-3 py-2 text-white"
@@ -369,9 +395,17 @@ export function PrepClient({
               ))}
             </select>
             <p className="mt-1 text-xs text-white/40">
-              {isAr
-                ? `${rolesInCategory.length} أدوار في هذه الفئة`
-                : `${rolesInCategory.length} roles in this category`}
+              {!rolesInCategory.length
+                ? isAr
+                  ? 'لا توجد أدوار هنا — اختر فئة أخرى'
+                  : 'No roles here — choose another category'
+                : picker.searchMiss
+                  ? isAr
+                    ? 'لا توجد نتائج لهذا البحث — نعرض كل الأدوار في هذه الفئة'
+                    : 'No roles match that search — showing all roles in this category'
+                  : isAr
+                    ? `${rolesInCategory.length} أدوار في هذه الفئة`
+                    : `${rolesInCategory.length} roles in this category`}
             </p>
           </Field>
 

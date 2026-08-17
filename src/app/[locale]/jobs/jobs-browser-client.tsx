@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -101,10 +101,12 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
   const spotlight =
     filtered.find((j) => j.salaryLabel) ?? filtered[0] ?? null;
   const rest = filtered.filter((j) => j.id !== spotlight?.id);
-
-  useEffect(() => {
+  const filterKey = `${country}|${q}|${salaryOnly ? '1' : '0'}`;
+  const [listKey, setListKey] = useState(filterKey);
+  if (listKey !== filterKey) {
+    setListKey(filterKey);
     setVisibleRest(24);
-  }, [country, q, salaryOnly]);
+  }
 
   if (!initialJobs.length) {
     return (

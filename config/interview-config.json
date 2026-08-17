@@ -36,6 +36,21 @@
       }
     },
     {
+      "id": "staff-software-engineer",
+      "en": "Staff Software Engineer",
+      "ar": "مهندس برمجيات أول",
+      "category": "tech",
+      "industries": ["tech-saas", "finance-banking", "healthcare"],
+      "questionFocus": {
+        "en": "Ask about technical leadership, cross-team architecture, mentoring, and driving ambiguous projects to production.",
+        "ar": "اسأل عن القيادة التقنية، هندسة الأنظمة عبر الفرق، الإرشاد، ودفع المشاريع الغامضة إلى الإنتاج."
+      },
+      "rubric": {
+        "en": "Score architectural judgment, influence without authority, mentoring, and delivery at org scale.",
+        "ar": "قيّم الحكم المعماري، التأثير دون سلطة رسمية، الإرشاد، والتسليم على مستوى المؤسسة."
+      }
+    },
+    {
       "id": "product-manager",
       "en": "Product Manager",
       "ar": "مدير منتج",

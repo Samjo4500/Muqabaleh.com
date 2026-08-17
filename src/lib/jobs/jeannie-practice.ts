@@ -6,8 +6,14 @@
 /** Map a free-text job title onto coach config role ids (kebab-case). */
 export function inferCoachRoleIdFromTitle(title: string): string {
   const t = title.toLowerCase();
+  if (/staff software|staff engineer|principal engineer|principal software/.test(t)) {
+    return 'staff-software-engineer';
+  }
+  if (/civil engineer|structural/.test(t)) return 'civil-engineer';
+  if (/mechanical engineer/.test(t)) return 'mechanical-engineer';
+  if (/electrical engineer/.test(t)) return 'electrical-engineer';
   if (
-    /software|engineer|developer|backend|frontend|full.?stack|devops|sre|mobile|ios|android|qa|platform|staff engineer|principal engineer/.test(
+    /software|engineer|developer|backend|frontend|full.?stack|devops|sre|mobile|ios|android|qa|platform/.test(
       t,
     )
   ) {
@@ -38,10 +44,10 @@ export function inferCoachRoleIdFromTitle(title: string): string {
   if (/doctor|physician|clinical|healthcare|medical/.test(t)) return 'doctor';
   if (/professor|lecturer|faculty/.test(t)) return 'university-professor';
   if (/teacher|educator|instructor/.test(t)) return 'teacher';
-  if (/civil engineer|structural/.test(t)) return 'civil-engineer';
-  if (/mechanical engineer/.test(t)) return 'mechanical-engineer';
-  if (/electrical engineer/.test(t)) return 'electrical-engineer';
   if (/design/.test(t)) return 'ux-designer';
+  if (/business manager|general manager|office manager|branch manager/.test(t)) {
+    return 'operations-manager';
+  }
   // Closest general business role when nothing matches
   return 'project-manager';
 }

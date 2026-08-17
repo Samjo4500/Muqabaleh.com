@@ -11,6 +11,10 @@ import { BrandLogo } from '@/components/landing/crystal/BrandLogo';
 import { localePath } from '@/i18n/navigation';
 import type { ChatMessage, CoachScoreResult, PrepSelections } from '@/lib/coach/types';
 import { trackGaEvent } from '@/lib/analytics-ga';
+import { Gate1Passport } from '@/components/nurture/Gate1Passport';
+import { readNurture } from '@/components/nurture/gate-storage';
+import { GATE1 } from '@/lib/nurture/copy';
+import { scoreBarColor } from '@/components/nurture/GateShell';
 
 type Props = { candidateName: string };
 
@@ -55,6 +59,8 @@ export function CoachSessionClient({ candidateName }: Props) {
   const startedRef = useRef(false);
   const answerInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [voiceFallback, setVoiceFallback] = useState(false);
+  const [passportUnlocked, setPassportUnlocked] = useState(false);
+  const [gate1Open, setGate1Open] = useState(false);
 
   const setHistoryBoth = (next: ChatMessage[]) => {
     historyRef.current = next;
@@ -70,6 +76,10 @@ export function CoachSessionClient({ candidateName }: Props) {
       /* ignore */
     }
   };
+
+  useEffect(() => {
+    if (readNurture().unlocked) setPassportUnlocked(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -429,8 +439,47 @@ export function CoachSessionClient({ candidateName }: Props) {
   }
 
   if (result) {
+    const copy = isAr ? GATE1.ar : GATE1.en;
+    if (!passportUnlocked) {
+      return (
+        <AtelierFlowShell>
+          <div
+            className="mq-wrap flex min-h-[70vh] flex-col items-center justify-center py-16 text-center"
+            dir={isAr ? 'rtl' : 'ltr'}
+          >
+            <BrandLogo size="nav" />
+            <h1 className="mq-display mt-8 text-3xl font-bold text-white md:text-5xl">
+              {copy.completeTitle}
+            </h1>
+            <p className="mt-3 max-w-md text-white/55">{copy.completeSub}</p>
+            <button
+              type="button"
+              onClick={() => setGate1Open(true)}
+              className="mt-8 inline-flex h-12 min-w-[240px] items-center justify-center rounded-3xl bg-[#C9A84C] px-6 text-sm font-extrabold text-black hover:bg-[#D4B86A]"
+            >
+              {copy.seeResults}
+            </button>
+          </div>
+          <Gate1Passport
+            open={gate1Open}
+            isAr={isAr}
+            locale={locale}
+            score={result.score}
+            role={prep?.roleTitle || prep?.role}
+            company={prep?.companyName}
+            onUnlocked={() => setPassportUnlocked(true)}
+          />
+        </AtelierFlowShell>
+      );
+    }
     return (
-      <ResultsView isAr={isAr} locale={locale} candidateName={candidateName} result={result} />
+      <ResultsView
+        isAr={isAr}
+        locale={locale}
+        candidateName={candidateName}
+        result={result}
+        unlocked
+      />
     );
   }
 
@@ -588,17 +637,20 @@ function ResultsView({
   locale,
   candidateName,
   result,
+  unlocked = false,
 }: {
   isAr: boolean;
   locale: string;
   candidateName: string;
   result: ResultState;
+  unlocked?: boolean;
 }) {
   const score = result.score;
   const provisional = score.scoringMode === 'provisional';
   const verifyUrl = result.verificationId
     ? `https://muqabaleh.com/verify/${result.verificationId}`
     : '';
+  const blurScorecard = result.upgradeRequired && !provisional && !unlocked;
 
   return (
     <AtelierFlowShell>
@@ -632,11 +684,11 @@ function ResultsView({
 
         <div
           className={`relative mt-8 max-w-2xl rounded-3xl border border-white/10 bg-white/[0.03] p-6 ${
-            result.upgradeRequired && !provisional ? 'overflow-hidden' : ''
+            blurScorecard ? 'overflow-hidden' : ''
           }`}
         >
-          <div className={result.upgradeRequired && !provisional ? 'blur-sm select-none' : ''}>
-            <p className="text-4xl font-bold text-teal-200">
+          <div className={blurScorecard ? 'blur-sm select-none' : ''}>
+            <p className="text-4xl font-bold text-[#C9A84C]">
               {score.overallScore}{' '}
               <span className="text-xl text-white/70">{score.grade}</span>
             </p>
@@ -649,7 +701,7 @@ function ResultsView({
                   </div>
                   <div className="h-2 rounded-full bg-white/10">
                     <div
-                      className="h-2 rounded-full bg-teal-400"
+                      className={`h-2 rounded-full ${scoreBarColor(c.score)}`}
                       style={{ width: `${Math.max(0, Math.min(100, c.score))}%` }}
                     />
                   </div>
@@ -681,7 +733,7 @@ function ResultsView({
             <p className="mt-6 text-sm text-white/70">{score.recommendedNextSteps}</p>
           </div>
 
-          {result.upgradeRequired && !provisional ? (
+          {blurScorecard ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#05080f]/55 p-6 text-center backdrop-blur-[2px]">
               <p className="max-w-sm text-lg font-bold text-white">
                 {isAr
@@ -693,6 +745,21 @@ function ResultsView({
               </Link>
             </div>
           ) : null}
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href={localePath('/interview/prep', locale)}
+            className="inline-flex h-12 items-center justify-center rounded-3xl bg-[#C9A84C] px-6 text-sm font-extrabold text-black hover:bg-[#D4B86A]"
+          >
+            {isAr ? 'تدرّب مرة أخرى' : 'PRACTICE AGAIN'}
+          </Link>
+          <Link
+            href={localePath('/jobs', locale)}
+            className="inline-flex h-12 items-center justify-center rounded-3xl border border-[#00D4AA] px-6 text-sm font-extrabold text-[#00D4AA]"
+          >
+            {isAr ? 'تصفّح الوظائف' : 'BROWSE ROLES'}
+          </Link>
         </div>
 
         {!result.upgradeRequired && !provisional && result.interviewId ? (

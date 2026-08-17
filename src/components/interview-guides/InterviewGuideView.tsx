@@ -19,6 +19,7 @@ import {
 } from '@/lib/interview-guides/variants';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { SITE_URL } from '@/lib/seo';
+import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
 
 function Stars({ n }: { n: number }) {
   return (
@@ -236,15 +237,17 @@ export function InterviewGuideView(props: Props) {
           <p className="mt-4 text-base leading-relaxed text-white/60 md:text-lg">{hook}</p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
+            <PracticeGateLink
               href={practiceHref}
+              role={kind === 'role' ? subjectName : undefined}
+              company={kind === 'company' ? subjectName : undefined}
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
             >
               <Sparkles size={16} />
               {isAr
                 ? `تدرّب على مقابلة ${subjectName} مع جيني`
                 : `Practice ${subjectName} Interview with Jeannie`}
-            </Link>
+            </PracticeGateLink>
             <Link
               href={localePath(jobsHref, locale)}
               className="mq-btn mq-btn-ghost inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"

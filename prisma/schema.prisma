@@ -181,6 +181,7 @@ model User {
   manualApplications     ManualApplication[]
   jobMockInterviews      JobMockInterview[]
   organizationMembers    OrganizationMember[]
+  nurtureLeads           NurtureLead[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -1425,4 +1426,110 @@ model PipelineStage {
 
   @@unique([organizationId, key])
   @@index([organizationId, sortOrder])
+}
+
+// ─── Gates & email nurture (Brevo) ───
+model NurtureLead {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  fullName           String
+  currentCity        String?
+  company            String?
+  phone              String?
+  yearsExperience    String?
+  preferredLanguage  String    @default("EN")
+  source             String
+  tags               String    @default("[]")
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  lastOverallScore   Int?
+  lastScoreDelta     Int?
+  lastStrengths      String    @default("[]")
+  lastImprovements   String    @default("[]")
+  lastCompetencies   String    @default("{}")
+  lastRole           String?
+  lastCompany        String?
+  lastJobId          String?
+  practiceCount      Int       @default(0)
+  lastPracticedAt    DateTime?
+  lastJobsBrowseAt   DateTime?
+  lastJobClickAt     DateTime?
+  lastApplyClickAt   DateTime?
+  lastEmailOpenAt    DateTime?
+  lastEmailSentAt    DateTime?
+  consecutiveNoOpens Int       @default(0)
+  timezone           String    @default("Asia/Dubai")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  preference  NurturePreference?
+  enrollments NurtureEnrollment[]
+  events      NurtureEvent[]
+  savedRoles  NurtureSavedRole[]
+
+  @@index([userId])
+  @@index([source])
+  @@map("nurture_leads")
+}
+
+model NurturePreference {
+  id             String    @id @default(cuid())
+  leadId         String    @unique
+  lead           NurtureLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  frequency      String    @default("NORMAL")
+  pausedUntil    DateTime?
+  unsubscribedAt DateTime?
+  token          String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("nurture_preferences")
+}
+
+model NurtureEnrollment {
+  id         String    @id @default(cuid())
+  leadId     String
+  lead       NurtureLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  sequence   String
+  step       Int       @default(1)
+  status     String    @default("ACTIVE")
+  enrolledAt DateTime  @default(now())
+  lastSentAt DateTime?
+  nextSendAt DateTime?
+  metadata   String    @default("{}")
+
+  @@unique([leadId, sequence])
+  @@index([status, nextSendAt])
+  @@index([leadId])
+  @@map("nurture_enrollments")
+}
+
+model NurtureEvent {
+  id        String       @id @default(cuid())
+  leadId    String?
+  lead      NurtureLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  email     String?
+  kind      String
+  path      String?
+  metadata  String       @default("{}")
+  createdAt DateTime     @default(now())
+
+  @@index([email, kind, createdAt])
+  @@index([leadId, kind])
+  @@index([kind, createdAt])
+  @@map("nurture_events")
+}
+
+model NurtureSavedRole {
+  id        String      @id @default(cuid())
+  leadId    String
+  lead      NurtureLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  company   String?
+  role      String?
+  jobId     String?
+  href      String?
+  createdAt DateTime    @default(now())
+
+  @@index([leadId, createdAt])
+  @@map("nurture_saved_roles")
 }

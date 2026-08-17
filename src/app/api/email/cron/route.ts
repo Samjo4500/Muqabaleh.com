@@ -4,10 +4,10 @@ import { processNurtureQueue } from '@/lib/nurture/process';
 import { assertCronAuthorized } from '@/lib/cron-auth';
 
 /**
- * Vercel Cron — daily 05:00 UTC (Hobby forbids */5; this project only
- * registers two Vercel crons so deploys pass).
- * GitHub Action `.github/workflows/email-cron.yml` ticks every 5 minutes
- * when repo secret CRON_SECRET is set.
+ * Email + nurture queue.
+ * Vercel Hobby was rejecting this project’s crons at deploy time, so
+ * scheduling lives in GitHub Actions (`.github/workflows/email-cron.yml`)
+ * and requires repo secret CRON_SECRET matching Vercel.
  */
 
 async function runEmailCron() {

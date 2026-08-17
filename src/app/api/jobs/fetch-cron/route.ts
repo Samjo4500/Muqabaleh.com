@@ -8,11 +8,9 @@ export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 /**
- * Vercel Cron — daily 03:00 UTC.
- * Hobby rejects sub-daily expressions at deploy time, and this project has
- * been failing with 5 crons in vercel.json even when all are daily.
- * Only jobs + email stay on Vercel; other schedules run from GitHub Actions.
- * Extra ATS ticks: `.github/workflows/daily-mena-jobs.yml` (needs CRON_SECRET).
+ * ATS aggregator tick. Vercel Hobby was rejecting this project’s crons at
+ * deploy time, so vercel.json no longer registers Cron Jobs. Sweep from
+ * `.github/workflows/daily-mena-jobs.yml` when repo secret CRON_SECRET is set.
  *
  * Query: `?limit=8` (default 8, max 16). `?sync=1` upserts the company catalog.
  */

@@ -1,6 +1,7 @@
-# Daily MENA ATS sweep (backup to Vercel’s daily 03:00 UTC cron).
-# Requires GitHub Actions secret CRON_SECRET — same value as Vercel CRON_SECRET.
-# The daily GitHub run currently fails because that secret is missing.
+# Daily MENA ATS sweep.
+# Vercel Hobby was failing production deploys with vercel.json crons, so this
+# Action is the scheduler. Requires GitHub Actions secret CRON_SECRET — same
+# value as Vercel CRON_SECRET.
 
 name: Daily MENA jobs fetch
 

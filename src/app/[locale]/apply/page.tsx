@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { cn } from '@/lib/utils';
+import { formatBytes, isAllowedVideoMime } from '@/lib/uploads/video';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -160,6 +161,7 @@ function FileUploadZone({
         <div className="flex flex-col items-center gap-2">
           <CheckCircle2 size={32} className="text-teal-300" />
           <p className="text-sm text-[var(--text-primary)]">{file.name}</p>
+          <p className="text-xs text-white/45">{formatBytes(file.size)}</p>
           <button
             onClick={removeFile}
             className="mt-1 text-xs text-red-400 hover:text-red-300 transition-colors"
@@ -210,10 +212,54 @@ export default function ApplyPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [idFile, setIdFile] = useState<File | null>(null);
   const [terms, setTerms] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [videoCap, setVideoCap] = useState<{ provider: 'blob' | 'inline'; maxBytes: number }>({
+    provider: 'inline',
+    maxBytes: 3_500_000,
+  });
 
   /* ── Drag state ── */
   const [videoDragging, setVideoDragging] = useState(false);
   const [idDragging, setIdDragging] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/uploads/video')
+      .then((r) => r.json())
+      .then((c: { provider?: 'blob' | 'inline'; maxBytes?: number }) => {
+        if (c?.maxBytes) {
+          setVideoCap({
+            provider: c.provider === 'blob' ? 'blob' : 'inline',
+            maxBytes: c.maxBytes,
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const takeVideoFile = (f: File | null) => {
+    setUploadError(null);
+    if (!f) {
+      setVideoFile(null);
+      return;
+    }
+    if (!isAllowedVideoMime(f.type, f.name)) {
+      setUploadError(
+        isRTL
+          ? 'صيغة الفيديو غير مدعومة. استخدم MP4 أو MOV أو WebM.'
+          : 'Unsupported video type. Use MP4, MOV, or WebM.',
+      );
+      return;
+    }
+    if (f.size > videoCap.maxBytes) {
+      setUploadError(
+        isRTL
+          ? `الفيديو أكبر من ${formatBytes(videoCap.maxBytes)}. صغّر الملف أو فعّل تخزين الكائنات.`
+          : `Video is larger than ${formatBytes(videoCap.maxBytes)}. Compress it, or enable object storage for 50MB clips.`,
+      );
+      return;
+    }
+    setVideoFile(f);
+  };
 
   /* ── Form validation ── */
   const isValid =
@@ -267,7 +313,10 @@ export default function ApplyPage() {
     e.preventDefault();
     setter(false);
     const file = e.dataTransfer.files?.[0] ?? null;
-    if (file) fileSetter(file);
+    if (file) {
+      if (fileSetter === setVideoFile) takeVideoFile(file);
+      else fileSetter(file);
+    }
   };
 
   const handleSubmit = useCallback(
@@ -288,17 +337,42 @@ export default function ApplyPage() {
         formData.append('industries', JSON.stringify(industries));
         formData.append('languages', JSON.stringify(languages));
         formData.append('priceTier', priceTier);
-        if (videoFile) formData.append('videoIntro', videoFile);
+        if (videoFile) {
+          if (videoCap.provider === 'blob') {
+            const { upload } = await import('@vercel/blob/client');
+            const blob = await upload(videoFile.name, videoFile, {
+              access: 'public',
+              handleUploadUrl: '/api/uploads/video',
+            });
+            formData.append('videoIntroUrl', blob.url);
+          } else {
+            formData.append('videoIntro', videoFile);
+          }
+        }
         if (idFile) formData.append('idVerification', idFile);
 
-        await fetch('/api/interviewers/apply', {
+        const res = await fetch('/api/interviewers/apply', {
           method: 'POST',
           body: formData,
         });
+        const data = (await res.json().catch(() => ({}))) as {
+          success?: boolean;
+          error?: { ar?: string; en?: string } | string;
+        };
+        if (!res.ok || data.success === false) {
+          const err =
+            typeof data.error === 'string'
+              ? data.error
+              : isRTL
+                ? data.error?.ar
+                : data.error?.en;
+          setUploadError(err || (isRTL ? 'تعذّر إرسال الطلب.' : 'Could not submit application.'));
+          return;
+        }
 
         setSubmitted(true);
       } catch {
-        /* silent fail — future: show toast */
+        setUploadError(isRTL ? 'تعذّر رفع الفيديو. حاول مرة أخرى.' : 'Could not upload the video. Try again.');
       } finally {
         setLoading(false);
       }
@@ -318,6 +392,8 @@ export default function ApplyPage() {
       priceTier,
       videoFile,
       idFile,
+      videoCap,
+      isRTL,
     ]
   );
 
@@ -621,10 +697,14 @@ export default function ApplyPage() {
               </Label>
               <FileUploadZone
                 file={videoFile}
-                onFileChange={setVideoFile}
-                accept="video/mp4,video/mov,video/webm"
+                onFileChange={takeVideoFile}
+                accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
                 helpText={t('videoIntroHelp')}
-                formatsText={t('videoIntroFormats')}
+                formatsText={
+                  isRTL
+                    ? `MP4 أو MOV أو WebM — حتى ${formatBytes(videoCap.maxBytes)}`
+                    : `MP4, MOV, WebM — up to ${formatBytes(videoCap.maxBytes)}`
+                }
                 icon={FileVideo}
                 isDragging={videoDragging}
                 onDragOver={(e) => handleDragOver(e, setVideoDragging)}
@@ -667,6 +747,12 @@ export default function ApplyPage() {
                 {t('terms')}
               </Label>
             </motion.div>
+
+            {uploadError ? (
+              <p className="text-sm text-rose-300" role="alert">
+                {uploadError}
+              </p>
+            ) : null}
 
             {/* ── Submit ── */}
             <motion.div variants={itemVariants}>

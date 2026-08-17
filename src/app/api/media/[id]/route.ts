@@ -17,7 +17,7 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  if (asset.kind === 'PHOTO') {
+  if (asset.kind === 'PHOTO' || asset.kind === 'VIDEO') {
     // Allow public read for photos attached to visible talent or user image
     return new NextResponse(Buffer.from(asset.data), {
       headers: {

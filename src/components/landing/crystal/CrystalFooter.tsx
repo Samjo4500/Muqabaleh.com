@@ -64,7 +64,7 @@ export function CrystalFooter() {
           </div>
           <T bi={C.footer.tagline} className="mb-5 text-sm leading-relaxed text-white/55" />
           <a
-            href="mailto:hello@muqabaleh.com"
+            href="mailto:info@muqabaleh.com"
             className="mb-4 inline-flex items-center gap-2 text-sm text-white/55 transition-colors hover:text-teal-300"
           >
             <Mail size={14} strokeWidth={1.75} />

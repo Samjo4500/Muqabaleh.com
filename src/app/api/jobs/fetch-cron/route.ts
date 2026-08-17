@@ -9,9 +9,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Vercel Cron — daily 03:00 UTC.
- * Hobby rejects any cron more frequent than once per day at deploy time
- * (including leftover `*/5` email crons in vercel.json).
- * GitHub Action can still sweep extra ticks when repo secret CRON_SECRET is set.
+ * Hobby rejects sub-daily expressions at deploy time, and this project has
+ * been failing with 5 crons in vercel.json even when all are daily.
+ * Only jobs + email stay on Vercel; other schedules run from GitHub Actions.
+ * Extra ATS ticks: `.github/workflows/daily-mena-jobs.yml` (needs CRON_SECRET).
  *
  * Query: `?limit=8` (default 8, max 16). `?sync=1` upserts the company catalog.
  */

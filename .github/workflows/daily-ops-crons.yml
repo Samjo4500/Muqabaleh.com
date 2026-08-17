@@ -1,0 +1,71 @@
+# Daily ops that used to live in vercel.json.
+# Hobby re-validates crons on every vercel.json change and has been rejecting
+# this project at 5 jobs (even once-per-day). Vercel keeps only jobs + email.
+# Requires GitHub Actions secret CRON_SECRET — same value as Vercel CRON_SECRET.
+
+name: Daily ops crons
+
+on:
+  schedule:
+    - cron: '10 2 * * *' # backup
+    - cron: '10 4 * * *' # sitemaps
+    - cron: '10 6 * * *' # admin daily summary
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Which endpoint to hit'
+        required: true
+        type: choice
+        options:
+          - backup
+          - sitemaps
+          - daily-summary
+
+concurrency:
+  group: daily-ops-crons-${{ github.event.schedule || github.event.inputs.job }}
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    name: Run scheduled ops endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: POST selected cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          SCHEDULE: ${{ github.event.schedule }}
+          MANUAL_JOB: ${{ github.event.inputs.job }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::Missing repo secret CRON_SECRET (must match Vercel CRON_SECRET)"
+            exit 1
+          fi
+
+          path=""
+          case "${MANUAL_JOB:-}" in
+            backup) path="/api/backup/cron" ;;
+            sitemaps) path="/api/generate-sitemaps" ;;
+            daily-summary) path="/api/email/daily-summary" ;;
+          esac
+          case "${SCHEDULE:-}" in
+            '10 2 * * *') path="/api/backup/cron" ;;
+            '10 4 * * *') path="/api/generate-sitemaps" ;;
+            '10 6 * * *') path="/api/email/daily-summary" ;;
+          esac
+          if [ -z "$path" ]; then
+            echo "::error::Could not resolve cron path"
+            exit 1
+          fi
+
+          BASE="${SITE_URL:-https://muqabaleh.com}"
+          BASE="${BASE%/}"
+          echo "POST ${BASE}${path}"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            --max-time 90 \
+            "${BASE}${path}"
+          echo

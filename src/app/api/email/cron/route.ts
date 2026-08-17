@@ -4,7 +4,8 @@ import { processNurtureQueue } from '@/lib/nurture/process';
 import { assertCronAuthorized } from '@/lib/cron-auth';
 
 /**
- * Vercel Cron — daily 05:00 UTC (Hobby forbids */5).
+ * Vercel Cron — daily 05:00 UTC (Hobby forbids */5; this project only
+ * registers two Vercel crons so deploys pass).
  * GitHub Action `.github/workflows/email-cron.yml` ticks every 5 minutes
  * when repo secret CRON_SECRET is set.
  */

@@ -179,8 +179,8 @@ export default async function CompanyJobPage({ params }: Props) {
           ) : (
             <p className="mt-3 text-sm text-white/40">
               {isAr
-                ? 'الراتب غير معلن هنا — راجعه عند التقديم لدى الشركة.'
-                : 'Pay not published here — check the company site when you apply.'}
+                ? 'يظهر الراتب عندما ينشره صاحب العمل. لا نقدّر الرواتب ولا نخترعها.'
+                : 'Salary shown when employers publish it. We do not estimate or invent pay.'}
             </p>
           )}
 
@@ -218,7 +218,12 @@ export default async function CompanyJobPage({ params }: Props) {
             </a>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <p className="mt-8 text-sm font-medium text-teal-100/90">
+            {isAr
+              ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+              : 'Try your first interview question for this role.'}
+          </p>
+          <div className="mt-4 flex flex-col gap-3">
             <PracticeGateLink
               href={practiceHref}
               role={job.title}
@@ -226,17 +231,17 @@ export default async function CompanyJobPage({ params }: Props) {
               jobId={job.id}
               roleId={job.id}
               companyId={slug}
-              className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
+              className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] w-full items-center justify-center gap-2 text-sm font-bold sm:w-auto sm:min-w-[300px]"
             >
               <Sparkles size={16} />
-              {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
+              {isAr ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
             </PracticeGateLink>
             <ApplyTrackLink
               href={job.applyUrl}
               role={job.title}
               company={job.companyName}
               jobId={job.id}
-              className="mq-btn mq-btn-ghost inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
+              className="mq-btn mq-btn-ghost inline-flex min-h-[48px] w-full items-center justify-center gap-2 text-sm font-bold sm:w-auto"
             >
               <ExternalLink size={16} />
               {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}

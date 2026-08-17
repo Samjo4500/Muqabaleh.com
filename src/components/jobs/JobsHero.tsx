@@ -173,23 +173,28 @@ export function JobsHero({ roleCount }: Props) {
             >
               {isAr ? subAr : subEn}
             </motion.p>
+            <motion.p variants={fadeUp} className="mt-3 text-sm text-teal-100/85">
+              {isAr
+                ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+                : 'Try your first interview question for this role.'}
+            </motion.p>
 
             <motion.div
               variants={fadeUp}
               className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
             >
+              <Link
+                href={localePath(jeanniePracticePath(), locale)}
+                className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
+              >
+                {isAr ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
+              </Link>
               <a
                 href="#roles"
-                className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
+                className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
               >
                 {isAr ? 'استعرض الوظائف' : 'Browse roles'}
               </a>
-              <Link
-                href={localePath(jeanniePracticePath(), locale)}
-                className="mq-btn mq-btn-on-dark-ghost inline-flex min-h-[52px] items-center justify-center px-7 text-sm font-bold"
-              >
-                {isAr ? 'تدرّب صوتياً مع جيني' : 'Voice practice with Jeannie'}
-              </Link>
             </motion.div>
           </motion.div>
 

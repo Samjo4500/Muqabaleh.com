@@ -213,17 +213,129 @@ function RequestDemoHeader() {
 export function RequestDemoClient() {
   return (
     <AtelierShell showHeroLogo>
-      <div className="mq-wrap mx-auto max-w-xl py-10 md:py-16">
+      <div className="mq-wrap mx-auto max-w-3xl py-10 md:py-16">
         <Suspense
           fallback={
             <div className="text-center text-white/50">…</div>
           }
         >
           <RequestDemoHeader />
+          <RequestDemoPitch />
           <RequestDemoForm />
+          <RequestDemoFollowup />
         </Suspense>
       </div>
     </AtelierShell>
+  );
+}
+
+function RequestDemoPitch() {
+  const locale = useLocale();
+  const isAr = locale === 'ar';
+
+  const audiences = isAr
+    ? [
+        { title: 'فرق التوظيف', body: 'فرز منظّم للجاهزية قبل الجولات الطويلة.' },
+        { title: 'فرق المواهب', body: 'إشارة موحّدة بعد تدرّب المرشّح مع جيني.' },
+        { title: 'وكالات التوظيف', body: 'جهّز المرشّحين ثم شارك النتائج بصلاحيات محددة.' },
+        { title: 'الجامعات ومراكز المهنة', body: 'درّب أفواجاً بالعربية والإنجليزية بهوية مؤسستك.' },
+      ]
+    : [
+        { title: 'Hiring teams', body: 'Structured readiness screening before long interview loops.' },
+        { title: 'Talent teams', body: 'A consistent signal after candidates practise with Jeannie.' },
+        { title: 'Recruitment agencies', body: 'Prep candidates, then share permission-scoped outcomes.' },
+        { title: 'Universities & career teams', body: 'Train a cohort in Arabic and English under your brand.' },
+      ];
+
+  const steps = isAr
+    ? [
+        { n: '01', title: 'جهّز الدور', body: 'حدد عائلة الدور ومعايير الجاهزية التي تهم فريقك.' },
+        { n: '02', title: 'ادعُ المرشّحين', body: 'أرسل رابط التدرّب — بالعربية أو الإنجليزية.' },
+        { n: '03', title: 'راجع النتائج بصلاحيات محددة', body: 'اقرأ إشارات الجاهزية التي صُرّح لك بها — دون بيانات خاصة غير مأذونة.' },
+      ]
+    : [
+        { n: '01', title: 'Set up the role', body: 'Define the role family and the readiness criteria that matter to your team.' },
+        { n: '02', title: 'Invite candidates', body: 'Send a practice link — Arabic or English.' },
+        { n: '03', title: 'Review permission-scoped outcomes', body: 'See the readiness signal you are allowed to see — not private data without consent.' },
+      ];
+
+  return (
+    <div className="mt-10 space-y-8">
+      <section>
+        <h2 className="mq-display text-lg font-bold text-white md:text-xl">
+          {isAr ? 'لمن مقابلة؟' : 'Who Muqabaleh is for'}
+        </h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {audiences.map((item) => (
+            <li
+              key={item.title}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4"
+            >
+              <p className="text-sm font-bold text-white">{item.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-white/55">{item.body}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="mq-display text-lg font-bold text-white md:text-xl">
+          {isAr ? 'ثلاث خطوات بسيطة' : 'A simple three-step flow'}
+        </h2>
+        <ol className="mt-4 grid gap-3 md:grid-cols-3">
+          {steps.map((step) => (
+            <li
+              key={step.n}
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4"
+            >
+              <p className="text-xs font-bold tracking-[0.16em] text-teal-300/80">{step.n}</p>
+              <p className="mt-2 text-sm font-bold text-white">{step.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-white/55">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="rounded-2xl border border-teal-300/20 bg-teal-400/[0.06] px-5 py-5">
+        <p className="text-sm font-bold text-white">
+          {isAr ? 'خصوصية واستخدام مسؤول' : 'Privacy and responsible use'}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-white/65">
+          {isAr
+            ? 'مقابلة تدعم مسارات جاهزية وفرز منظّمة. ينبغي استخدامها مع قرار بشري مسؤول، وليست بديلاً عن عملية التوظيف القانونية. الجواز خاص افتراضياً.'
+            : 'Muqabaleh supports structured readiness and screening workflows. Use it with responsible human decision-making — it does not replace a lawful hiring process. Passports stay private by default.'}
+        </p>
+        <Link
+          href={localePath('/how-scores-work', locale)}
+          className="mt-3 inline-flex text-sm font-semibold text-teal-300 hover:text-teal-200"
+        >
+          {isAr ? 'كيف تعمل درجات مقابلة' : 'How Muqabaleh scores work'}
+        </Link>
+      </section>
+
+      <section>
+        <h2 className="mq-display text-lg font-bold text-white md:text-xl">
+          {isAr ? 'تجربة محدودة وواضحة' : 'Start with a focused pilot'}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-white/60">
+          {isAr
+            ? 'فريق أو فوج واحد. عائلة دور واحدة. نتيجة قابلة للقياس — مثل وقت الفرز أو جاهزية المرشّحين قبل المقابلة البشرية.'
+            : 'One team or cohort. One role family. A measurable outcome — such as screening time or candidate readiness before the human interview.'}
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function RequestDemoFollowup() {
+  const locale = useLocale();
+  const isAr = locale === 'ar';
+  return (
+    <p className="mt-5 text-center text-sm text-white/50">
+      {isAr
+        ? 'نرد خلال يوم عمل واحد. بلا رسائل مزعجة. بلا التزام.'
+        : 'We respond within one business day. No spam. No obligation.'}
+    </p>
   );
 }
 

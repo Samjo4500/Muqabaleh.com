@@ -171,11 +171,16 @@ export function JobFlipCard({ locale, roleCount }: Props) {
           jobId={job.id}
           roleId={job.id}
           companyId={job.company}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 text-sm font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]"
+          className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 text-sm font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]"
         >
-          {locale === 'ar' ? 'تدرّب صوتياً مع جيني مجاناً' : 'Voice practice with Jeannie — Free'}
+          {locale === 'ar' ? 'تدرّب على هذا الدور مع جيني' : 'Practice this role with Jeannie'}
           <span aria-hidden>{locale === 'ar' ? '←' : '→'}</span>
         </PracticeGateLink>
+        <p className="text-sm text-white/55">
+          {locale === 'ar'
+            ? 'جرّب أول سؤال مقابلة لهذا الدور.'
+            : 'Try your first interview question for this role.'}
+        </p>
         <p className="text-[11px] text-white/40">
           {locale === 'ar'
             ? jobsLabel

@@ -37,28 +37,57 @@ export const C = {
     ctaInterview: { en: 'Start free practice', ar: 'ابدأ تدريباً مجانياً' },
     ctaJeannie: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
     ctaHr: { en: "I'm hiring", ar: 'أنا أوظّف' },
+    reassure: {
+      en: 'Arabic + English · Private by default · You always apply yourself',
+      ar: 'العربية والإنجليزية · خاص افتراضياً · أنت من يقدّم دائماً',
+    },
+    noCard: { en: 'No card required', ar: 'لا حاجة لبطاقة' },
+    startMinutes: { en: 'Start in minutes', ar: 'ابدأ خلال دقائق' },
+    forEmployers: { en: 'Hiring teams', ar: 'فرق التوظيف' },
+    forPartners: { en: 'Partners', ar: 'الشركاء' },
+    journey: [
+      { en: 'Choose a role or company', ar: 'اختر دوراً أو شركة' },
+      { en: 'Practise with Jeannie in Arabic or English', ar: 'تدرّب مع جيني بالعربية أو الإنجليزية' },
+      { en: 'Receive structured feedback', ar: 'احصل على ملاحظات منظّمة' },
+      { en: 'Improve and decide whether to share your Passport', ar: 'حسّن نتيجتك وقرر إن كنت ستشارك جوازك' },
+      { en: 'Apply yourself on the employer’s site', ar: 'قدّم بنفسك على موقع صاحب العمل' },
+    ],
   },
   path: {
-    eyebrow: { en: 'Simple path', ar: 'مسار بسيط' },
-    title: { en: 'Three steps. Jeannie in the middle.', ar: 'ثلاث خطوات. جيني في الوسط.' },
+    eyebrow: { en: 'Your journey', ar: 'مسارك' },
+    title: { en: 'Five steps from practice to applying yourself.', ar: 'خمس خطوات من التدريب إلى التقديم بنفسك.' },
     sub: {
-      en: 'No auto-apply. No spam. Practice, verify, then you apply.',
-      ar: 'بلا تقديم تلقائي. بلا عشوائية. تدرّب، وثّق، ثم قدّم أنت.',
+      en: 'No auto-apply. No spam. Practice, get feedback, then you apply.',
+      ar: 'بلا تقديم تلقائي. بلا رسائل عشوائية. تدرّب، احصل على ملاحظات، ثم قدّم أنت.',
     },
     ctaJobs: { en: 'Browse jobs', ar: 'تصفّح الوظائف' },
     steps: [
       {
-        title: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
+        title: { en: 'Choose a role or company', ar: 'اختر دوراً أو شركة' },
         body: {
-          en: 'Company-specific or general mocks in Arabic or English. Dialects welcome.',
-          ar: 'مقابلات خاصة بشركات أو عامة بالعربية أو الإنجليزية. اللهجات مرحّب بها.',
+          en: 'Pick a live job, a company guide, or a general role — then start with Jeannie.',
+          ar: 'اختر وظيفة حقيقية أو دليل شركة أو دوراً عاماً — ثم ابدأ مع جيني.',
         },
       },
       {
-        title: { en: 'Get your passport', ar: 'احصل على جوازك' },
+        title: { en: 'Practise with Jeannie', ar: 'تدرّب مع جيني' },
         body: {
-          en: 'A verified score you can share — private until you decide to publish.',
-          ar: 'درجة موثّقة يمكنك مشاركتها — خاصة حتى تقرر النشر.',
+          en: 'Arabic or English. Dialects and accents welcome — accent is not a penalty.',
+          ar: 'بالعربية أو الإنجليزية. اللهجات والنبرات مرحّب بها — اللهجة ليست عقوبة.',
+        },
+      },
+      {
+        title: { en: 'Get structured feedback', ar: 'احصل على ملاحظات منظّمة' },
+        body: {
+          en: 'A clear scorecard after practice — so you know what to improve next.',
+          ar: 'بطاقة تقييم واضحة بعد التدريب — لتعرف ماذا تحسّن بعد ذلك.',
+        },
+      },
+      {
+        title: { en: 'Improve, then share', ar: 'حسّن ثم شارك' },
+        body: {
+          en: 'Your Passport stays private until you choose to publish or share it.',
+          ar: 'جوازك يبقى خاصاً حتى تختار نشره أو مشاركته.',
         },
       },
       {
@@ -74,14 +103,16 @@ export const C = {
     eyebrow: { en: 'Your passport', ar: 'جوازك' },
     title: { en: 'Proof employers can trust', ar: 'دليل يثق به أصحاب العمل' },
     sub: {
-      en: 'Not a gimmick score — a clear, verifiable readiness credential from your Jeannie interview.',
-      ar: 'ليست درجة شكلية — اعتماد جاهزية واضح وقابل للتحقق من مقابلتك مع جيني.',
+      en: 'Not a gimmick score — a candidate-controlled interview-readiness record from your Jeannie practice.',
+      ar: 'ليست درجة شكلية — سجل جاهزية للمقابلة تحت سيطرتك، مبني على تدرّبك مع جيني.',
     },
     cta: { en: 'Earn your passport free', ar: 'احصل على جوازك مجاناً' },
+    scoresLink: { en: 'How Muqabaleh scores work', ar: 'كيف تعمل درجات مقابلة' },
     bullets: [
-      { en: '0–100 interview-verified score', ar: 'درجة ٠–١٠٠ موثّقة بالمقابلة' },
+      { en: 'Private by default — you choose whether to publish or share', ar: 'خاص افتراضياً — أنت تختار النشر أو المشاركة' },
+      { en: '0–100 interview-readiness score from the practice methodology', ar: 'درجة جاهزية ٠–١٠٠ وفق منهجية التدريب' },
       { en: 'Clarity, confidence, structure, bilingual signal', ar: 'وضوح، ثقة، هيكل، إشارة ثنائية اللغة' },
-      { en: 'Public verify link + QR when you choose to share', ar: 'رابط تحقق عام + QR عندما تختار المشاركة' },
+      { en: 'Public verify link + QR only when you choose to share', ar: 'رابط تحقق عام + QR فقط عندما تختار المشاركة' },
     ],
   },
   trust: {
@@ -546,8 +577,18 @@ export const C = {
           ar: 'ما هو جواز مقابلة؟',
         },
         a: {
-          en: 'A shareable, verifiable hire-ready profile built from your AI interview score — proof employers can trust.',
-          ar: 'ملف جاهزية قابل للمشاركة والتحقق مبني على نتيجة مقابلتك الذكية — دليل يثق به أصحاب العمل.',
+          en: 'A candidate-controlled interview-readiness record built from your Jeannie practice. It stays private until you choose to publish or share it — not a hiring guarantee.',
+          ar: 'سجل جاهزية للمقابلة تحت سيطرتك، مبني على تدرّبك مع جيني. يبقى خاصاً حتى تختار نشره أو مشاركته — وليس ضمان توظيف.',
+        },
+      },
+      {
+        q: {
+          en: 'How do Muqabaleh scores work?',
+          ar: 'كيف تعمل درجات مقابلة؟',
+        },
+        a: {
+          en: 'The score reflects the interview-practice methodology and score version from that session. It is not a complete measure of competence or an automatic hiring decision. Read How Muqabaleh Scores Work for the full explanation.',
+          ar: 'تعكس الدرجة منهجية التدرّب على المقابلة وإصدار التقييم في تلك الجلسة. ليست مقياساً كاملاً للكفاءة ولا قرار توظيف تلقائي. اقرأ «كيف تعمل درجات مقابلة» للشرح الكامل.',
         },
       },
       {
@@ -646,6 +687,7 @@ export const C = {
     faq: { en: 'FAQ', ar: 'الأسئلة الشائعة' },
     practice: { en: 'Practice with Jeannie', ar: 'تدرّب مع جيني' },
     requestDemo: { en: 'Request a demo', ar: 'اطلب عرضاً' },
+    howScores: { en: 'How scores work', ar: 'كيف تعمل الدرجات' },
     verify: { en: 'Verify a passport', ar: 'تحقق من جواز' },
     privacy: { en: 'Privacy', ar: 'الخصوصية' },
     terms: { en: 'Terms', ar: 'الشروط' },

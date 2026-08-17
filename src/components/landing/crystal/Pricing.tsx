@@ -487,6 +487,12 @@ export function CrystalPricing() {
           className="mx-auto mt-10 max-w-3xl text-center"
         >
           <T as="p" bi={C.pricing.companyNote} className="mb-4 text-sm text-white/55 md:text-base" />
+          <Link
+            href={localePath('/how-scores-work', locale)}
+            className="mb-5 inline-flex text-sm font-semibold text-teal-300 hover:text-teal-200"
+          >
+            <BiInline bi={C.passport.scoresLink} />
+          </Link>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href={localePath('/request-demo?from=landing-pricing', locale)}

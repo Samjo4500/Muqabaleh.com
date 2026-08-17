@@ -252,6 +252,43 @@ export default function PartnersLandingPage() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--mq-paper)] to-transparent" />
         </section>
 
+        <section className="mq-section !pt-8 md:!pt-12">
+          <div className="mq-wrap">
+            <div className="mb-8 max-w-2xl">
+              <p className="mq-kicker mb-3 !text-amber-200/85">{t('audienceKicker')}</p>
+              <h2 className="mq-display text-3xl font-bold text-white md:text-5xl">
+                {t('audienceTitle')}
+              </h2>
+            </div>
+            <ul className="grid gap-4 md:grid-cols-3">
+              <li className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-5 py-6">
+                <h3 className="mq-display text-lg font-bold text-white md:text-xl">
+                  {t('audAcademyTitle')}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">{t('audAcademyBody')}</p>
+              </li>
+              <li className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-5 py-6">
+                <h3 className="mq-display text-lg font-bold text-white md:text-xl">
+                  {t('audAgencyTitle')}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">{t('audAgencyBody')}</p>
+              </li>
+              <li className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-5 py-6">
+                <h3 className="mq-display text-lg font-bold text-white md:text-xl">
+                  {t('audPlatformTitle')}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">{t('audPlatformBody')}</p>
+              </li>
+            </ul>
+            <Link
+              href={localePath('/how-scores-work', locale)}
+              className="mt-6 inline-flex text-sm font-semibold text-amber-200/90 hover:text-amber-100"
+            >
+              {t('scoresLink')}
+            </Link>
+          </div>
+        </section>
+
         {/* Brand studio stage */}
         <section className="mq-section !pt-6 md:!pt-10">
           <div className="mq-wrap">

@@ -261,6 +261,12 @@ export default function BusinessContent() {
                   ? 'جيني تُجري المقابلات. الدرجات والجوازات تصل إلى مكتبك في ثوانٍ.'
                   : 'Jeannie runs the interviews. Scores and passports land on your desk in seconds.'}
               </p>
+              <Link
+                href={localePath('/how-scores-work', locale)}
+                className="mt-3 inline-flex text-sm font-semibold text-teal-300 hover:text-teal-200"
+              >
+                {isAr ? 'كيف تعمل درجات مقابلة' : 'How Muqabaleh scores work'}
+              </Link>
             </motion.div>
             <HiringCommandCenter />
 

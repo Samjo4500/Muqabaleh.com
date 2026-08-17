@@ -36,8 +36,8 @@ export async function PopularGuides({ locale }: { locale: string }) {
             </h2>
             <p className="mt-2 max-w-xl text-sm text-white/55 md:text-base">
               {isAr
-                ? 'تحضّر قبل التقديم — أسئلة ونصائح لأشهر الشركات والأدوار.'
-                : 'Prepare before you apply — questions and tips for top companies and roles.'}
+                ? `${companies.length} دليل شركة و${roles.length} دليل دور — تحضّر قبل التقديم.`
+                : `${companies.length} company guides and ${roles.length} role guides — prepare before you apply.`}
             </p>
           </div>
           <Link

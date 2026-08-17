@@ -28,6 +28,7 @@ export function CrystalFooter() {
       { bi: C.nav.jeannie, href: '/#jeannie' },
       { bi: C.footer.practice, href: '/interview/prequal' },
       { bi: C.nav.pricing, href: '/#pricing' },
+      { bi: C.footer.howScores, href: '/how-scores-work' },
       { bi: C.footer.verify, href: '/verify' },
     ],
     company: [

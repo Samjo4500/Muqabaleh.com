@@ -70,6 +70,8 @@ const nextConfig: NextConfig = {
       { source: '/en/register', destination: '/en/auth/register', permanent: false },
       { source: '/help', destination: '/support', permanent: false },
       { source: '/en/help', destination: '/en/support', permanent: false },
+      { source: '/dashboard', destination: '/app', permanent: false },
+      { source: '/en/dashboard', destination: '/en/app', permanent: false },
       {
         source: '/contact-sales',
         destination: '/employers#enterprise-form',

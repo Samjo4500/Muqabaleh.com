@@ -49,7 +49,7 @@ export function passportEmailHtml(opts: {
       value: `${opts.overallScore}/100`,
       sublabel: opts.grade,
     },
-    ctaHref: localePath('/dashboard', locale),
+    ctaHref: localePath('/app', locale),
     ctaLabel: ar ? 'عرض لوحة التحكم' : 'View dashboard',
     footnote: ar
       ? 'إذا لم يظهر المرفق، افتح لوحة التحكم وحمّل الجواز من هناك.'

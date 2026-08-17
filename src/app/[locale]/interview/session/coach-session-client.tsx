@@ -675,6 +675,16 @@ function ResultsView({
         <p className="mt-2 text-white/60">
           {candidateName} · {score.overallScore}/100 · {score.grade}
         </p>
+        {(() => {
+          const emailedTo = readNurture().email;
+          if (!emailedTo) return null;
+          const copy = isAr ? GATE1.ar : GATE1.en;
+          return (
+            <p className="mt-3 max-w-xl text-sm text-teal-200/90">
+              {copy.emailedNote} {emailedTo}
+            </p>
+          );
+        })()}
         {provisional ? (
           <p className="mt-3 max-w-xl text-sm text-amber-200/90">
             {isAr
@@ -694,7 +704,7 @@ function ResultsView({
               <span className="text-xl text-white/70">{score.grade}</span>
             </p>
             <ul className="mt-6 space-y-3">
-              {score.competencyBreakdown.map((c) => (
+              {(score.competencyBreakdown || []).map((c) => (
                 <li key={c.name}>
                   <div className="mb-1 flex justify-between text-sm text-white/70">
                     <span>{c.name}</span>
@@ -715,7 +725,7 @@ function ResultsView({
                   {isAr ? 'نقاط القوة' : 'Strengths'}
                 </p>
                 <ul className="mt-2 space-y-1 text-sm text-white/80">
-                  {score.strengths.slice(0, 3).map((s, i) => (
+                  {(score.strengths || []).slice(0, 3).map((s, i) => (
                     <li key={i}>• {s}</li>
                   ))}
                 </ul>
@@ -725,7 +735,7 @@ function ResultsView({
                   {isAr ? 'للتحسين' : 'Improvements'}
                 </p>
                 <ul className="mt-2 space-y-1 text-sm text-white/80">
-                  {score.improvements.slice(0, 3).map((s, i) => (
+                  {(score.improvements || []).slice(0, 3).map((s, i) => (
                     <li key={i}>• {s}</li>
                   ))}
                 </ul>
@@ -757,6 +767,12 @@ function ResultsView({
             className="inline-flex h-12 items-center justify-center rounded-3xl bg-[#C9A84C] px-6 text-sm font-extrabold text-black hover:bg-[#D4B86A]"
           >
             {isAr ? 'تدرّب مرة أخرى' : 'PRACTICE AGAIN'}
+          </Link>
+          <Link
+            href={localePath('/app', locale)}
+            className="inline-flex h-12 items-center justify-center rounded-3xl border border-white/20 px-6 text-sm font-extrabold text-white/80"
+          >
+            {isAr ? GATE1.ar.viewDashboard : GATE1.en.viewDashboard}
           </Link>
           <Link
             href={localePath(

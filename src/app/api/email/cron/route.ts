@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processEmailQueue } from '@/lib/email';
+import { processNurtureQueue } from '@/lib/nurture/process';
 import { assertCronAuthorized } from '@/lib/cron-auth';
 
 async function runEmailCron() {
   const result = await processEmailQueue();
+  const nurture = await processNurtureQueue();
   return {
     processed: true,
     sent: result.sent,
     failed: result.failed,
+    nurture,
   };
 }
 

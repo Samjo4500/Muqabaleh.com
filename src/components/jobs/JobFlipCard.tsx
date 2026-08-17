@@ -1,12 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { FEATURED_JOBS } from '@/components/jobs/featured-jobs';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
+import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
 
 type Props = {
   locale: string;
@@ -164,14 +164,18 @@ export function JobFlipCard({ locale, roleCount }: Props) {
             />
           ))}
         </div>
-        <Link
+        <PracticeGateLink
           href={practiceHref}
+          role={locale === 'ar' ? job.titleAr : job.titleEn}
+          company={job.company}
+          jobId={job.id}
+          roleId={job.id}
+          companyId={job.company}
           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-300 px-6 text-sm font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]"
-          onClick={(e) => e.stopPropagation()}
         >
           {locale === 'ar' ? 'تدرّب صوتياً مع جيني مجاناً' : 'Voice practice with Jeannie — Free'}
           <span aria-hidden>{locale === 'ar' ? '←' : '→'}</span>
-        </Link>
+        </PracticeGateLink>
         <p className="text-[11px] text-white/40">
           {locale === 'ar'
             ? jobsLabel

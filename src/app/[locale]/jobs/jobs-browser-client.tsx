@@ -8,6 +8,8 @@ import { ArrowUpRight, Banknote, Briefcase, MapPin, Search, Sparkles } from 'luc
 import { localePath } from '@/i18n/navigation';
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
+import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
+import { ApplyTrackLink, JobsBrowseTracker } from '@/components/nurture/NurtureTrackers';
 import {
   classifyMenaCountry,
   MENA_COUNTRY_FLAGS,
@@ -118,6 +120,7 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
 
   return (
     <section id="roles" className="relative border-t border-white/10 bg-[#05080f]">
+      <JobsBrowseTracker />
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div className="mq-orb mq-orb-a opacity-40" />
         <div className="mq-orb mq-orb-c opacity-30" />
@@ -481,22 +484,28 @@ function SpotlightRole({
         </p>
       ) : null}
       <div className="relative mt-7 flex flex-col gap-3 sm:flex-row">
-        <Link
+        <PracticeGateLink
           href={practiceHref}
-          className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
+          role={job.title}
+          company={job.company?.name}
+              jobId={job.id}
+              roleId={job.id}
+              companyId={job.company?.slug}
+              className="mq-btn mq-btn-primary inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
           <Sparkles size={15} />
           {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
-        </Link>
-        <a
+        </PracticeGateLink>
+        <ApplyTrackLink
           href={job.applyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          role={job.title}
+          company={job.company?.name}
+          jobId={job.id}
           className="mq-btn mq-btn-ghost inline-flex min-h-[50px] flex-1 items-center justify-center gap-2 text-sm font-bold"
         >
           {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
           <ArrowUpRight size={15} />
-        </a>
+        </ApplyTrackLink>
         <Link
           href={href}
           className="mq-btn mq-btn-ghost inline-flex min-h-[50px] items-center justify-center px-5 text-sm font-bold sm:flex-none"

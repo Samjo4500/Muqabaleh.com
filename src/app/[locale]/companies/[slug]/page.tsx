@@ -15,6 +15,7 @@ import { getDemoCompany, getDemoCompanyJobs } from '@/lib/jobs/demo-listings';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
+import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -94,13 +95,15 @@ export default async function CompanyPage({ params }: Props) {
                   : `${guide.name.en} interview guide`}
               </Link>
             ) : null}
-            <Link
+            <PracticeGateLink
               href={localePath(jeanniePracticePath({ company: company.name }), locale)}
+              company={company.name}
+              companyId={company.slug}
               className="mq-btn mq-btn-primary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 text-sm font-bold"
             >
               <Sparkles size={16} />
               {isAr ? `تدرّب صوتياً لـ ${company.name}` : `Voice practice for ${company.name}`}
-            </Link>
+            </PracticeGateLink>
           </div>
         </div>
 

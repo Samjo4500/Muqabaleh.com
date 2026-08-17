@@ -13,8 +13,10 @@ export const MUQABALEH_BRAND = {
   senders: {
     passport: { name: 'Muqabaleh', email: 'passport@muqabaleh.com' },
     system: { name: 'Muqabaleh', email: 'noreply@muqabaleh.com' },
+    nurture: { name: 'Jeannie from Muqabaleh', email: 'info@muqabaleh.com' },
   },
   replyTo: { name: 'Muqabaleh Support', email: 'support@muqabaleh.com' },
+  nurtureReplyTo: { name: 'Muqabaleh', email: 'info@muqabaleh.com' },
   colors: {
     navy: '#0B1F33',
     navyDeep: '#071523',

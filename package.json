@@ -8,6 +8,7 @@
     "postinstall": "prisma generate",
     "build": "next build",
     "db:deploy": "prisma migrate deploy",
+    "db:migrate:direct": "node scripts/migrate-direct.mjs",
     "start": "next start",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",

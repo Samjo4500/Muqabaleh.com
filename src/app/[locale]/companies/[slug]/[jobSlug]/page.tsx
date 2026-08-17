@@ -23,6 +23,8 @@ import {
 import { localePath } from '@/i18n/navigation';
 import { inferCoachRoleIdFromTitle, jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
 import { pageMetadata, SITE_URL } from '@/lib/seo';
+import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
+import { ApplyTrackLink, JobClickTracker } from '@/components/nurture/NurtureTrackers';
 
 type Props = { params: Promise<{ locale: string; slug: string; jobSlug: string }> };
 
@@ -114,6 +116,7 @@ export default async function CompanyJobPage({ params }: Props) {
       />
 
       <main className="mq-wrap py-10 md:py-14">
+        <JobClickTracker role={job.title} company={job.companyName} jobId={job.id} />
         <div className="mx-auto max-w-3xl">
           <p className="mq-kicker mb-3">{job.companyName}</p>
           <h1 className="mq-display text-3xl font-bold tracking-tight text-white md:text-5xl">
@@ -214,22 +217,28 @@ export default async function CompanyJobPage({ params }: Props) {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Link
+            <PracticeGateLink
               href={practiceHref}
+              role={job.title}
+              company={job.companyName}
+              jobId={job.id}
+              roleId={job.id}
+              companyId={slug}
               className="mq-btn mq-btn-primary mq-btn-shimmer inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
             >
               <Sparkles size={16} />
               {isAr ? 'تدرّب صوتياً لهذه الوظيفة مع جيني' : 'Voice practice this role with Jeannie'}
-            </Link>
-            <a
+            </PracticeGateLink>
+            <ApplyTrackLink
               href={job.applyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              role={job.title}
+              company={job.companyName}
+              jobId={job.id}
               className="mq-btn mq-btn-ghost inline-flex min-h-[52px] items-center justify-center gap-2 text-sm font-bold"
             >
               <ExternalLink size={16} />
               {isAr ? 'التقديم لدى الشركة' : 'Apply on company site'}
-            </a>
+            </ApplyTrackLink>
           </div>
 
           <p className="mt-5 text-center text-xs text-white/40">

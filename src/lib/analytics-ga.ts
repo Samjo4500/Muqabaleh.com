@@ -10,7 +10,9 @@ export type GaEventName =
   | 'passport_downloaded'
   | 'upgrade_clicked'
   | 'payment_completed'
-  | 'signup_completed';
+  | 'signup_completed'
+  | 'nurture_gate1_unlocked'
+  | 'nurture_gate2_start';
 
 declare global {
   interface Window {

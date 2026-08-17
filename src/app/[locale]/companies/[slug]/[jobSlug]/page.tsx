@@ -26,6 +26,8 @@ import { pageMetadata, SITE_URL } from '@/lib/seo';
 import { PracticeGateLink } from '@/components/nurture/PracticeGateLink';
 import { ApplyTrackLink, JobClickTracker } from '@/components/nurture/NurtureTrackers';
 
+export const revalidate = 3600;
+
 type Props = { params: Promise<{ locale: string; slug: string; jobSlug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

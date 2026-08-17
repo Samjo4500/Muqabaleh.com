@@ -4,18 +4,20 @@ import { setRequestLocale } from 'next-intl/server';
 import { InterviewGuideView } from '@/components/interview-guides/InterviewGuideView';
 import { bi } from '@/lib/interview-guides/content';
 import { loadRoleGuide } from '@/lib/interview-guides/data';
-import { allGuideRoleSlugsAsync } from '@/lib/interview-guides/registry';
+import { topGuideRoleSlugs } from '@/lib/interview-guides/registry';
 import { pageMetadata } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; roleSlug: string }> };
 
-export const revalidate = 3600;
-/** Prefetch at build; allow on-demand recovery for published roles. */
+export const revalidate = 86400;
+/**
+ * Prerender the top 10 roles. Remaining published roles generate on first
+ * request, then cache. Unknown slugs still `notFound()`.
+ */
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  // Parent layout already emits locales — only this segment.
-  const slugs = await allGuideRoleSlugsAsync();
+  const slugs = await topGuideRoleSlugs(10);
   return slugs.map((roleSlug) => ({ roleSlug }));
 }
 

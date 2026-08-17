@@ -92,6 +92,21 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        // View-only company profile: open inline and allow same-origin embed.
+        source: '/muqabaleh-company-profile.pdf',
+        headers: [
+          {
+            key: 'Content-Disposition',
+            value: 'inline; filename="Muqabaleh-Company-Profile.pdf"',
+          },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'none'; frame-ancestors 'self'; object-src 'none'; base-uri 'none'",
+          },
+        ],
+      },
+      {
         source: '/images/(.*)',
         headers: [
           {

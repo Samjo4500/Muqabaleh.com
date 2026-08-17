@@ -17,16 +17,20 @@ function isLocale(value: string): value is Locale {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
-const META: Record<string, { title: string; description: string }> = {
+const META: Record<string, { title: string; description: string; ogDescription: string }> = {
   ar: {
-    title: 'مقابلة | Muqabaleh — التدرّب على المقابلات الوظيفية بالذكاء الاصطناعي',
+    title: 'مقابلة | ادخل واثق. اخرج ناجح.',
     description:
-      'المنصة العربية الأولى للتدرّب على المقابلات الوظيفية بالذكاء الاصطناعي. محاور ذكي يقيّمك بأربعة معايير ويمنحك شهادة موثّقة بشارة QR.',
+      'تدرّب على مقابلات العمل الحقيقية مع جيني — مساعدك الذكي بالعربية والإنجليزية. استعد للأسئلة الصعبة، وحسّن إجاباتك قبل ما تقدم على الوظيفة.',
+    ogDescription:
+      'تدرّب على مقابلات العمل الحقيقية مع جيني — مساعدك الذكي بالعربية والإنجليزية.',
   },
   en: {
-    title: 'Muqabaleh — AI-Powered Job Interview Practice',
+    title: 'Muqabaleh | Walk in prepared. Walk out hired.',
     description:
-      'The first Arabic platform for AI-powered job interview practice. Get evaluated on 4 criteria and receive a QR-verified certificate.',
+      'Practice real job interviews with Jeannie — your AI coach in Arabic and English. Get ready for tough questions before you apply.',
+    ogDescription:
+      'Practice real job interviews with Jeannie — your AI coach in Arabic and English.',
   },
 };
 
@@ -60,14 +64,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title:
-        locale === 'ar'
-          ? 'Muqabaleh | تدرّب على مقابلات العمل بالذكاء الاصطناعي'
-          : 'Muqabaleh | Practice job interviews with AI',
-      description:
-        'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
+      title: meta.title,
+      description: meta.ogDescription,
       url,
-      siteName: 'مقابلة | Muqabaleh',
+      siteName: 'Muqabaleh',
       locale: ogLocale,
       alternateLocale: locale === 'ar' ? ['en_US'] : ['ar_SA'],
       type: 'website',
@@ -76,18 +76,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           url: '/og-passport.jpg',
           width: 1200,
           height: 630,
-          alt: 'مقابلة | Muqabaleh — AI Interview Practice',
+          alt: meta.title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title:
-        locale === 'ar'
-          ? 'Muqabaleh | تدرّب على مقابلات العمل بالذكاء الاصطناعي'
-          : 'Muqabaleh | Practice job interviews with AI',
-      description:
-        'Practice your job interview in Arabic or English. Get a verified passport. Apply with confidence.',
+      title: meta.title,
+      description: meta.ogDescription,
       images: ['/og-passport.jpg'],
       site: '@muqabaleh',
     },

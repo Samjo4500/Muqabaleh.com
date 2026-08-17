@@ -20,12 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: '',
-    titleAr: 'مقابلة | Muqabaleh — تدرّب على مقابلات العمل بالذكاء الاصطناعي',
-    titleEn: 'Muqabaleh — AI Mock Interviews for Job Seekers in MENA',
+    titleAr: 'مقابلة | ادخل واثق. اخرج ناجح.',
+    titleEn: 'Muqabaleh | Walk in prepared. Walk out hired.',
     descAr:
-      'تدرّب على مقابلات العمل بالعربية والإنجليزية مع جيني، واحصل على تقييم فوري وجواز جاهزية موثّق.',
+      'تدرّب على مقابلات العمل الحقيقية مع جيني — مساعدك الذكي بالعربية والإنجليزية. استعد للأسئلة الصعبة، وحسّن إجاباتك قبل ما تقدم على الوظيفة.',
     descEn:
-      'Practice job interviews in Arabic and English with Jeannie. Get instant scoring and a verified hire-ready passport.',
+      'Practice real job interviews with Jeannie — your AI coach in Arabic and English. Get ready for tough questions before you apply.',
     keywords:
       locale === 'ar'
         ? ['مقابلة عمل', 'تدريب مقابلات', 'جيني', 'ذكاء اصطناعي', 'وظائف']

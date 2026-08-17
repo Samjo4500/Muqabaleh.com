@@ -155,10 +155,27 @@ function toGeminiHistory(messages: ChatMessage[]) {
   }));
 }
 
-const OPENING_FALLBACK = {
-  ar: 'مرحباً، أنا مدرب المقابلات في مقابلة. لنبدأ — حدّثني عن نفسك وخبرتك ذات الصلة بهذا الدور.',
-  en: "Hello — I'm your interview coach on Muqabaleh. Let's begin: tell me about yourself and your relevant experience for this role.",
+/** First message Jeannie sends when a new chat/session opens. */
+export const JEANNIE_OPENING_LINE = {
+  ar: `مرحباً! 👋 أنا جيني، مساعدك الذكي للمقابلات.
+
+هدفنا إنك تدخل واثق وتخرج ناجح. 🎯
+
+يلا نبدأ؟ اختار:
+• تدريب على مقابلة محددة
+• نصائح عامة للمقابلات
+• أسئلة شائعة في مجالك`,
+  en: `Hi there! 👋 I'm Jeannie, your AI interview coach.
+
+Our goal: walk in prepared, walk out hired. 🎯
+
+Ready? Choose:
+• Practice a specific interview
+• General interview tips
+• Common questions in your field`,
 };
+
+const OPENING_FALLBACK = JEANNIE_OPENING_LINE;
 
 export async function generateCoachTurn(opts: {
   prep: PrepSelections;
@@ -172,13 +189,11 @@ export async function generateCoachTurn(opts: {
     history.push({ role: 'user', content: opts.userMessage.trim() });
   }
 
-  // Opening turn
-  if (history.length === 0) {
-    const kickoff =
-      opts.prep.language === 'en'
-        ? 'Please start the interview with a warm greeting and your first question.'
-        : 'ابدأ المقابلة بترحيب قصير ثم اطرح السؤال الأول.';
-    history.push({ role: 'user', content: kickoff });
+  // Opening turn — fixed Jeannie greeting (slogan + menu). Follow-ups unchanged.
+  if (history.length === 0 && !opts.userMessage?.trim()) {
+    const opening =
+      opts.prep.language === 'en' ? JEANNIE_OPENING_LINE.en : JEANNIE_OPENING_LINE.ar;
+    return { reply: opening, complete: false };
   }
 
   const text = await callGeminiPro(system, toGeminiHistory(history));

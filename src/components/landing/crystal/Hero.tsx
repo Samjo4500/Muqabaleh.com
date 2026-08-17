@@ -10,7 +10,6 @@ import { BrandLogo } from './BrandLogo';
 import { BiInline, T } from './BiText';
 import { C } from './copy';
 import { HeroPassportPreview } from './HeroPassportPreview';
-import { JeannieNameLockup } from './JeannieNameLockup';
 import {
   MENA_JEANNIE_FRAMES,
   prefetchNextImage,
@@ -51,7 +50,6 @@ export function CrystalHero() {
   }, [carouselReady, reduceMotion, frame]);
 
   const current = MENA_JEANNIE_FRAMES[frame];
-  const cityLabel = isAr ? current.cityAr : current.cityEn;
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
@@ -141,13 +139,19 @@ export function CrystalHero() {
       </div>
 
       <div className="mq-wrap relative flex min-h-[100svh] flex-col justify-end pb-16 pt-28 md:justify-center md:pb-24 md:pt-32">
+        {/*
+          Mobile: centered stack.
+          Desktop: edge-aligned text column (~55%) — start side = right in RTL, left in LTR.
+          Do not center the slogan on desktop.
+        */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="max-w-3xl text-white"
+          className="mx-auto flex w-full max-w-[520px] flex-col items-center text-center text-white md:mx-0 md:max-w-[min(55%,40rem)] md:items-start md:text-start"
+          dir={isAr ? 'rtl' : 'ltr'}
         >
-          <motion.div variants={fadeUp} className="mb-5">
+          <motion.div variants={fadeUp} className="mb-5 flex w-full justify-center md:justify-start">
             <motion.div
               className="mq-logo-glow relative inline-flex"
               animate={{ y: [0, -10, 0] }}
@@ -166,44 +170,42 @@ export function CrystalHero() {
 
           <motion.p
             variants={fadeUp}
-            className="mq-kicker mb-3 text-teal-200/90"
+            className="mb-3 w-full text-sm font-medium leading-snug text-teal-300"
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={current.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.35 }}
-                className="inline-block"
-              >
-                {isAr ? `جيني · ${cityLabel}` : `Jeannie · ${cityLabel}`}
-              </motion.span>
-            </AnimatePresence>
+            <BiInline bi={C.hero.eyebrow} />
           </motion.p>
 
-          <motion.div variants={fadeUp} className="mb-3">
-            <JeannieNameLockup size="lg" />
-          </motion.div>
+          <motion.h1
+            variants={fadeUp}
+            className="mq-display mb-5 w-full text-[2.75rem] font-bold leading-[1.2] tracking-tight text-white sm:text-5xl md:text-[3.25rem] lg:text-[3.5rem]"
+            dir={isAr ? 'rtl' : 'ltr'}
+            lang={isAr ? 'ar' : 'en'}
+          >
+            {isAr ? (
+              <>
+                ادخل واثق.
+                <br />
+                اخرج ناجح.
+              </>
+            ) : (
+              <>
+                Walk in prepared.
+                <br />
+                Walk out hired.
+              </>
+            )}
+          </motion.h1>
 
-          <motion.div variants={fadeUp}>
-            <T
-              as="h1"
-              bi={C.hero.headline}
-              className="mq-display mb-5 text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
-            />
-          </motion.div>
-
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} className="w-full">
             <T
               as="p"
               bi={C.hero.sub}
-              className="mb-6 max-w-xl text-base leading-relaxed text-white/80 md:mb-8 md:text-lg"
+              className="mb-6 max-w-[520px] text-lg font-normal leading-relaxed text-white/75 md:mb-8 md:text-xl"
             />
           </motion.div>
 
           {/* Mobile passport — in content flow so it never covers Jeannie's face */}
-          <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 md:hidden">
+          <motion.div variants={fadeUp} className="mq-hero-score-inline mb-7 w-full md:hidden">
             <HeroPassportPreview
               locale={locale}
               cityEn={current.cityEn}
@@ -214,21 +216,35 @@ export function CrystalHero() {
             />
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <motion.div
+            variants={fadeUp}
+            className="flex w-full flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start"
+            style={{ gap: 12 }}
+          >
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href={localePath('/interview/prep', locale)}
-                className="mq-btn mq-btn-on-dark mq-btn-shimmer"
+                className="mq-btn mq-btn-on-dark mq-btn-shimmer text-base font-medium"
               >
                 <BiInline bi={C.hero.ctaInterview} />
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href={localePath('/jobs', locale)} className="mq-btn mq-btn-on-dark-ghost">
-                <BiInline bi={C.hero.ctaJeannie} />
+              <Link
+                href={localePath('/#pricing', locale)}
+                className="mq-btn mq-btn-on-dark-ghost text-base font-medium"
+              >
+                <BiInline bi={C.hero.ctaPricing} />
               </Link>
             </motion.div>
           </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="mt-4 w-full text-[13px] font-normal leading-relaxed text-white/50"
+          >
+            <BiInline bi={C.hero.trust} />
+          </motion.p>
         </motion.div>
       </div>
 

@@ -1,6 +1,6 @@
-# Daily ops that used to live in vercel.json.
-# Hobby re-validates crons on every vercel.json change and has been rejecting
-# this project at 5 jobs (even once-per-day). Vercel keeps only jobs + email.
+# Daily ops (backup, sitemaps, admin daily summary).
+# Vercel Hobby was failing production deploys while any crons lived in
+# vercel.json, so these run here instead.
 # Requires GitHub Actions secret CRON_SECRET — same value as Vercel CRON_SECRET.
 
 name: Daily ops crons

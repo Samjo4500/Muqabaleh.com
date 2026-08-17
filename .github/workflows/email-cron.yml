@@ -1,6 +1,6 @@
-# Email + nurture queue tick (backup to Vercel’s daily 05:00 UTC cron).
-# Hobby only allows once-per-day Vercel crons, so this Action is the 5-minute
-# scheduler. Requires GitHub Actions secret CRON_SECRET (same as Vercel).
+# Email + nurture queue tick every 5 minutes.
+# Vercel Hobby cannot host this cadence; vercel.json has no crons.
+# Requires GitHub Actions secret CRON_SECRET (same as Vercel).
 
 name: Email queue cron
 

@@ -1,13 +1,3 @@
 {
-  "ignoreCommand": "bash vercel-ignore-build.sh",
-  "crons": [
-    {
-      "path": "/api/jobs/fetch-cron",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/email/cron",
-      "schedule": "0 5 * * *"
-    }
-  ]
+  "ignoreCommand": "bash vercel-ignore-build.sh"
 }

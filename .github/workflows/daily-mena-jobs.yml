@@ -1,6 +1,6 @@
-# Daily full MENA ATS sweep (backup to Vercel’s every-3h rotation).
-# Requires repo secret: CRON_SECRET (same value as Vercel env).
-# Optional repo variable: SITE_URL (default https://muqabaleh.com).
+# Daily MENA ATS sweep (backup to Vercel’s daily 03:00 UTC cron).
+# Requires GitHub Actions secret CRON_SECRET — same value as Vercel CRON_SECRET.
+# The daily GitHub run currently fails because that secret is missing.
 
 name: Daily MENA jobs fetch
 
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       ticks:
-        description: 'How many fetch ticks (each covers ~16 boards, oldest first)'
+        description: 'How many fetch ticks (each covers ~8 boards, oldest first)'
         required: false
         default: '5'
 
@@ -47,11 +47,15 @@ jobs:
           i=1
           while [ "$i" -le "$TICKS" ]; do
             echo "── Tick $i/$TICKS ──"
+            SYNC_QS=""
+            if [ "$i" -eq 1 ]; then
+              SYNC_QS="&sync=1"
+            fi
             resp=$(curl -fsS -X POST \
               -H "Authorization: Bearer ${CRON_SECRET}" \
               -H "Accept: application/json" \
               --max-time 90 \
-              "${BASE}/api/jobs/fetch-cron?limit=16&source=github-daily")
+              "${BASE}/api/jobs/fetch-cron?limit=8&source=github-daily${SYNC_QS}")
             echo "$resp" | tee "/tmp/ats-tick-$i.json"
             upserted=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('upserted',0))")
             companies=$(echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('companies',0))")

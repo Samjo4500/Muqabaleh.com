@@ -494,10 +494,24 @@ export async function syncListedCompanyCatalog() {
   return { catalogSize: LISTED_COMPANY_CATALOG.length, upserted };
 }
 
-export async function runAtsFetchTick(opts?: { limit?: number; syncCatalog?: boolean }) {
+export async function runAtsFetchTick(opts?: {
+  limit?: number;
+  syncCatalog?: boolean;
+  budgetMs?: number;
+}) {
   const limit = opts?.limit ?? 40;
-  const synced =
-    opts?.syncCatalog === false ? null : await syncListedCompanyCatalog();
+  const budgetMs = opts?.budgetMs ?? 45_000;
+  const started = Date.now();
+
+  // Full catalog upsert is too slow for Hobby's 60s cron. Sync only when asked,
+  // or when the listed-company table is empty.
+  let synced: { catalogSize: number; upserted: number } | null = null;
+  if (opts?.syncCatalog === true) {
+    synced = await syncListedCompanyCatalog();
+  } else if (opts?.syncCatalog !== false) {
+    const existing = await db.listedCompany.count();
+    if (existing === 0) synced = await syncListedCompanyCatalog();
+  }
 
   const companies = await db.listedCompany.findMany({
     where: { isActive: true, ats: { not: null } },
@@ -507,18 +521,24 @@ export async function runAtsFetchTick(opts?: { limit?: number; syncCatalog?: boo
   });
 
   const summary = {
-    companies: companies.length,
+    companies: 0,
     catalogSynced: synced?.upserted ?? 0,
     catalogSize: synced?.catalogSize ?? LISTED_COMPANY_CATALOG.length,
     upserted: 0,
     deactivated: 0,
     skipped: 0,
     errors: [] as string[],
+    budgetStop: false,
   };
 
   for (const company of companies) {
+    if (Date.now() - started > budgetMs) {
+      summary.budgetStop = true;
+      break;
+    }
     try {
       const result = await fetchForCompany(company);
+      summary.companies += 1;
       summary.upserted += result.upserted;
       summary.deactivated += result.deactivated;
       if (result.skipped) summary.skipped += 1;
@@ -527,6 +547,7 @@ export async function runAtsFetchTick(opts?: { limit?: number; syncCatalog?: boo
         data: { updatedAt: new Date() },
       });
     } catch (err) {
+      summary.companies += 1;
       summary.errors.push(
         `${company.slug}: ${err instanceof Error ? err.message : 'error'}`,
       );

@@ -4,6 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getCoachAccess } from '@/lib/coach/access';
+import { getPublicInterviewConfig } from '@/lib/coach/config';
 import { PrepClient } from './prep-client';
 
 interface Props {
@@ -74,6 +75,7 @@ export default async function InterviewPrepPage({ params, searchParams }: Props)
 
   return (
     <PrepClient
+      initialCatalog={getPublicInterviewConfig()}
       initialCompany={company || undefined}
       initialRoleTitle={role || undefined}
       initialJobId={job || undefined}

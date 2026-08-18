@@ -7,7 +7,7 @@ import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
-import { fontVariables } from '@/lib/fonts';
+import { fontVariablesFor } from '@/lib/fonts';
 import { pickPublicMessages } from '@/lib/i18n/public-messages';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
@@ -127,7 +127,7 @@ export default async function LocaleLayout({
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning className={fontVariables}>
+    <html lang={locale} dir={dir} suppressHydrationWarning className={fontVariablesFor(locale)}>
       <head>
         <meta name="theme-color" content="#0a1220" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

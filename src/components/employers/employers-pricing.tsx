@@ -114,7 +114,7 @@ export function EmployersPricing() {
       dir={isAr ? 'rtl' : 'ltr'}
       lang={isAr ? 'ar' : 'en'}
     >
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <section className="relative overflow-hidden px-4 pb-16 pt-28 md:px-8 md:pt-32">
         <div

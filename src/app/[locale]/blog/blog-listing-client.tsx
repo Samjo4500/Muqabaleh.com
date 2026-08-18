@@ -116,7 +116,7 @@ export default function BlogListingClient({
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         {/* Hero — one composition */}

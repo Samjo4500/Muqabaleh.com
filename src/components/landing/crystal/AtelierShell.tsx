@@ -55,13 +55,13 @@ export function AtelierShell({
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       {showHeroLogo ? (
         <div className="mq-wrap relative pt-8 md:pt-10">
           <div className="flex justify-center">
             <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="inline-flex">
-              <BrandLogo size="hero" priority className="mq-logo-glow" />
+              <BrandLogo size="hero" className="mq-logo-glow" />
             </Link>
           </div>
         </div>

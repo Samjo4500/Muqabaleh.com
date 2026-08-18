@@ -105,7 +105,7 @@ export default function ArticleClient({
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         {/* Article hero */}

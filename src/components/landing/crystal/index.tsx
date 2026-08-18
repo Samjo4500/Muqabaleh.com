@@ -55,9 +55,9 @@ export async function CrystalLanding() {
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
       <main>
-        <CrystalHero />
+        <CrystalHero locale={locale} />
         <CrystalSimplePath />
         <PopularGuides locale={locale} />
         <CrystalPassportShowcase />

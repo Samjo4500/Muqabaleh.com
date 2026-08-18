@@ -272,7 +272,7 @@ export function VacanciesClient() {
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         <section className="relative overflow-hidden pb-10 pt-8 md:pb-12 md:pt-10">

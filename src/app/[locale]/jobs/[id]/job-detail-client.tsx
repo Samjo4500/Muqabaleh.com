@@ -90,7 +90,7 @@ export function JobDetailClient({ jobId }: { jobId: string }) {
       dir={isAr ? 'rtl' : 'ltr'}
       lang={isAr ? 'ar' : 'en'}
     >
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
       <main className="mq-wrap py-10 md:py-14">
         {loading ? (
           <div className="flex justify-center py-20 text-white/50">

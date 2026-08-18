@@ -42,7 +42,7 @@ export default function PartnerApplyPage() {
 
   return (
     <div className="mq-atelier relative min-h-screen overflow-x-hidden" dir={isAr ? 'rtl' : 'ltr'}>
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
       <main className="mq-wrap py-12 md:py-16">
         <div className="mx-auto max-w-xl">
           <Link href={localePath('/', locale)} aria-label="Muqabaleh" className="mb-6 inline-block">

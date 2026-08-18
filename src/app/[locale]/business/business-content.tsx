@@ -126,7 +126,7 @@ export default function BusinessContent() {
       lang={isAr ? 'ar' : 'en'}
     >
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         {/* Full-bleed brand hero — one composition */}

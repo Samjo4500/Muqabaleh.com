@@ -98,138 +98,151 @@ export async function processNurtureQueue(): Promise<{
   let failed = 0;
 
   for (const enrollment of due) {
-    const claimed = await db.nurtureEnrollment.updateMany({
-      where: {
-        id: enrollment.id,
-        status: 'ACTIVE',
-        nextSendAt: { lte: new Date() },
-      },
-      data: { nextSendAt: new Date(Date.now() + 15 * 60 * 1000) },
-    });
-    if (claimed.count !== 1) {
-      skipped++;
-      continue;
-    }
-
-    const lead = enrollment.lead;
-    const pref = lead.preference;
-    const gate = canSendNurture(pref);
-    if (!gate.ok) {
-      if (gate.reason === 'unsubscribed') {
-        await db.nurtureEnrollment.update({
-          where: { id: enrollment.id },
-          data: { status: 'PAUSED' },
-        });
-      } else if (gate.reason === 'monthly_digest' && enrollment.sequence !== 'JOB_SEEKERS') {
-        await db.nurtureEnrollment.update({
-          where: { id: enrollment.id },
-          data: { status: 'PAUSED' },
-        });
-      } else {
-        await db.nurtureEnrollment.update({
-          where: { id: enrollment.id },
-          data: { nextSendAt: addDaysAtNine(new Date(), 1, lead.timezone) },
-        });
+    try {
+      const claimed = await db.nurtureEnrollment.updateMany({
+        where: {
+          id: enrollment.id,
+          status: 'ACTIVE',
+          nextSendAt: { lte: new Date() },
+        },
+        data: { nextSendAt: new Date(Date.now() + 15 * 60 * 1000) },
+      });
+      if (claimed.count !== 1) {
+        skipped++;
+        continue;
       }
-      skipped++;
-      continue;
-    }
 
-    if (skipForLessOften(pref?.frequency || 'NORMAL', enrollment.step)) {
+      const lead = enrollment.lead;
+      const pref = lead.preference;
+      const gate = canSendNurture(pref);
+      if (!gate.ok) {
+        if (gate.reason === 'unsubscribed') {
+          await db.nurtureEnrollment.update({
+            where: { id: enrollment.id },
+            data: { status: 'PAUSED' },
+          });
+        } else if (gate.reason === 'monthly_digest' && enrollment.sequence !== 'JOB_SEEKERS') {
+          await db.nurtureEnrollment.update({
+            where: { id: enrollment.id },
+            data: { status: 'PAUSED' },
+          });
+        } else {
+          await db.nurtureEnrollment.update({
+            where: { id: enrollment.id },
+            data: { nextSendAt: addDaysAtNine(new Date(), 1, lead.timezone) },
+          });
+        }
+        skipped++;
+        continue;
+      }
+
+      if (skipForLessOften(pref?.frequency || 'NORMAL', enrollment.step)) {
+        const nxt = nextAfterSend(enrollment.sequence, enrollment.step, lead.timezone);
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: {
+            step: nxt.step,
+            nextSendAt: nxt.nextSendAt,
+            status: nxt.status,
+          },
+        });
+        skipped++;
+        continue;
+      }
+
+      if (
+        enrollment.sequence === 'NEW_SIGNUP' &&
+        shouldSkipSignupStep(enrollment.step, lead)
+      ) {
+        const nxt = nextAfterSend(enrollment.sequence, enrollment.step, lead.timezone);
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: {
+            step: nxt.step,
+            nextSendAt: nxt.nextSendAt,
+            status: nxt.status,
+          },
+        });
+        skipped++;
+        continue;
+      }
+
+      if (enrollment.sequence === 'JOB_CLICK' && shouldSkipJobClick(lead)) {
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: { status: 'SKIPPED' },
+        });
+        skipped++;
+        continue;
+      }
+
+      const token = pref?.token;
+      if (!token) {
+        skipped++;
+        continue;
+      }
+
+      await markOpenStreak(lead.id, lead.lastEmailOpenAt, lead.lastEmailSentAt);
+
+      const merge = await buildMergeForLead(lead, token, enrollment.id);
+      const rendered = renderNurtureEmail({
+        sequence: enrollment.sequence,
+        step: enrollment.step,
+        merge,
+      });
+      if (!rendered) {
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: { status: 'COMPLETED' },
+        });
+        skipped++;
+        continue;
+      }
+
+      const result = await sendBrevoEmail({
+        to: lead.email,
+        subject: rendered.subject,
+        html: rendered.html,
+        sender: NURTURE_SENDER,
+        replyTo: NURTURE_REPLY_TO,
+      });
+
+      if (!result.success) {
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: { nextSendAt: hoursLater(1) },
+        });
+        failed++;
+        continue;
+      }
+
       const nxt = nextAfterSend(enrollment.sequence, enrollment.step, lead.timezone);
       await db.nurtureEnrollment.update({
         where: { id: enrollment.id },
         data: {
+          lastSentAt: new Date(),
           step: nxt.step,
           nextSendAt: nxt.nextSendAt,
           status: nxt.status,
         },
       });
-      skipped++;
-      continue;
-    }
-
-    if (
-      enrollment.sequence === 'NEW_SIGNUP' &&
-      shouldSkipSignupStep(enrollment.step, lead)
-    ) {
-      const nxt = nextAfterSend(enrollment.sequence, enrollment.step, lead.timezone);
-      await db.nurtureEnrollment.update({
-        where: { id: enrollment.id },
-        data: {
-          step: nxt.step,
-          nextSendAt: nxt.nextSendAt,
-          status: nxt.status,
-        },
+      await db.nurtureLead.update({
+        where: { id: lead.id },
+        data: { lastEmailSentAt: new Date() },
       });
-      skipped++;
-      continue;
-    }
-
-    if (enrollment.sequence === 'JOB_CLICK' && shouldSkipJobClick(lead)) {
-      await db.nurtureEnrollment.update({
-        where: { id: enrollment.id },
-        data: { status: 'SKIPPED' },
-      });
-      skipped++;
-      continue;
-    }
-
-    const token = pref?.token;
-    if (!token) {
-      skipped++;
-      continue;
-    }
-
-    await markOpenStreak(lead.id, lead.lastEmailOpenAt, lead.lastEmailSentAt);
-
-    const merge = await buildMergeForLead(lead, token, enrollment.id);
-    const rendered = renderNurtureEmail({
-      sequence: enrollment.sequence,
-      step: enrollment.step,
-      merge,
-    });
-    if (!rendered) {
-      await db.nurtureEnrollment.update({
-        where: { id: enrollment.id },
-        data: { status: 'COMPLETED' },
-      });
-      skipped++;
-      continue;
-    }
-
-    const result = await sendBrevoEmail({
-      to: lead.email,
-      subject: rendered.subject,
-      html: rendered.html,
-      sender: NURTURE_SENDER,
-      replyTo: NURTURE_REPLY_TO,
-    });
-
-    if (!result.success) {
-      await db.nurtureEnrollment.update({
-        where: { id: enrollment.id },
-        data: { nextSendAt: hoursLater(1) },
-      });
+      sent++;
+    } catch (err) {
+      console.error('nurture enrollment failed', enrollment.id, err);
       failed++;
-      continue;
+      try {
+        await db.nurtureEnrollment.update({
+          where: { id: enrollment.id },
+          data: { nextSendAt: hoursLater(1) },
+        });
+      } catch {
+        /* table/client mismatch is reported by the outer cron */
+      }
     }
-
-    const nxt = nextAfterSend(enrollment.sequence, enrollment.step, lead.timezone);
-    await db.nurtureEnrollment.update({
-      where: { id: enrollment.id },
-      data: {
-        lastSentAt: new Date(),
-        step: nxt.step,
-        nextSendAt: nxt.nextSendAt,
-        status: nxt.status,
-      },
-    });
-    await db.nurtureLead.update({
-      where: { id: lead.id },
-      data: { lastEmailSentAt: new Date() },
-    });
-    sent++;
   }
 
   return { sent, skipped, failed };

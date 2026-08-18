@@ -1,42 +1,17 @@
-import dynamic from 'next/dynamic';
 import { getLocale } from 'next-intl/server';
 import { CrystalNavbar } from './CrystalNavbar';
 import { CrystalHero } from './Hero';
+import { CrystalSimplePath } from './SimplePath';
+import { CrystalFAQ } from './FAQ';
 import { PopularGuides } from './PopularGuides';
-import { LanguageSwitcherFixed } from '@/components/chrome/LanguageSwitcherFixed';
-
-const CrystalSimplePath = dynamic(
-  () => import('./SimplePath').then((m) => m.CrystalSimplePath),
-  { ssr: true },
-);
-const CrystalPassportShowcase = dynamic(
-  () => import('./PassportShowcase').then((m) => m.CrystalPassportShowcase),
-  { ssr: true },
-);
-const CrystalJeannie = dynamic(
-  () => import('./Jeannie').then((m) => m.CrystalJeannie),
-  { ssr: true },
-);
-const CrystalPricing = dynamic(
-  () => import('./Pricing').then((m) => m.CrystalPricing),
-  { ssr: true },
-);
-const CrystalFAQ = dynamic(
-  () => import('./FAQ').then((m) => m.CrystalFAQ),
-  { ssr: true },
-);
-const CrystalFinalCta = dynamic(
-  () => import('./FinalCta').then((m) => m.CrystalFinalCta),
-  { ssr: true },
-);
-const CrystalFooter = dynamic(
-  () => import('./CrystalFooter').then((m) => m.CrystalFooter),
-  { ssr: true },
-);
+import { BelowFoldStatic } from './BelowFoldStatic';
+import { BelowFoldLoader } from './BelowFoldLoader';
+import { HomeLanguageSwitch } from './HomeLanguageSwitch';
+import { HomeFooter } from './HomeFooter';
 
 /**
- * Prepare-and-Verify landing — server shell, client islands below the fold.
- * Hero → path → passport → Jeannie → pricing → FAQ → CTA.
+ * Prepare-and-Verify landing — server shell.
+ * Cinematic below-fold islands load only when scrolled near view.
  */
 export async function CrystalLanding() {
   const locale = await getLocale();
@@ -54,19 +29,18 @@ export async function CrystalLanding() {
         <div className="mq-orb mq-orb-c" />
       </div>
 
-      <LanguageSwitcherFixed />
+      <HomeLanguageSwitch locale={locale} />
       <CrystalNavbar locale={locale} />
       <main>
         <CrystalHero locale={locale} />
-        <CrystalSimplePath />
+        <CrystalSimplePath locale={locale} />
         <PopularGuides locale={locale} />
-        <CrystalPassportShowcase />
-        <CrystalJeannie />
-        <CrystalPricing />
-        <CrystalFAQ />
-        <CrystalFinalCta />
+        <BelowFoldLoader
+          faq={<CrystalFAQ locale={locale} />}
+          fallback={<BelowFoldStatic locale={locale} />}
+        />
       </main>
-      <CrystalFooter />
+      <HomeFooter locale={locale} />
     </div>
   );
 }

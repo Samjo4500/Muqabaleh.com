@@ -31,9 +31,20 @@ jobs:
           fi
           BASE="${SITE_URL:-https://muqabaleh.com}"
           BASE="${BASE%/}"
-          curl -fsS -X POST \
+          body="$(mktemp)"
+          code="$(curl -sS -o "$body" -w '%{http_code}' -X POST \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             -H "Accept: application/json" \
             --max-time 90 \
-            "${BASE}/api/email/cron"
+            "${BASE}/api/email/cron" || true)"
+          echo "HTTP $code"
+          cat "$body"
           echo
+          if [ "$code" = "401" ] || [ "$code" = "503" ]; then
+            echo "::error::email cron auth/config failed HTTP $code"
+            exit 1
+          fi
+          if [ "$code" -ge 400 ]; then
+            echo "::error::email cron HTTP $code"
+            exit 1
+          fi

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import { preload } from 'react-dom';
 import { setRequestLocale } from 'next-intl/server';
 import { CrystalLanding } from '@/components/landing/crystal';
 import { FaqJsonLd, SoftwareApplicationJsonLd } from '@/components/json-ld';
 import { C } from '@/components/landing/crystal/copy';
 import { pageMetadata } from '@/lib/seo';
+import { HERO_LCP_MOBILE } from '@/lib/perf/hero-media';
 
 export const revalidate = 3600;
 
@@ -38,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LandingPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  preload(HERO_LCP_MOBILE, { as: 'image', type: 'image/webp', fetchPriority: 'high' });
 
   return (
     <>

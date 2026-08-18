@@ -135,7 +135,7 @@ export default function PartnersLandingPage() {
       lang={isAr ? 'ar' : 'en'}
     >
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         {/* Full-bleed brand hero */}

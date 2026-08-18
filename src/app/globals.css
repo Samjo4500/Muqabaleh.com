@@ -805,6 +805,12 @@
   font-family: var(--font-jeannie-ar), var(--font-display-ar), sans-serif;
   letter-spacing: 0;
 }
+.mq-nav-summary {
+  list-style: none;
+}
+.mq-nav-summary::-webkit-details-marker {
+  display: none;
+}
 .mq-atelier .mq-wrap {
   margin-inline: auto;
   max-width: 1180px;

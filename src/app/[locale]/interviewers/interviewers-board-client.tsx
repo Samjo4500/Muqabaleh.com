@@ -308,7 +308,7 @@ export function InterviewersBoardClient() {
       </div>
 
       <LanguageSwitcherFixed />
-      <CrystalNavbar />
+      <CrystalNavbar locale={locale} />
 
       <main>
         {/* Hero — brand + living photo mosaic */}

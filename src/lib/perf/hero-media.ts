@@ -1,9 +1,11 @@
-/** Cap next/image srcset so full-bleed heroes do not request 1920w on phones. */
+/** Static LCP sources — already compressed webp, skip the image optimizer round-trip. */
+export const HERO_LCP_MOBILE = '/images/hero-interview-768.webp';
+export const HERO_LCP_TABLET = '/images/hero-interview-1280.webp';
+export const HERO_LCP_DESKTOP = '/images/hero-interview.webp';
+
+/** Cap next/image srcset on non-LCP full-bleed frames (jobs / Jeannie). */
 export const HERO_FULL_BLEED_SIZES =
-  '(max-width: 640px) 640px, (max-width: 828px) 828px, (max-width: 1080px) 1080px, 1400px';
+  '(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 1080px';
 
-/** LCP hero — slightly lower than default 75, still sharp on retina. */
 export const HERO_LCP_QUALITY = 62;
-
-/** Below-fold cinematic frames. */
 export const HERO_LAZY_QUALITY = 58;

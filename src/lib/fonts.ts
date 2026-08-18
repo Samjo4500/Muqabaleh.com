@@ -9,54 +9,59 @@ import {
 /** Display — English atelier headlines */
 export const fontDisplayEn = Syne({
   subsets: ['latin'],
-  weight: ['600', '700', '800'],
+  weight: ['700'],
   display: 'swap',
   variable: '--font-display-en',
-  // Preload only on EN routes via layout class; keep false globally to cut LCP bytes.
   preload: false,
 });
 
 /** Body — English UI */
 export const fontBodyEn = Manrope({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '700'],
   display: 'swap',
   variable: '--font-body-en',
   preload: false,
 });
 
-/** Body — Arabic UI */
+/** Body — Arabic UI. Arabic-only subset: latin+arabic was 8 woff2 preloads. */
 export const fontBodyAr = IBM_Plex_Sans_Arabic({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700'],
+  subsets: ['arabic'],
+  weight: ['400', '700'],
   display: 'swap',
   variable: '--font-body-ar',
-  // Default locale is Arabic — preload only the body face used for LCP text.
   preload: true,
 });
 
 /** Display — Arabic headlines */
 export const fontDisplayAr = Readex_Pro({
-  subsets: ['arabic', 'latin'],
-  weight: ['500', '600', '700'],
+  subsets: ['arabic'],
+  weight: ['700'],
   display: 'swap',
   variable: '--font-display-ar',
   preload: false,
 });
 
-/** Jeannie Arabic name mark — not on critical path for every route */
+/** Jeannie Arabic name mark */
 export const fontJeannieAr = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['700', '800'],
+  subsets: ['arabic'],
+  weight: ['700'],
   display: 'swap',
   variable: '--font-jeannie-ar',
   preload: false,
 });
 
-export const fontVariables = [
-  fontDisplayEn.variable,
-  fontBodyEn.variable,
+export const fontVariablesAr = [
   fontBodyAr.variable,
   fontDisplayAr.variable,
   fontJeannieAr.variable,
 ].join(' ');
+
+export const fontVariablesEn = [fontDisplayEn.variable, fontBodyEn.variable].join(' ');
+
+export function fontVariablesFor(locale: string) {
+  return locale === 'en' ? fontVariablesEn : fontVariablesAr;
+}
+
+/** @deprecated use fontVariablesFor(locale) so unused families are not applied */
+export const fontVariables = [fontVariablesEn, fontVariablesAr].join(' ');

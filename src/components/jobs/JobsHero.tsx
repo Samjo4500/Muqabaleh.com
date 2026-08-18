@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -15,7 +14,6 @@ import {
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
-import { HERO_FULL_BLEED_SIZES, HERO_LCP_QUALITY } from '@/lib/perf/hero-media';
 
 type Props = {
   roleCount: number;
@@ -67,43 +65,18 @@ export function JobsHero({ roleCount }: Props) {
 
   return (
     <section className="relative min-h-[92svh] overflow-hidden bg-[#05080f]">
-      <motion.div
-        className="absolute inset-0"
-        initial={{ scale: 1.1, opacity: 0.5 }}
-        animate={{ scale: 1.03, opacity: 1 }}
-        transition={{ duration: 1.5, ease: easeCrystal }}
-      >
-        <motion.div
-          className="absolute inset-0"
-          animate={
-            reduceMotion
-              ? undefined
-              : { scale: [1, 1.05, 1], y: [0, -10, 0] }
-          }
-          transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <AnimatePresence mode="sync">
-            <motion.div
-              key={current.src}
-              className="absolute inset-0"
-              initial={frame === 0 ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.35, ease: 'easeInOut' }}
-            >
-              <Image
-                src={current.src}
-                alt={isAr ? current.altAr : current.altEn}
-                fill
-                priority={frame === 0}
-                fetchPriority={frame === 0 ? 'high' : 'auto'}
-                sizes={HERO_FULL_BLEED_SIZES}
-                quality={HERO_LCP_QUALITY}
-                className="object-cover object-[center_35%]"
-              />
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
+      <div className="absolute inset-0">
+        {/* Native img: next/image + motion opacity was 4.9s LCP on mobile. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={current.src}
+          alt={isAr ? current.altAr : current.altEn}
+          width={1280}
+          height={720}
+          fetchPriority={frame === 0 ? 'high' : 'auto'}
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+        />
         <div
           className="absolute inset-0"
           style={{
@@ -112,7 +85,7 @@ export function JobsHero({ roleCount }: Props) {
           }}
           aria-hidden
         />
-      </motion.div>
+      </div>
 
       <div className="mq-wrap relative z-10 flex min-h-[92svh] flex-col justify-center pb-8 pt-28 md:pb-10 md:pt-32">
         <div
@@ -126,7 +99,7 @@ export function JobsHero({ roleCount }: Props) {
             className="max-w-xl"
           >
             <motion.div variants={fadeUp} className="mb-7">
-              <BrandLogo size="hero" priority />
+              <BrandLogo size="hero" />
             </motion.div>
 
             <motion.p

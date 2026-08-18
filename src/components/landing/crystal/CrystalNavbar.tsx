@@ -1,23 +1,13 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
 import { localePath } from '@/i18n/navigation';
 import { BrandLogo } from './BrandLogo';
-import { BiInline, T } from './BiText';
-import { C } from './copy';
+import { C, type Bi } from './copy';
 
-/** Product story first; Pricing always last before auth CTAs. */
 const NAV_LINKS = [
   { bi: C.nav.jeannie, href: '#jeannie' },
-  { bi: { en: 'How it works', ar: 'كيف يعمل' }, href: '#how' },
-  { bi: { en: 'Passport', ar: 'الجواز' }, href: '#passport' },
-  { bi: { en: 'Jobs', ar: 'الوظائف' }, href: '/jobs' },
+  { bi: { en: 'How it works', ar: 'كيف يعمل' } as Bi, href: '#how' },
+  { bi: { en: 'Passport', ar: 'الجواز' } as Bi, href: '#passport' },
+  { bi: { en: 'Jobs', ar: 'الوظائف' } as Bi, href: '/jobs' },
   { bi: C.nav.pricing, href: '#pricing' },
 ] as const;
 
@@ -26,46 +16,27 @@ const TEAM_LINKS = [
   { bi: C.hero.forPartners, href: '/partners' },
 ] as const;
 
-export function CrystalNavbar() {
-  const locale = useLocale();
-  const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+function pick(bi: Bi, locale: string) {
+  return locale === 'ar' ? bi.ar : bi.en;
+}
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+function resolveHref(href: string, locale: string) {
+  if (href.startsWith('#')) return href;
+  return localePath(href, locale);
+}
 
+/**
+ * Server navbar — no Radix Sheet (that JS was on the mobile critical path).
+ * Mobile uses native details/summary.
+ */
+export function CrystalNavbar({ locale }: { locale: string }) {
+  const isAr = locale === 'ar';
   const homeHref = localePath('/', locale);
-  const isHome =
-    pathname === '/' ||
-    pathname === `/${locale}` ||
-    pathname === `/${locale}/` ||
-    pathname === '/en' ||
-    pathname === '/en/';
-
-  const resolveHref = (href: string) => {
-    if (href.startsWith('#')) {
-      if (!isHome) {
-        const base = homeHref === '/' ? '' : homeHref;
-        return `${base}${href}`;
-      }
-      return href;
-    }
-    return localePath(href, locale);
-  };
+  const menuLabel = isAr ? 'القائمة' : 'Menu';
 
   return (
     <header className="sticky top-0 z-50 w-full px-3 pt-3 pe-20 md:px-5 md:pe-24">
-      <nav
-        className={cn(
-          'mq-glass-nav mq-wrap mx-auto flex h-[76px] items-center justify-between rounded-2xl px-4 transition-all duration-300 md:h-[84px] md:px-6',
-          scrolled && 'border-white/20 bg-[rgba(8,12,22,0.78)] shadow-[0_16px_50px_rgba(0,0,0,0.45)]',
-        )}
-      >
+      <nav className="mq-glass-nav mq-wrap mx-auto flex h-[76px] items-center justify-between rounded-2xl px-4 md:h-[84px] md:px-6">
         <Link
           href={homeHref}
           className="relative z-10 flex h-full shrink-0 items-center overflow-visible"
@@ -78,10 +49,10 @@ export function CrystalNavbar() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
-              href={resolveHref(link.href)}
+              href={resolveHref(link.href, locale)}
               className="text-sm font-medium text-white/60 transition-colors hover:text-teal-300"
             >
-              <BiInline bi={link.bi} />
+              {pick(link.bi, locale)}
             </Link>
           ))}
           <span className="h-4 w-px bg-white/15" aria-hidden />
@@ -91,7 +62,7 @@ export function CrystalNavbar() {
               href={localePath(link.href, locale)}
               className="text-xs font-medium text-white/40 transition-colors hover:text-white/70"
             >
-              <BiInline bi={link.bi} />
+              {pick(link.bi, locale)}
             </Link>
           ))}
         </div>
@@ -101,75 +72,71 @@ export function CrystalNavbar() {
             href={localePath('/login', locale)}
             className="text-sm font-semibold text-white/65 hover:text-white"
           >
-            <BiInline bi={C.nav.login} />
+            {pick(C.nav.login, locale)}
           </Link>
-          <Link href={localePath('/interview/prep', locale)} className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm">
-            <BiInline bi={C.nav.getStarted} />
+          <Link
+            href={localePath('/interview/prep', locale)}
+            className="mq-btn mq-btn-primary !min-h-[42px] !px-4 !py-2 text-sm"
+          >
+            {pick(C.nav.getStarted, locale)}
           </Link>
         </div>
 
-        <div className="lg:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <button type="button" className="rounded-lg p-2 text-white/80" aria-label={locale === 'ar' ? 'القائمة' : 'Menu'}>
-                <Menu size={22} strokeWidth={1.75} />
-              </button>
-            </SheetTrigger>
-            <SheetContent
-              side={locale === 'ar' ? 'left' : 'right'}
-              className="w-80 border-white/10 bg-[#0a1220]/95 text-white backdrop-blur-xl"
-            >
-              <SheetHeader>
-                <SheetTitle className="text-start">
-                  <Link
-                    href={localePath('/', locale)}
-                    aria-label="Muqabaleh"
-                    onClick={() => setOpen(false)}
-                    className="inline-flex"
-                  >
-                    <BrandLogo size="nav" />
-                  </Link>
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-1 px-2 pb-6">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={resolveHref(link.href)}
-                    onClick={() => setOpen(false)}
-                    className="min-h-[48px] rounded-xl px-3 py-3 text-white hover:bg-white/5"
-                  >
-                    <T bi={link.bi} className="text-sm font-semibold" />
-                  </Link>
-                ))}
-                <p className="mt-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-white/35">
-                  {locale === 'ar' ? 'للفرق' : 'For teams'}
-                </p>
-                {TEAM_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={localePath(link.href, locale)}
-                    onClick={() => setOpen(false)}
-                    className="min-h-[48px] rounded-xl px-3 py-3 text-white/70 hover:bg-white/5"
-                  >
-                    <T bi={link.bi} className="text-sm font-semibold" />
-                  </Link>
-                ))}
-                <hr className="my-2 border-white/10" />
-                <Link href={localePath('/login', locale)} onClick={() => setOpen(false)} className="min-h-[48px] px-3 py-3">
-                  <T bi={C.nav.login} className="text-sm font-semibold" />
-                </Link>
+        <details className="relative lg:hidden">
+          <summary
+            className="mq-nav-summary flex cursor-pointer list-none items-center rounded-lg p-2 text-white/80"
+            aria-label={menuLabel}
+          >
+            <span className="sr-only">{menuLabel}</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path
+                d="M4 7h16M4 12h16M4 17h16"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+          </summary>
+          <div
+            className={`absolute top-[calc(100%+8px)] z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-white/10 bg-[#0a1220]/95 p-3 text-white shadow-2xl backdrop-blur-xl ${
+              isAr ? 'start-0' : 'end-0'
+            }`}
+          >
+            <div className="flex flex-col gap-1 pb-2">
+              {NAV_LINKS.map((link) => (
                 <Link
-                  href={localePath('/interview/prep', locale)}
-                  onClick={() => setOpen(false)}
-                  className="mq-btn mq-btn-primary mt-2 text-center text-sm"
+                  key={link.href}
+                  href={resolveHref(link.href, locale)}
+                  className="min-h-[48px] rounded-xl px-3 py-3 text-sm font-semibold text-white hover:bg-white/5"
                 >
-                  <BiInline bi={C.nav.getStarted} />
+                  {pick(link.bi, locale)}
                 </Link>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+              ))}
+              <p className="mt-3 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-white/35">
+                {isAr ? 'للفرق' : 'For teams'}
+              </p>
+              {TEAM_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={localePath(link.href, locale)}
+                  className="min-h-[48px] rounded-xl px-3 py-3 text-sm font-semibold text-white/70 hover:bg-white/5"
+                >
+                  {pick(link.bi, locale)}
+                </Link>
+              ))}
+              <hr className="my-2 border-white/10" />
+              <Link href={localePath('/login', locale)} className="min-h-[48px] px-3 py-3 text-sm font-semibold">
+                {pick(C.nav.login, locale)}
+              </Link>
+              <Link
+                href={localePath('/interview/prep', locale)}
+                className="mq-btn mq-btn-primary mt-2 text-center text-sm"
+              >
+                {pick(C.nav.getStarted, locale)}
+              </Link>
+            </div>
+          </div>
+        </details>
       </nav>
     </header>
   );

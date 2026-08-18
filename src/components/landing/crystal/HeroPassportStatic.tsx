@@ -124,20 +124,11 @@ export function HeroPassportStatic({
 
           <div className="flex items-center gap-3 border-t border-white/10 pt-2.5">
             <div
-              className={`relative shrink-0 overflow-hidden rounded-lg border border-white/15 bg-white p-1 ${
+              className={`mq-qr-placeholder relative shrink-0 overflow-hidden rounded-lg border border-white/15 ${
                 compact ? 'h-12 w-12' : 'h-14 w-14'
               }`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/passport-qr-demo.png"
-                alt=""
-                width={56}
-                height={56}
-                className="h-full w-full object-contain"
-                decoding="async"
-              />
-            </div>
+              aria-hidden
+            />
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-white/80">
                 {isAr ? 'امسح للتحقق' : 'Scan to verify'}

@@ -7,10 +7,12 @@ export function BrandLogo({
   size = 'md',
   className,
   priority = false,
+  loading,
 }: {
   size?: 'sm' | 'nav' | 'md' | 'lg' | 'hero';
   className?: string;
   priority?: boolean;
+  loading?: 'lazy' | 'eager';
 }) {
   const dims = {
     sm: { w: 160, h: 84, className: 'h-10 w-auto' },
@@ -33,6 +35,7 @@ export function BrandLogo({
       width={dims.w}
       height={dims.h}
       decoding="async"
+      loading={loading ?? (priority ? 'eager' : undefined)}
       fetchPriority={priority ? 'high' : 'auto'}
       className={cn('object-contain', dims.className, className)}
     />

@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing, type Locale } from '@/i18n/routing';
-import { Toaster } from 'sonner';
+import { DeferredToaster } from '@/components/chrome/DeferredToaster';
 import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
@@ -145,7 +145,7 @@ export default async function LocaleLayout({
             {children}
             <DeferredMarketingChrome />
             <ConditionalAnalytics />
-            <Toaster position={dir === 'rtl' ? 'top-left' : 'top-right'} richColors />
+            <DeferredToaster position={dir === 'rtl' ? 'top-left' : 'top-right'} />
           </NextIntlClientProvider>
         </Providers>
         {/* Outside SessionProvider so auth/CSP client errors cannot hide consent UI */}

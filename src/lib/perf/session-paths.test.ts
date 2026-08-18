@@ -14,4 +14,9 @@ describe('pathNeedsSession', () => {
       assert.equal(pathNeedsSession(p), true, p);
     }
   });
+
+  it('does not pull session for the marketing home', () => {
+    assert.equal(pathNeedsSession('/'), false);
+    assert.equal(pathNeedsSession('/en'), false);
+  });
 });

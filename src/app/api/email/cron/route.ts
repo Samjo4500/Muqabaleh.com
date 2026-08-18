@@ -1,47 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processEmailQueue } from '@/lib/email';
-import { processNurtureQueue } from '@/lib/nurture/process';
 import { assertCronAuthorized } from '@/lib/cron-auth';
+import { runEmailCron } from '@/lib/email/run-email-cron';
 
 /**
  * Email + nurture queue.
  * Vercel Hobby was rejecting this project’s crons at deploy time, so
  * scheduling lives in GitHub Actions (`.github/workflows/email-cron.yml`)
  * and requires repo secret CRON_SECRET matching Vercel.
+ *
+ * Always 200 after auth so Actions can log the JSON body. Queue vs nurture
+ * failures are isolated in `errors[]` instead of taking the tick down.
  */
 
-async function runEmailCron() {
-  const result = await processEmailQueue();
-  const nurture = await processNurtureQueue();
-  return {
-    processed: true,
-    sent: result.sent,
-    failed: result.failed,
-    nurture,
-  };
+async function handle(req: NextRequest) {
+  const authError = assertCronAuthorized(req);
+  if (authError) return authError;
+  return NextResponse.json(await runEmailCron());
 }
 
 // Vercel Cron uses GET
 export async function GET(req: NextRequest) {
-  const authError = assertCronAuthorized(req);
-  if (authError) return authError;
-
-  try {
-    return NextResponse.json(await runEmailCron());
-  } catch (err) {
-    console.error('GET /api/email/cron error:', err);
-    return NextResponse.json({ error: 'Cron failed' }, { status: 500 });
-  }
+  return handle(req);
 }
 
 export async function POST(req: NextRequest) {
-  const authError = assertCronAuthorized(req);
-  if (authError) return authError;
-
-  try {
-    return NextResponse.json(await runEmailCron());
-  } catch (err) {
-    console.error('POST /api/email/cron error:', err);
-    return NextResponse.json({ error: 'Cron failed' }, { status: 500 });
-  }
+  return handle(req);
 }

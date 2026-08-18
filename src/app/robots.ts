@@ -20,6 +20,8 @@ const DISALLOW = [
   '/interview/session',
   '/interview/summary',
   '/interview/report',
+  '/call',
+  '/booking',
   '/auth/',
   '/en/admin',
   '/en/api',
@@ -33,6 +35,8 @@ const DISALLOW = [
   '/en/interview/session',
   '/en/interview/summary',
   '/en/interview/report',
+  '/en/call',
+  '/en/booking',
   '/en/auth/',
 ];
 

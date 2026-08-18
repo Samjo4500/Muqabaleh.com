@@ -5,15 +5,17 @@ import { getLocale } from 'next-intl/server';
 import { JobPortalChrome } from '@/components/jobs/JobPortalChrome';
 import { JobsHero } from '@/components/jobs/JobsHero';
 import { CrystalFooter } from '@/components/landing/crystal/CrystalFooter';
+import { JobsItemListJsonLd } from '@/components/json-ld';
 import { db } from '@/lib/db';
 import { DEMO_JOBS } from '@/lib/jobs/demo-listings';
-import { safeJobText } from '@/lib/jobs/job-details';
+import {
+  JOBS_BOARD_TAKE,
+  latestPostedAtIso,
+  toJobsBoardCard,
+} from '@/lib/jobs/board';
 import { isMenaListedRole } from '@/lib/jobs/mena';
 import { localePath } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
-
-/** Soft cap for client payload — banner uses a separate live MENA count. */
-const JOBS_PAGE_TAKE = 500;
 
 const JobsBrowserClient = dynamic(
   () =>
@@ -69,23 +71,24 @@ export default async function JobsPage() {
   const locale = await getLocale();
   const isAr = locale === 'ar';
 
-  const [loaded, liveCount] = await Promise.all([loadJobsSafe(), countMenaJobsSafe()]);
-  let jobs = loaded;
+  let jobs = await loadJobsSafe();
   if (!jobs.length) {
-    jobs = DEMO_JOBS.map((j) => ({
-      id: j.id,
-      title: j.title,
-      slug: j.slug,
-      location: j.location,
-      department: j.department,
-      employmentType: j.employmentType,
-      description: j.description,
-      requirements: j.requirements ?? null,
-      applyUrl: j.applyUrl,
-      source: j.source,
-      salaryLabel: null as string | null,
-      company: j.company,
-    }));
+    jobs = DEMO_JOBS.map((j) =>
+      toJobsBoardCard({
+        id: j.id,
+        title: j.title,
+        slug: j.slug,
+        location: j.location,
+        department: j.department,
+        employmentType: j.employmentType,
+        description: j.description,
+        applyUrl: j.applyUrl,
+        source: j.source,
+        salaryLabel: null,
+        postedAt: null,
+        company: j.company,
+      }),
+    );
   }
 
   // Strict MENA board: location/title signal (or Remote/Hybrid from regional HQ)
@@ -93,10 +96,19 @@ export default async function JobsPage() {
     isMenaListedRole(j.location, j.title, j.company?.country),
   );
 
-  const roleCount = Math.max(liveCount, jobs.length);
+  const roleCount = jobs.length;
+  const updatedIso = latestPostedAtIso(jobs);
 
   return (
     <div className="mq-atelier min-h-screen bg-[#05080f]">
+      <JobsItemListJsonLd
+        locale={locale}
+        jobs={jobs.map((j) => ({
+          title: j.title,
+          slug: j.slug,
+          companySlug: j.company?.slug ?? null,
+        }))}
+      />
       <JobPortalChrome
         backHref="/"
         backLabel={{ en: 'Home', ar: 'الرئيسية' }}
@@ -104,7 +116,7 @@ export default async function JobsPage() {
       />
 
       <JobsHero roleCount={roleCount} />
-      <JobsBrowserClient initialJobs={jobs} />
+      <JobsBrowserClient initialJobs={jobs} updatedAt={updatedIso} />
 
       <div className="mq-wrap pb-12 text-center">
         <p className="text-sm text-white/40">
@@ -120,36 +132,6 @@ export default async function JobsPage() {
   );
 }
 
-async function countMenaJobsSafe(): Promise<number> {
-  try {
-    // Count with the same MENA filter as the board (not raw DB total).
-    const rows = await db.listedJob.findMany({
-      where: {
-        isActive: true,
-        OR: [{ companyId: null }, { company: { isActive: true } }],
-      },
-      select: {
-        location: true,
-        title: true,
-        department: true,
-        description: true,
-        company: { select: { country: true } },
-      },
-      take: 2000,
-      orderBy: { postedAt: 'desc' },
-    });
-    return rows.filter((j) =>
-      isMenaListedRole(j.location, j.title, j.company?.country, {
-        department: j.department,
-        description: j.description,
-      }),
-    ).length;
-  } catch (err) {
-    console.error('[jobs page count]', err);
-    return 0;
-  }
-}
-
 async function loadJobsSafe() {
   try {
     const rows = await db.listedJob.findMany({
@@ -157,28 +139,26 @@ async function loadJobsSafe() {
         isActive: true,
         OR: [{ companyId: null }, { company: { isActive: true } }],
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        location: true,
+        department: true,
+        employmentType: true,
+        description: true,
+        applyUrl: true,
+        source: true,
+        salaryLabel: true,
+        postedAt: true,
         company: {
-          select: { name: true, slug: true, country: true, logoUrl: true },
+          select: { name: true, slug: true, country: true },
         },
       },
       orderBy: { postedAt: 'desc' },
-      take: JOBS_PAGE_TAKE,
+      take: JOBS_BOARD_TAKE,
     });
-    return rows.map((j) => ({
-      id: j.id,
-      title: j.title,
-      slug: j.slug,
-      location: j.location,
-      department: j.department,
-      employmentType: j.employmentType,
-      description: safeJobText(j.description, 280),
-      requirements: j.requirements ? safeJobText(j.requirements, 220) : null,
-      applyUrl: j.applyUrl,
-      source: j.source,
-      salaryLabel: j.salaryLabel,
-      company: j.company,
-    }));
+    return rows.map(toJobsBoardCard);
   } catch (err) {
     console.error('[jobs page]', err);
     return [];

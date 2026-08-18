@@ -17,28 +17,17 @@ import {
   MENA_COUNTRY_ORDER,
   type MenaCountryKey,
 } from '@/lib/jobs/mena';
+import { formatBoardPostedOn, type JobsBoardCard } from '@/lib/jobs/board';
 
-export type ListedJobCard = {
-  id: string;
-  title: string;
-  slug: string;
-  location: string;
-  department: string | null;
-  employmentType: string | null;
-  description: string;
-  requirements: string | null;
-  applyUrl: string;
-  source: string;
-  salaryLabel: string | null;
-  company: {
-    name: string;
-    slug: string;
-    country: string;
-    logoUrl: string | null;
-  } | null;
-};
+export type ListedJobCard = JobsBoardCard;
 
-export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[] }) {
+export function JobsBrowserClient({
+  initialJobs,
+  updatedAt,
+}: {
+  initialJobs: ListedJobCard[];
+  updatedAt?: string | null;
+}) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const [country, setCountry] = useState<'all' | MenaCountryKey>('all');
@@ -140,6 +129,13 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
             <h2 className="mq-display text-3xl font-bold text-white md:text-4xl">
               {isAr ? 'اختر وظيفة. تدرّب عليها.' : 'Pick a role. Practice it.'}
             </h2>
+            {updatedAt ? (
+              <p className="mt-2 text-xs text-white/35">
+                {isAr
+                  ? `آخر تحديث للقائمة: ${formatBoardPostedOn(updatedAt, locale)}`
+                  : `Board updated ${formatBoardPostedOn(updatedAt, locale)}`}
+              </p>
+            ) : null}
           </div>
           <p className="text-sm text-white/45 md:max-w-sm md:text-end">
             {isAr
@@ -333,6 +329,13 @@ export function JobsBrowserClient({ initialJobs }: { initialJobs: ListedJobCard[
                                 : 'Salary shown when published'}
                             </span>
                           )}
+                          {job.postedAt ? (
+                            <span className="text-white/35">
+                              {isAr
+                                ? `نُشرت ${formatBoardPostedOn(job.postedAt, locale)}`
+                                : `Posted ${formatBoardPostedOn(job.postedAt, locale)}`}
+                            </span>
+                          ) : null}
                         </p>
                         <p className="mt-2 text-sm text-white/55">
                           {isAr
@@ -523,13 +526,11 @@ function SpotlightRole({
             : 'Practice role-specific questions with Jeannie, then apply yourself on the company site.'}
         </p>
       )}
-      {job.requirements ? (
-        <p className="relative mt-3 max-w-2xl text-sm leading-relaxed text-white/45">
-          <span className="font-semibold text-white/55">
-            {isAr ? 'المتطلبات: ' : 'Requirements: '}
-          </span>
-          {job.requirements.slice(0, 220)}
-          {job.requirements.length > 220 ? '…' : ''}
+      {job.postedAt ? (
+        <p className="relative mt-3 text-sm text-white/40">
+          {isAr
+            ? `نُشرت ${formatBoardPostedOn(job.postedAt, locale)}`
+            : `Posted ${formatBoardPostedOn(job.postedAt, locale)}`}
         </p>
       ) : null}
       <p className="relative mt-5 text-sm font-medium text-teal-100/90">

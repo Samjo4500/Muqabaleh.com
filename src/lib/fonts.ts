@@ -31,7 +31,7 @@ export const fontBodyAr = IBM_Plex_Sans_Arabic({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-body-ar',
-  // Default locale is Arabic — preload Arabic body for LCP text.
+  // Default locale is Arabic — preload only the body face used for LCP text.
   preload: true,
 });
 
@@ -41,7 +41,7 @@ export const fontDisplayAr = Readex_Pro({
   weight: ['500', '600', '700'],
   display: 'swap',
   variable: '--font-display-ar',
-  preload: true,
+  preload: false,
 });
 
 /** Jeannie Arabic name mark — not on critical path for every route */

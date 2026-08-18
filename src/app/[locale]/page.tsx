@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { CrystalLanding } from '@/components/landing/crystal';
-import { FaqJsonLd } from '@/components/json-ld';
+import { FaqJsonLd, SoftwareApplicationJsonLd } from '@/components/json-ld';
 import { C } from '@/components/landing/crystal/copy';
 import { pageMetadata } from '@/lib/seo';
 
@@ -42,6 +42,7 @@ export default async function LandingPage({ params }: Props) {
   return (
     <>
       <FaqJsonLd locale={locale} items={C.faq.items} />
+      <SoftwareApplicationJsonLd locale={locale} />
       <CrystalLanding />
     </>
   );

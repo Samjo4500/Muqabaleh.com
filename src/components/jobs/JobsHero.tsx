@@ -15,6 +15,7 @@ import {
 import { easeCrystal, fadeUp, stagger } from '@/components/landing/crystal/motion';
 import { localePath } from '@/i18n/navigation';
 import { jeanniePracticePath } from '@/lib/jobs/jeannie-practice';
+import { HERO_FULL_BLEED_SIZES, HERO_LCP_QUALITY } from '@/lib/perf/hero-media';
 
 type Props = {
   roleCount: number;
@@ -96,8 +97,8 @@ export function JobsHero({ roleCount }: Props) {
                 fill
                 priority={frame === 0}
                 fetchPriority={frame === 0 ? 'high' : 'auto'}
-                sizes="100vw"
-                quality={68}
+                sizes={HERO_FULL_BLEED_SIZES}
+                quality={HERO_LCP_QUALITY}
                 className="object-cover object-[center_35%]"
               />
             </motion.div>

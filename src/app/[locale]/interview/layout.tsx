@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { FullMessages } from '@/components/i18n/FullMessages';
 import {
   PartnerBrandProvider,
   PartnerInterviewChrome,
@@ -17,13 +18,15 @@ export default async function InterviewLayout({
   const hostHint = h.get('x-partner-host');
 
   return (
-    <PartnerBrandProvider hostHint={hostHint}>
-      <div className="interview-wl-shell">
-        <div className="mq-wrap pt-3 empty:hidden [&:has(.wl-chrome)]:block">
-          <PartnerInterviewChrome />
+    <FullMessages>
+      <PartnerBrandProvider hostHint={hostHint}>
+        <div className="interview-wl-shell">
+          <div className="mq-wrap pt-3 empty:hidden [&:has(.wl-chrome)]:block">
+            <PartnerInterviewChrome />
+          </div>
+          {children}
         </div>
-        {children}
-      </div>
-    </PartnerBrandProvider>
+      </PartnerBrandProvider>
+    </FullMessages>
   );
 }

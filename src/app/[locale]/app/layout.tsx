@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { FullMessages } from '@/components/i18n/FullMessages';
 import AppShell from './AppShell';
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <FullMessages>
+      <AppShell>{children}</AppShell>
+    </FullMessages>
+  );
 }

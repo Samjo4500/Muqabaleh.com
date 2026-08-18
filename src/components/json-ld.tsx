@@ -460,3 +460,66 @@ export function JobPostingJsonLd(props: JobPostingLdInput) {
   if (!data) return null;
   return <JsonLd data={data} />;
 }
+
+/** ItemList of public job URLs on /jobs — no invented descriptions. */
+export function JobsItemListJsonLd({
+  locale,
+  jobs,
+}: {
+  locale: string;
+  jobs: Array<{
+    title: string;
+    slug: string;
+    companySlug: string | null;
+  }>;
+}) {
+  const prefix = locale === 'en' ? '/en' : '';
+  const items = jobs
+    .filter((j) => j.companySlug && j.slug)
+    .slice(0, 12)
+    .map((j, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: j.title,
+      url: `${SITE_URL}${prefix}/companies/${j.companySlug}/${j.slug}`,
+    }));
+  if (!items.length) return null;
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: locale === 'ar' ? 'وظائف الشرق الأوسط' : 'MENA jobs',
+        numberOfItems: items.length,
+        itemListElement: items,
+      }}
+    />
+  );
+}
+
+export function SoftwareApplicationJsonLd({ locale }: { locale: string }) {
+  return (
+    <JsonLd
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Muqabaleh',
+        alternateName: 'مقابلة',
+        applicationCategory: 'EducationalApplication',
+        operatingSystem: 'Web',
+        inLanguage: locale === 'en' ? ['en', 'ar'] : ['ar', 'en'],
+        url: locale === 'en' ? `${SITE_URL}/en` : SITE_URL,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Muqabaleh',
+          url: SITE_URL,
+        },
+      }}
+    />
+  );
+}

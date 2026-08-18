@@ -8,6 +8,7 @@ import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingCh
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
 import { fontVariables } from '@/lib/fonts';
+import { pickPublicMessages } from '@/lib/i18n/public-messages';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/json-ld';
@@ -92,7 +93,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: ['/og-passport.jpg'],
       site: '@muqabaleh',
     },
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
     other: {
       'theme-color': '#0a1220',
     },
@@ -112,7 +123,7 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const messages = pickPublicMessages(await getMessages());
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (

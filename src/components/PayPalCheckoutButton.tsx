@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, CheckCircle2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { fetchPayPalBrowserConfig } from '@/lib/paypal-browser-config';
 
 export type PlanType = 'pro' | 'unlimited' | 'jeannie' | 'jeannie_pro' | 'mastery_pack';
 
@@ -34,6 +35,8 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
+  const [jeannieSubConfigured, setJeannieSubConfigured] = useState(false);
 
   const userTier = (session?.user as Record<string, unknown> | undefined)?.tier as string | undefined;
   const isCurrentPlan =
@@ -42,17 +45,24 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
     (plan === 'pro' && userTier === 'PRO') ||
     (plan === 'unlimited' && userTier === 'UNLIMITED');
 
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  // Prefer PayPal Subscriptions for Jeannie when plan IDs are configured;
-  // otherwise fall back to one-time Orders (still grants a 1-month period).
-  const jeannieSubConfigured =
-    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === '1' ||
-    process.env.NEXT_PUBLIC_PAYPAL_JEANNIE_SUBSCRIPTIONS === 'true';
   const isSubscription =
     plan === 'unlimited' ||
     ((plan === 'jeannie' || plan === 'jeannie_pro') && jeannieSubConfigured);
 
   useEffect(() => {
+    let mounted = true;
+    fetchPayPalBrowserConfig().then((cfg) => {
+      if (!mounted) return;
+      setPaypalClientId(cfg.clientId);
+      setJeannieSubConfigured(cfg.jeannieSubscriptions);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paypalClientId === null) return;
     if (!paypalClientId || !session || isCurrentPlan) {
       setLoading(false);
       return;
@@ -64,7 +74,7 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
         const { loadScript } = await import('@paypal/paypal-js');
 
         const paypal = await loadScript({
-          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+          clientId: paypalClientId,
           vault: isSubscription,
           intent: isSubscription ? 'subscription' : 'capture',
           locale: locale === 'ar' ? 'ar_SA' : 'en_US',
@@ -179,6 +189,15 @@ export function PayPalCheckoutButton({ plan, className = '' }: PayPalCheckoutBut
       mounted = false;
     };
   }, [session, isCurrentPlan, locale, t, plan, paypalClientId, isSubscription]);
+
+  if (paypalClientId === null) {
+    return (
+      <div className={`flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)] ${className}`}>
+        <Loader2 size={18} className="animate-spin text-gold" />
+        {t('loadingGateway')}
+      </div>
+    );
+  }
 
   if (!paypalClientId) {
     return (

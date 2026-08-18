@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { fetchPayPalBrowserConfig } from '@/lib/paypal-browser-config';
 
 interface BookingPayPalButtonProps {
   bookingId: string;
@@ -23,9 +24,20 @@ export function BookingPayPalButton({
   const [capturing, setCapturing] = useState(false);
   const [error, setError] = useState('');
 
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+    fetchPayPalBrowserConfig().then((cfg) => {
+      if (mounted) setPaypalClientId(cfg.clientId);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paypalClientId === null) return;
     if (!paypalClientId) {
       setLoading(false);
       return;
@@ -37,7 +49,7 @@ export function BookingPayPalButton({
         const { loadScript } = await import('@paypal/paypal-js');
 
         const paypal = await loadScript({
-          'client-id': process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+          'client-id': paypalClientId,
           intent: 'capture',
           currency: 'USD',
           locale: locale === 'ar' ? 'ar_SA' : 'en_US',
@@ -128,7 +140,16 @@ export function BookingPayPalButton({
     return () => {
       mounted = false;
     };
-  }, [bookingId, amount, locale, onSuccess, onError]);
+  }, [bookingId, amount, locale, onSuccess, onError, paypalClientId]);
+
+  if (paypalClientId === null) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]">
+        <Loader2 size={18} className="animate-spin text-[var(--gold)]" />
+        {locale === 'ar' ? 'جارٍ تحميل بوابة الدفع...' : 'Loading payment gateway...'}
+      </div>
+    );
+  }
 
   // --- PayPal not configured ---
   if (!paypalClientId) {

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { fetchPayPalBrowserConfig } from '@/lib/paypal-browser-config';
 
 interface PayPalSubscriptionButtonProps {
   /** If true, render a compact inline button; if false, render a full card */
@@ -31,9 +32,20 @@ export function PayPalSubscriptionButton({
     tier,
   );
 
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+    fetchPayPalBrowserConfig().then((cfg) => {
+      if (mounted) setPaypalClientId(cfg.clientId);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (paypalClientId === null) return;
     if (!paypalClientId || !session || isPremium) {
       setLoading(false);
       return;
@@ -45,7 +57,7 @@ export function PayPalSubscriptionButton({
         const { loadScript } = await import('@paypal/paypal-js');
 
         const paypal = await loadScript({
-          'client-id': process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+          'client-id': paypalClientId,
           vault: true,
           intent: 'subscription',
           locale: locale === 'ar' ? 'ar_SA' : 'en_US',
@@ -122,7 +134,16 @@ export function PayPalSubscriptionButton({
     return () => {
       mounted = false;
     };
-  }, [session, isPremium, locale, t, compact]);
+  }, [session, isPremium, locale, t, compact, paypalClientId]);
+
+  if (paypalClientId === null) {
+    return (
+      <div className={`flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)] ${className}`}>
+        <Loader2 size={18} className="animate-spin text-gold" />
+        {t('loadingGateway')}
+      </div>
+    );
+  }
 
   // --- PayPal not configured ---
   if (!paypalClientId) {

@@ -184,6 +184,28 @@ export function hasJeannieSubscriptionPlans(): boolean {
   );
 }
 
+/**
+ * Browser-safe PayPal config. Client IDs are public by design.
+ * Prefer PAYPAL_CLIENT_ID so this still works when NEXT_PUBLIC_* is
+ * marked Sensitive on Vercel (those never reach the client bundle).
+ */
+export function getPublicPayPalConfig(): {
+  clientId: string;
+  mode: 'live' | 'sandbox';
+  jeannieSubscriptions: boolean;
+} {
+  const clientId = (
+    process.env.PAYPAL_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ||
+    ''
+  ).trim();
+  return {
+    clientId,
+    mode: process.env.PAYPAL_MODE === 'live' ? 'live' : 'sandbox',
+    jeannieSubscriptions: hasJeannieSubscriptionPlans(),
+  };
+}
+
 /** Resolve PLAN_CONFIG entry by captured USD amount string. */
 export function findPlanByAmount(amountValue: string) {
   const normalized = Number.parseFloat(amountValue).toFixed(2);

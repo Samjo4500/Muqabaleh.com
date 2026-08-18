@@ -1,53 +1,13 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import { securityHeaders } from './src/lib/security/http-headers';
 
 const withNextIntl = createNextIntlPlugin();
-
-/**
- * Content-Security-Policy tuned for:
- * - Next.js App Router (inline scripts/styles in production without nonce middleware)
- * - PayPal JS SDK + checkout iframes/popups
- * - Daily.co call iframes (human interview rooms)
- * - Microphone / blob media for AI interview recording
- *
- * Prefer tightening further with nonces later; do not invent allowlists for unused CDNs.
- */
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self' https://www.paypal.com https://www.sandbox.paypal.com",
-  // Next.js hydration + PayPal SDK. 'unsafe-eval' kept for Next/PayPal compatibility;
-  // remove once a nonce-based CSP middleware is in place.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://c.paypal.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "media-src 'self' blob: data:",
-  "worker-src 'self' blob:",
-  "connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://c.paypal.com https://api.daily.co https://*.daily.co wss://*.daily.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://*.sentry.io https://*.ingest.sentry.io https://www.facebook.com https://connect.facebook.net",
-  "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://*.daily.co",
-  "upgrade-insecure-requests",
-].join('; ');
-
-const securityHeaders = [
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  {
-    key: 'Permissions-Policy',
-    value: 'camera=(self), microphone=(self), geolocation=(), payment=(self "https://www.paypal.com" "https://www.sandbox.paypal.com")',
-  },
-  // Allow PayPal checkout popups without fully isolating the opener.
-  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
-  { key: 'Content-Security-Policy', value: contentSecurityPolicy },
-];
 
 const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1400],
     imageSizes: [64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
@@ -104,6 +64,16 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: "default-src 'none'; frame-ancestors 'self'; object-src 'none'; base-uri 'none'",
           },
+        ],
+      },
+      {
+        source: '/.well-known/security.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400',
+          },
+          { key: 'Content-Type', value: 'text/plain; charset=utf-8' },
         ],
       },
       {

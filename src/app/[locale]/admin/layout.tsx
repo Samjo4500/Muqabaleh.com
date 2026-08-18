@@ -1,3 +1,4 @@
+import { FullMessages } from '@/components/i18n/FullMessages';
 import { AdminGate } from './admin-guard';
 import { AdminShell } from './admin-shell';
 
@@ -11,8 +12,10 @@ export default async function AdminLayout({
   const { locale } = await params;
 
   return (
-    <AdminGate locale={locale}>
-      <AdminShell>{children}</AdminShell>
-    </AdminGate>
+    <FullMessages>
+      <AdminGate locale={locale}>
+        <AdminShell>{children}</AdminShell>
+      </AdminGate>
+    </FullMessages>
   );
 }

@@ -313,8 +313,8 @@ export function CrystalJeannie() {
                       fill
                       className="object-cover"
                       style={{ objectPosition: meta.objectPosition }}
-                      sizes="(max-width: 1024px) 100vw, 58vw"
-                      quality={78}
+                      sizes="(max-width: 640px) 640px, (max-width: 1024px) 100vw, 58vw"
+                      quality={58}
                       // Never compete with the home hero LCP image
                       priority={false}
                     />

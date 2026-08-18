@@ -15,6 +15,7 @@ import {
   MENA_JEANNIE_FRAMES,
   prefetchNextImage,
 } from './mena-hero-frames';
+import { HERO_FULL_BLEED_SIZES, HERO_LCP_QUALITY } from '@/lib/perf/hero-media';
 import { easeCrystal, fadeUp, stagger } from './motion';
 
 const HERO_SCORE = 86;
@@ -87,8 +88,8 @@ export function CrystalHero() {
                 fetchPriority={frame === 0 ? 'high' : 'auto'}
                 className="object-cover mq-hero-face"
                 style={{ objectPosition: current.objectPosition }}
-                sizes="100vw"
-                quality={70}
+                sizes={HERO_FULL_BLEED_SIZES}
+                quality={HERO_LCP_QUALITY}
               />
             </motion.div>
           </AnimatePresence>

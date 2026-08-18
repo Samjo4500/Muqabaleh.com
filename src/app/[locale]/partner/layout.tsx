@@ -1,7 +1,10 @@
-'use client';
-
-import { PartnerShell } from '@/components/partner/partner-shell';
+import { FullMessages } from '@/components/i18n/FullMessages';
+import { PartnerChrome } from './partner-chrome';
 
 export default function PartnerLayout({ children }: { children: React.ReactNode }) {
-  return <PartnerShell>{children}</PartnerShell>;
+  return (
+    <FullMessages>
+      <PartnerChrome>{children}</PartnerChrome>
+    </FullMessages>
+  );
 }

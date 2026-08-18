@@ -28,7 +28,17 @@ export function pageMetadata(opts: {
     keywords: opts.keywords,
     robots: opts.noIndex
       ? { index: false, follow: false, googleBot: { index: false, follow: false } }
-      : { index: true, follow: true },
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1,
+          },
+        },
     alternates: {
       canonical: url,
       languages: {

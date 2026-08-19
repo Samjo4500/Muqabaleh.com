@@ -183,6 +183,7 @@ model User {
   jobMockInterviews      JobMockInterview[]
   organizationMembers    OrganizationMember[]
   nurtureLeads           NurtureLead[]
+  student100Claim        Student100Claim?
 
   @@index([companyId])
   @@index([partnerId])
@@ -1549,4 +1550,32 @@ model SiteVisit {
   @@index([visitorKey, createdAt])
   @@index([path, createdAt])
   @@map("site_visits")
+}
+
+/// Student Interview Pack campaign — first 100 verified MENA students/recent grads.
+/// Grants 3 practice credits for 30 days. Not a Jeannie Pro subscription.
+model Student100Claim {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email            String    @unique
+  fullName         String
+  country          String
+  university       String
+  major            String
+  /// CURRENT_STUDENT | GRADUATED_12M
+  eligibility      String
+  universityEmail  String?
+  proofNote        String?
+  /// PENDING | ACTIVATED | REJECTED | EXPIRED
+  status           String    @default("PENDING")
+  creditsGranted   Int       @default(0)
+  creditsRemaining Int       @default(0)
+  activatedAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@map("student100_claims")
 }

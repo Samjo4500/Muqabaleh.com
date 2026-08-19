@@ -26,6 +26,7 @@ export const STATIC_SITEMAP_ROUTES = [
   '/legal/opt-out',
   '/interview-guide',
   '/interview-guide/role',
+  '/student100',
 ] as const;
 
 export type StaticSitemapEntry = {

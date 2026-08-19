@@ -23,6 +23,7 @@ const COLS = {
     { bi: C.nav.howItWorks, href: '/#jeannie' },
     { bi: C.nav.jeannie, href: '/#jeannie' },
     { bi: C.footer.practice, href: '/interview/prequal' },
+    { bi: { en: 'Student 100', ar: 'باقة الطلاب 100' }, href: '/student100' },
     { bi: C.nav.pricing, href: '/#pricing' },
     { bi: C.footer.howScores, href: '/how-scores-work' },
     { bi: C.footer.verify, href: '/verify' },

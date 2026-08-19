@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { UserTier } from '@/lib/enums';
+import { consumeStudent100Credit, expireStudent100Pack } from '@/lib/student100/campaign';
 
 export type PlanKey = 'FREE' | 'JEANNIE' | 'JEANNIE_PRO' | 'MASTERY_PACK' | 'PRO' | 'UNLIMITED';
 
@@ -285,6 +286,8 @@ export async function debitPractice(
     };
   }
 
+  await expireStudent100Pack(userId);
+
   const snap = await getEntitlementSnapshot(userId);
   if (!snap) return { ok: false, error: 'User not found', status: 404 };
 
@@ -341,6 +344,7 @@ export async function debitPractice(
     where: { id: userId },
     select: { sessionsLeft: true },
   });
+  await consumeStudent100Credit(userId);
   return {
     ok: true,
     sessionsLeft: user?.sessionsLeft ?? 0,

@@ -4,7 +4,17 @@ import { pathNeedsSession } from './session-paths';
 
 describe('pathNeedsSession', () => {
   it('skips marketing home, jobs, and guides', () => {
-    for (const p of ['/', '/en', '/jobs', '/en/jobs', '/interview-guide/careem', '/interviewers', '/partners']) {
+    for (const p of [
+      '/',
+      '/en',
+      '/jobs',
+      '/en/jobs',
+      '/interview-guide/careem',
+      '/interviewers',
+      '/partners',
+      '/student100',
+      '/en/student100',
+    ]) {
       assert.equal(pathNeedsSession(p), false, p);
     }
   });

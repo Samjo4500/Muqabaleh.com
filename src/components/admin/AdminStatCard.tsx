@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { BiLabel } from '@/components/admin/BiLabel';
+import { BiInline, BiLabel } from '@/components/admin/BiLabel';
 import type { Bi } from '@/lib/admin/labels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -12,12 +12,14 @@ export function AdminStatCard({
   icon: Icon,
   loading,
   accent,
+  hint,
 }: {
   label: Bi;
   value: string;
   icon: LucideIcon;
   loading?: boolean;
   accent?: 'green' | 'yellow' | 'red' | 'cyan';
+  hint?: Bi;
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-[var(--bg-panel)] p-5">
@@ -39,6 +41,11 @@ export function AdminStatCard({
       ) : (
         <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">{value}</p>
       )}
+      {hint ? (
+        <p className="mt-1 text-xs font-normal text-[var(--text-muted)]">
+          <BiInline ar={hint.ar} en={hint.en} />
+        </p>
+      ) : null}
     </div>
   );
 }

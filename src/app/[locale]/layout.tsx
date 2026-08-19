@@ -7,6 +7,7 @@ import { Providers } from '@/components/providers';
 import { DeferredMarketingChrome } from '@/components/chrome/DeferredMarketingChrome';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { ConditionalAnalytics } from '@/components/analytics/ConditionalAnalytics';
+import { VisitBeacon } from '@/components/analytics/VisitBeacon';
 import { fontVariablesFor } from '@/lib/fonts';
 import { pickPublicMessages } from '@/lib/i18n/public-messages';
 import type { Metadata } from 'next';
@@ -144,6 +145,7 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <DeferredMarketingChrome />
+            <VisitBeacon locale={locale} />
             <ConditionalAnalytics />
             <DeferredToaster position={dir === 'rtl' ? 'top-left' : 'top-right'} />
           </NextIntlClientProvider>

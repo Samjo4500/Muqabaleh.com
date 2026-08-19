@@ -1536,3 +1536,17 @@ model NurtureSavedRole {
   @@index([leadId, createdAt])
   @@map("nurture_saved_roles")
 }
+
+/// First-party anonymous pageviews for Super Admin (no IP, no PII).
+model SiteVisit {
+  id         String   @id @default(cuid())
+  path       String
+  locale     String   @default("ar")
+  visitorKey String
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorKey, createdAt])
+  @@index([path, createdAt])
+  @@map("site_visits")
+}

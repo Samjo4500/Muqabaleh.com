@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
-import { useSession } from 'next-auth/react';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
 import { localePath } from '@/i18n/navigation';
 import { MENA_COUNTRIES } from '@/lib/constants';
@@ -16,11 +15,15 @@ function pick(bi: Bi, locale: string) {
 }
 
 function formatStart(locale: string) {
-  return STUDENT100_START_AT.toLocaleString(locale === 'ar' ? 'ar' : 'en-GB', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-    timeZone: 'Asia/Riyadh',
-  });
+  try {
+    return STUDENT100_START_AT.toLocaleString(locale === 'ar' ? 'ar' : 'en-GB', {
+      dateStyle: 'long',
+      timeStyle: 'short',
+      timeZone: 'Asia/Riyadh',
+    });
+  } catch {
+    return '20 Aug 2026, 00:00';
+  }
 }
 
 type StatusPayload = Student100PublicStatus & {
@@ -31,9 +34,8 @@ type StatusPayload = Student100PublicStatus & {
 export default function Student100Content({ initial }: { initial: Student100PublicStatus }) {
   const locale = useLocale();
   const isAr = locale === 'ar';
-  const { status: authStatus } = useSession();
-  const signedIn = authStatus === 'authenticated';
   const [data, setData] = useState<StatusPayload>(initial);
+  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -50,8 +52,11 @@ export default function Student100Content({ initial }: { initial: Student100Publ
     void fetch('/api/student100/status')
       .then((r) => r.json())
       .then((json: StatusPayload) => setData(json))
-      .catch(() => undefined);
-  }, [signedIn]);
+      .catch(() => undefined)
+      .finally(() => setReady(true));
+  }, []);
+
+  const signedIn = data.signedIn === true;
 
   const remainingLabel = useMemo(() => {
     if (data.soldOut) return pick(S100.claimed, locale);
@@ -155,6 +160,10 @@ export default function Student100Content({ initial }: { initial: Student100Publ
             <div className="rounded-3xl border border-white/10 p-6 text-white/70">{pick(S100.expired, locale)}</div>
           ) : data.soldOut ? (
             <div className="rounded-3xl border border-white/10 p-6 text-white/70">{pick(S100.soldOut, locale)}</div>
+          ) : !ready ? (
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-sm text-white/45">…</p>
+            </div>
           ) : !signedIn ? (
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <p className="mb-4 text-sm text-white/70">{pick(S100.needAccount, locale)}</p>

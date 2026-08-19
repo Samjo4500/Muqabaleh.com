@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import {
   STUDENT100_CAP,
@@ -64,5 +66,17 @@ describe('student100 campaign rules', () => {
       ),
       true,
     );
+  });
+});
+
+describe('student100 landing client', () => {
+  it('does not call next-auth useSession (marketing pages skip SessionProvider)', () => {
+    const src = readFileSync(
+      join(process.cwd(), 'src/app/[locale]/student100/student100-content.tsx'),
+      'utf8',
+    );
+    assert.doesNotMatch(src, /next-auth/);
+    assert.doesNotMatch(src, /useSession/);
+    assert.match(src, /\/api\/student100\/status/);
   });
 });

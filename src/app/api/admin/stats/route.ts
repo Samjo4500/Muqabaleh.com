@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { PaymentStatus } from '@/lib/enums';
+import { PaymentStatus, UserRole, UserTier } from '@/lib/enums';
+import { loadVisitorStats } from '@/lib/analytics/site-visit';
 import { verifyAdmin } from '../_lib';
 
 function dayStart(d = new Date()) {
@@ -14,6 +15,12 @@ function daysAgo(n: number) {
   d.setDate(d.getDate() - n);
   return d;
 }
+
+function hoursAgo(n: number) {
+  return new Date(Date.now() - n * 60 * 60 * 1000);
+}
+
+const COMPLETED_INTERVIEW = ['COMPLETED', 'SCORED', 'DONE'] as const;
 
 async function probeHealth(): Promise<'green' | 'yellow' | 'red'> {
   const checks: boolean[] = [];
@@ -44,6 +51,7 @@ export async function GET() {
 
     const today = dayStart();
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const d24 = hoursAgo(24);
     const d7 = daysAgo(7);
     const d30 = daysAgo(30);
     const d90 = daysAgo(90);
@@ -51,12 +59,22 @@ export async function GET() {
     const [
       revenueToday,
       revenueThisMonth,
+      revenue30d,
       interviewsToday,
+      interviews7d,
       newSignups,
+      newSignups7d,
+      usersTotal,
+      loggedIn24h,
+      candidates,
+      companyUsers,
+      interviewers,
+      admins,
       activeCompanies,
       pendingTickets,
       totalInterviews,
       completedInterviews,
+      guestInterviewsToday,
       b2cUsers,
       b2bUsers,
       industryGroups,
@@ -64,6 +82,12 @@ export async function GET() {
       recentPayments30,
       recentPayments90,
       apiHealth,
+      activeJeannieSubs,
+      jeannieTierUsers,
+      liveJobs,
+      listedCompanies,
+      recentUsers,
+      visitors,
     ] = await Promise.all([
       db.payment.aggregate({
         _sum: { amount: true },
@@ -73,12 +97,39 @@ export async function GET() {
         _sum: { amount: true },
         where: { status: PaymentStatus.COMPLETED, capturedAt: { gte: monthStart } },
       }),
+      db.payment.aggregate({
+        _sum: { amount: true },
+        where: { status: PaymentStatus.COMPLETED, capturedAt: { gte: d30 } },
+      }),
       db.interview.count({ where: { createdAt: { gte: today } } }),
+      db.interview.count({ where: { createdAt: { gte: d7 } } }),
       db.user.count({ where: { createdAt: { gte: today } } }),
-      db.company.count(),
+      db.user.count({ where: { createdAt: { gte: d7 } } }),
+      db.user.count(),
+      db.user.count({ where: { lastLoginAt: { gte: d24 } } }),
+      db.user.count({
+        where: {
+          role: UserRole.USER,
+          companyId: null,
+          accountType: { in: ['INDIVIDUAL', 'B2C'] },
+        },
+      }),
+      db.user.count({
+        where: {
+          OR: [
+            { accountType: { in: ['COMPANY', 'B2B'] } },
+            { companyId: { not: null } },
+            { role: UserRole.COMPANY_ADMIN },
+          ],
+        },
+      }),
+      db.user.count({ where: { role: UserRole.INTERVIEWER } }),
+      db.user.count({ where: { role: { in: [UserRole.ADMIN, UserRole.SUPER_ADMIN] } } }),
+      db.company.count({ where: { status: 'ACTIVE' } }),
       db.supportTicket.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS', 'PENDING'] } } }),
       db.interview.count(),
-      db.interview.count({ where: { status: { in: ['COMPLETED', 'SCORED', 'DONE'] } } }),
+      db.interview.count({ where: { status: { in: [...COMPLETED_INTERVIEW] } } }),
+      db.interview.count({ where: { createdAt: { gte: today }, userId: null } }),
       db.user.count({ where: { accountType: { in: ['INDIVIDUAL', 'B2C'] } } }),
       db.user.count({
         where: {
@@ -104,6 +155,26 @@ export async function GET() {
         select: { amount: true, capturedAt: true, createdAt: true },
       }),
       probeHealth(),
+      db.paypalSubscription.count({ where: { status: 'ACTIVE' } }),
+      db.user.count({
+        where: { tier: { in: [UserTier.JEANNIE, UserTier.JEANNIE_PRO] } },
+      }),
+      db.listedJob.count({ where: { isActive: true } }),
+      db.listedCompany.count({ where: { isActive: true } }),
+      db.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          accountType: true,
+          createdAt: true,
+          lastLoginAt: true,
+        },
+      }),
+      loadVisitorStats(d24, d7),
     ]);
 
     const bucket = (payments: { amount: number; capturedAt: Date | null; createdAt: Date }[], days: number) => {
@@ -122,23 +193,62 @@ export async function GET() {
     const completionRate =
       totalInterviews > 0 ? Math.round((completedInterviews / totalInterviews) * 100) : 0;
 
-    // Soft visitor estimate from interviews + signups when no analytics store exists
-    const visitors24h = Math.max(interviewsToday * 3 + newSignups * 2, interviewsToday + newSignups);
+    const revenueTodayUsd = Number(revenueToday._sum.amount ?? 0);
+    const revenueMonthUsd = Number(revenueThisMonth._sum.amount ?? 0);
+    const revenue30dUsd = Number(revenue30d._sum.amount ?? 0);
 
     return NextResponse.json({
+      people: {
+        total: usersTotal,
+        newToday: newSignups,
+        new7d: newSignups7d,
+        loggedIn24h,
+        candidates,
+        companies: companyUsers,
+        interviewers,
+        admins,
+      },
+      visitors,
+      interviews: {
+        today: interviewsToday,
+        last7d: interviews7d,
+        total: totalInterviews,
+        completed: completedInterviews,
+        completionRate,
+        guestToday: guestInterviewsToday,
+      },
+      money: {
+        revenueTodayUsd,
+        revenueMonthUsd,
+        revenue30dUsd,
+        activeJeannieSubs,
+        jeannieTierUsers,
+      },
+      jobs: {
+        liveListings: liveJobs,
+        companies: listedCompanies,
+      },
+      recentUsers: recentUsers.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        accountType: u.accountType,
+        createdAt: u.createdAt.toISOString(),
+        lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
+      })),
       widgets: {
         todaysInterviews: interviewsToday,
         newSignups,
-        revenueTodayCents: Math.round((revenueToday._sum.amount ?? 0) * 100),
-        revenueThisMonthCents: Math.round((revenueThisMonth._sum.amount ?? 0) * 100),
+        revenueTodayCents: Math.round(revenueTodayUsd * 100),
+        revenueThisMonthCents: Math.round(revenueMonthUsd * 100),
         activeCompanies,
         pendingSupportTickets: pendingTickets,
         apiHealth,
-        visitors24h,
+        visitors24h: visitors.available ? visitors.unique24h : 0,
       },
-      // backward compat
-      revenueTodayCents: Math.round((revenueToday._sum.amount ?? 0) * 100),
-      revenueThisMonthCents: Math.round((revenueThisMonth._sum.amount ?? 0) * 100),
+      revenueTodayCents: Math.round(revenueTodayUsd * 100),
+      revenueThisMonthCents: Math.round(revenueMonthUsd * 100),
       activeUsers: b2cUsers + b2bUsers,
       pendingApplications: pendingTickets,
       charts: {

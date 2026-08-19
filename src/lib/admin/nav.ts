@@ -58,6 +58,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { href: '/admin/b2b/jobs', label: 'b2bJobs' },
       { href: '/admin/b2b/applications', label: 'b2bApplications' },
       { href: '/admin/applicants', label: 'applicants' },
+      { href: '/admin/campaigns/student100', label: 'student100' },
     ],
   },
   {

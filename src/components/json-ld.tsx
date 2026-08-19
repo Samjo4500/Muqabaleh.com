@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { SOCIAL_LINKS } from '@/lib/brand/social-links';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://muqabaleh.com';
 
@@ -28,11 +29,7 @@ export function OrganizationJsonLd() {
           name: 'Saudi Arabia',
         },
         areaServed: 'MENA',
-        sameAs: [
-          'https://www.instagram.com/muqabaleh2026',
-          'https://www.tiktok.com/@muqabaleh2026',
-          'https://linkedin.com/company/muqabaleh',
-        ],
+        sameAs: SOCIAL_LINKS.map((s) => s.href.split('?')[0]),
       }}
     />
   );

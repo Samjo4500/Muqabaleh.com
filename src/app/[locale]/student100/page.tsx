@@ -1,12 +1,15 @@
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { pageMetadata } from '@/lib/seo';
-import { getStudent100Status } from '@/lib/student100/campaign';
+import { STUDENT100_CAP, STUDENT100_START_AT } from '@/lib/student100/constants';
 import Student100Content from './student100-content';
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
+
+/** Inventory is fetched on the client so production builds do not query Postgres. */
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -25,6 +28,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const campaign = await getStudent100Status();
-  return <Student100Content initial={campaign} />;
+  return (
+    <Student100Content
+      initial={{
+        available: false,
+        open: true,
+        startAt: STUDENT100_START_AT.toISOString(),
+        cap: STUDENT100_CAP,
+        reserved: 0,
+        remaining: STUDENT100_CAP,
+        soldOut: false,
+      }}
+    />
+  );
 }

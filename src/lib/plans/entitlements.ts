@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { UserTier } from '@/lib/enums';
-import { consumeStudent100Credit, expireStudent100Pack } from '@/lib/student100/campaign';
+import { consumeStudent100Credit, expireStudent100Pack } from '@/lib/student100/credits';
 
 export type PlanKey = 'FREE' | 'JEANNIE' | 'JEANNIE_PRO' | 'MASTERY_PACK' | 'PRO' | 'UNLIMITED';
 

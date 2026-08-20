@@ -6,6 +6,8 @@ function pick(bi: Bi, locale: string) {
 
 export const S100 = {
   kicker: { ar: 'باقة مقابلة للطلاب', en: 'Muqabaleh Student Interview Pack' },
+  heroOffer: { ar: 'مجاناً لأول 100 طالب', en: 'Free for 100 students' },
+  heroCta: { ar: 'قدّم الآن', en: 'Apply now' },
   h1: { ar: 'من بغداد إلى الدار البيضاء.', en: 'From Baghdad to Casablanca.' },
   sub: {
     ar: 'كل طالب في المنطقة يستحق أن يدخل أول مقابلة عمل حقيقية وهو مستعد. نقدّم لأول 100 طالب أو خريج حديث مؤهلين باقة جاهزية مجانية — ليست اشتراك جيني برو.',

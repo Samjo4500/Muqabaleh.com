@@ -1871,190 +1871,115 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
   display: none !important;
 }
 
-/* Student 100 — compact animated MENA hero */
+/* Student 100 — campaign banner over a quiet MENA map */
 .s100-hero {
-  padding: 0.5rem 1.25rem 0;
+  padding: 0.25rem 0 0;
   background: transparent;
 }
 .s100-hero-stage {
   position: relative;
-  height: 188px;
-  max-width: 440px;
-  margin-inline: auto;
+  height: 18.5rem;
   overflow: hidden;
-  border-radius: 1.15rem;
-  border: 1px solid rgba(232, 201, 122, 0.18);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: #070b14;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 0 1px rgba(7, 11, 20, 0.4),
-    0 14px 36px rgba(0, 0, 0, 0.28);
+    0 20px 50px rgba(0, 0, 0, 0.28);
 }
 @media (min-width: 768px) {
   .s100-hero-stage {
-    height: 214px;
-    max-width: 500px;
+    height: 22rem;
   }
 }
 .s100-hero-map {
-  display: block;
-  width: 124%;
-  height: 124%;
-  margin: -12%;
-  opacity: 0.88;
-  animation: s100-drift 22s ease-in-out infinite alternate;
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  opacity: 0.42;
+  animation: s100-drift 28s ease-in-out infinite alternate;
 }
 .s100-hero-center {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 2;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.65rem;
-  background: radial-gradient(ellipse at center, rgba(7, 11, 20, 0.55) 0%, rgba(7, 11, 20, 0.18) 52%, transparent 72%);
-}
-.s100-hero-halo {
-  position: absolute;
-  width: 210px;
-  height: 210px;
-  border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(
-    circle,
-    rgba(232, 201, 122, 0.42) 0%,
-    rgba(45, 212, 191, 0.16) 36%,
-    transparent 68%
-  );
-  filter: blur(6px);
-  animation: s100-halo 3.8s ease-in-out infinite;
-}
-.s100-hero-lockup {
-  position: relative;
-  z-index: 1;
-  display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: center;
-  gap: 0.28rem;
-  max-width: 92%;
-  padding: 0.45rem 0.85rem 0.55rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(232, 201, 122, 0.22);
-  background: rgba(7, 11, 20, 0.38);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 1.5rem 1.25rem;
+  background:
+    radial-gradient(ellipse 55% 60% at 50% 48%, rgba(7, 11, 20, 0.38) 0%, rgba(7, 11, 20, 0.12) 55%, transparent 74%);
 }
 .s100-hero-logo {
-  height: auto !important;
-  width: 196px !important;
-  max-width: min(196px, 72vw);
+  height: 5.5rem !important;
+  width: auto !important;
   mix-blend-mode: lighten;
 }
 @media (min-width: 768px) {
   .s100-hero-logo {
-    width: 228px !important;
-    max-width: 228px;
+    height: 6.25rem !important;
   }
 }
 .s100-hero-offer {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: #e8c97a;
-  text-shadow: 0 0 12px rgba(232, 201, 122, 0.4);
-}
-[dir='ltr'] .s100-hero-offer {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 .s100-hero-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 0.35rem 0.95rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #0a0e14;
-  background: linear-gradient(135deg, #d4a843 0%, #e8c97a 55%, #f3e2a8 100%);
-  box-shadow: 0 0 18px rgba(232, 201, 122, 0.28);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-}
-.s100-hero-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 24px rgba(232, 201, 122, 0.42);
+  min-height: 44px !important;
+  padding: 0.7rem 1.35rem !important;
+  font-size: 0.9rem !important;
 }
 .s100-stroke {
-  stroke-dasharray: 7 11;
-  animation: s100-dash 28s linear infinite;
-}
-.s100-stroke-slow {
-  animation-duration: 42s;
-  animation-direction: reverse;
+  stroke-dasharray: 5 14;
+  animation: s100-dash 42s linear infinite;
 }
 .s100-route {
-  stroke-dasharray: 4 14;
-  animation: s100-dash 16s linear infinite;
+  stroke-dasharray: 3 16;
+  animation: s100-dash 26s linear infinite;
 }
 .s100-pin,
-.s100-pin-core,
 .s100-pin-ring {
   transform-box: fill-box;
   transform-origin: center;
 }
 .s100-pin {
   fill: #e8c97a;
-  animation: s100-pin-blink 2.1s ease-in-out infinite;
-}
-.s100-pin-core {
-  fill: #fff6d6;
-  animation: s100-pin-core 2.1s ease-in-out infinite;
+  animation: s100-pin-breathe 3.4s ease-in-out infinite;
 }
 .s100-pin-ring {
   fill: none;
-  stroke: #ef4444;
-  stroke-width: 1.2;
-  opacity: 0;
-  animation: s100-pin-ring 2.1s ease-in-out infinite;
-}
-@keyframes s100-halo {
-  0%, 100% { opacity: 0.72; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.08); }
+  stroke: rgba(232, 201, 122, 0.45);
+  stroke-width: 1;
+  animation: s100-pin-ring 3.4s ease-in-out infinite;
 }
 @keyframes s100-drift {
-  from { transform: scale(1.02) translate(-0.4%, 0.2%); }
-  to { transform: scale(1.05) translate(0.5%, -0.3%); }
+  from { transform: translate(-0.8%, 0.4%); }
+  to { transform: translate(0.8%, -0.4%); }
 }
 @keyframes s100-dash {
-  to { stroke-dashoffset: -240; }
+  to { stroke-dashoffset: -180; }
 }
-@keyframes s100-pin-blink {
-  0%, 38% { fill: #e8c97a; }
-  55%, 100% { fill: #ef4444; }
-}
-@keyframes s100-pin-core {
-  0%, 38% { fill: #fff6d6; }
-  55%, 100% { fill: #fecaca; }
+@keyframes s100-pin-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 @keyframes s100-pin-ring {
-  0%, 38% { opacity: 0; transform: scale(0.7); }
-  62% { opacity: 0.7; }
-  100% { opacity: 0; transform: scale(1.35); }
+  0%, 100% { opacity: 0.15; transform: scale(0.85); }
+  50% { opacity: 0.55; transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
   .s100-hero-map,
-  .s100-hero-halo,
   .s100-stroke,
   .s100-route,
   .s100-pin,
-  .s100-pin-core,
   .s100-pin-ring {
     animation: none !important;
   }
-  .s100-pin { fill: #ef4444; }
-  .s100-pin-core { fill: #fecaca; }
+  .s100-pin { opacity: 0.85; }
 }

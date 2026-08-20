@@ -105,7 +105,7 @@ export default function Student100Content({ initial }: { initial: Student100Publ
         cta={pick(S100.heroCta, locale)}
         ctaHref="#s100-apply"
       />
-      <section className="mq-section pb-8 pt-8">
+      <section className="mq-section pb-8 pt-6">
         <div className="mq-wrap mx-auto max-w-3xl text-center">
           <p className="mq-kicker mb-3">{pick(S100.kicker, locale)}</p>
           <h1 className="mq-display mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">

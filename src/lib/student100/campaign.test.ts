@@ -80,7 +80,7 @@ describe('student100 landing client', () => {
     assert.match(src, /\/api\/student100\/status/);
   });
 
-  it('renders a compact MENA hero with logo, offer, and CTA', () => {
+  it('renders a MENA banner with logo, offer, and CTA', () => {
     const hero = readFileSync(
       join(process.cwd(), 'src/components/student100/Student100Hero.tsx'),
       'utf8',
@@ -94,8 +94,10 @@ describe('student100 landing client', () => {
     assert.match(hero, /BrandLogo/);
     assert.match(hero, /s100-hero-offer/);
     assert.match(hero, /s100-hero-cta/);
-    assert.match(hero, /s100-hero-halo/);
+    assert.match(hero, /mq-btn-on-dark/);
     assert.match(hero, /MENA_CAPITALS/);
+    assert.doesNotMatch(hero, /s100-hero-halo/);
+    assert.doesNotMatch(hero, /s100-hero-lockup/);
   });
 
   it('centers the offer copy in parentheses', () => {

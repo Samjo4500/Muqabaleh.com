@@ -19,12 +19,17 @@ type Alert = {
   unread: boolean;
 };
 
+function isStudent100(kind: string) {
+  return kind === 'student100';
+}
+
 export function AdminNotificationBell({ className }: { className?: string }) {
   const locale = useLocale();
   const isAr = locale === 'ar';
   const [open, setOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [unread, setUnread] = useState(0);
+  const student100Unread = alerts.some((a) => isStudent100(a.kind) && a.unread);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -72,9 +77,14 @@ export function AdminNotificationBell({ className }: { className?: string }) {
         aria-label={isAr ? 'التنبيهات والبريد' : 'Alerts & emails'}
         title={isAr ? 'التنبيهات والبريد' : 'Alerts & emails'}
       >
-        <Bell size={18} />
+        <Bell size={18} className={student100Unread ? 'text-amber-300' : undefined} />
         {unread > 0 ? (
-          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+          <span
+            className={cn(
+              'absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white',
+              student100Unread ? 'bg-amber-500' : 'bg-rose-500',
+            )}
+          >
             {unread > 99 ? '99+' : unread}
           </span>
         ) : null}
@@ -106,25 +116,38 @@ export function AdminNotificationBell({ className }: { className?: string }) {
                 <Link
                   href={localePath(a.href, locale)}
                   onClick={() => setOpen(false)}
-                  className="block px-3 py-2.5 hover:bg-white/[0.04]"
+                  className={cn(
+                    'block px-3 py-2.5 hover:bg-white/[0.04]',
+                    isStudent100(a.kind) && 'border-s-2 border-amber-400 bg-amber-500/[0.08]',
+                  )}
                 >
                   <div className="flex items-start gap-2">
                     <span
                       className={cn(
                         'mt-1 h-2 w-2 shrink-0 rounded-full',
-                        a.severity === 'critical'
-                          ? 'bg-rose-400'
-                          : a.severity === 'warn'
-                            ? 'bg-amber-400'
-                            : 'bg-teal-400',
+                        isStudent100(a.kind)
+                          ? 'bg-amber-400'
+                          : a.severity === 'critical'
+                            ? 'bg-rose-400'
+                            : a.severity === 'warn'
+                              ? 'bg-amber-400'
+                              : 'bg-teal-400',
                         !a.unread && 'opacity-30',
                       )}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm text-white">{a.title}</div>
+                      <div className="flex items-center gap-2">
+                        {isStudent100(a.kind) ? (
+                          <span className="shrink-0 rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-200">
+                            S100
+                          </span>
+                        ) : null}
+                        <div className="truncate text-sm text-white">{a.title}</div>
+                      </div>
                       <div className="mt-0.5 line-clamp-2 text-xs text-white/50">{a.body}</div>
                       <div className="mt-1 text-[10px] uppercase tracking-wide text-white/35">
-                        {a.kind} · {new Date(a.createdAt).toLocaleString()}
+                        {isStudent100(a.kind) ? 'Student 100' : a.kind} ·{' '}
+                        {new Date(a.createdAt).toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -139,18 +162,18 @@ export function AdminNotificationBell({ className }: { className?: string }) {
           </ul>
           <div className="flex gap-2 border-t border-white/10 p-2">
             <Link
+              href={localePath('/admin/campaigns/student100', locale)}
+              onClick={() => setOpen(false)}
+              className="flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-medium text-amber-200 hover:bg-amber-500/10"
+            >
+              <BiInline ar="مركز الطلاب 100" en="Student 100 inbox" />
+            </Link>
+            <Link
               href={localePath('/admin/notifications', locale)}
               onClick={() => setOpen(false)}
               className="flex-1 rounded-lg px-2 py-1.5 text-center text-xs text-teal-300 hover:bg-white/5"
             >
               <BiInline ar="مركز التنبيهات" en="Notification center" />
-            </Link>
-            <Link
-              href={localePath('/admin/content/email-queue', locale)}
-              onClick={() => setOpen(false)}
-              className="flex-1 rounded-lg px-2 py-1.5 text-center text-xs text-teal-300 hover:bg-white/5"
-            >
-              <BiInline ar="طابور البريد" en="Email queue" />
             </Link>
           </div>
         </div>

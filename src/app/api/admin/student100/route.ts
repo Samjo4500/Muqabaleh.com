@@ -5,14 +5,19 @@ import {
   listStudent100Claims,
   rejectStudent100Claim,
   getStudent100Status,
+  countStudent100Pending,
 } from '@/lib/student100/campaign';
 
 export async function GET() {
   const auth = await verifyAdmin();
   if (!auth.authorized) return auth.response;
   try {
-    const [campaign, items] = await Promise.all([getStudent100Status(), listStudent100Claims()]);
-    return NextResponse.json({ campaign, items });
+    const [campaign, items, pending] = await Promise.all([
+      getStudent100Status(),
+      listStudent100Claims(),
+      countStudent100Pending(),
+    ]);
+    return NextResponse.json({ campaign, items, pending });
   } catch (err) {
     console.error('GET /api/admin/student100', err);
     return NextResponse.json({ error: 'unavailable' }, { status: 503 });

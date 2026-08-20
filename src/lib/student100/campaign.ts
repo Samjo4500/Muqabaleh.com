@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { sendBrevoEmail, brandedEmailShell } from '@/lib/brevo';
 import { MUQABALEH_BRAND, localePath } from '@/lib/brand/comms';
+import { writeAdminNotification } from '@/lib/admin/notify';
 import {
   STUDENT100_CAP,
   STUDENT100_CREDITS,
@@ -19,9 +20,9 @@ import {
   normalizeEmail,
   normalizeText,
 } from './eligibility';
-
 import type { Student100Mine, Student100PublicStatus } from './types';
 import { expireStudent100Pack } from './credits';
+import { student100AdminNotification } from './admin-inbox';
 
 export type { Student100Mine, Student100PublicStatus };
 export { consumeStudent100Credit, expireStudent100Pack } from './credits';
@@ -158,12 +159,30 @@ export async function applyStudent100(input: ApplyInput): Promise<ApplyResult> {
 
     if (academic) {
       const activated = await activateStudent100Claim(created.id, input.locale);
+      const status = activated.ok ? 'ACTIVATED' : 'PENDING';
+      void notifyStudent100Inbox({
+        id: created.id,
+        name: fullName,
+        email: accountEmail,
+        university,
+        country,
+        status,
+        proofNote: proof,
+      });
       if (activated.ok) return { ok: true, status: 'ACTIVATED' };
       return { ok: true, status: 'PENDING' };
     }
 
     void notifyStudent100Pending(accountEmail, fullName, input.locale);
-    void notifyStudent100Admin(created.id, fullName, accountEmail, university, country);
+    void notifyStudent100Inbox({
+      id: created.id,
+      name: fullName,
+      email: accountEmail,
+      university,
+      country,
+      status: 'PENDING',
+      proofNote: proof,
+    });
     return { ok: true, status: 'PENDING' };
   } catch (err) {
     if (err instanceof Error && err.message === 'SOLD_OUT') {
@@ -242,6 +261,16 @@ export async function rejectStudent100Claim(claimId: string): Promise<{ ok: bool
   }
 }
 
+export async function countStudent100Pending(): Promise<number> {
+  try {
+    return await db.student100Claim.count({ where: { status: 'PENDING' } });
+  } catch (err) {
+    if (isMissingRelationError(err)) return 0;
+    console.error('countStudent100Pending', err);
+    return 0;
+  }
+}
+
 export async function listStudent100Claims() {
   return db.student100Claim.findMany({
     orderBy: { createdAt: 'desc' },
@@ -310,18 +339,31 @@ async function notifyStudent100Pending(email: string, name: string, locale: 'ar'
   }).catch(() => undefined);
 }
 
-async function notifyStudent100Admin(
-  id: string,
-  name: string,
-  email: string,
-  university: string,
-  country: string,
-) {
+async function notifyStudent100Inbox(input: {
+  id: string;
+  name: string;
+  email: string;
+  university: string;
+  country: string;
+  status: 'PENDING' | 'ACTIVATED';
+  proofNote?: string | null;
+}) {
+  const payload = student100AdminNotification(input);
+  await writeAdminNotification({
+    channel: payload.channel,
+    subject: payload.subject,
+    body: payload.body,
+    href: payload.href,
+    kind: payload.kind,
+    severity: payload.severity,
+    meta: payload.meta,
+  });
+  if (input.status !== 'PENDING') return;
   const to = process.env.ADMIN_EMAIL?.trim() || MUQABALEH_BRAND.supportEmail;
   await sendBrevoEmail({
     to,
-    subject: `[Student 100] Review ${name} — ${university}`,
-    html: `<p>${name} (${email}) applied from ${country} / ${university}. Claim ${id} needs manual review.</p>`,
+    subject: payload.subject,
+    html: `<p>${payload.body}</p><p>Open Super Admin → Student 100 Contact Center.</p>`,
     sender: MUQABALEH_BRAND.senders.system,
   }).catch(() => undefined);
 }

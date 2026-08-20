@@ -58,7 +58,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { href: '/admin/b2b/jobs', label: 'b2bJobs' },
       { href: '/admin/b2b/applications', label: 'b2bApplications' },
       { href: '/admin/applicants', label: 'applicants' },
-      { href: '/admin/campaigns/student100', label: 'student100' },
     ],
   },
   {
@@ -141,6 +140,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: 'support',
     label: 'support',
     items: [
+      { href: '/admin/campaigns/student100', label: 'student100' },
       { href: '/admin/support/tickets', label: 'tickets' },
       { href: '/admin/support/chat', label: 'chat' },
     ],

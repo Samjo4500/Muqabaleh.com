@@ -135,7 +135,7 @@ export const L = {
   coachOverview: { ar: 'نظرة جيني / الجواز', en: 'Jeannie / Passport Ops' },
   // Expanded ops (2026)
   jobsBoard: { ar: 'لوحة الوظائف', en: 'Jobs Board' },
-  student100: { ar: 'حملة الطلاب 100', en: 'Student 100' },
+  student100: { ar: 'مركز تواصل الطلاب 100', en: 'Student 100 Contact Center' },
   atsAggregator: { ar: 'مجمّع ATS', en: 'ATS Aggregator' },
   passports: { ar: 'جوازات المقابلة', en: 'Passports' },
   partnersList: { ar: 'محفظة الشركاء', en: 'Partner Portfolio' },

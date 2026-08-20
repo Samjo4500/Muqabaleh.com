@@ -5,6 +5,12 @@ import {
   hasGoogleApiKey,
   hasGoogleServiceAccount,
 } from '@/lib/coach/google-auth';
+import {
+  applyRuntimeEnvDefaults,
+  getBrevoApiKey,
+  getNextAuthSecret,
+  resolveNextAuthUrl,
+} from '@/lib/env/runtime';
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'skip';
 
@@ -276,7 +282,7 @@ async function checkSpeech(): Promise<HealthCheckResult> {
 
 async function checkBrevo(): Promise<HealthCheckResult> {
   const started = Date.now();
-  const key = process.env.BREVO_API_KEY?.trim();
+  const key = getBrevoApiKey();
   if (!key) {
     return {
       id: 'brevo',
@@ -304,6 +310,11 @@ async function checkBrevo(): Promise<HealthCheckResult> {
         detail: 'Account reachable',
       };
     }
+    const body = await res.text().catch(() => '');
+    const hint =
+      res.status === 401
+        ? ' — rotate BREVO_API_KEY in Vercel (Key not found)'
+        : '';
     return {
       id: 'brevo',
       label: { ar: 'بريد Brevo (الجواز)', en: 'Brevo (passport email)' },
@@ -311,7 +322,7 @@ async function checkBrevo(): Promise<HealthCheckResult> {
       status: 'fail',
       critical: false,
       latencyMs: Date.now() - started,
-      detail: `HTTP ${res.status}`,
+      detail: `HTTP ${res.status}${hint}${body ? `: ${body.slice(0, 80)}` : ''}`,
     };
   } catch (err) {
     return {
@@ -377,16 +388,21 @@ function checkPayPal(): HealthCheckResult {
 }
 
 function checkAuthEnv(): HealthCheckResult {
-  const secret = Boolean(process.env.NEXTAUTH_SECRET?.trim());
-  const url = Boolean(process.env.NEXTAUTH_URL?.trim());
+  applyRuntimeEnvDefaults();
+  const secret = Boolean(getNextAuthSecret());
+  const { url, source } = resolveNextAuthUrl();
   if (secret && url) {
+    const urlNote =
+      source === 'NEXTAUTH_URL'
+        ? 'NEXTAUTH_SECRET + NEXTAUTH_URL set'
+        : `NEXTAUTH_SECRET set · URL via ${source} (${url})`;
     return {
       id: 'auth',
       label: { ar: 'المصادقة', en: 'Auth (NextAuth)' },
       category: 'core',
       status: 'pass',
       critical: true,
-      detail: 'NEXTAUTH_SECRET + NEXTAUTH_URL set',
+      detail: urlNote,
     };
   }
   return {
@@ -395,7 +411,9 @@ function checkAuthEnv(): HealthCheckResult {
     category: 'core',
     status: 'fail',
     critical: true,
-    detail: !secret ? 'NEXTAUTH_SECRET missing' : 'NEXTAUTH_URL missing',
+    detail: !secret
+      ? 'NEXTAUTH_SECRET missing'
+      : 'NEXTAUTH_URL empty — set https://muqabaleh.com in Vercel',
   };
 }
 
@@ -416,6 +434,7 @@ function checkCron(): HealthCheckResult {
  * Never throws — always returns a structured report.
  */
 export async function runSystemHealthChecks(): Promise<SystemHealthReport> {
+  applyRuntimeEnvDefaults();
   const started = Date.now();
   const checks = await Promise.all([
     checkDatabase(),

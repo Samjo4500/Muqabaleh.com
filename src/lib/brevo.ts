@@ -1,6 +1,6 @@
 /**
  * Brevo transactional email helper for muqabaleh.com.
- * Reads BREVO_API_KEY from env only. Never throws to callers that catch.
+ * Reads BREVO_API_KEY (or BREVO_KEY alias). Never throws to callers that catch.
  */
 
 import {
@@ -8,6 +8,7 @@ import {
   escapeHtml,
   appBaseUrl,
 } from '@/lib/brand/comms';
+import { getBrevoApiKey } from '@/lib/env/runtime';
 
 const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 const DEFAULT_SENDER = MUQABALEH_BRAND.senders.system;
@@ -27,7 +28,7 @@ export async function sendBrevoEmail(opts: {
   replyTo?: { name?: string; email: string };
   attachment?: BrevoAttachment[];
 }): Promise<{ success: boolean; error?: string; messageId?: string }> {
-  const apiKey = process.env.BREVO_API_KEY?.trim();
+  const apiKey = getBrevoApiKey();
   if (!apiKey) {
     console.error('[brevo] BREVO_API_KEY missing');
     return { success: false, error: 'BREVO_API_KEY missing' };

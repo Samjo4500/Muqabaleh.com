@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
     }
 
     const accessToken = await getPayPalAccessToken();
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const { resolveNextAuthUrl } = await import('@/lib/env/runtime');
+    const baseUrl = resolveNextAuthUrl().url || 'http://localhost:3000';
 
     const subRes = await fetch(
       `${getPayPalApiBase()}/v1/billing/subscriptions`,

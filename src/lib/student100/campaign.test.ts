@@ -80,7 +80,7 @@ describe('student100 landing client', () => {
     assert.match(src, /\/api\/student100\/status/);
   });
 
-  it('renders an animated MENA hero with no copy over the map', () => {
+  it('renders a compact MENA hero with logo, offer, and CTA', () => {
     const hero = readFileSync(
       join(process.cwd(), 'src/components/student100/Student100Hero.tsx'),
       'utf8',
@@ -90,8 +90,17 @@ describe('student100 landing client', () => {
       'utf8',
     );
     assert.match(page, /<Student100Hero/);
-    assert.doesNotMatch(hero, /FROM BAGHDAD|INTERVIEW PACK|Start free/i);
-    assert.match(hero, /s100-pin/);
+    assert.match(page, /#s100-apply/);
+    assert.match(hero, /BrandLogo/);
+    assert.match(hero, /s100-hero-offer/);
+    assert.match(hero, /s100-hero-cta/);
+    assert.match(hero, /s100-hero-halo/);
     assert.match(hero, /MENA_CAPITALS/);
+  });
+
+  it('centers the offer copy in parentheses', () => {
+    const copy = readFileSync(join(process.cwd(), 'src/lib/student100/copy.ts'), 'utf8');
+    assert.match(copy, /\(Free for 100 students\)/);
+    assert.match(copy, /\(مجاناً لأول 100 طالب\)/);
   });
 });

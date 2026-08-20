@@ -100,7 +100,11 @@ export default function Student100Content({ initial }: { initial: Student100Publ
 
   return (
     <AtelierShell>
-      <Student100Hero />
+      <Student100Hero
+        offer={pick(S100.heroOffer, locale)}
+        cta={pick(S100.heroCta, locale)}
+        ctaHref="#s100-apply"
+      />
       <section className="mq-section pb-8 pt-8">
         <div className="mq-wrap mx-auto max-w-3xl text-center">
           <p className="mq-kicker mb-3">{pick(S100.kicker, locale)}</p>
@@ -134,7 +138,7 @@ export default function Student100Content({ initial }: { initial: Student100Publ
         </div>
       </section>
 
-      <section className="mq-section border-t border-white/10">
+      <section id="s100-apply" className="mq-section scroll-mt-24 border-t border-white/10">
         <div className="mq-wrap mx-auto max-w-xl">
           <h2 className="mq-display mb-2 text-2xl text-white">{pick(S100.formTitle, locale)}</h2>
           <p className="mb-6 text-sm text-white/55">{pick(S100.eligibilityBody, locale)}</p>

@@ -92,6 +92,8 @@ export const L = {
   chat: { ar: 'الدردشة المباشرة', en: 'Chat' },
   // Top-level
   notifications: { ar: 'مركز التنبيهات', en: 'Notification Center' },
+  alerts: { ar: 'التنبيهات', en: 'Alerts' },
+  alertsEmails: { ar: 'تنبيهات وبريد النظام', en: 'Alerts & system email' },
   audit: { ar: 'سجلات النشاط', en: 'Audit Logs' },
   applicants: { ar: 'قاعدة بيانات المتقدمين', en: 'Applicants' },
   jeannieOps: { ar: 'عمليات جيني', en: 'Jeannie Ops' },

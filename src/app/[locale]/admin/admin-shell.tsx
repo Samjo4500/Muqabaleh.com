@@ -175,8 +175,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="mq-orb mq-orb-c" />
       </div>
 
-      <LanguageSwitcherFixed />
-
       <aside
         className={cn(
           'relative z-10 hidden flex-col border-e border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all lg:flex',
@@ -198,12 +196,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </Link>
         <SidebarNav pathname={pathname} locale={locale} collapsed={collapsed} />
         <div className="mt-auto space-y-2 border-t border-white/10 p-3">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-300">
               <ShieldCheck size={14} />
               {!collapsed ? <BiInline ar={L.systemAdmin.ar} en={L.systemAdmin.en} /> : null}
             </span>
-            <AdminNotificationBell />
           </div>
           <button
             type="button"
@@ -238,10 +235,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/10 bg-[#070b14]/80 px-4 pe-24 backdrop-blur-md lg:hidden">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-white/10 bg-[#070b14]/92 px-4 backdrop-blur-md lg:px-6">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <button type="button" className="rounded-lg p-2 text-white/50 hover:bg-white/5" aria-label="Menu">
+              <button
+                type="button"
+                className="rounded-lg p-2 text-white/50 hover:bg-white/5 lg:hidden"
+                aria-label="Menu"
+              >
                 <Menu size={20} />
               </button>
             </SheetTrigger>
@@ -266,25 +267,32 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </Sheet>
           <Link
             href={localePath('/', locale)}
-            className="flex min-w-0 items-center gap-2"
+            className="flex min-w-0 items-center gap-2 lg:hidden"
             aria-label={homeLabel}
           >
             <BrandLogo size="nav" />
           </Link>
-          <div className="ms-auto flex items-center gap-1">
-            <AdminNotificationBell />
+          <div className="hidden min-w-0 lg:block">
+            <p className="truncate text-sm font-semibold text-white">
+              <BiInline ar={L.systemAdmin.ar} en={L.systemAdmin.en} />
+            </p>
+            <p className="truncate text-[11px] text-white/45">
+              <BiInline ar={L.alertsEmails.ar} en={L.alertsEmails.en} />
+            </p>
+          </div>
+          <div className="ms-auto flex items-center gap-2" dir="ltr">
             <button
               type="button"
               onClick={toggle}
-              className="rounded-lg p-2 text-white/50 hover:bg-white/5"
+              className="rounded-xl border border-white/10 p-2 text-white/60 hover:bg-white/5 hover:text-white"
+              aria-label={isAr ? L.theme.ar : L.theme.en}
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
+            <LanguageSwitcherFixed variant="inline" />
+            <AdminNotificationBell />
           </div>
         </header>
-        <div className="sticky top-0 z-30 hidden items-center justify-end gap-2 border-b border-white/10 bg-[#070b14]/70 px-6 py-2 backdrop-blur-md lg:flex">
-          <AdminNotificationBell />
-        </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {showGlobalBack ? (
             <div className="mb-4">

@@ -4,15 +4,27 @@ import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { getLocaleSwitchPath } from '@/i18n/navigation';
 
-/** Shared fixed EN / عربي control used across atelier surfaces. */
-export function LanguageSwitcherFixed({ className = '' }: { className?: string }) {
+/** Shared EN / عربي control. Default is a fixed overlay; `inline` sits in a header. */
+export function LanguageSwitcherFixed({
+  className = '',
+  variant = 'fixed',
+}: {
+  className?: string;
+  variant?: 'fixed' | 'inline';
+}) {
   const locale = useLocale();
   const pathname = usePathname() || '/';
   const nextLocale = locale === 'ar' ? 'en' : 'ar';
   const href = getLocaleSwitchPath(pathname, locale, nextLocale);
 
   return (
-    <div className={`fixed top-4 right-4 z-[70] ${className}`}>
+    <div
+      className={
+        variant === 'inline'
+          ? `relative z-10 ${className}`
+          : `fixed top-4 right-4 z-[70] ${className}`
+      }
+    >
       <a
         href={href}
         className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/8 px-3 py-2 text-[11px] font-bold tracking-wide text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition hover:border-teal-300/40 hover:bg-white/12"

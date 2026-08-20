@@ -57,8 +57,20 @@ describe('student100 contact center', () => {
     const bell = readFileSync(join(process.cwd(), 'src/components/admin/AdminNotificationBell.tsx'), 'utf8');
     assert.match(bell, /isStudent100/);
     assert.match(bell, /S100/);
+    assert.match(bell, /Alerts & system email/);
     const nav = readFileSync(join(process.cwd(), 'src/lib/admin/nav.ts'), 'utf8');
     assert.match(nav, /id: 'support'/);
     assert.match(nav, /\/admin\/campaigns\/student100/);
+  });
+
+  it('keeps Super Admin alerts in the header, not under the language overlay', () => {
+    const shell = readFileSync(join(process.cwd(), 'src/app/[locale]/admin/admin-shell.tsx'), 'utf8');
+    assert.match(shell, /<header/);
+    assert.match(shell, /AdminNotificationBell/);
+    assert.match(shell, /variant="inline"/);
+    assert.doesNotMatch(shell, /pe-24/);
+    assert.doesNotMatch(shell, /<LanguageSwitcherFixed \/>/);
+    const lang = readFileSync(join(process.cwd(), 'src/components/chrome/LanguageSwitcherFixed.tsx'), 'utf8');
+    assert.match(lang, /variant === 'inline'/);
   });
 });

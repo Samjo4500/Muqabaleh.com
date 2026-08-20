@@ -138,7 +138,7 @@ export default function Student100Content({ initial }: { initial: Student100Publ
         </div>
       </section>
 
-      <section id="s100-apply" className="mq-section border-t border-white/10">
+      <section id="s100-apply" className="mq-section scroll-mt-24 border-t border-white/10">
         <div className="mq-wrap mx-auto max-w-xl">
           <h2 className="mq-display mb-2 text-2xl text-white">{pick(S100.formTitle, locale)}</h2>
           <p className="mb-6 text-sm text-white/55">{pick(S100.eligibilityBody, locale)}</p>

@@ -111,11 +111,14 @@ export function Student100Hero({
         </svg>
 
         <div className="s100-hero-center">
-          <BrandLogo size="md" priority className="s100-hero-logo" />
-          <p className="s100-hero-offer">{offer}</p>
-          <a href={ctaHref} className="mq-btn mq-btn-primary s100-hero-cta">
-            {cta}
-          </a>
+          <div className="s100-hero-halo" aria-hidden="true" />
+          <div className="s100-hero-lockup">
+            <BrandLogo size="md" priority className="s100-hero-logo" />
+            <p className="s100-hero-offer">{offer}</p>
+            <a href={ctaHref} className="s100-hero-cta">
+              {cta}
+            </a>
+          </div>
         </div>
       </div>
     </section>

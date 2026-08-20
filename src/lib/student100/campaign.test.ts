@@ -94,6 +94,13 @@ describe('student100 landing client', () => {
     assert.match(hero, /BrandLogo/);
     assert.match(hero, /s100-hero-offer/);
     assert.match(hero, /s100-hero-cta/);
+    assert.match(hero, /s100-hero-halo/);
     assert.match(hero, /MENA_CAPITALS/);
+  });
+
+  it('centers the offer copy in parentheses', () => {
+    const copy = readFileSync(join(process.cwd(), 'src/lib/student100/copy.ts'), 'utf8');
+    assert.match(copy, /\(Free for 100 students\)/);
+    assert.match(copy, /\(مجاناً لأول 100 طالب\)/);
   });
 });

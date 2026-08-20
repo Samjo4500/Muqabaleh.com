@@ -6,7 +6,7 @@ function pick(bi: Bi, locale: string) {
 
 export const S100 = {
   kicker: { ar: 'باقة مقابلة للطلاب', en: 'Muqabaleh Student Interview Pack' },
-  heroOffer: { ar: 'مجاناً لأول 100 طالب', en: 'Free for 100 students' },
+  heroOffer: { ar: '(مجاناً لأول 100 طالب)', en: '(Free for 100 students)' },
   heroCta: { ar: 'قدّم الآن', en: 'Apply now' },
   h1: { ar: 'من بغداد إلى الدار البيضاء.', en: 'From Baghdad to Casablanca.' },
   sub: {

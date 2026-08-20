@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdmin } from '../_lib';
 import { writeAdminAudit } from '@/lib/admin/audit';
+import { countStudent100Pending } from '@/lib/student100/campaign';
+import { STUDENT100_ADMIN_PATH, STUDENT100_ALERT_KIND } from '@/lib/student100/admin-inbox';
 
 export type AdminAlert = {
   id: string;
-  kind: 'email' | 'queue' | 'ticket' | 'jobs' | 'partner' | 'system';
+  kind: 'email' | 'queue' | 'ticket' | 'jobs' | 'partner' | 'system' | 'student100';
   severity: 'info' | 'warn' | 'critical';
   title: string;
   body: string;
@@ -32,6 +34,7 @@ export async function GET() {
     pendingPartners,
     recentJobFails,
     activeJobs,
+    pendingStudent100,
   ] = await Promise.all([
     db.notificationLog.findMany({
       orderBy: { createdAt: 'desc' },
@@ -60,6 +63,7 @@ export async function GET() {
       include: { company: { select: { name: true, slug: true } } },
     }),
     db.listedJob.count({ where: { isActive: true } }),
+    countStudent100Pending(),
   ]);
 
   const alerts: AdminAlert[] = [];
@@ -73,7 +77,7 @@ export async function GET() {
     };
     alerts.push({
       id: `notif:${n.id}`,
-      kind: meta.kind || (n.channel === 'EMAIL' ? 'email' : 'system'),
+      kind: (meta.kind as AdminAlert['kind']) || (n.channel === 'EMAIL' ? 'email' : 'system'),
       severity:
         meta.severity ||
         (n.status === 'FAILED' ? 'critical' : n.status === 'QUEUED' ? 'warn' : 'info'),
@@ -106,6 +110,19 @@ export async function GET() {
       title: `${pendingQueue} emails due in queue`,
       body: 'Process the email queue or wait for the */5 cron.',
       href: '/admin/content/email-queue',
+      createdAt: new Date().toISOString(),
+      unread: true,
+    });
+  }
+
+  if (pendingStudent100 > 0) {
+    alerts.push({
+      id: 'student100-pending',
+      kind: STUDENT100_ALERT_KIND,
+      severity: 'warn',
+      title: `${pendingStudent100} Student 100 application${pendingStudent100 === 1 ? '' : 's'} need review`,
+      body: 'Open the Student 100 Contact Center — separate from support tickets.',
+      href: STUDENT100_ADMIN_PATH,
       createdAt: new Date().toISOString(),
       unread: true,
     });
@@ -161,9 +178,11 @@ export async function GET() {
     unread: false,
   });
 
-  alerts.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+  alerts.sort((a, b) => {
+    const pin = Number(b.kind === STUDENT100_ALERT_KIND) - Number(a.kind === STUDENT100_ALERT_KIND);
+    if (pin !== 0) return pin;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const unreadCount = alerts.filter((a) => a.unread).length;
 
@@ -176,6 +195,7 @@ export async function GET() {
       pendingPartners,
       activeJobs,
       failedQueue: failedQueue.length,
+      pendingStudent100,
     },
   });
 }

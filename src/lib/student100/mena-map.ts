@@ -3,32 +3,36 @@
 export type MenaCapital = {
   code: string;
   name: string;
+  nameAr: string;
   lon: number;
   lat: number;
+  /** Label offset in viewBox units so crowded capitals do not collide. */
+  dx?: number;
+  dy?: number;
 };
 
 /** Capitals for every MENA country on the Student 100 apply list. */
 export const MENA_CAPITALS: MenaCapital[] = [
-  { code: 'MR', name: 'Nouakchott', lon: -15.98, lat: 18.09 },
-  { code: 'MA', name: 'Rabat', lon: -6.83, lat: 34.02 },
-  { code: 'DZ', name: 'Algiers', lon: 3.06, lat: 36.75 },
-  { code: 'TN', name: 'Tunis', lon: 10.18, lat: 36.81 },
-  { code: 'LY', name: 'Tripoli', lon: 13.19, lat: 32.89 },
-  { code: 'EG', name: 'Cairo', lon: 31.24, lat: 30.04 },
-  { code: 'PS', name: 'Ramallah', lon: 35.2, lat: 31.9 },
-  { code: 'LB', name: 'Beirut', lon: 35.5, lat: 33.89 },
-  { code: 'SY', name: 'Damascus', lon: 36.29, lat: 33.51 },
-  { code: 'JO', name: 'Amman', lon: 35.93, lat: 31.95 },
-  { code: 'IQ', name: 'Baghdad', lon: 44.37, lat: 33.31 },
-  { code: 'KW', name: 'Kuwait City', lon: 47.98, lat: 29.38 },
-  { code: 'BH', name: 'Manama', lon: 50.59, lat: 26.23 },
-  { code: 'QA', name: 'Doha', lon: 51.53, lat: 25.29 },
-  { code: 'AE', name: 'Abu Dhabi', lon: 54.38, lat: 24.45 },
-  { code: 'OM', name: 'Muscat', lon: 58.38, lat: 23.59 },
-  { code: 'SA', name: 'Riyadh', lon: 46.68, lat: 24.71 },
-  { code: 'YE', name: 'Sanaa', lon: 44.21, lat: 15.35 },
-  { code: 'IR', name: 'Tehran', lon: 51.39, lat: 35.69 },
-  { code: 'DJ', name: 'Djibouti', lon: 43.15, lat: 11.59 },
+  { code: 'MR', name: 'Nouakchott', nameAr: 'نواكشوط', lon: -15.98, lat: 18.09, dy: 16 },
+  { code: 'MA', name: 'Rabat', nameAr: 'الرباط', lon: -6.83, lat: 34.02, dy: -14 },
+  { code: 'DZ', name: 'Algiers', nameAr: 'الجزائر', lon: 3.06, lat: 36.75, dy: -14 },
+  { code: 'TN', name: 'Tunis', nameAr: 'تونس', lon: 10.18, lat: 36.81, dy: -14, dx: 8 },
+  { code: 'LY', name: 'Tripoli', nameAr: 'طرابلس', lon: 13.19, lat: 32.89, dy: -14 },
+  { code: 'EG', name: 'Cairo', nameAr: 'القاهرة', lon: 31.24, lat: 30.04, dx: -22, dy: 16 },
+  { code: 'PS', name: 'Ramallah', nameAr: 'رام الله', lon: 35.2, lat: 31.9, dx: -28, dy: 18 },
+  { code: 'LB', name: 'Beirut', nameAr: 'بيروت', lon: 35.5, lat: 33.89, dx: -30, dy: -16 },
+  { code: 'SY', name: 'Damascus', nameAr: 'دمشق', lon: 36.29, lat: 33.51, dx: 34, dy: -14 },
+  { code: 'JO', name: 'Amman', nameAr: 'عمّان', lon: 35.93, lat: 31.95, dx: 28, dy: 18 },
+  { code: 'IQ', name: 'Baghdad', nameAr: 'بغداد', lon: 44.37, lat: 33.31, dy: -16 },
+  { code: 'KW', name: 'Kuwait', nameAr: 'الكويت', lon: 47.98, lat: 29.38, dy: -16, dx: -6 },
+  { code: 'BH', name: 'Manama', nameAr: 'المنامة', lon: 50.59, lat: 26.23, dx: -22, dy: 16 },
+  { code: 'QA', name: 'Doha', nameAr: 'الدوحة', lon: 51.53, lat: 25.29, dx: 22, dy: 14 },
+  { code: 'AE', name: 'Abu Dhabi', nameAr: 'أبوظبي', lon: 54.38, lat: 24.45, dy: 18 },
+  { code: 'OM', name: 'Muscat', nameAr: 'مسقط', lon: 58.38, lat: 23.59, dx: 12, dy: 8 },
+  { code: 'SA', name: 'Riyadh', nameAr: 'الرياض', lon: 46.68, lat: 24.71, dy: 18 },
+  { code: 'YE', name: 'Sanaa', nameAr: 'صنعاء', lon: 44.21, lat: 15.35, dy: 16 },
+  { code: 'IR', name: 'Tehran', nameAr: 'طهران', lon: 51.39, lat: 35.69, dy: -16, dx: 10 },
+  { code: 'DJ', name: 'Djibouti', nameAr: 'جيبوتي', lon: 43.15, lat: 11.59, dy: 16 },
 ];
 
 export const MENA_MAP_VIEW = { width: 1200, height: 640 } as const;

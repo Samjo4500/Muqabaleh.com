@@ -18,6 +18,8 @@ import {
   normalizeEmail,
   normalizeText,
 } from './eligibility';
+import { MENA_COUNTRIES } from '../constants';
+import { MENA_CAPITALS } from './mena-map';
 
 describe('student100 campaign rules', () => {
   it('is a 100-pack of 3 credits for 30 days, already open', () => {
@@ -80,7 +82,7 @@ describe('student100 landing client', () => {
     assert.match(src, /\/api\/student100\/status/);
   });
 
-  it('renders a MENA banner with logo, offer, and CTA', () => {
+  it('renders a full-bleed MENA map with floating capitals, logo, and CTA', () => {
     const hero = readFileSync(
       join(process.cwd(), 'src/components/student100/Student100Hero.tsx'),
       'utf8',
@@ -89,15 +91,29 @@ describe('student100 landing client', () => {
       join(process.cwd(), 'src/app/[locale]/student100/student100-content.tsx'),
       'utf8',
     );
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
     assert.match(page, /<Student100Hero/);
     assert.match(page, /#s100-apply/);
     assert.match(hero, /BrandLogo/);
     assert.match(hero, /s100-hero-offer/);
     assert.match(hero, /s100-hero-cta/);
-    assert.match(hero, /mq-btn-on-dark/);
+    assert.match(hero, /s100-city-label/);
     assert.match(hero, /MENA_CAPITALS/);
-    assert.doesNotMatch(hero, /s100-hero-halo/);
-    assert.doesNotMatch(hero, /s100-hero-lockup/);
+    assert.doesNotMatch(hero, /mq-wrap/);
+    assert.match(css, /\.s100-hero-stage \{[\s\S]*?border: 0;/);
+    assert.match(css, /\.s100-hero-stage \{[\s\S]*?border-radius: 0;/);
+    assert.match(css, /\.s100-hero \{[\s\S]*?width: 100%;/);
+  });
+
+  it('labels every MENA apply-list capital in English and Arabic', () => {
+    const codes = new Set(MENA_CAPITALS.map((c) => c.code));
+    assert.equal(MENA_CAPITALS.length, MENA_COUNTRIES.length);
+    for (const country of MENA_COUNTRIES) {
+      assert.equal(codes.has(country.code), true, `missing capital for ${country.code}`);
+    }
+    for (const city of MENA_CAPITALS) {
+      assert.ok(city.nameAr.length > 1, city.code);
+    }
   });
 
   it('centers the offer copy in parentheses', () => {

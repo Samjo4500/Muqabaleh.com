@@ -1871,34 +1871,38 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
   display: none !important;
 }
 
-/* Student 100 — campaign banner over a quiet MENA map */
+/* Student 100 — full-bleed MENA map with floating capitals */
 .s100-hero {
-  padding: 0.25rem 0 0;
-  background: transparent;
+  padding: 0;
+  width: 100%;
+  background: #070b14;
 }
 .s100-hero-stage {
   position: relative;
-  height: 18.5rem;
+  width: 100%;
+  height: 20rem;
   overflow: hidden;
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 0;
+  border-radius: 0;
   background: #070b14;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 20px 50px rgba(0, 0, 0, 0.28);
 }
 @media (min-width: 768px) {
   .s100-hero-stage {
-    height: 22rem;
+    height: 26rem;
+  }
+}
+@media (min-width: 1024px) {
+  .s100-hero-stage {
+    height: 28rem;
   }
 }
 .s100-hero-map {
   position: absolute;
-  inset: -6%;
-  width: 112%;
-  height: 112%;
-  opacity: 0.42;
-  animation: s100-drift 28s ease-in-out infinite alternate;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  animation: s100-drift 32s ease-in-out infinite alternate;
 }
 .s100-hero-center {
   position: relative;
@@ -1911,7 +1915,11 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
   gap: 0.85rem;
   padding: 1.5rem 1.25rem;
   background:
-    radial-gradient(ellipse 55% 60% at 50% 48%, rgba(7, 11, 20, 0.38) 0%, rgba(7, 11, 20, 0.12) 55%, transparent 74%);
+    radial-gradient(ellipse 42% 48% at 50% 48%, rgba(7, 11, 20, 0.42) 0%, rgba(7, 11, 20, 0.12) 52%, transparent 72%);
+  pointer-events: none;
+}
+.s100-hero-center a {
+  pointer-events: auto;
 }
 .s100-hero-logo {
   height: 5.5rem !important;
@@ -1943,10 +1951,14 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
   stroke-dasharray: 3 16;
   animation: s100-dash 26s linear infinite;
 }
+.s100-city,
 .s100-pin,
 .s100-pin-ring {
   transform-box: fill-box;
   transform-origin: center;
+}
+.s100-city {
+  animation: s100-city-float 4s ease-in-out infinite;
 }
 .s100-pin {
   fill: #e8c97a;
@@ -1954,13 +1966,28 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
 }
 .s100-pin-ring {
   fill: none;
-  stroke: rgba(232, 201, 122, 0.45);
+  stroke: rgba(232, 201, 122, 0.5);
   stroke-width: 1;
   animation: s100-pin-ring 3.4s ease-in-out infinite;
 }
+.s100-city-label {
+  fill: #f6ead0;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  paint-order: stroke;
+  stroke: rgba(7, 11, 20, 0.82);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .s100-city-label { font-size: 14px; }
+}
 @keyframes s100-drift {
-  from { transform: translate(-0.8%, 0.4%); }
-  to { transform: translate(0.8%, -0.4%); }
+  from { transform: scale(1.03) translate(-0.6%, 0.3%); }
+  to { transform: scale(1.06) translate(0.6%, -0.3%); }
 }
 @keyframes s100-dash {
   to { stroke-dashoffset: -180; }
@@ -1973,12 +2000,17 @@ html[data-console-simple='1'] [data-simple-hide='true'] {
   0%, 100% { opacity: 0.15; transform: scale(0.85); }
   50% { opacity: 0.55; transform: scale(1); }
 }
+@keyframes s100-city-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
 @media (prefers-reduced-motion: reduce) {
   .s100-hero-map,
   .s100-stroke,
   .s100-route,
   .s100-pin,
-  .s100-pin-ring {
+  .s100-pin-ring,
+  .s100-city {
     animation: none !important;
   }
   .s100-pin { opacity: 0.85; }

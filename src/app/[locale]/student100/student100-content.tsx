@@ -101,6 +101,7 @@ export default function Student100Content({ initial }: { initial: Student100Publ
   return (
     <AtelierShell>
       <Student100Hero
+        locale={locale}
         offer={pick(S100.heroOffer, locale)}
         cta={pick(S100.heroCta, locale)}
         ctaHref="#s100-apply"

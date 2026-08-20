@@ -79,4 +79,19 @@ describe('student100 landing client', () => {
     assert.doesNotMatch(src, /useSession/);
     assert.match(src, /\/api\/student100\/status/);
   });
+
+  it('renders an animated MENA hero with no copy over the map', () => {
+    const hero = readFileSync(
+      join(process.cwd(), 'src/components/student100/Student100Hero.tsx'),
+      'utf8',
+    );
+    const page = readFileSync(
+      join(process.cwd(), 'src/app/[locale]/student100/student100-content.tsx'),
+      'utf8',
+    );
+    assert.match(page, /<Student100Hero/);
+    assert.doesNotMatch(hero, /FROM BAGHDAD|INTERVIEW PACK|Start free/i);
+    assert.match(hero, /s100-pin/);
+    assert.match(hero, /MENA_CAPITALS/);
+  });
 });

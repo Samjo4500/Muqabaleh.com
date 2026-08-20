@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { AtelierShell } from '@/components/landing/crystal/AtelierShell';
+import { Student100Hero } from '@/components/student100/Student100Hero';
 import { localePath } from '@/i18n/navigation';
 import { MENA_COUNTRIES } from '@/lib/constants';
 import { S100, type Bi } from '@/lib/student100/copy';
@@ -98,8 +99,9 @@ export default function Student100Content({ initial }: { initial: Student100Publ
   const mine = data.mine;
 
   return (
-    <AtelierShell showHeroLogo>
-      <section className="mq-section pb-8 pt-4">
+    <AtelierShell>
+      <Student100Hero />
+      <section className="mq-section pb-8 pt-8">
         <div className="mq-wrap mx-auto max-w-3xl text-center">
           <p className="mq-kicker mb-3">{pick(S100.kicker, locale)}</p>
           <h1 className="mq-display mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">

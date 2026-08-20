@@ -1870,3 +1870,88 @@ html[data-console-reduce-motion='1'] .mq-console-card:hover {
 html[data-console-simple='1'] [data-simple-hide='true'] {
   display: none !important;
 }
+
+/* Student 100 — animated MENA hero (no copy over the map) */
+.s100-hero {
+  height: min(72vh, 640px);
+  min-height: 280px;
+  background: #070b14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.s100-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 5rem;
+  background: linear-gradient(to top, #070b14, transparent);
+  pointer-events: none;
+}
+.s100-hero-map {
+  display: block;
+  animation: s100-drift 22s ease-in-out infinite alternate;
+}
+.s100-stroke {
+  stroke-dasharray: 7 11;
+  animation: s100-dash 28s linear infinite;
+}
+.s100-stroke-slow {
+  animation-duration: 42s;
+  animation-direction: reverse;
+}
+.s100-route {
+  stroke-dasharray: 4 14;
+  animation: s100-dash 16s linear infinite;
+}
+.s100-pin,
+.s100-pin-core,
+.s100-pin-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.s100-pin {
+  fill: #e8c97a;
+  animation: s100-pin-blink 2.1s ease-in-out infinite;
+}
+.s100-pin-core {
+  fill: #fff6d6;
+  animation: s100-pin-core 2.1s ease-in-out infinite;
+}
+.s100-pin-ring {
+  fill: none;
+  stroke: #ef4444;
+  stroke-width: 1.2;
+  opacity: 0;
+  animation: s100-pin-ring 2.1s ease-in-out infinite;
+}
+@keyframes s100-drift {
+  from { transform: scale(1.05) translate(-0.8%, 0.4%); }
+  to { transform: scale(1.1) translate(1%, -0.6%); }
+}
+@keyframes s100-dash {
+  to { stroke-dashoffset: -240; }
+}
+@keyframes s100-pin-blink {
+  0%, 38% { fill: #e8c97a; }
+  55%, 100% { fill: #ef4444; }
+}
+@keyframes s100-pin-core {
+  0%, 38% { fill: #fff6d6; }
+  55%, 100% { fill: #fecaca; }
+}
+@keyframes s100-pin-ring {
+  0%, 38% { opacity: 0; transform: scale(0.7); }
+  62% { opacity: 0.7; }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .s100-hero-map,
+  .s100-stroke,
+  .s100-route,
+  .s100-pin,
+  .s100-pin-core,
+  .s100-pin-ring {
+    animation: none !important;
+  }
+  .s100-pin { fill: #ef4444; }
+  .s100-pin-core { fill: #fecaca; }
+}

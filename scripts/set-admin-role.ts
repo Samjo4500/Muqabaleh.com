@@ -2,7 +2,7 @@
  * One-off ops script: ensure admin user exists with SUPER_ADMIN role.
  *
  * Usage:
- *   DATABASE_URL=... ADMIN_EMAIL=samjo4500@gmail.com bunx tsx scripts/set-admin-role.ts
+ *   DATABASE_URL=... ADMIN_EMAIL=sam@muqabaleh.com bunx tsx scripts/set-admin-role.ts
  */
 import { createHash, randomBytes } from 'crypto';
 import { hashSync } from 'bcryptjs';
@@ -19,7 +19,7 @@ function cuidLike(): string {
 }
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'samjo4500@gmail.com';
+  const adminEmail = (process.env.ADMIN_EMAIL || 'sam@muqabaleh.com').trim().toLowerCase();
 
   const existing = await prisma.user.findUnique({
     where: { email: adminEmail },
@@ -29,7 +29,7 @@ async function main() {
   if (existing) {
     const user = await prisma.user.update({
       where: { email: adminEmail },
-      data: { role: 'SUPER_ADMIN' },
+      data: { role: 'SUPER_ADMIN', isActive: true, tier: 'UNLIMITED', sessionsLeft: 999 },
     });
     console.log('Updated user:', user.id, 'Role:', user.role);
     return;
@@ -44,13 +44,13 @@ async function main() {
       id: cuidLike(),
       email: adminEmail,
       passwordHash,
-      name: 'Admin',
+      name: 'Sam',
       role: 'SUPER_ADMIN',
       accountType: 'INDIVIDUAL',
       language: 'AR',
       interviewerGender: 'MALE',
       sessionsLeft: 999,
-      tier: 'FREE',
+      tier: 'UNLIMITED',
       isActive: true,
     },
   });

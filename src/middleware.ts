@@ -2,6 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { routing } from './i18n/routing';
+import { isSuperAdminEmail } from './lib/admin/constants';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -130,18 +131,23 @@ async function getRoleFromRequest(request: NextRequest): Promise<string | null> 
       cookieName: '__Secure-next-auth.session-token',
     });
 
-    if (!token) {
-      // Fallback for local/dev cookies without __Secure- prefix
-      const fallback = await getToken({
-        req: request,
-        secret,
-        cookieName: 'next-auth.session-token',
-      });
-      if (!fallback) return null;
-      return (fallback.role as string) || ROLE.USER;
+    const fallback = !token
+      ? await getToken({
+          req: request,
+          secret,
+          cookieName: 'next-auth.session-token',
+        })
+      : null;
+
+    const effective = token || fallback;
+    if (!effective) return null;
+
+    const email = effective.email as string | undefined;
+    if (isSuperAdminEmail(email)) {
+      return ROLE.SUPER_ADMIN;
     }
 
-    return (token.role as string) || ROLE.USER;
+    return (effective.role as string) || ROLE.USER;
   } catch {
     return null;
   }

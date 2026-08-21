@@ -90,17 +90,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Individual user
+    const { isSuperAdminEmail } = await import('@/lib/admin/constants');
+    const isSuperAdmin = isSuperAdminEmail(data.email);
+
     const user = await db.user.create({
       data: {
-        email: data.email,
+        email: data.email.trim().toLowerCase(),
         passwordHash,
         name: data.name,
-        role: 'USER',
+        role: isSuperAdmin ? 'SUPER_ADMIN' : 'USER',
         accountType: 'INDIVIDUAL',
         country: data.country,
         industry: data.industry,
         experience: data.experience,
-        sessionsLeft: 1, // Free trial session
+        tier: isSuperAdmin ? 'UNLIMITED' : 'FREE',
+        sessionsLeft: isSuperAdmin ? 999 : 1, // Free trial session
+        isActive: true,
       },
     });
 
@@ -115,7 +120,7 @@ export async function POST(req: NextRequest) {
       role: user.role,
       accountType: user.accountType,
       sessionsLeft: user.sessionsLeft,
-      redirectTo: '/app',
+      redirectTo: isSuperAdmin ? '/admin' : '/app',
     });
   } catch (e) {
     if (e instanceof z.ZodError) {

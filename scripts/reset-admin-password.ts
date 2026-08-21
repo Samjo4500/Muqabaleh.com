@@ -1,7 +1,7 @@
 /**
  * Reset SUPER_ADMIN password (local / ops use).
  *
- *   DATABASE_URL=... ADMIN_EMAIL=samjo4500@gmail.com ADMIN_TEMP_PASSWORD='...' \
+ *   DATABASE_URL=... ADMIN_EMAIL=sam@muqabaleh.com ADMIN_TEMP_PASSWORD='...' \
  *     npx tsx scripts/reset-admin-password.ts
  */
 import { randomBytes } from 'crypto';
@@ -11,7 +11,7 @@ import { PrismaClient, UserRole } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = (process.env.ADMIN_EMAIL || 'samjo4500@gmail.com').toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'sam@muqabaleh.com').trim().toLowerCase();
   const tempPassword =
     process.env.ADMIN_TEMP_PASSWORD || randomBytes(18).toString('base64url') + '!A1';
 
@@ -26,17 +26,19 @@ async function main() {
       lockedUntil: null,
       totpEnabled: false,
       totpSecret: null,
+      tier: 'UNLIMITED',
+      sessionsLeft: 999,
     },
     create: {
       email: adminEmail,
       passwordHash,
-      name: 'Admin',
+      name: 'Sam',
       role: UserRole.SUPER_ADMIN,
       accountType: 'INDIVIDUAL',
       language: 'AR',
       interviewerGender: 'MALE',
       sessionsLeft: 999,
-      tier: 'FREE',
+      tier: 'UNLIMITED',
       isActive: true,
     },
   });

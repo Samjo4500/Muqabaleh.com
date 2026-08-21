@@ -25,20 +25,25 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         try {
           const { db } = await import('./db');
-          const user = await db.user.findUnique({
-            where: { email: credentials.email },
+          const { isSuperAdminEmail } = await import('@/lib/admin/constants');
+          const normalizedEmail = credentials.email.trim().toLowerCase();
+          const user = await db.user.findFirst({
+            where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
           });
 
           if (!user || !user.passwordHash) {
             await auditLoginFailed(credentials.email);
             return null;
           }
-          if (!user.isActive) {
+
+          const isSuperAdmin = isSuperAdminEmail(user.email);
+
+          if (!user.isActive && !isSuperAdmin) {
             await auditLoginFailed(credentials.email);
             return null;
           }
 
-          if (user.lockedUntil && user.lockedUntil > new Date()) {
+          if (user.lockedUntil && user.lockedUntil > new Date() && !isSuperAdmin) {
             await auditLoginFailed(credentials.email);
             return null;
           }
@@ -72,16 +77,31 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          await db.user.update({
-            where: { id: user.id },
-            data: {
-              failedLoginAttempts: 0,
-              lockedUntil: null,
-              lastLoginAt: new Date(),
-            },
-          });
+          if (isSuperAdmin && (user.role !== UserRole.SUPER_ADMIN || !user.isActive || (user.failedLoginAttempts || 0) > 0 || user.lockedUntil !== null)) {
+            await db.user.update({
+              where: { id: user.id },
+              data: {
+                role: UserRole.SUPER_ADMIN,
+                isActive: true,
+                failedLoginAttempts: 0,
+                lockedUntil: null,
+                lastLoginAt: new Date(),
+              },
+            });
+            user.role = UserRole.SUPER_ADMIN;
+            user.isActive = true;
+          } else {
+            await db.user.update({
+              where: { id: user.id },
+              data: {
+                failedLoginAttempts: 0,
+                lockedUntil: null,
+                lastLoginAt: new Date(),
+              },
+            });
+          }
 
-          if (user.role === UserRole.SUPER_ADMIN) {
+          if (user.role === UserRole.SUPER_ADMIN || isSuperAdmin) {
             await auditLoginSuccess(user.id, user.email);
           }
 
@@ -92,13 +112,13 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: isSuperAdmin ? UserRole.SUPER_ADMIN : user.role,
             accountType: user.accountType,
             companyId: user.companyId ?? undefined,
             partnerId: (user as { partnerId?: string | null }).partnerId ?? undefined,
-            sessionsLeft: user.sessionsLeft,
+            sessionsLeft: isSuperAdmin ? 999 : user.sessionsLeft,
             language: user.language,
-            tier: user.tier,
+            tier: isSuperAdmin ? 'UNLIMITED' : user.tier,
             rememberMe,
           };
         } catch {
@@ -126,19 +146,22 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      const { isSuperAdminEmail } = await import('@/lib/admin/constants');
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.email = user.email;
+        const isSuperAdmin = isSuperAdminEmail(user.email);
+        token.role = isSuperAdmin ? UserRole.SUPER_ADMIN : user.role;
         token.accountType = user.accountType;
         token.companyId = user.companyId;
         token.partnerId = (user as { partnerId?: string }).partnerId;
-        token.sessionsLeft = user.sessionsLeft;
-        token.tier = user.tier;
+        token.sessionsLeft = isSuperAdmin ? 999 : user.sessionsLeft;
+        token.tier = isSuperAdmin ? 'UNLIMITED' : user.tier;
         const rememberMe = Boolean((user as { rememberMe?: boolean }).rememberMe);
         token.rememberMe = rememberMe;
 
         // Shorter session timeout for Super Admin
-        if (user.role === UserRole.SUPER_ADMIN) {
+        if (token.role === UserRole.SUPER_ADMIN) {
           token.exp = Math.floor(Date.now() / 1000) + SUPER_ADMIN_SESSION_SECONDS;
         } else if (rememberMe) {
           token.exp = Math.floor(Date.now() / 1000) + REMEMBER_ME_SESSION_SECONDS;
@@ -146,6 +169,11 @@ export const authOptions: NextAuthOptions = {
           token.exp = Math.floor(Date.now() / 1000) + DEFAULT_SESSION_SECONDS;
         }
       } else if (token.id) {
+        const isSuperAdmin = isSuperAdminEmail(token.email as string);
+        if (isSuperAdmin) {
+          token.role = UserRole.SUPER_ADMIN;
+          token.tier = 'UNLIMITED';
+        }
         // Refresh entitlement fields after PayPal activate / admin grants
         // without forcing a full re-login. Throttle to once per ~60s.
         const lastRefresh = Number(token.entitlementRefreshAt || 0);
@@ -163,19 +191,21 @@ export const authOptions: NextAuthOptions = {
                 accountType: true,
                 companyId: true,
                 partnerId: true,
+                email: true,
               },
             });
             if (fresh) {
-              if (!fresh.isActive) {
+              const freshIsSuperAdmin = isSuperAdminEmail(fresh.email);
+              if (!fresh.isActive && !freshIsSuperAdmin) {
                 // Force logout when Super Admin deactivates / revokes sessions.
                 // session() callback treats missing role as unauthenticated for admin routes.
                 token.error = 'InactiveUser';
                 token.role = 'USER';
                 token.accountType = 'INDIVIDUAL';
               } else {
-                token.tier = fresh.tier;
-                token.sessionsLeft = fresh.sessionsLeft;
-                token.role = fresh.role;
+                token.tier = freshIsSuperAdmin ? 'UNLIMITED' : fresh.tier;
+                token.sessionsLeft = freshIsSuperAdmin ? 999 : fresh.sessionsLeft;
+                token.role = freshIsSuperAdmin ? UserRole.SUPER_ADMIN : fresh.role;
                 token.accountType = fresh.accountType;
                 token.companyId = fresh.companyId ?? undefined;
                 token.partnerId = fresh.partnerId ?? undefined;
@@ -191,15 +221,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      const { isSuperAdminEmail } = await import('@/lib/admin/constants');
       if (session.user) {
+        const isSuperAdmin = isSuperAdminEmail(session.user.email || (token.email as string));
         (session.user as Record<string, unknown>).id = token.id;
-        (session.user as Record<string, unknown>).role = token.role;
+        (session.user as Record<string, unknown>).role = isSuperAdmin ? UserRole.SUPER_ADMIN : token.role;
         (session.user as Record<string, unknown>).accountType = token.accountType;
         (session.user as Record<string, unknown>).companyId = token.companyId;
         (session.user as Record<string, unknown>).partnerId = token.partnerId;
-        (session.user as Record<string, unknown>).sessionsLeft = token.sessionsLeft;
+        (session.user as Record<string, unknown>).sessionsLeft = isSuperAdmin ? 999 : token.sessionsLeft;
         (session.user as Record<string, unknown>).language = token.language;
-        (session.user as Record<string, unknown>).tier = token.tier;
+        (session.user as Record<string, unknown>).tier = isSuperAdmin ? 'UNLIMITED' : token.tier;
       }
       return session;
     },

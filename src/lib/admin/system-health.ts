@@ -100,19 +100,34 @@ async function checkGemini(): Promise<HealthCheckResult> {
   }
 
   try {
-    const models = ['gemini-flash-latest', 'gemini-pro-latest', 'gemini-2.5-flash'];
+    const models = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-flash-latest',
+      'gemini-pro-latest',
+    ];
+    const key = process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim() || null;
     const accessToken = sa
       ? await getGoogleAccessToken([
           'https://www.googleapis.com/auth/generative-language',
         ])
       : null;
-    const key = process.env.GEMINI_API_KEY?.trim() || null;
     let lastErr = 'no response';
 
     for (const model of models) {
-      const attempts: { url: string; headers: Record<string, string> }[] = [];
+      const attempts: { label: string; url: string; headers: Record<string, string> }[] = [];
+      // Prefer dedicated API key first when provided
+      if (key) {
+        attempts.push({
+          label: 'api_key',
+          url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       if (accessToken) {
         attempts.push({
+          label: 'service_account',
           url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -120,41 +135,40 @@ async function checkGemini(): Promise<HealthCheckResult> {
           },
         });
       }
-      if (key) {
-        attempts.push({
-          url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
       for (const attempt of attempts) {
-        const res = await fetch(attempt.url, {
-          method: 'POST',
-          headers: attempt.headers,
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: OK' }] }],
-          }),
-          signal: AbortSignal.timeout(12000),
-        });
-        if (!res.ok) {
-          lastErr = `${model} ${res.status}`;
-          continue;
-        }
-        const data = (await res.json()) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-        };
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (text) {
-          return {
-            id: 'gemini',
-            label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
-            category: 'ai',
-            status: 'pass',
-            critical: true,
-            latencyMs: Date.now() - started,
-            detail: `Live OK · ${model}`,
+        try {
+          const res = await fetch(attempt.url, {
+            method: 'POST',
+            headers: attempt.headers,
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: OK' }] }],
+            }),
+            signal: AbortSignal.timeout(6000),
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            lastErr = `${model} ${attempt.label} ${res.status}: ${errText.slice(0, 100)}`;
+            continue;
+          }
+          const data = (await res.json()) as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[];
           };
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text) {
+            return {
+              id: 'gemini',
+              label: { ar: 'Gemini / جيني', en: 'Gemini AI' },
+              category: 'ai',
+              status: 'pass',
+              critical: true,
+              latencyMs: Date.now() - started,
+              detail: `Live OK · ${model} (${attempt.label})`,
+            };
+          }
+          lastErr = `${model} (${attempt.label}): empty`;
+        } catch (fetchErr) {
+          lastErr = `${model} (${attempt.label}): ${fetchErr instanceof Error ? fetchErr.message : 'timeout'}`;
         }
-        lastErr = `${model}: empty`;
       }
     }
     return {

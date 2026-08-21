@@ -39,10 +39,11 @@ export async function GET(req: NextRequest) {
 
   if (geminiKey || googleServiceAccount) {
     const models = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
       'gemini-flash-latest',
       'gemini-pro-latest',
-      'gemini-3.5-flash',
-      'gemini-2.5-flash',
     ];
     const accessToken = googleServiceAccount
       ? await getGoogleAccessToken([
@@ -59,6 +60,13 @@ export async function GET(req: NextRequest) {
           headers: Record<string, string>;
           label: string;
         }[] = [];
+        if (key) {
+          attempts.push({
+            label: 'api_key',
+            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
         if (accessToken) {
           attempts.push({
             label: 'service_account',
@@ -67,13 +75,6 @@ export async function GET(req: NextRequest) {
               Authorization: `Bearer ${accessToken}`,
               'Content-Type': 'application/json',
             },
-          });
-        }
-        if (key) {
-          attempts.push({
-            label: 'api_key',
-            url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-            headers: { 'Content-Type': 'application/json' },
           });
         }
 

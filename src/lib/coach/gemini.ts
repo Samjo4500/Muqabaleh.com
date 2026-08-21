@@ -5,10 +5,11 @@ import { buildCoachSystemPrompt, buildScoringPrompt } from './prompts';
 import { getGoogleAccessToken, hasGoogleServiceAccount } from './google-auth';
 
 const GEMINI_MODEL_FALLBACKS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
   'gemini-flash-latest',
   'gemini-pro-latest',
-  'gemini-3.5-flash',
-  'gemini-2.5-flash',
 ];
 
 async function callGeminiPro(
@@ -106,6 +107,14 @@ async function callGeminiRest(opts: {
 
   const attempts: { auth: string; url: string; headers: Record<string, string> }[] =
     [];
+  // Prefer API key first when available (direct to AI Studio model endpoints)
+  if (opts.key) {
+    attempts.push({
+      auth: 'api_key',
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   if (opts.accessToken) {
     attempts.push({
       auth: 'service_account',
@@ -114,13 +123,6 @@ async function callGeminiRest(opts: {
         Authorization: `Bearer ${opts.accessToken}`,
         'Content-Type': 'application/json',
       },
-    });
-  }
-  if (opts.key) {
-    attempts.push({
-      auth: 'api_key',
-      url: `https://generativelanguage.googleapis.com/v1beta/models/${opts.model}:generateContent?key=${encodeURIComponent(opts.key)}`,
-      headers: { 'Content-Type': 'application/json' },
     });
   }
 

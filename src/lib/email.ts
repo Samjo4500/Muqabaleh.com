@@ -161,7 +161,8 @@ export async function processEmailQueue(): Promise<{ sent: number; failed: numbe
 
     // Prefer Brevo for all queued mail when configured.
     let result: { success: boolean; error?: string } = { success: false };
-    if (process.env.BREVO_API_KEY?.trim()) {
+    const { hasBrevoApiKey } = await import('@/lib/env/runtime');
+    if (hasBrevoApiKey()) {
       const { sendBrevoEmail } = await import('@/lib/brevo');
       result = await sendBrevoEmail({
         to: email.to,

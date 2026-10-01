@@ -2,18 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import NextAuth from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { enforceIpRateLimit } from '@/lib/rate-limit';
+import { applyRuntimeEnvDefaults } from '@/lib/env/runtime';
 
-/**
- * On Vercel Preview, force NEXTAUTH_URL to the deployment host so
- * auth does not break when the shared env still points at production.
- */
-if (
-  process.env.VERCEL_ENV === 'preview' &&
-  process.env.VERCEL_URL &&
-  !process.env.NEXTAUTH_URL?.includes(process.env.VERCEL_URL)
-) {
-  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
-}
+/** Fill empty NEXTAUTH_URL / Brevo aliases; pin Preview to deployment host. */
+applyRuntimeEnvDefaults();
 
 const handler = NextAuth(authOptions);
 

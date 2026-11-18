@@ -104,3 +104,30 @@ describe('legacy $29.99 resolution is now unambiguous', () => {
     assert.equal(resolveLegacyPlan('9.99', catalog), 'PRO');
   });
 });
+
+describe('database URL handling on a persistent host', () => {
+  test('a PgBouncer URL gets a real pool, not connection_limit=1', async () => {
+    const { resolveDatabaseUrl } = await import('../../src/lib/db');
+    const out = resolveDatabaseUrl(
+      'postgresql://u:p@aws-0-eu.pooler.supabase.com:6543/postgres',
+    ) as string;
+    const u = new URL(out);
+    assert.equal(u.searchParams.get('pgbouncer'), 'true', 'transaction pooler needs this');
+    assert.equal(u.searchParams.get('connection_limit'), '10', 'one shared process needs a pool');
+  });
+
+  test('a long-lived server URL is left alone', async () => {
+    const { resolveDatabaseUrl } = await import('../../src/lib/db');
+    const out = resolveDatabaseUrl('postgresql://muqabaleh:pw@127.0.0.1:5432/muqabaleh') as string;
+    const u = new URL(out);
+    assert.equal(u.searchParams.get('connection_limit'), null);
+    assert.equal(u.searchParams.get('pgbouncer'), null);
+    assert.equal(u.protocol, 'postgresql:', 'scheme survives URL() mangling');
+  });
+
+  test('connect_timeout is always set so health checks fail fast', async () => {
+    const { resolveDatabaseUrl } = await import('../../src/lib/db');
+    const out = resolveDatabaseUrl('postgresql://u:p@127.0.0.1:5432/db') as string;
+    assert.equal(new URL(out).searchParams.get('connect_timeout'), '10');
+  });
+});

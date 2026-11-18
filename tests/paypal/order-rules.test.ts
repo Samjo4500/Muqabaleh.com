@@ -145,9 +145,9 @@ describe('money and identity', () => {
     assert.equal((decideCapture(null, facts()) as any).reason, 'order_not_found');
   });
 
-  test('a legacy plan code can never be granted', () => {
+  test('a booking-only SKU can never be granted through checkout', () => {
     assert.equal(
-      (decideCapture(order({ planCode: 'UNLIMITED' }), facts()) as any).reason,
+      (decideCapture(order({ planCode: 'HUMAN_STD' }), facts()) as any).reason,
       'plan_not_sellable',
     );
   });
@@ -165,8 +165,12 @@ describe('the $29.99 ambiguity', () => {
     assert.equal(resolveLegacyPlan('29.99', CATALOG, Object.keys(CATALOG)), null);
   });
 
-  test('scoping to sellable plans removes the ambiguity legitimately', () => {
-    assert.equal(resolveLegacyPlan('29.99', CATALOG), 'JEANNIE_PRO');
+  test('an amount shared by two sellable plans stays ambiguous', () => {
+    // Both UNLIMITED and JEANNIE_PRO are sellable and both cost $29.99, so a
+    // bare amount lookup must refuse rather than guess.
+    assert.equal(resolveLegacyPlan('29.99', CATALOG), null);
+    assert.equal(resolveLegacyPlan('29.99', CATALOG, ['JEANNIE_PRO']), 'JEANNIE_PRO');
+    assert.equal(resolveLegacyPlan('29.99', CATALOG, ['UNLIMITED']), 'UNLIMITED');
   });
 
   test('unknown amounts refuse', () => {
@@ -176,9 +180,10 @@ describe('the $29.99 ambiguity', () => {
 });
 
 describe('catalog and guards', () => {
-  test('legacy SKUs cannot be sold', () => {
-    assert.equal(isSellablePlan('PRO'), false);
-    assert.equal(isSellablePlan('UNLIMITED'), false);
+  test('the plans the pricing page sells are sellable', () => {
+    // PRO and UNLIMITED are the two live buttons on /pricing.
+    assert.equal(isSellablePlan('PRO'), true);
+    assert.equal(isSellablePlan('UNLIMITED'), true);
     assert.equal(isSellablePlan('jeannie'), true);
     assert.equal(isSellablePlan('JEANNIE_PRO'), true);
     assert.equal(isSellablePlan(undefined), false);

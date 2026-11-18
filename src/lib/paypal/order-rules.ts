@@ -10,13 +10,26 @@
 // ---------------------------------------------------------------------------
 
 /**
- * Plans the storefront may sell right now.
+ * Everything the storefront may charge for.
  *
- * The legacy SKUs PRO ($9.99) and UNLIMITED ($29.99) are deliberately excluded:
- * they are still in PLAN_CONFIG for receipts, but `?plan=PRO` must no longer
- * produce a live $9.99 order.
+ * PRO ($9.99, one-time) and UNLIMITED ($29.99/month) are NOT legacy here: the
+ * public pricing page sells exactly those two buttons today
+ * (src/app/[locale]/pricing/pricing-content.tsx). Excluding them would 400 the
+ * only checkout buttons a customer can click.
+ *
+ * JEANNIE / JEANNIE_PRO / MASTERY_PACK remain sellable because
+ * PayPalCheckoutButton and the subscription flow use them.
+ *
+ * HUMAN_STD / HUMAN_PRO are excluded: those are booking prices, handled by
+ * create-booking-order with its own capture route.
  */
-export const SELLABLE_PLANS = ['JEANNIE', 'JEANNIE_PRO', 'MASTERY_PACK'] as const;
+export const SELLABLE_PLANS = [
+  'PRO',
+  'UNLIMITED',
+  'JEANNIE',
+  'JEANNIE_PRO',
+  'MASTERY_PACK',
+] as const;
 export type SellablePlan = (typeof SELLABLE_PLANS)[number];
 
 export function isSellablePlan(value: unknown): value is SellablePlan {
@@ -24,6 +37,50 @@ export function isSellablePlan(value: unknown): value is SellablePlan {
     typeof value === 'string' &&
     (SELLABLE_PLANS as readonly string[]).includes(value.toUpperCase())
   );
+}
+
+/**
+ * The billing shape of each sellable plan. Drives two decisions that must never
+ * be inferred from an amount:
+ *   - what `grantPlan` is told (a month-based plan sets an expiry)
+ *   - whether a second purchase renews or stacks (UNLIMITED renews: buying it
+ *     again while subscribed must not push the expiry two months out)
+ */
+export type BillingPeriod = 'month' | 'one-time';
+export const BILLING_PERIOD: Record<SellablePlan, BillingPeriod> = {
+  PRO: 'one-time',
+  UNLIMITED: 'month',
+  JEANNIE: 'month',
+  JEANNIE_PRO: 'month',
+  MASTERY_PACK: 'one-time',
+};
+
+export function billingPeriodFor(planCode: string): BillingPeriod | null {
+  return isSellablePlan(planCode) ? BILLING_PERIOD[planCode.toUpperCase() as SellablePlan] : null;
+}
+
+/**
+ * When should this purchase expire?
+ *
+ * Month plans set an explicit end (`grantPlan`'s own default would silently do
+ * the same, but stating it here keeps the rule visible and testable).
+ * One-time packs and credit top-ups must not create or extend a subscription —
+ * buying PRO while subscribed must not shorten the month already paid for.
+ */
+export function expiryForPurchase(
+  planCode: string,
+  now: Date,
+  currentExpiry: Date | null,
+  rule: 'renew' | 'stack' = 'renew',
+): Date | null {
+  const period = billingPeriodFor(planCode);
+  if (period !== 'month') return null; // never touch subscriptionExpiresAt
+
+  const base =
+    rule === 'stack' && currentExpiry && currentExpiry > now ? currentExpiry : now;
+  const end = new Date(base);
+  end.setMonth(end.getMonth() + 1);
+  return end;
 }
 
 /** "29.99" | 29.99 -> 2999. Never produces 29.989999. */

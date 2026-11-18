@@ -223,17 +223,25 @@ function PayPalPlanButton({
     setError('');
     try {
       const res = await fetch(`/api/paypal/create-order?plan=${plan}`, { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok || data.error) {
+      const data = (await res.json()) as {
+        orderId?: string;
+        ref?: string;
+        approveUrl?: string;
+        error?: string;
+      };
+      if (!res.ok || data.error || (!data.approveUrl && !data.orderId)) {
         setError(data.error || t('createError'));
         setLoading(false);
         return;
       }
-      const baseUrl =
-        process.env.PAYPAL_MODE === 'live'
-          ? 'https://www.paypal.com'
-          : 'https://www.sandbox.paypal.com';
-      window.location.href = `${baseUrl}/checkoutnow?token=${data.orderId}`;
+
+      // Prefer the approve link PayPal returned. The old code rebuilt the URL
+      // from `process.env.PAYPAL_MODE` here — which is undefined in a browser
+      // bundle, so live customers were always sent to the SANDBOX domain.
+      const target =
+        data.approveUrl ||
+        `https://www${process.env.NEXT_PUBLIC_PAYPAL_MODE === 'sandbox' ? '.sandbox' : ''}.paypal.com/checkoutnow?token=${data.orderId}`;
+      window.location.href = target;
     } catch {
       setError(t('generalError'));
       setLoading(false);

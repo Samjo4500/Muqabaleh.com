@@ -4,6 +4,7 @@ import { PLAN_CONFIG } from '@/lib/paypal';
 import { grantPlan } from '@/lib/plans/entitlements';
 import {
   decideCapture,
+  expiryForPurchase,
   type CaptureFacts,
   type OrderSnapshot,
   type Rejection,
@@ -26,6 +27,7 @@ import {
 export interface GrantDb {
   user: {
     update(args: { where: { id: string }; data: Record<string, unknown> }): Promise<unknown>;
+    findUnique?(args: { where: { id: string } }): Promise<{ subscriptionExpiresAt?: Date | null } | null>;
   };
   paypalOrder: {
     findUnique(args: { where: { ref: string } }): Promise<OrderRow | null>;
@@ -151,12 +153,20 @@ export async function grantForCapture(
         },
       });
 
-      // Entitlements exactly as before — same function, same arguments. It now
-      // joins this transaction instead of opening its own write.
+      // Entitlements. grantPlan() joins this transaction instead of opening its
+      // own write. The expiry comes from the plan's billing shape, so a one-time
+      // pack can never create or extend a subscription by accident.
+      const current = await tx.user.findUnique?.({ where: { id: row.userId } });
+      const expiresAt = expiryForPurchase(
+        row.planCode,
+        new Date(),
+        current?.subscriptionExpiresAt ?? null,
+      );
       await grantPlan({
         userId: row.userId,
         planKey: config.planKey,
         sessions: config.sessions,
+        ...(expiresAt ? { expiresAt } : { expiresAt: null }),
         tx: tx as never,
       });
 

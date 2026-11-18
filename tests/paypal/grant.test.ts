@@ -132,11 +132,32 @@ describe('validation is enforced against the order, not the payload', () => {
     assert.equal(await countPayments(), 1);
   });
 
-  test('legacy SKU on a new order is refused', async () => {
-    await seedOrder(raw, { planCode: 'UNLIMITED', amountCents: 2999 });
-    const r = await grantForCapture('mo_test', facts({ amountCents: 2999 }), { db, userId: 'user_1' });
+  test('a booking-only SKU on a checkout order is refused', async () => {
+    await seedOrder(raw, { planCode: 'HUMAN_STD', amountCents: 2900 });
+    const r = await grantForCapture('mo_test', facts({ amountCents: 2900 }), { db, userId: 'user_1' });
     assert.equal(r.status === 'rejected' && r.reason, 'plan_not_sellable');
     assert.equal(await countPayments(), 0);
+  });
+
+  test('a one-time pack does not create a subscription expiry', async () => {
+    await seedOrder(raw, { planCode: 'PRO', amountCents: 999 });
+    const r = await grantForCapture('mo_test', facts({ amountCents: 999 }), { db, userId: 'user_1' });
+    assert.equal(r.status, 'granted');
+    const u = await user();
+    assert.equal(u.tier, 'PRO');
+    assert.equal(u.sessionsLeft, 4, '3 credits added to the 1 seeded');
+    assert.equal(u.subscriptionExpiresAt, null, 'PRO is one-time, not a subscription');
+  });
+
+  test('a monthly plan sets a subscription expiry', async () => {
+    await seedOrder(raw, { planCode: 'UNLIMITED', amountCents: 2999 });
+    const r = await grantForCapture('mo_test', facts({ amountCents: 2999 }), { db, userId: 'user_1' });
+    assert.equal(r.status, 'granted');
+    const u = await user();
+    assert.equal(u.tier, 'UNLIMITED');
+    assert.ok(u.subscriptionExpiresAt instanceof Date, 'a month plan must have an end date');
+    const days = (u.subscriptionExpiresAt.getTime() - Date.now()) / 86_400_000;
+    assert.ok(days > 27 && days < 32, `expected ~1 month, got ${days.toFixed(1)} days`);
   });
 });
 

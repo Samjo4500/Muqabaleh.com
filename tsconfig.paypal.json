@@ -1,6 +1,9 @@
 {
   "extends": "/home/user/muqabaleh/tsconfig.json",
-  "compilerOptions": { "incremental": false, "noEmit": true },
+  "compilerOptions": {
+    "incremental": false,
+    "noEmit": true
+  },
   "include": [
     "/home/user/muqabaleh/next-env.d.ts",
     "/home/user/muqabaleh/src/lib/paypal.ts",
@@ -10,6 +13,8 @@
     "/home/user/muqabaleh/src/lib/db.ts",
     "/home/user/muqabaleh/src/lib/enums.ts",
     "/home/user/muqabaleh/src/lib/auth.ts",
-    "/home/user/muqabaleh/src/lib/sentry.ts"
+    "/home/user/muqabaleh/src/lib/sentry.ts",
+    "src/components/PayPalCheckoutButton.tsx",
+    "src/app/[locale]/pricing/pricing-content.tsx"
   ]
 }

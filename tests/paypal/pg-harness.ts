@@ -55,6 +55,27 @@ export function makeGrantDb(raw: PGlite): GrantDb {
         const r = await client.query(`SELECT * FROM "PaypalOrder" WHERE ${conds}`, vals);
         return (r.rows[0] as any) ?? null;
       },
+      findMany: async ({ where, orderBy, take }: any) => {
+        const conds: string[] = [];
+        const vals: unknown[] = [];
+        let i = 1;
+        if (where?.status?.in) {
+          conds.push(`status = ANY($${i++})`);
+          vals.push(where.status.in);
+        }
+        if (where?.grantedAt === null) conds.push('"grantedAt" IS NULL');
+        if (where?.createdAt?.lt) {
+          conds.push(`"createdAt" < $${i++}`);
+          vals.push(where.createdAt.lt);
+        }
+        const sql =
+          `SELECT * FROM "PaypalOrder"` +
+          (conds.length ? ` WHERE ${conds.join(' AND ')}` : '') +
+          (orderBy?.createdAt ? ` ORDER BY "createdAt" ${orderBy.createdAt === 'desc' ? 'DESC' : 'ASC'}` : '') +
+          (take ? ` LIMIT ${Number(take)}` : '');
+        const r = await client.query(sql, vals);
+        return r.rows as any;
+      },
       updateMany: async ({ where, data }) => {
         const sets: string[] = [];
         const vals: unknown[] = [];

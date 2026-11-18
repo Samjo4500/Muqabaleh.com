@@ -1,3 +1,9 @@
 {
-  "ignoreCommand": "bash vercel-ignore-build.sh"
+  "ignoreCommand": "bash vercel-ignore-build.sh",
+  "crons": [
+    {
+      "path": "/api/paypal/reconcile?olderThanMinutes=90&limit=50",
+      "schedule": "17 * * * *"
+    }
+  ]
 }

@@ -1,4 +1,3 @@
-import 'server-only';
 import { paypalDb } from '@/lib/paypal/seams';
 import { PaymentStatus, PaymentType } from '@/lib/enums';
 import { PLAN_CONFIG } from '@/lib/paypal';

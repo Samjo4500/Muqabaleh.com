@@ -1,4 +1,3 @@
-import 'server-only';
 import { db as baseDb } from '@/lib/db';
 import { paypalDb } from '@/lib/paypal/seams';
 import { planKeyForPayPalPlanId, verifyWebhookSignature } from '@/lib/paypal';

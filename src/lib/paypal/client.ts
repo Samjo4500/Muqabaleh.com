@@ -1,4 +1,3 @@
-import 'server-only';
 import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
 
 /**

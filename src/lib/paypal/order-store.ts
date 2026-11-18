@@ -1,4 +1,3 @@
-import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { paypalDb } from '@/lib/paypal/seams';
 import { PLAN_CONFIG } from '@/lib/paypal';

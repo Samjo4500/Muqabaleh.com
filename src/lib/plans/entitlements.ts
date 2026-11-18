@@ -353,12 +353,24 @@ export async function debitPractice(
   };
 }
 
+/** Minimal Prisma surface used by grantPlan, so it can run inside a transaction. */
+type GrantDb = {
+  user: {
+    update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown>;
+  };
+};
+
 export type GrantPlanInput = {
   userId: string;
   planKey: PlanKey;
   sessions?: number;
   /** Billing period end; defaults to +1 month for subscriptions. */
   expiresAt?: Date | null;
+  /**
+   * Optional transaction client. When supplied, the entitlement update joins the
+   * caller's transaction so a payment row and its entitlements can never diverge.
+   */
+  tx?: GrantDb;
 };
 
 /** Grant plan entitlements after successful payment / activation. */
@@ -367,7 +379,11 @@ export async function grantPlan({
   planKey,
   sessions,
   expiresAt,
+  tx,
 }: GrantPlanInput) {
+  // Everything below writes through `client`, which is either the transaction
+  // passed in by the caller or the normal pooled client.
+  const client = tx ?? (db as unknown as GrantDb);
   const ent = PLAN_ENTITLEMENTS[planKey] ?? PLAN_ENTITLEMENTS.FREE;
   const tier =
     planKey === 'JEANNIE'
@@ -384,7 +400,7 @@ export async function grantPlan({
 
   if (planKey === 'PRO') {
     const add = sessions ?? 3;
-    return db.user.update({
+    return client.user.update({
       where: { id: userId },
       data: {
         tier,
@@ -397,7 +413,7 @@ export async function grantPlan({
   }
 
   if (planKey === 'MASTERY_PACK') {
-    return db.user.update({
+    return client.user.update({
       where: { id: userId },
       data: {
         // Keep existing subscription tier if already on Jeannie; otherwise tag Mastery.
@@ -415,7 +431,7 @@ export async function grantPlan({
         : null
       : expiresAt;
 
-  return db.user.update({
+  return client.user.update({
     where: { id: userId },
     data: {
       tier,

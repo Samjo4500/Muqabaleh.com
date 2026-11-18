@@ -1,30 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdmin } from '@/app/api/admin/_lib';
+import { getPayPalAccessToken, getPayPalApiBase } from '@/lib/paypal';
 import { PayoutStatus } from '@/lib/enums';
 import { z } from 'zod';
 
 const schema = z.object({ payoutId: z.string().uuid() });
-
-async function getPayPalAccessToken(): Promise<string> {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const secret = process.env.PAYPAL_SECRET!;
-  const baseUrl =
-    process.env.PAYPAL_MODE === 'live'
-      ? 'https://api-m.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
-
-  const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString('base64')}`,
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json();
-  return data.access_token;
-}
 
 // POST /api/paypal/send-payout
 // Admin-only: triggers PayPal Payouts API for a given payout
@@ -58,7 +39,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_SECRET) {
+    // Same credential contract as checkout: PAYPAL_CLIENT_SECRET, with
+    // PAYPAL_SECRET kept as a legacy alias by lib/paypal.ts.
+    if (!process.env.PAYPAL_CLIENT_ID || !(process.env.PAYPAL_CLIENT_SECRET || process.env.PAYPAL_SECRET)) {
       return NextResponse.json({ error: 'PayPal not configured' }, { status: 503 });
     }
 
@@ -68,16 +51,15 @@ export async function POST(req: NextRequest) {
 
     try {
       const accessToken = await getPayPalAccessToken();
-      const baseUrl =
-        process.env.PAYPAL_MODE === 'live'
-          ? 'https://api-m.paypal.com'
-          : 'https://api-m.sandbox.paypal.com';
 
-      const paypalRes = await fetch(`${baseUrl}/v1/payments/payouts`, {
+      const paypalRes = await fetch(`${getPayPalApiBase()}/v1/payments/payouts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
+          // PayPal dedupes payouts on this id. Without it, an admin retry after
+          // a timeout can pay the same interviewer twice.
+          'PayPal-Request-Id': senderBatchId,
         },
         body: JSON.stringify({
           sender_batch_header: {

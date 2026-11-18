@@ -184,6 +184,7 @@ model User {
   organizationMembers    OrganizationMember[]
   nurtureLeads           NurtureLead[]
   student100Claim        Student100Claim?
+  paypalOrders           PaypalOrder[]
 
   @@index([companyId])
   @@index([partnerId])
@@ -1578,4 +1579,51 @@ model Student100Claim {
 
   @@index([status, createdAt])
   @@map("student100_claims")
+}
+
+model PaypalOrder {
+  id     String @id @default(cuid())
+  /// Our id, sent to PayPal as invoice_id and custom_id.
+  ref    String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planCode    String
+  amountCents Int
+  currency    String @default("USD")
+
+  paypalOrderId String? @unique
+  status        String  @default("CREATED") // CREATED|APPROVED|COMPLETED|FAILED|VOIDED|REVIEW
+
+  captureId     String? @unique
+  captureStatus String?
+  payerId       String?
+  merchantId    String?
+
+  /// Set exactly once, in the same transaction as the Payment row and the
+  /// entitlement update. Its presence is the idempotency check.
+  grantedAt     DateTime?
+  failureCode   String?
+  failureDetail String?
+
+  /// Set once a refund has been issued for this order, so a retry can never
+  /// refund the same customer twice.
+  refundedAt DateTime?
+  refundId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model WebhookEvent {
+  id          String    @id
+  type        String
+  payload     String
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([processedAt, receivedAt])
 }

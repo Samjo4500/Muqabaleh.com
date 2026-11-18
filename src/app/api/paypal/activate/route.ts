@@ -11,6 +11,7 @@ import {
   planKeyForPayPalPlanId,
 } from '@/lib/paypal';
 import { grantPlan } from '@/lib/plans/entitlements';
+import { decideActivation } from '@/lib/paypal/order-rules';
 import {
   triggerPaymentReceiptEmail,
   triggerSubscriptionConfirmationEmail,
@@ -117,10 +118,33 @@ export async function POST(req: NextRequest) {
     const plan = PLAN_CONFIG[planKey];
     const amountDollars = Number.parseFloat(plan.amount);
     const amountCents = Math.round(amountDollars * 100);
+
+    // A subscription grants once. Without this, every extra click on the
+    // approve screen moved subscriptionExpiresAt another month.
+    const priorPayment = await db.payment.findUnique({
+      where: { paypalOrderId: subscriptionId },
+    });
+    const decision = decideActivation({
+      subscriptionStatus: existing?.status ?? null,
+      paymentExists: Boolean(priorPayment),
+      paypalStatus: subData.status,
+    });
+
+    if (decision === 'already_active') {
+      return NextResponse.json({ success: true, alreadyActive: true });
+    }
+
+    // Expiry follows PayPal's own billing date when it is known, so our period
+    // cannot drift away from what the customer was actually charged for.
+    const nextBilling = billingInfo?.next_billing_time
+      ? new Date(billingInfo.next_billing_time as string)
+      : undefined;
+
     await grantPlan({
       userId,
       planKey,
       sessions: plan.sessions ?? 999,
+      ...(nextBilling ? { expiresAt: nextBilling } : {}),
     });
 
     // Record subscription payment once (idempotent on paypalOrderId)

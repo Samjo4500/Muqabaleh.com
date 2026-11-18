@@ -29,9 +29,9 @@ const payments = async () =>
 const orderRow = async () => (await raw.query('SELECT * FROM "PaypalOrder"')).rows[0] as any;
 const userRow = async () => (await raw.query('SELECT * FROM "User" WHERE id = $1', ['user_1'])).rows[0] as any;
 
-/** Make the order look 3 hours old so the sweep picks it up. */
+/** Make the order look a day old so the sweep (default cutoff: 3 hours) picks it up. */
 async function ageOrder() {
-  await raw.query(`UPDATE "PaypalOrder" SET "createdAt" = now() - interval '3 hours'`);
+  await raw.query(`UPDATE "PaypalOrder" SET "createdAt" = now() - interval '24 hours'`);
 }
 
 function paypalOrder(id: string, status: any, capture: any = null) {
@@ -46,6 +46,16 @@ function paypalOrder(id: string, status: any, capture: any = null) {
 }
 
 describe('reconciliation', () => {
+  test('orders younger than the cutoff are left alone', async () => {
+    paypalOrder('PPO-1', 'APPROVED');
+    await seedOrder(raw, { paypalOrderId: 'PPO-1', status: 'APPROVED' });
+    await raw.query(`UPDATE "PaypalOrder" SET "createdAt" = now() - interval '20 minutes'`);
+
+    const report = await reconcilePayPalOrders();
+    assert.equal(report.looked, 0, 'a 20-minute-old intent is still in-flight');
+    assert.equal(await payments(), 0);
+  });
+
   test('fresh orders are left alone', async () => {
     paypalOrder('PPO-1', 'APPROVED');
     await seedOrder(raw, { paypalOrderId: 'PPO-1', status: 'APPROVED' });

@@ -11,7 +11,12 @@ import { reconcilePayPalOrders } from '@/lib/paypal/reconcile';
  * Auth: `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends this
  * automatically when CRON_SECRET is set) or `?secret=`.
  *
- * Configurable: ?olderThanMinutes=90&limit=50&dryRun=1
+ * Vercel's Hobby plan allows one run per day, so the schedule in vercel.json is
+ * daily (03:23 UTC) and sweeps anything older than 3 hours. A buyer who closes
+ * the tab is normally covered by the webhook within seconds; this is the
+ * backstop for the few that are not. On Pro, switch the cron to hourly.
+ *
+ * Configurable: ?olderThanMinutes=180&limit=100&dryRun=1
  */
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +37,8 @@ async function run(req: NextRequest) {
   }
 
   const params = new URL(req.url).searchParams;
-  const olderThanMinutes = Number(params.get('olderThanMinutes') ?? 90);
-  const limit = Math.min(Number(params.get('limit') ?? 50), 200);
+  const olderThanMinutes = Number(params.get('olderThanMinutes') ?? 180);
+  const limit = Math.min(Number(params.get('limit') ?? 100), 200);
   const dryRun = params.get('dryRun') === '1' || params.get('dryRun') === 'true';
 
   if (!Number.isFinite(olderThanMinutes) || !Number.isFinite(limit)) {

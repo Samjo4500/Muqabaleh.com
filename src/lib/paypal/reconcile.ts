@@ -24,7 +24,7 @@ import { captureFlow } from '@/lib/paypal/capture-flow';
  */
 
 export interface ReconcileOptions {
-  /** Only touch orders older than this. Default 90 minutes. */
+  /** Only touch orders older than this. Default 3 hours. */
   olderThanMinutes?: number;
   /** Hard cap per run so a cron tick stays inside its time limit. */
   limit?: number;
@@ -45,8 +45,8 @@ const STALE_STATUSES = ['CREATED', 'APPROVED'];
 export async function reconcilePayPalOrders(
   opts: ReconcileOptions = {},
 ): Promise<ReconcileReport> {
-  const olderThanMinutes = opts.olderThanMinutes ?? 90;
-  const limit = opts.limit ?? 50;
+  const olderThanMinutes = opts.olderThanMinutes ?? 180;
+  const limit = opts.limit ?? 100;
   const dryRun = opts.dryRun ?? false;
   const db = paypalDb();
   const cutoff = new Date(Date.now() - olderThanMinutes * 60_000);
